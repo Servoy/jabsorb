@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCResult.java,v 1.4 2005/02/13 03:42:09 mclark Exp $
+ * $Id: JSONRPCResult.java,v 1.8 2005/08/09 02:36:37 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -24,9 +24,10 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import org.json.JSONObject;
 
-class JSONRPCResult {
+public class JSONRPCResult {
 
     private Object result = null;
+    private Object id = null;
     private int errorCode;
 
     public final static int CODE_SUCCESS = 0;
@@ -36,35 +37,43 @@ class JSONRPCResult {
     public final static int CODE_ERR_UNMARSHALL = 592;
     public final static int CODE_ERR_MARSHALL = 593;
 
-    public final static JSONRPCResult ERR_PARSE = new JSONRPCResult
-	(CODE_ERR_PARSE, "couldn't parse request arguments");
-    public final static JSONRPCResult ERR_NOMETHOD = new JSONRPCResult
-	(CODE_ERR_NOMETHOD, "method not found (session may have timed out)");
+    public final static String MSG_ERR_PARSE =
+	"couldn't parse request arguments";
+    public final static String MSG_ERR_NOMETHOD =
+	"method not found (session may have timed out)";
 
-    public JSONRPCResult(int errorCode, Object o)
+    public JSONRPCResult(int errorCode, Object id, Object o)
     {
 	this.errorCode = errorCode;
+	this.id = id;
 	this.result = o;
     }
+
+    public Object getResult() { return result; }
+    public Object getId() { return id; }
+    public int getErrorCode() { return errorCode; }
 
     public String toString()
     {
 	JSONObject o = new JSONObject();
 	if(errorCode == CODE_SUCCESS) {
+	    o.put("id", id);
 	    o.put("result", result);
 	} else if (errorCode == CODE_REMOTE_EXCEPTION) {
-	    Exception e = (Exception)result;
+	    Throwable e = (Throwable)result;
 	    CharArrayWriter caw = new CharArrayWriter();
 	    e.printStackTrace(new PrintWriter(caw));
 	    JSONObject err = new JSONObject();
 	    err.put("code", new Integer(errorCode));
 	    err.put("msg", e.getMessage());
 	    err.put("trace", caw.toString());
+	    o.put("id", id);
 	    o.put("error", err);
 	} else {
 	    JSONObject err = new JSONObject();
 	    err.put("code", new Integer(errorCode));
 	    err.put("msg", result);
+	    o.put("id", id);
 	    o.put("error", err);
 	}
 	return o.toString();

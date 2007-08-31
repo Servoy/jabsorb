@@ -25,16 +25,10 @@
 
     <h2>News</h2>
     <ul>
+      <li><strong>19 Sep 2005</strong> - <em>Released 1.0rc1 - This release prepares to stabilise the current API in a release branch where only bug fixes and minor feature enhancements will be accepted. Sources have been tagged in CVS as 'R1_0RC1' and in early August there will be a 1.0 release and a CVS 'R1_0' branch created. This release adds the ability to handle generic Object and Interface method signatures, changes the date marshalling format to milliseconds, adds the ability to cancel async requests and updates the protocol for closer conformance with the JSON-RPC specification. See <a href="/jsonrpc-dist/CHANGES.txt">CHANGES.txt</a> for complete details.</em></li>
+      <li><strong>18 Sep 2005</strong> - <em>The Mailing list is back up again. The list archives have been restored although subscriptions have not so list members will need to re-subscribe.</em></li>
+      <li><strong>17 Sep 2005</strong> - <em>We've had some trouble with a disk array on one of our servers although fortunately we were able to restore from backup and the website, CVS, etc are back up again. Unfortunately our backup script missed the mailing list archive and subscriptions. I'll post a note here when we get the mailing list back up (you will probably need to re-subscribe).</em></li>
       <li><strong>17 Jun 2005</strong> - <em>Released 0.9 (aka "About time for a release release") - Contains many updates and bug fixes including: Public access to many APIs (documentation still needed on many of these), conversion of numeric String types into methods with number signatures, LocalArgResolverImplementation, and many small bug fixes and changes. See <a href="/jsonrpc-dist/CHANGES.txt">CHANGES.txt</a> for complete details.</em></li>
-      <li><strong>24 Apr 2005</strong> - <em>The LocalArgResolver implementationis now in CVS - this allows you to get access to the HttpServletRequest or HttpSession object from within a method being called via JSON-RPC.</em></li>
-      <li><strong>25 Feb 2005</strong> - <em>Presented a talk on <a href="/jsonrpc-dist/json-rpc-java-talk-20050225.pdf">Building next generation web applications using JSON-RPC-Java</a> to the Singapore Linux Users Groups.</em></li>
-      <li><strong>14 Feb 2005</strong> - <em>Released 0.8 (aka "Valentine Rooster") - Contains many updates and bug fixes including: Unicode and other character set support (UTF-8, ISO-8859-1 have been tested), Asynchronous support, Unicode test suite, Regression test suite, Dictionary demo, Browser Compatiblity database, Hello World sample app, Tutorial and Manual updates and a protocol sync with the JSON-RPC spec. See <a href="/jsonrpc-dist/CHANGES.txt">CHANGES.txt</a> for complete details.</em></li>
-      <li><strong>10 Feb 2005</strong> - <em>Added the first cut of a new Unicode test page. Submissions for more languages and texts are needed. It's in CVS and the CVS snapshot tarball. Version 0.8 will be released very soon (test feedback appreciated) targeting Unicode UTF-8 support across all supported browsers and a testing framework for other encodings.</em></li>
-      <li><strong>9 Feb 2005</strong> - <em>Happy Chinese New Year! New CVS tarball available containing a bunch of small fixes, a new Hello World demo, a dynamic browser compatibility database, and the start of a new unit testing framework with profiling support. Visit the <a href="demos.html">Demos</a> page.</em></li>
-      <li><strong>29 Jan 2005</strong> - <em>Fix for Konqueror's XMLHttpRequest POST bug has made it into kdelibs CVS. Ability to set encoding charset is now in CVS (and in the CVS snapshot tarball).</em></li>
-      <li><strong>28 Jan 2005</strong> - <em>First draft of reference manual now online. Asynchonous method invocation in the JavaScript JSONRpcClient is now in CVS (and in the CVS snapshot tarball). See Changelog for details.</em></li>
-      <li><strong>25 Jan 2005</strong> - <em>Released 0.7 - Attention Internet Explorer users - 0.6 had a brown paper bag bug in the Opera fix which broke Internet Explorer. Please download 0.7 to fix this.</em></li>
-      <li><strong>24 Jan 2005</strong> - <em>Released 0.6 - Now works in Opera 8 Beta and Konqueror 3.3 (with a patch to KHTML). A new lightweight JavaScript JSON-RPC client was added. The browser support documentation was updated. A new mailing list was added..</em></li>
     </ul>
 
     <h2>JSON-RPC-Java Overview</h2>
@@ -127,8 +121,16 @@
     </ul>
 
     <h2>Source code</h2>
-    <p>You can download the current release version here: <a href="http://oss.metaparadigm.com/jsonrpc-dist/json-rpc-java-0.9.tar.gz">json-rpc-java-0.9.tar.gz</a> (<a href="http://oss.metaparadigm.com/jsonrpc-dist/CHANGES.txt">Changelog</a>)</p>
-    <p>Regular snapshots of the current CVS version here: <a href="http://oss.metaparadigm.com/jsonrpc-dist/json-rpc-java-cvs.tar.gz">json-rpc-java-cvs.tar.gz</a> (<a href="CHANGES.txt">Changelog</a>)</p>
+    <p>You can download the current release version here:
+      <ul>
+        <li><a href="http://oss.metaparadigm.com/jsonrpc-dist/json-rpc-java-1.0rc1.tar.gz">json-rpc-java-1.0rc1.tar.gz</a> or <a href="http://oss.metaparadigm.com/jsonrpc-dist/json-rpc-java-1.0rc1.zip">json-rpc-java-1.0rc1.zip</a> (<a href="http://oss.metaparadigm.com/jsonrpc-dist/CHANGES.txt">Changelog</a>)</li>
+      </ul>
+    </p>
+    <p>Regular snapshots of the current CVS version here:
+      <ul>
+        <li><a href="http://oss.metaparadigm.com/jsonrpc-dist/json-rpc-java-cvs.tar.gz">json-rpc-java-cvs.tar.gz</a> or <a href="http://oss.metaparadigm.com/jsonrpc-dist/json-rpc-java-cvs.zip">json-rpc-java-cvs.zip</a> (<a href="CHANGES.txt">Changelog</a>)</li>
+      </ul>
+    </p>
     <p>JSON-RPC-Java is licensed under the <a href="http://www.gnu.org/licenses/lgpl.html">LGPL</a> which allows use within commerical/proprietary applications (with conditions).</p>
     <p>Access to the latest code is available via anonymous CVS:</p>
     <div class="code-block">
@@ -160,20 +162,21 @@ CVS password: &lt;enter '<b>anoncvs</b>'&gt;<br>
       <li>Update Manual: async top-level exception handler, async parallelism, profiling, opaque and callable references, custom serializers.</li>
       <li>Make JSONRPCBridge.registerSerializer() and Serializer base class public to allow external custom serializers. Add javadocs to these interfaces.</li>
       <li>Allow a CallableReference to also be used as an opaque Reference (allow them to be passed back to Java methods on the server).</li>
-      <li>Standardise method for invocation on unnamed object instances (those returned as CallableReferences). JSON-RPC-Java presently includes a lightweight version of the JSON-RPC client based on jsolait although it has extensions to handle unmarshalling of Callable References (automatic creation of Proxy object). It also adds an additional attribute <code>objectID</code> to the JSON-RPC protocol message to method calls on these unnamed object instances.</li>
       <li>Date mapping still needs more work (to transparently map java.util.Date to JavaScript Date object). This will need a standardised format layered on top of JSON-RPC or perhaps could be implemented using JSON-RPC Class hinting.</li>
       <li>Look into implementing the JSON-RPC Class hinting part of the specification (although this has the disadvantage of complicating the JavaScript unmarshalling which is currently just a simple assignment).</li>
-      <li>Implement Request ids (not required for current synchronous operation).</li>
       <li>Handle marshalling of objects with circular references (will require an extension to JSON).</li>
       <li>Add browser checking for more graceful and informative messages on unsupported browsers.</li>
     </ul>
     <p>Please contact us if you'd like to help out or discuss one of the To Do List items, or even better send patches for review.</p>
 
-    <h2>Project Team</h2>
+    <h2>Contributors</h2>
     <p>List of contributors to the JSON-RPC-Java project:</p>
     <ul>
       <li><a href="mailto:michael@metaparadigm.com">Michael Clark</a> (Project lead)</li>
+      <li>Ryan Gates</li>
+      <li>Nicola Piccinini</li>
       <li>Chee Yong Tan</li>
+      <li>many more.. (see CHANGES.txt)</li>
     </ul>
     <p>Like to join the team and help out? We are looking for talented Java and JavaScript developers who can help out with development, testing and documentation. Contact <a href="mailto:michael@metaparadigm.com">Michael Clark</a> if you're interested.</p>
 
@@ -199,7 +202,7 @@ CVS password: &lt;enter '<b>anoncvs</b>'&gt;<br>
     <hr>
     <table cellpadding="0" cellspacing="0" border="0" width="100%">
       <tr>
-	<td><code>$Id: index.html,v 1.79 2005/06/17 01:29:20 mclark Exp $</code></td>
+	<td><code>$Id: index.html,v 1.86 2005/09/19 04:37:21 mclark Exp $</code></td>
 	<td><div class="copyright">Copyright 2005 <a href="http://www.metaparadigm.com/">Metaparadigm Pte Ltd</a></div></td>
       </tr>
     </table>

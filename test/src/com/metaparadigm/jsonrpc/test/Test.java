@@ -102,6 +102,16 @@ public class Test
         return d;
     }
 
+    public Object echoObject(Object o)
+    {
+        return o;
+    }
+
+    public Object echoObjectArray(Object[] o)
+    {
+        return o;
+    }
+
     // Container tests
 
     public int[] anArray()

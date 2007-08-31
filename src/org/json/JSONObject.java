@@ -298,6 +298,25 @@ public class JSONObject {
 
 
     /**
+     * Get the long value associated with a key.
+     * @exception NoSuchElementException if the key is not found
+     * @exception NumberFormatException
+     *  if the value cannot be converted to a number.
+     *
+     * @param key   A key string.
+     * @return      The long value.
+     */
+    public long getLong(String key)
+            throws NoSuchElementException, NumberFormatException {
+        Object o = get(key);
+        if (o instanceof Number) {
+            return ((Number)o).longValue();
+        }
+        return (long)getDouble(key);
+    }
+
+
+    /**
      * Get the JSONArray value associated with a key.
      * @exception NoSuchElementException if the key is not found or
      *  if the value is not a JSONArray.

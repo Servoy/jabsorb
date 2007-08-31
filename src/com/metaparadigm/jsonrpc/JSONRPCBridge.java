@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCBridge.java,v 1.31 2005/06/16 23:26:14 mclark Exp $
+ * $Id: JSONRPCBridge.java,v 1.35 2005/07/22 13:41:06 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -708,8 +708,17 @@ public class JSONRPCBridge
 	MethodCandidate best = null;
 	for(int i=0; i < candidate.size(); i++) {
 	    MethodCandidate c = (MethodCandidate)candidate.get(i);
-	    if(best == null || best.getMatch().mismatch >
-	       c.getMatch().mismatch) best = c;
+        if (best == null)
+        {
+            best = c;
+            continue;
+        }
+        final ObjectMatch bestMatch = best.getMatch();
+        final ObjectMatch cMatch = c.getMatch();
+	    if(bestMatch.mismatch > cMatch.mismatch)
+            best = c;
+        else if (bestMatch.mismatch == cMatch.mismatch)
+            best = betterSignature(best, c);
 	}
 	if(best != null) {
 	    Method m = best.method;
@@ -721,6 +730,30 @@ public class JSONRPCBridge
 	return null;
     }
 
+    private MethodCandidate betterSignature(MethodCandidate methodCandidate, MethodCandidate methodCandidate1)
+    {
+        final Method method = methodCandidate.method;
+        final Method method1 = methodCandidate1.method;
+        final Class[] parameters = method.getParameterTypes();
+        final Class[] parameters1 = method1.getParameterTypes();
+        int c = 0, c1 = 0;
+        for (int i = 0; i < parameters.length; i++)
+        {
+            final Class parameterClass = parameters[i];
+            final Class parameterClass1 = parameters1[i];
+            if (parameterClass != parameterClass1)
+            {
+                if (parameterClass.isAssignableFrom(parameterClass1))
+                    c1++;
+                else
+                    c++;
+            }
+        }
+        if (c1 > c)
+            return methodCandidate1;
+        else
+            return methodCandidate;
+    }
 
     private static String argSignature(Method method)
     {
@@ -859,15 +892,43 @@ public class JSONRPCBridge
 	}
     }    
 
-    protected JSONRPCResult call(Object context[],
-				 int object_id, String classDotMethod,
-				 JSONArray arguments)
+    public JSONRPCResult call(Object context[], JSONObject jsonReq)
     {
+	JSONRPCResult result = null;
+	String encodedMethod = null;
+	Object requestId = null;
+	JSONArray arguments = null;
+
+	try {
+	    // Get method name, arguments and request id
+	    encodedMethod = jsonReq.getString("method");
+	    arguments = jsonReq.getJSONArray("params");
+	    requestId = jsonReq.opt("id");
+	} catch (NoSuchElementException e) {
+	    log.severe("no method or parameters in request");
+	    return new JSONRPCResult(JSONRPCResult.CODE_ERR_NOMETHOD, null,
+				     JSONRPCResult.MSG_ERR_NOMETHOD);
+	}
+
+	if(isDebug())
+	    log.fine("call " + encodedMethod + "(" + arguments + ")" +
+		     ", requestId=" + requestId);
+
+	String className = null;
+	String methodName = null;
+	int objectID = 0;
+
 	// Parse the class and methodName
-	StringTokenizer t = new StringTokenizer(classDotMethod, ".");
-	String className = null, methodName = null;
+	StringTokenizer t = new StringTokenizer(encodedMethod, ".");
 	if(t.hasMoreElements()) className = t.nextToken();
 	if(t.hasMoreElements()) methodName = t.nextToken();
+
+	// See if we have an object method in the format ".obj#<objectID>"
+	if(encodedMethod.startsWith(".obj#")) {
+	    t = new StringTokenizer(className, "#");
+	    t.nextToken();
+	    objectID = Integer.parseInt(t.nextToken());
+	}
 
 	ObjectInstance oi = null;
 	ClassData cd = null;
@@ -875,9 +936,9 @@ public class JSONRPCBridge
 	Method method = null;
 	Object itsThis = null;
 
-	if(object_id == 0) {
+	if(objectID == 0) {
 	    // Handle "system.listMethods"
-	    if(classDotMethod.equals("system.listMethods")) {
+	    if(encodedMethod.equals("system.listMethods")) {
 		HashSet m = new HashSet();
 		globalBridge.allInstanceMethods(m);
 		if (globalBridge != this) {
@@ -889,13 +950,16 @@ public class JSONRPCBridge
 		JSONArray methods = new JSONArray();
 		Iterator i = m.iterator();
 		while(i.hasNext()) methods.put((String)i.next());
-		return new JSONRPCResult(JSONRPCResult.CODE_SUCCESS, methods);
+		return new JSONRPCResult
+		    (JSONRPCResult.CODE_SUCCESS, requestId, methods);
 	    }
 	    // Look up the class, object instance and method objects
 	    if(className == null || methodName == null ||
 	       ((oi = resolveObject(className)) == null &&
 		(cd = resolveClass(className)) == null))
-		return JSONRPCResult.ERR_NOMETHOD;	    
+		return new JSONRPCResult(JSONRPCResult.CODE_ERR_NOMETHOD,
+					 requestId,
+					 JSONRPCResult.MSG_ERR_NOMETHOD);
 	    if(oi != null) {
 		itsThis = oi.o;
 		methodMap = oi.classData().methodMap;
@@ -903,31 +967,35 @@ public class JSONRPCBridge
 		methodMap = cd.staticMethodMap;
 	    }
 	} else {
-	    if((oi = resolveObject(new Integer(object_id))) == null)
-		return JSONRPCResult.ERR_NOMETHOD;
+	    if((oi = resolveObject(new Integer(objectID))) == null)
+		return new JSONRPCResult(JSONRPCResult.CODE_ERR_NOMETHOD,
+					 requestId,
+					 JSONRPCResult.MSG_ERR_NOMETHOD);
 	    itsThis = oi.o;
 	    methodMap = oi.classData().methodMap;
 	    // Handle "system.listMethods"
-	    if(classDotMethod.equals("system.listMethods")) {
+	    if(methodName.equals("listMethods")) {
 		HashSet m = new HashSet();
 		uniqueMethods(m, "", oi.classData().staticMethodMap);
 		uniqueMethods(m, "", oi.classData().methodMap);
 		JSONArray methods = new JSONArray();
 		Iterator i = m.iterator();
 		while(i.hasNext()) methods.put((String)i.next());
-		return new JSONRPCResult(JSONRPCResult.CODE_SUCCESS, methods);
+		return new JSONRPCResult(JSONRPCResult.CODE_SUCCESS,
+					 requestId, methods);
 	    }
-	    methodName = className;
 	}
-	if((method = resolveMethod(methodMap, methodName, arguments)) == null)
-	    return JSONRPCResult.ERR_NOMETHOD;
 
+	if((method = resolveMethod(methodMap, methodName, arguments)) == null)
+	    return new JSONRPCResult(JSONRPCResult.CODE_ERR_NOMETHOD,
+				     requestId,
+				     JSONRPCResult.MSG_ERR_NOMETHOD);
 	// Call the method
-	JSONRPCResult result = null;
 	try {
 	    if(debug)
-		log.fine("invoking " + method.getReturnType().getName() + " " +
-			 method.getName() + "(" + argSignature(method) + ")");
+		log.fine("invoking " + method.getReturnType().getName() +
+			 " " + method.getName() +
+			 "(" + argSignature(method) + ")");
 	    Object javaArgs[] = unmarshallArgs(context, method, arguments);
 	    for(int i=0; i< context.length; i++)
 		preInvokeCallback(context[i], itsThis, method, javaArgs);
@@ -936,17 +1004,18 @@ public class JSONRPCBridge
 		postInvokeCallback(context[i], itsThis, method, o);
 	    SerializerState state = new SerializerState();
 	    result = new JSONRPCResult(JSONRPCResult.CODE_SUCCESS,
-				       ser.marshall(state, o));
+				       requestId, ser.marshall(state, o));
 	} catch (UnmarshallException e) {
 	    result = new JSONRPCResult(JSONRPCResult.CODE_ERR_UNMARSHALL,
-				       e.getMessage());
+				       requestId, e.getMessage());
 	} catch (MarshallException e) {
 	    result = new JSONRPCResult(JSONRPCResult.CODE_ERR_MARSHALL,
-				       e.getMessage());
+				       requestId, e.getMessage());
 	} catch (Throwable e) {
 	    if(e instanceof InvocationTargetException)
 		e = ((InvocationTargetException)e).getTargetException();
-	    result = new JSONRPCResult(JSONRPCResult.CODE_REMOTE_EXCEPTION, e);
+	    result = new JSONRPCResult(JSONRPCResult.CODE_REMOTE_EXCEPTION,
+				       requestId, e);
 	}
 
 	// Return the results

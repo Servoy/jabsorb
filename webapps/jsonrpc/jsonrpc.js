@@ -1,7 +1,7 @@
 /*
  * JSON-RPC JavaScript client
  *
- * $Id: jsonrpc.js,v 1.29 2005/06/16 23:42:47 mclark Exp $
+ * $Id: jsonrpc.js,v 1.34 2005/09/18 05:01:09 mclark Exp $
  *
  * Copyright (c) 2003-2004 Jan-Klaas Kollhof
  * Copyright (c) 2005 Michael Clark, Metaparadigm Pte Ltd
@@ -76,8 +76,7 @@ function toJSON(o)
     } else if(o.constructor == Boolean) {
 	return o.toString();
     } else if(o.constructor == Date) {
-    	return '{javaClass: "java.util.Date", time: ' + o.valueOf()/1000 +'}';
-	//return o.valueOf().toString();
+    	return '{javaClass: "java.util.Date", time: ' + o.valueOf() +'}';
     } else if(o.constructor == Array) {
 	var v = [];
 	for(var i = 0; i < o.length; i++) v.push(toJSON(o[i]));
@@ -104,12 +103,15 @@ JSONRpcClient = function JSONRpcClient_ctor(serverURL, user, pass, objectID)
     this.objectID = objectID;
 
     // Add standard methods
-    this.addMethods(["system.listMethods"]);
-
-    // Query the methods on the server and add them to this object
-    var req = this.makeRequest("system.listMethods", []);
-    var m = this.sendRequest(req);
-    this.addMethods(m);
+    if(this.objectID) {
+	this._addMethods(["listMethods"]);
+	var req = this._makeRequest("listMethods", []);
+    } else {
+	this._addMethods(["system.listMethods"]);
+	var req = this._makeRequest("system.listMethods", []);
+    }
+    var m = this._sendRequest(req);
+    this._addMethods(m);
 }
 
 
@@ -156,12 +158,12 @@ function JSONRpcClient_default_ex_handler(e) { alert(e); }
 JSONRpcClient.toplevel_ex_handler = JSONRpcClient.default_ex_handler;
 JSONRpcClient.profile_async = false;
 JSONRpcClient.max_req_active = 1;
-JSONRpcClient.old0point7proto = false; // Back compat
+JSONRpcClient.requestId = 1;
 
 
 // JSONRpcClient implementation
 
-JSONRpcClient.prototype.createMethod =
+JSONRpcClient.prototype._createMethod =
 function JSONRpcClient_createMethod(methodName)
 {
     var fn=function()
@@ -170,13 +172,14 @@ function JSONRpcClient_createMethod(methodName)
 	var callback = null;
 	for(var i=0;i<arguments.length;i++) args.push(arguments[i]);
 	if(typeof args[0] == "function") callback = args.shift();
-	var req = fn.client.makeRequest.call(fn.client, fn.methodName,
+	var req = fn.client._makeRequest.call(fn.client, fn.methodName,
 					     args, callback);
 	if(callback == null) {
-	    return fn.client.sendRequest.call(fn.client, req);
+	    return fn.client._sendRequest.call(fn.client, req);
 	} else {
 	    JSONRpcClient.async_requests.push(req);
 	    JSONRpcClient.kick_async();
+	    return req.requestId;
 	}
     }
     fn.client = this;
@@ -184,7 +187,7 @@ function JSONRpcClient_createMethod(methodName)
     return fn;
 }
 
-JSONRpcClient.prototype.addMethods =
+JSONRpcClient.prototype._addMethods =
 function JSONRpcClient_addMethods(methodNames)
 {
     for(var i=0; i<methodNames.length; i++) {
@@ -201,13 +204,13 @@ function JSONRpcClient_addMethods(methodNames)
 	}
 	var name = names[names.length-1];
 	if(!obj[name]){
-	    var method = this.createMethod(methodNames[i]);
+	    var method = this._createMethod(methodNames[i]);
 	    obj[name] = method;
 	}
     }
 }
 
-JSONRpcClient.getCharsetFromHeaders =
+JSONRpcClient._getCharsetFromHeaders =
 function JSONRpcClient_getCharsetFromHeaders(http)
 {
     try {
@@ -223,18 +226,21 @@ function JSONRpcClient_getCharsetFromHeaders(http)
 
 // Async queue globals
 JSONRpcClient.async_requests = [];
+JSONRpcClient.async_inflight = {};
 JSONRpcClient.async_responses = [];
 JSONRpcClient.async_timeout = null;
 JSONRpcClient.num_req_active = 0;
 
-JSONRpcClient.async_handler = function JSONRpcClient_async_handler()
+JSONRpcClient._async_handler =
+function JSONRpcClient_async_handler()
 {
     JSONRpcClient.async_timeout = null;
 
     while(JSONRpcClient.async_responses.length > 0) {
 	var res = JSONRpcClient.async_responses.shift();
+	if(res.canceled) continue;
+	if(res.profile) res.profile.dispatch = new Date();
 	try {
-	    if(res.profile) res.profile.dispatch = new Date();
 	    res.cb(res.result, res.ex, res.profile);
 	} catch(e) {
 	    JSONRpcClient.toplevel_ex_handler(e);
@@ -244,36 +250,74 @@ JSONRpcClient.async_handler = function JSONRpcClient_async_handler()
     while(JSONRpcClient.async_requests.length > 0 &&
 	  JSONRpcClient.num_req_active < JSONRpcClient.max_req_active) {
 	var req = JSONRpcClient.async_requests.shift();
-	req.client.sendRequest.call(req.client, req);
+	if(req.canceled) continue;
+	req.client._sendRequest.call(req.client, req);
     }
 }
 
-JSONRpcClient.kick_async = function JSONRpcClient_kick_async()
+JSONRpcClient.kick_async =
+function JSONRpcClient_kick_async()
 {
     if(JSONRpcClient.async_timeout == null)
-	setTimeout(JSONRpcClient.async_handler, 0);
+	setTimeout(JSONRpcClient._async_handler, 0);
 }
 
-JSONRpcClient.prototype.makeRequest =
+JSONRpcClient.cancelRequest =
+function JSONRpcClient_cancelRequest(requestId)
+{
+    // If it is in flight then mark it as canceled in the inflight map
+    // and the XMLHttpRequest callback will discard the reply.
+    if(JSONRpcClient.async_inflight[requestId]) {
+	JSONRpcClient.async_inflight[requestId].canceled = true;
+	return true;
+    }
+
+    // If its not in flight yet then we can just mark it as canceled in
+    // the the request queue and it will get discarded before being sent.
+    for(var i in JSONRpcClient.async_requests) {
+	if(JSONRpcClient.async_requests[i].requestId == requestId) {
+	    JSONRpcClient.async_requests[i].canceled = true;
+	    return true;
+	}
+    }
+
+    // It may have returned from the network and be waiting for its callback
+    // to be dispatched, so mark it as canceled in the response queue
+    // and the response will get discarded before calling the callback.
+    for(var i in JSONRpcClient.async_responses) {
+	if(JSONRpcClient.async_responses[i].requestId == requestId) {
+	    JSONRpcClient.async_responses[i].canceled = true;
+	    return true;
+	}
+    }
+
+    return false;
+}
+
+JSONRpcClient.prototype._makeRequest =
 function JSONRpcClient_makeRequest(methodName, args, cb)
 {
     var req = {};
     req.client = this;
-    var obj;
-    if(JSONRpcClient.old0point7proto) {
-	obj = {"methodName" : methodName, "arguments" : args};
-    } else {
-	obj = {"method" : methodName, "params" : args};
-    }
-    if (this.objectID) obj.objectID = this.objectID;
+    req.requestId = JSONRpcClient.requestId++;
+
+    var obj = {};
+    obj.id = req.requestId;
+    if (this.objectID)
+	obj.method = ".obj#" + this.objectID + "." + methodName;
+    else
+	obj.method = methodName;
+    obj.params = args;
+
     if (cb) req.cb = cb;
     if (JSONRpcClient.profile_async)
 	req.profile = { "submit": new Date() };
     req.data = toJSON(obj);
+
     return req;
 }
 
-JSONRpcClient.prototype.sendRequest =
+JSONRpcClient.prototype._sendRequest =
 function JSONRpcClient_sendRequest(req)
 {
     if(req.profile) req.profile.start = new Date();
@@ -293,14 +337,17 @@ function JSONRpcClient_sendRequest(req)
 	var self = this;
 	http.onreadystatechange = function() {
 	    if(http.readyState == 4) {
+		http.onreadystatechange = function (){};
 		var res = { "cb": req.cb, "result": null, "ex": null};
 		if (req.profile) {
 		    res.profile = req.profile;
 		    res.profile.end = new Date();
 		}
-		try { res.result = self.handleResponse(http); }
+		try { res.result = self._handleResponse(http); }
 		catch(e) { res.ex = e; }
-		JSONRpcClient.async_responses.push(res);
+		if(!JSONRpcClient.async_inflight[req.requestId].canceled)
+		    JSONRpcClient.async_responses.push(res);
+		delete JSONRpcClient.async_inflight[req.requestId];
 		JSONRpcClient.kick_async();
 	    }
 	};
@@ -308,17 +355,18 @@ function JSONRpcClient_sendRequest(req)
 	http.onreadystatechange = function() {};
     }
 
+    JSONRpcClient.async_inflight[req.requestId] = req;
     http.send(req.data);
 
-    if(!req.cb) return this.handleResponse(http);
+    if(!req.cb) return this._handleResponse(http);
 }
 
-JSONRpcClient.prototype.handleResponse =
+JSONRpcClient.prototype._handleResponse =
 function JSONRpcClient_handleResponse(http)
 {
     // Get the charset
     if(!this.charset) {
-	this.charset = JSONRpcClient.getCharsetFromHeaders(http);
+	this.charset = JSONRpcClient._getCharsetFromHeaders(http);
     }
 
     // Get request results

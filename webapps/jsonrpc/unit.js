@@ -57,8 +57,8 @@ var tests = [
 	{ 'code': 'jsonrpc.test.echoDoubleObject(9.9)',
 	  'test': 'result == 9.9'
 	},
-    { 'code': 'jsonrpc.test.echoDateObject(new Date(100000))',
-	  'test': 'result.javaClass == "java.util.Date" && result.time == 100'
+    { 'code': 'jsonrpc.test.echoDateObject(new Date(1121689294000))',
+	  'test': 'result.javaClass == "java.util.Date" && result.time == 1121689294000'
 	},
 	{ 'code': 'jsonrpc.test.echoBoolean(true)',
 	  'test': 'result == true'
@@ -105,6 +105,12 @@ var tests = [
 	},
 	{ 'code': 'jsonrpc.test.aHashtable()',
 	  'test': 'result.map.constructor == Object'
+	},
+	{ 'code': 'jsonrpc.test.echoObject({ "javaClass": "com.metaparadigm.jsonrpc.test.Test$Waggle", "bang": "foo", "baz": 9, "bork": 5 })',
+	  'test': 'result.javaClass == "com.metaparadigm.jsonrpc.test.Test$Waggle" && result.bang =="foo" && result.baz == 9 && result.bork == 5'
+	},
+	{ 'code': 'jsonrpc.test.echoObjectArray([{ "javaClass": "com.metaparadigm.jsonrpc.test.Test$Waggle", "bang": "foo", "baz": 9, "bork": 5 }])',
+	  'test': 'result[0].javaClass == "com.metaparadigm.jsonrpc.test.Test$Waggle" && result[0].bang =="foo" && result[0].baz == 9 && result[0].bork == 5'
 	}
 ];
 

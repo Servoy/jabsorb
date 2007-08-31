@@ -20,7 +20,7 @@
 
   <!-- JBoss 3.2.x classpath and installpath -->
   <!--
-  <property name="jboss" location="/opt/jboss-3.2.5"/>
+  <property name="jboss" location="/opt/jboss-3.2.7"/>
   <property name="installpath" location="${jboss}/server/default/deploy"/>
   <path id="myclasspath">
     <fileset dir="${jboss}/lib"><include name="**/*.jar"/></fileset>

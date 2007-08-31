@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONSerializer.java,v 1.7 2005/06/16 23:26:14 mclark Exp $
+ * $Id: JSONSerializer.java,v 1.9 2005/07/18 12:27:44 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -167,6 +167,14 @@ public class JSONSerializer
 				     Class clazz, Object json)
 	throws UnmarshallException
     {
+	/* If we have a JSON object class hint that is a sub class of the
+	   signature 'clazz', then override 'clazz' with the hint class. */
+	if(clazz != null &&
+	   json instanceof JSONObject &&
+	   ((JSONObject)json).has("javaClass") &&
+	   clazz.isAssignableFrom(getClassFromHint(json)))
+	    clazz = getClassFromHint(json);
+
 	if(clazz == null)
 	    clazz = getClassFromHint(json);
 	if(clazz == null)
@@ -186,6 +194,14 @@ public class JSONSerializer
     public Object unmarshall(SerializerState state, Class clazz, Object json)
 	throws UnmarshallException
     {
+	/* If we have a JSON object class hint that is a sub class of the
+	   signature 'clazz', then override 'clazz' with the hint class. */
+	if(clazz != null &&
+	   json instanceof JSONObject &&
+	   ((JSONObject)json).has("javaClass") &&
+	   clazz.isAssignableFrom(getClassFromHint(json)))
+	    clazz = getClassFromHint(json);
+
 	if(clazz == null)
 	    clazz = getClassFromHint(json);
 	if(clazz == null)
@@ -258,8 +274,8 @@ public class JSONSerializer
      * size of marshalled String.  Default is true.
      * @return
      */
-    public void setMarshallClassHints(boolean marshallClassHints_) {
-        marshallClassHints = marshallClassHints_;
+    public void setMarshallClassHints(boolean marshallClassHints) {
+        this.marshallClassHints = marshallClassHints;
     }
     
     /** 
@@ -279,7 +295,7 @@ public class JSONSerializer
      * undefined for JSON object attributes is virtually the same thing.
      * @return
      */
-    public void setMarshallNullAttributes(boolean marshallNullAttributes_) {
-        marshallNullAttributes = marshallNullAttributes_;
+    public void setMarshallNullAttributes(boolean marshallNullAttributes) {
+        this.marshallNullAttributes = marshallNullAttributes;
     }
 }

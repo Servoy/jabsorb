@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCServlet.java,v 1.17 2005/04/23 11:24:17 mclark Exp $
+ * $Id: JSONRPCServlet.java,v 1.19 2005/08/09 13:41:13 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -27,6 +27,7 @@ import java.io.BufferedReader;
 import java.io.CharArrayWriter;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
+import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -69,6 +70,16 @@ import org.json.JSONArray;
  *   &lt;param-value&gt;0&lt;/param-value&gt;
  * &lt;/init-param&gt;
  * </code>
+ * To disable keepalives to workaround issues with certain web containers
+ * and configurations of apache / connectors place the following XML into
+ * your web.xml inside the &lt;servlet&gt; element.
+ * <p />
+ * <code>
+ * &lt;init-param&gt;
+ *   &lt;param-name&gt;keepalive&lt;/param-name&gt;
+ *   &lt;param-value&gt;0&lt;/param-value&gt;
+ * &lt;/init-param&gt;
+ * </code>
  */
 
 public class JSONRPCServlet extends HttpServlet
@@ -77,6 +88,19 @@ public class JSONRPCServlet extends HttpServlet
 	Logger.getLogger(JSONRPCServlet.class.getName());
 
     private final static int buf_size = 4096;
+
+    private static boolean auto_session_bridge = true;
+    private static boolean keepalive = true;
+
+    public void init(ServletConfig config)
+    {
+	if("0".equals(config.getInitParameter("auto-session-bridge")))
+	    auto_session_bridge = false;
+	if("0".equals(config.getInitParameter("keepalive")))
+	    keepalive = false;
+	log.info("auto_session_bridge=" + auto_session_bridge +
+		 ", keepalive=" + keepalive);
+    }
 
     public void service(HttpServletRequest request,
 			HttpServletResponse response)
@@ -89,8 +113,7 @@ public class JSONRPCServlet extends HttpServlet
 	json_bridge = (JSONRPCBridge) session.getAttribute("JSONRPCBridge");
 	if(json_bridge == null) {
 	    // Only create a new bridge if not disabled in config
-	    if("0".equals(getServletConfig().getInitParameter
-			  ("auto-session-bridge"))) {
+	    if(!auto_session_bridge) {
 	    	// Use the global bridge only, and don't set on session.
 		json_bridge = JSONRPCBridge.getGlobalBridge();
 		if (json_bridge.isDebug())
@@ -125,60 +148,32 @@ public class JSONRPCServlet extends HttpServlet
         CharArrayWriter data = new CharArrayWriter();
         char buf[] = new char[buf_size];
         int ret;
-        while((ret = in.read(buf, 0, buf_size)) != -1) {
+        while((ret = in.read(buf, 0, buf_size)) != -1)
             data.write(buf, 0, ret);
-        }
-
 	if(json_bridge.isDebug())
 	    log.fine("recieve: " + data.toString());
 
 	// Process the request
 	JSONObject json_req = null;
-	Object json_res = null;
+	JSONRPCResult json_res = null;
 	try {
 	    json_req = new JSONObject(data.toString());
-
-	    // Get method name and arguments
-	    String methodName = null;
-	    JSONArray arguments = null;
-
-	    try { methodName = json_req.getString("method");
-	    } catch (NoSuchElementException ne) {}
-
-	    // Back compatibility for <= 0.7 clients
-	    if (methodName != null) {
-		arguments = json_req.getJSONArray("params");
-	    } else {
-		methodName = json_req.getString("methodName");
-		arguments = json_req.getJSONArray("arguments");
-		log.warning("methodName in request deprecated, " +
-			    "please update your JSON-RPC client.");
-	    }
-
-	    // Is this a CallableReference it will have a non-zero objectID
-	    int object_id = json_req.optInt("objectID");
-	    if(json_bridge.isDebug())
-		if(object_id != 0)
-		    log.fine("call " + "objectID=" + object_id + " " +
-			     methodName + "(" + arguments + ")");
-		else
-		    log.fine("call " + methodName + "(" + arguments + ")");
-	    json_res = json_bridge.call(new Object[] {request},
-					object_id, methodName, arguments);
+	    json_res = json_bridge.call(new Object[] {request}, json_req);
 	} catch (ParseException e) {
 	    log.severe("can't parse call: " + data);
-	    json_res = JSONRPCResult.ERR_PARSE;
-	} catch (NoSuchElementException e) {
-	    log.severe("no method in request");
-	    json_res = JSONRPCResult.ERR_NOMETHOD;
+	    json_res = new JSONRPCResult
+		(JSONRPCResult.CODE_ERR_PARSE, null,
+		 JSONRPCResult.MSG_ERR_PARSE);
 	}
 
 	// Write the response
 	if(json_bridge.isDebug())
 	    log.fine("send: " + json_res.toString());
 	byte[] bout = json_res.toString().getBytes("UTF-8");
-	response.setIntHeader("Content-Length", bout.length);
-	response.setHeader("Connection", "keep-alive");
+	if(keepalive) {
+	    response.setIntHeader("Content-Length", bout.length);
+	    response.setHeader("Connection", "keep-alive");
+	}
 
 	out.write(bout);
 	out.flush();

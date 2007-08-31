@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: DateSerializer.java,v 1.4 2005/06/16 23:26:14 mclark Exp $
+ * $Id: DateSerializer.java,v 1.6 2005/07/18 12:27:44 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -54,8 +54,7 @@ public class DateSerializer extends AbstractSerializer
 	throws UnmarshallException
     {
 	JSONObject jso = (JSONObject)o;
-	long time = (long)jso.getInt("time");
-	time = time * 1000;
+	long time = jso.getLong("time");
         if (jso.has("javaClass")) {
             try {
                 clazz = Class.forName(jso.getString("javaClass"));
@@ -78,14 +77,14 @@ public class DateSerializer extends AbstractSerializer
     {
 	long time;
 	if (o instanceof Date) {
-	    time = ((Date)o).getTime() / 1000;
+	    time = ((Date)o).getTime();
 	} else {
 	    throw new MarshallException("cannot marshall date using class "+o.getClass());
 	}
 	JSONObject obj = new JSONObject();	
         if (ser.getMarshallClassHints())
             obj.put("javaClass", o.getClass().getName());
-	obj.put("time", (int)time);
+	obj.put("time", time);
 	return obj;
     }
 
