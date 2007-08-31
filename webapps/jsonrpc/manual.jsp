@@ -238,13 +238,13 @@ if(bridge == null) {
 
     <h2><a name="local-arg-resolvers">Local Argument Resolvers</a></h2>
     <p>LocalArgResolvers are classes that can resolve an argument from the exported method signatures on the server-side. The exported signature of methods that contain a class registered as a LocalArgResolver have that class removed. It does not need to be provided in call in the JSON-RPC client.</p>
-    <p>The LocalArgResolver provides a mechanism to get access to the HttpServletRequest or HttpSession object associated with a request/method invocation. There are 3 LocalArgResolvers that are enabled by default:
-      <ul>
-        <li>JSONRPCBridgeServletArgResolver</li>
-	<li>HttpSessionArgResolver</li>
-	<li>HttpServletRequestArgResolver</li>
-      </ul>
-    </p>
+    <p>The LocalArgResolver provides a mechanism to get access to the HttpServletRequest or HttpSession object associated with a request/method invocation. There are 3 LocalArgResolvers that are enabled by default:</p>
+    <ul>
+      <li>JSONRPCBridgeServletArgResolver</li>
+      <li>HttpSessionArgResolver</li>
+      <li>HttpServletRequestArgResolver</li>
+    </ul>
+
     <p>Additional LocalArgResolvers can be created by implementing the <code>LocalArgResolver</code> interface and calling <code>JSONRPCBridge.registerLocalArgResolver()</code></p>
     <p>An example method that has JSONRPCBridge in the method signature:</p>
     <pre>public void setDebug(JSONRPCBridge bridge, boolean flag)
