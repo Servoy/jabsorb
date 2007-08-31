@@ -50,6 +50,8 @@ import com.metaparadigm.jsonrpc.serializer.impl.NumberSerializer;
 import com.metaparadigm.jsonrpc.serializer.impl.PrimitiveSerializer;
 import com.metaparadigm.jsonrpc.serializer.impl.SetSerializer;
 import com.metaparadigm.jsonrpc.serializer.impl.StringSerializer;
+import com.metaparadigm.jsonrpc.serializer.impl.RawJSONObjectSerializer;
+import com.metaparadigm.jsonrpc.serializer.impl.RawJSONArraySerializer;
 
 /**
  * This class is the public entry point to the serialization code and provides
@@ -115,6 +117,8 @@ public class JSONSerializer implements Serializable {
      * Register all of the provided standard serializers.
      */
     public void registerDefaultSerializers() throws Exception {
+        registerSerializer(new RawJSONArraySerializer());
+        registerSerializer(new RawJSONObjectSerializer());
         registerSerializer(new BeanSerializer());
         registerSerializer(new ArraySerializer());
         registerSerializer(new DictionarySerializer());

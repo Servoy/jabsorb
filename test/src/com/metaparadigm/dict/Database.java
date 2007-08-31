@@ -1,7 +1,7 @@
 /*
  * Simple Java Dict Client (RFC2229)
  *
- * $Id: Database.java,v 1.1.2.1 2006/03/06 12:39:21 mclark Exp $
+ * $Id: Database.java,v 1.4 2006/03/06 12:41:32 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -22,23 +22,31 @@
 
 package com.metaparadigm.dict;
 
-public class Database
-{
+import java.io.Serializable;
+
+public class Database implements Serializable {
+
+    private final static long serialVersionUID = 2;
+
     private String database;
+
     private String description;
 
-    public String getDatabase() { return database; }
-    public String getDescription() { return description; }
-
-    public Database(String database, String description)
-    {
-	this.database = database;
-	this.description = description;
+    public String getDatabase() {
+        return database;
     }
 
-    public String toString()
-    {
-	return "database: " + database + " \"" + description + "\"";
+    public String getDescription() {
+        return description;
+    }
+
+    public Database(String database, String description) {
+        this.database = database;
+        this.description = description;
+    }
+
+    public String toString() {
+        return "database: " + database + " \"" + description + "\"";
     }
 
 }

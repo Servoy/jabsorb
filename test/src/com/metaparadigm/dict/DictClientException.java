@@ -22,14 +22,18 @@
 
 package com.metaparadigm.dict;
 
-public class DictClientException extends Exception
-{
-    private final static long serialVersionUID = 1;
+public class DictClientException extends Exception {
+
+    private final static long serialVersionUID = 2;
 
     private DictCommandResult r;
 
     public DictClientException(DictCommandResult r) {
-	super("DictClientException: code=" + r.code + ", " + r.msg);
-	this.r = r;
+        super("DictClientException: code=" + r.code + ", " + r.msg);
+        this.r = r;
+    }
+
+    public DictCommandResult getResult() {
+        return r;
     }
 }

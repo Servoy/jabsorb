@@ -1,6 +1,9 @@
 jsonurl = "JSON-RPC";
 jsonrpc = null;
 
+var cb;
+var tests_start;
+
 var tests = [
 	{ 'code': 'jsonrpc.test.voidFunction()',
 	  'test': 'result == undefined'
@@ -100,8 +103,7 @@ var tests = [
 	  'test': 'result.set.constructor == Object'
 	},
 	{ 'code': 'jsonrpc.test.aBean()',
-	  'test': 'e.message.indexOf("circular reference") >= 0',
-	  'exception': true
+	  'test': 'result != null',
 	},
 	{ 'code': 'jsonrpc.test.aHashtable()',
 	  'test': 'result.map.constructor == Object'
@@ -111,6 +113,9 @@ var tests = [
 	},
 	{ 'code': 'jsonrpc.test.echoObjectArray([{ "javaClass": "com.metaparadigm.jsonrpc.test.Test$Waggle", "bang": "foo", "baz": 9, "bork": 5 }])',
 	  'test': 'result[0].javaClass == "com.metaparadigm.jsonrpc.test.Test$Waggle" && result[0].bang =="foo" && result[0].baz == 9 && result[0].bork == 5'
+	},
+	{ 'code': 'jsonrpc.test.echoRawJSON({ "field1": "test" })',
+	  'test': 'result.field1 == "test"'
 	}
 ];
 
@@ -122,39 +127,44 @@ function onLoad()
     maxRequestNode = document.getElementById("max_requests");
 
     try {
-	jsonrpc = new JSONRpcClient(jsonurl);
+		jsonrpc = new JSONRpcClient(jsonurl);
     } catch(e) {
-	if(e.message) alert(e.message);
-	else alert(e);
+		if(e.message) alert(e.message);
+		else alert(e);
     }
     displayTests();
-    clearResults();
+    clearAllResults();
 }
 
 function displayTests()
 {
     for(var i = 0; i < tests.length; i++) {
-	var row = testTableBody.insertRow(testTableBody.rows.length);
-	var ccell = row.insertCell(row.cells.length);
-	var rcell = row.insertCell(row.cells.length);
-	var pcell = row.insertCell(row.cells.length);
-	ccell.innerHTML = "<div class=\"code_cell\">" + tests[i].code + "</div>";
-	ccell.className = "test_td";
-	rcell.id = "result." + i;
-	rcell.className = "test_td";
-	pcell.id = "pass." + i;
-	pcell.className = "test_td";
+		var row = testTableBody.insertRow(testTableBody.rows.length);
+		var ccell = row.insertCell(row.cells.length);
+		var rcell = row.insertCell(row.cells.length);
+		var pcell = row.insertCell(row.cells.length);
+		ccell.innerHTML = "<div class=\"code_cell\"><a href=\"javascript:runTest(" +
+			i + ")\">" + tests[i].code + "</a></div>";
+		ccell.className = "test_td";
+		rcell.id = "result." + i;
+		rcell.className = "test_td";
+		pcell.id = "pass." + i;
+		pcell.className = "test_td";
     }
 }
 
-function clearResults()
+function clearResult(i)
 {
-    for(var i = 0; i < tests.length; i++) {
 	var resultsNode = document.getElementById("result." + i);
 	var passNode = document.getElementById("pass." + i);
 	resultsNode.innerHTML = "<div class=\"result_cell\"></div>";
 	passNode.innerHTML = "<div class=\"pass_cell\"></div>";
-    }
+}
+
+function clearAllResults()
+{
+    for(var i = 0; i < tests.length; i++)
+		clearResult(i);
 }
 
 function postResults(i, result, e, profile)
@@ -164,55 +174,53 @@ function postResults(i, result, e, profile)
     var resultText;
     var pass = false;
     if(e) {
-	if(e.message) resultText = e.message;
-	else resultText = e.toString();
-	if(tests[i].exception) {
-	    try {
-		eval("pass = " + tests[i].test);
-	    } catch(e) {}
-	}
+		if(e.message) resultText = e.message;
+		else resultText = e.toString();
+		if(tests[i].exception) {
+		    try {
+				eval("pass = " + tests[i].test);
+			} catch(e) {}
+		}
     } else {
-	if(typeof result == "object") resultText = toJSON(result);
-	else resultText = result;
-	try {
-	    eval("pass = " + tests[i].test);
-	} catch(e) {}
+		if(typeof result == "object") resultText = toJSON(result);
+		else resultText = result;
+		try {
+	    	eval("pass = " + tests[i].test);
+		} catch(e) {}
     }
     if(profile) {
-	resultsNode.innerHTML = "<div class=\"result_cell\">" +
-	    "submit=" + (profile.submit - tests_start) +
-	    ", start=" + (profile.start - tests_start) +
-	    ", end=" + (profile.end - tests_start) +
-	    ", dispatch=" + (profile.dispatch - tests_start) +
-	    " (rtt=" + (profile.end - profile.start) + ")</div>";
+		resultsNode.innerHTML = "<div class=\"result_cell\">" +
+	    	"submit=" + (profile.submit - tests_start) +
+	    	", start=" + (profile.start - tests_start) +
+	    	", end=" + (profile.end - tests_start) +
+	    	", dispatch=" + (profile.dispatch - tests_start) +
+	    	" (rtt=" + (profile.end - profile.start) + ")</div>";
     } else {
-	resultsNode.innerHTML = "<div class=\"result_cell\">" +
-	    resultText + "</div>";
+		resultsNode.innerHTML = "<div class=\"result_cell\">" +
+	    	resultText + "</div>";
     }
     if(pass) passNode.innerHTML = "<div class=\"pass_cell\">pass</div>";
     else passNode.innerHTML = "<div class=\"fail_cell\">fail</pass>";
 }
 
-var cb;
-
 function testAsyncCB(i)
 {
     return function (result, e, profile) {
-	postResults(i, result, e, profile);
+		postResults(i, result, e, profile);
     };
 }
 
 function runTestAsync(i)
 {
     try {
-	// insert post results callback into first argument and submit test
+		// insert post results callback into first argument and submit test
         var cb = testAsyncCB(i);
-	var code = tests[i].code;
-	code = code.replace(/\(([^\)])/, "(cb, $1");
-	code = code.replace(/\(\)/, "(cb)");
+		var code = tests[i].code;
+		code = code.replace(/\(([^\)])/, "(cb, $1");
+		code = code.replace(/\(\)/, "(cb)");
 
-	// run the test
-	eval(code);
+		// run the test
+		eval(code);
     } catch (e) {}
 }
 
@@ -222,34 +230,47 @@ function runTestSync(i)
     var exception;
     var profile;
     if(profileNode.checked) {
-	profile = {};
-	profile.submit = profile.start = new Date();
+		profile = {};
+		profile.submit = profile.start = new Date();
     }
     try {
-	eval("result = " + tests[i].code);
+		eval("result = " + tests[i].code);
     } catch (e) { exception = e; }
     if(profileNode.checked) {
-	profile.end = profile.dispatch = new Date();
+		profile.end = profile.dispatch = new Date();
     }
     postResults(i, result, exception, profile);
 }
 
-function runTests()
+function runTest(i)
+{
+	clearResult(i);
+	if(profileNode.checked) tests_start = new Date();
+	if(asyncNode.checked) {
+		JSONRpcClient.profile_async = profileNode.checked;
+		cb = [];
+		runTestAsync(i);
+    } else {
+		runTestSync(i);
+    }
+}
+
+function runAllTests()
 {
     var n = maxRequestNode.value
     if(maxRequestNode.value < 1 || maxRequestNode.value > 99) {
-	alert("Max requests should be between 1 and 99");
-	return;
+		alert("Max requests should be between 1 and 99");
+		return;
     }
     JSONRpcClient.max_req_active = maxRequestNode.value;
 
-    clearResults();
+    clearAllResults();
     if(profileNode.checked) tests_start = new Date();
     if(asyncNode.checked) {
-	JSONRpcClient.profile_async = profileNode.checked;
-	cb = [];
-	for(var i = 0; i < tests.length; i++) runTestAsync(i);
+		JSONRpcClient.profile_async = profileNode.checked;
+		cb = [];
+		for(var i = 0; i < tests.length; i++) runTestAsync(i);
     } else {
-	for(var i = 0; i < tests.length; i++) runTestSync(i);
+		for(var i = 0; i < tests.length; i++) runTestSync(i);
     }
 }

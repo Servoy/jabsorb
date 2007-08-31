@@ -3,6 +3,7 @@ package com.metaparadigm.jsonrpc.test;
 import java.util.*;
 import java.lang.reflect.Method;
 import javax.servlet.http.HttpServletRequest;
+import org.json.JSONObject;
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
 import com.metaparadigm.jsonrpc.callback.InvocationCallback;
 
@@ -97,6 +98,10 @@ public class Test implements Serializable {
 
     public Object echoObjectArray(Object[] o) {
         return o;
+    }
+
+    public JSONObject echoRawJSON(JSONObject rawObject) {
+        return rawObject;
     }
 
     // Container tests

@@ -102,6 +102,11 @@ public class JSONRPCBridge implements Serializable {
 
     private final static long serialVersionUID = 2;
 
+    private static final ExceptionTransformer IDENTITY_EXCEPTION_TRANSFORMER = new ExceptionTransformer() {
+        public Object transform(Throwable t) {
+            return t;
+        }
+    };
     private final static Logger log = Logger.getLogger(JSONRPCBridge.class
             .getName());
 
@@ -124,6 +129,7 @@ public class JSONRPCBridge implements Serializable {
 
     // Debugging enabled on this bridge
     private boolean debug = false;
+    private ExceptionTransformer exceptionTransformer = IDENTITY_EXCEPTION_TRANSFORMER;
 
     // Bridge state
     private JSONRPCBridgeState state = new JSONRPCBridgeState(this);
@@ -223,6 +229,10 @@ public class JSONRPCBridge implements Serializable {
      */
     protected boolean isDebug() {
         return debug || (this != globalBridge && globalBridge.isDebug());
+    }
+
+    public void setExceptionTransformer(ExceptionTransformer exceptionTransformer) {
+        this.exceptionTransformer = exceptionTransformer;
     }
 
     /**
@@ -989,7 +999,7 @@ public class JSONRPCBridge implements Serializable {
                 for (int i = 0; i < context.length; i++)
                     cbc.errorCallback(context[i], itsThis, method, e);
             result = new JSONRPCResult(JSONRPCResult.CODE_REMOTE_EXCEPTION,
-                    requestId, e);
+                    requestId, exceptionTransformer.transform(e));
         }
 
         // Return the results

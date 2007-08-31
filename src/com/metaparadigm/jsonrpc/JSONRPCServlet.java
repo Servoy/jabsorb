@@ -153,7 +153,8 @@ public class JSONRPCServlet extends HttpServlet {
         JSONRPCResult json_res = null;
         try {
             json_req = new JSONObject(data.toString());
-            json_res = json_bridge.call(new Object[] { request }, json_req);
+            json_res = json_bridge.call
+		(new Object[] { request, response }, json_req);
         } catch (ParseException e) {
             log.severe("can't parse call: " + data);
             json_res = new JSONRPCResult(JSONRPCResult.CODE_ERR_PARSE, null,

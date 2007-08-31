@@ -9,7 +9,7 @@ page import="com.metaparadigm.jsonrpc.test.Test"
      class="com.metaparadigm.jsonrpc.test.Test"
 /><%
    response.setDateHeader ("Expires", 0);
-   //JSONRPCBridge.setDebug(true);
+   JSONRPCBridge.setDebug(true);
    JSONRPCBridge.registerObject("test", testObject);
 %>
 <%!
@@ -27,7 +27,7 @@ page import="com.metaparadigm.jsonrpc.test.Test"
     <table cellpadding="0" cellspacing="0" border="0" width="100%">
       <tr>
         <td align="left">
-          <input type="button" value="Run Tests" onclick="runTests()" />
+          <input type="button" value="Run All Tests" onclick="runAllTests()" />
         </td>
         <td align="right">
           (

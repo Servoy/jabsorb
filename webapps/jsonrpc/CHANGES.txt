@@ -1,6 +1,24 @@
 $Id: CHANGES.txt,v 1.107 2006/03/27 05:38:40 mclark Exp $
 
-json-rpc-java-cvs (HEAD)
+json-rpc-java/svn/trunk
+
+* Add ExceptionTransformer interface and interface to
+  JSONRPCBridge to transform exception objects returned
+  to the client.
+  -- Rhys Yarranton, rhys dot yarranton at albertasolutions dot com
+
+* Make Hello test page use async callback.
+* Modify unit test page to allow running a single test by
+  clicking on a link.
+* Add HttpServletResponseLocalArgResolver and pass
+  HttpServletResponse object into calls so that exported
+  methods can get access to it.
+* Add RawJSONObjectSerializer and RawJSONArraySerializer to allow
+  methods to return hand constructed JSON object representations
+* Formatting cleanups in example Dictionary client
+  -- Michael Clark <michael@metaparadigm.com>
+
+json-rpc-java-cvs
 
 * Add a new overloaded registerObject call that allows the
   caller to specify the class/interface to be used for exporting

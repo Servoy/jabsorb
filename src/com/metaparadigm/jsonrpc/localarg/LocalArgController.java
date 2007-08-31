@@ -28,10 +28,12 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
 import com.metaparadigm.jsonrpc.localarg.impl.HttpServletRequestArgResolver;
+import com.metaparadigm.jsonrpc.localarg.impl.HttpServletResponseArgResolver;
 import com.metaparadigm.jsonrpc.localarg.impl.HttpSessionArgResolver;
 import com.metaparadigm.jsonrpc.localarg.impl.JSONRPCBridgeServletArgResolver;
 import com.metaparadigm.jsonrpc.reflect.ClassAnalyzer;
@@ -52,6 +54,8 @@ public class LocalArgController {
     static {
         LocalArgController.registerLocalArgResolver(HttpServletRequest.class,
                 HttpServletRequest.class, new HttpServletRequestArgResolver());
+	LocalArgController.registerLocalArgResolver(HttpServletResponse.class,
+		HttpServletResponse.class, new HttpServletResponseArgResolver());
         LocalArgController.registerLocalArgResolver(HttpSession.class,
                 HttpServletRequest.class, new HttpSessionArgResolver());
         LocalArgController.registerLocalArgResolver(JSONRPCBridge.class,
