@@ -68,7 +68,7 @@
     </javac>
   </target>
 
-  <target name="test.dist" depends="dist,compile.test,docs">
+  <target name="test.dist" depends="dist,compile.test">
     <copy file="jsonrpc.jar" tofile="${webinf}/lib/jsonrpc.jar"/>
     <war destfile="jsonrpc.war" basedir="${webapp}"
          excludes="**/*~,**/*.jsp,WEB-INF/web.xml*"

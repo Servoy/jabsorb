@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: VectorSerializer.java,v 1.1.1.1 2004/03/31 14:21:01 mclark Exp $
+ * $Id: AbstractListSerializer.java,v 1.1 2004/04/01 06:51:29 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,14 +20,19 @@
 
 package com.metaparadigm.jsonrpc;
 
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Vector;
+import java.util.Iterator;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
-class VectorSerializer extends Serializer
+class AbstractListSerializer extends Serializer
 {
     private static Class[] _serializableClasses = new Class[]
-	{ Vector.class };
+	{ AbstractList.class, ArrayList.class,
+	  LinkedList.class, Vector.class };
 
     private static Class[] _JSONClasses = new Class[]
 	{ JSONObject.class };
@@ -40,15 +45,22 @@ class VectorSerializer extends Serializer
 	throws UnmarshallException
     {
 	JSONObject jso = (JSONObject)o;
-	String type = jso.getString("json_type");
-	if(!type.equals("java.util.Vector"))
-	    throw new UnmarshallException("not a Vector");
-	JSONArray jsa = jso.getJSONArray("arr");
+	String java_class = jso.getString("java_class");
+	if(java_class == null)
+	    throw new UnmarshallException("no type hint");
+	if(!(java_class.equals("java.util.AbstractList") ||
+	     java_class.equals("java.util.LinkedList") ||
+	     java_class.equals("java.util.ArrayList") ||
+	     java_class.equals("java.util.Vector")))
+	    throw new UnmarshallException("not an AbstractList");
+	JSONArray jsonlist = jso.getJSONArray("list");
+	if(jsonlist == null)
+	    throw new UnmarshallException("list missing");
 	int i = 0;
 	ObjectMatch m = new ObjectMatch(-1);
 	try {
-	    for(; i < jsa.length(); i++)
-		m = tryToUnmarshall(null, jsa.get(i)).max(m);
+	    for(; i < jsonlist.length(); i++)
+		m = tryToUnmarshall(null, jsonlist.get(i)).max(m);
 	} catch (UnmarshallException e) {
 	    throw new UnmarshallException
 		("element " + i + " " + e.getMessage());
@@ -60,36 +72,52 @@ class VectorSerializer extends Serializer
 	throws UnmarshallException
     {
 	JSONObject jso = (JSONObject)o;
-	String type = jso.getString("json_type");
-	if(!type.equals("java.util.Vector"))
-	    throw new UnmarshallException("not a Vector");
-	JSONArray jsa = jso.getJSONArray("arr");
+	String java_class = jso.getString("java_class");
+	if(java_class == null)
+	    throw new UnmarshallException("no type hint");	
+	AbstractList al = null;
+	if(java_class.equals("java.util.AbstractList") ||
+	   java_class.equals("java.util.ArrayList")) {
+	    al = new ArrayList();
+	} else if(java_class.equals("java.util.LinkedList")) {
+	    al = new LinkedList();
+	} else if(java_class.equals("java.util.Vector")) {
+	    al = new Vector();
+	} else {
+	    throw new UnmarshallException("not an AbstractList");
+	}
+	JSONArray jsonlist = jso.getJSONArray("list");
+	if(jsonlist == null)
+	    throw new UnmarshallException("list missing");
 	int i = 0;
-	Vector v = new Vector();
 	try {
-	    for(; i < jsa.length(); i++)
-		v.add(unmarshall(null, jsa.get(i)));
+	    for(; i < jsonlist.length(); i++)
+		al.add(unmarshall(null, jsonlist.get(i)));
 	} catch (UnmarshallException e) {
 	    throw new UnmarshallException
 		("element " + i + " " + e.getMessage());
 	}
-	return v;
+	return al;
     }
 
     public Object doMarshall(Object o)
 	throws MarshallException
     {
-	Vector v = (Vector)o;
+	AbstractList list = (AbstractList)o;
 	JSONObject obj = new JSONObject();
 	JSONArray arr = new JSONArray();
-	obj.put("java_class", v.getClass().getName());
-	obj.put("arr", arr);
-	int i=0;
+	obj.put("java_class", o.getClass().getName());
+	obj.put("list", arr);
+	int index=0;
 	try {
-	    for(; i < v.size(); i++) arr.put(marshall(v.elementAt(i)));
+	    Iterator i = list.iterator();
+	    while(i.hasNext()) {
+		arr.put(marshall(i.next()));
+		index++;
+	    }
 	} catch (MarshallException e) {
 	    throw new MarshallException
-		("element " + i + " " + e.getMessage());
+		("element " + index + " " + e.getMessage());
 	}
 	return obj;
     }

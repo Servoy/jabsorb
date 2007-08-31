@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCBridge.java,v 1.1.1.1 2004/03/31 14:20:59 mclark Exp $
+ * $Id: JSONRPCBridge.java,v 1.2 2004/04/01 06:51:29 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -114,9 +114,10 @@ public class JSONRPCBridge
 	try {
 	    globalBridge.registerSerializer(new ArraySerializer());
 	    globalBridge.registerSerializer(new BeanSerializer());
-	    globalBridge.registerSerializer(new VectorSerializer());
-	    globalBridge.registerSerializer(new HashtableSerializer());
-	    globalBridge.registerSerializer(new ArrayListSerializer());
+	    globalBridge.registerSerializer(new DictionarySerializer());
+	    globalBridge.registerSerializer(new AbstractMapSerializer());
+	    globalBridge.registerSerializer(new AbstractSetSerializer());
+	    globalBridge.registerSerializer(new AbstractListSerializer());
 	    globalBridge.registerSerializer(new StringSerializer());
 	    globalBridge.registerSerializer(new NumberSerializer());
 	    globalBridge.registerSerializer(new PrimitiveSerializer());

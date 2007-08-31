@@ -4,7 +4,7 @@
   -
   - Author: Michael Clark <michael@metaparadigm.com>
   - Copyright 2004 Metaparadigm Pte Ltd.
-  - $Id: test.jsp,v 1.1.1.1 2004/03/31 14:21:12 mclark Exp $
+  - $Id: test.jsp,v 1.2 2004/04/01 06:51:29 mclark Exp $
   -->
  <jsp:directive.page contentType="text/html;charset=UTF-8" language="java" />
  <jsp:directive.page import="com.metaparadigm.jsonrpc.JSONRPCBridge" />
@@ -15,7 +15,6 @@
 	class="com.metaparadigm.jsonrpc.test.Test" />
  <jsp:scriptlet>
    response.setDateHeader ("Expires", 0);
-   JSONRPCBridge.setDebug(true);
    JSONRPCBridge.registerObject("test", testObject);
    JSONRPCBridge.registerReference(Test.RefTest.class);
    JSONRPCBridge.registerCallableReference(Test.CallableRefTest.class);
@@ -33,18 +32,31 @@
       <form id="testform">
        <table cellpadding="2" cellspacing="0" border="0"><tr>
          <td valign="top">Eval:</td>
-         <td><input type="text" id="txEval" size="70"
-	           value="test.echo({bang: 'foo', baz: 9})" /></td>
+         <td colspan="6">
+          <input type="text" id="txEval" size="80"
+	         value="jsonserver.test.echo({bang: 'foo', baz: 9})" />
+         </td>
         </tr><tr>
          <td valign="top">Result:</td>
-         <td><textarea wrap="off" id="txResult" cols="80" rows="18">
-            <jsp:text /></textarea></td>
+         <td colspan="6">
+          <textarea wrap="off" id="txResult" cols="80" rows="24">
+           <jsp:text /></textarea>
+         </td>
         </tr><tr>
-         <td colspan="2"><input type="button" value="Execute" onclick="onSubmit()" /></td>
-        </tr><tr>
-         <td colspan="2"><input type="button" value="Run Tests" onclick="runTests()" /></td>
-        </tr><tr>
-         <td colspan="2"><input type="button" value="Run Reference Tests" onclick="runReferenceTests()" /></td>
+         <td></td>
+         <td><input type="button" value="Eval"
+                         onclick="doEval()" />
+         </td><td><input type="button" value="List Methods"
+                         onclick="doListMethods()" />
+         </td><td><input type="button" value="Basic Tests"
+                         onclick="doBasicTests()" />
+         </td><td><input type="button" value="Reference Tests"
+                         onclick="doReferenceTests()" />
+         </td><td><input type="button" value="Container Tests"
+                         onclick="doContainerTests()" />
+         </td><td><input type="button" value="Exception Test"
+                         onclick="doExceptionTest()" />
+         </td>
         </tr>
       </table>
      </form>

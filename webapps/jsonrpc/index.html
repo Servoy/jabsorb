@@ -31,16 +31,18 @@
          <li>Primitive types (int, long, short, byte, char, float, double)</li>
          <li>Numbers (Float, Integer, etc...), Strings, Char and Byte arrays</li>
          <li>Java Beans (any Object with set and get methods)</li>
-         <li>Arrays of primitive types, Strings, Numbers and Java Beans</li>
+         <li>Arrays of primitive types, Strings, Numbers, Collections and Java Beans</li>
          <li>Exceptions (although type information isn't currently preserved)</li>
-	 <li>ArrayLists, Vectors and Hashtables (presently only supports marshalling for returned types)</li>
+	 <li>Concrete and abstract collection types:
+          <ul>
+           <li>AbstractList, ArrayList, LinkedList, and Vector</li>
+           <li>AbstractMap, HashMap, TreeMap, and LinkedHashMap</li>
+           <li>AbstractSet, HashSet, TreeSet, and LinkedHashSet</li>
+           <li>Dictionary, Hashtable</li>
+          </ul>
+         </li>
+         <li>Any arbitrary nested combination of the above</li>
        </ul></p>
-    <p>In addition to this it adds Java class name hints to the JSON objects
-       sent back to Javascript to aid in unmarshalling of these objects
-       in subsequent calls to Java methods <i>(Note: This is still to be
-       implmented and is required to allow unmarshalling of the contents of
-       generic container classes where no type information is available)</i>.
-    </p>
     <h2>Documentation</h2>
     <p>
      <ul>
@@ -69,7 +71,7 @@
     <h2>Download</h2>
     <p>JSON-RPC-Java is licensed unger the <a href="http://www.gnu.org/licenses/lgpl.html">LGPL</a>. You can download the latest version here:
      <ul>
-       <li><a href="json-rpc-java-0.1.tar.gz">json-rpc-java-0.1.tar.gz</a></li>
+       <li><a href="/jsonrpc-dist/json-rpc-java-0.2.tar.gz">json-rpc-java-0.2.tar.gz</a></li>
      </ul>
     </p>
 
@@ -92,10 +94,8 @@ CVS password: &lt;enter '<b>anoncvs</b>'&gt;<br>
     <h2>To do</h2>
     <p>
      <ul>
-       <li>Complete unmarshalling of Hashtable.</li>
-       <li>Implement unmarshalling of abstract container classes by
-           instantiating a compatible concrete implementation.</li>
-       <li>Complete support for Callable References in a standard manner.</li>
+       <li>Complete support for Callable References in a standard way.</li>
+       <li>Implement JSRS transport to support browsers where XmlHttpObject is not available.</li>
        <li>Testing, testing, testing.</li>
      </ul>
     </p>
