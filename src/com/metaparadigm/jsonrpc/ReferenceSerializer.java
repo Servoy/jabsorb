@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: ReferenceSerializer.java,v 1.3 2004/04/04 16:08:22 mclark Exp $
+ * $Id: ReferenceSerializer.java,v 1.4 2005/01/21 00:05:24 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,10 +20,7 @@
 
 package com.metaparadigm.jsonrpc;
 
-import java.util.HashSet;
-import java.util.HashMap;
 import org.json.JSONObject;
-import org.json.JSONArray;
 
 class ReferenceSerializer extends Serializer
 {

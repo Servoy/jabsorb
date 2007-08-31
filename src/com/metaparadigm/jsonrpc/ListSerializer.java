@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: AbstractListSerializer.java,v 1.2 2004/04/04 16:08:22 mclark Exp $
+ * $Id: ListSerializer.java,v 1.2 2004/12/10 08:11:02 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,6 +20,7 @@
 
 package com.metaparadigm.jsonrpc;
 
+import java.util.List;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -28,11 +29,10 @@ import java.util.Iterator;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
-class AbstractListSerializer extends Serializer
+class ListSerializer extends Serializer
 {
     private static Class[] _serializableClasses = new Class[]
-	{ AbstractList.class, ArrayList.class,
-	  LinkedList.class, Vector.class };
+	{ List.class, ArrayList.class, LinkedList.class, Vector.class };
 
     private static Class[] _JSONClasses = new Class[]
 	{ JSONObject.class };
@@ -40,6 +40,12 @@ class AbstractListSerializer extends Serializer
     public Class[] getSerializableClasses() { return _serializableClasses; }
     public Class[] getJSONClasses() { return _JSONClasses; }
 
+    public boolean canSerialize(Class clazz, Class jsonClazz)
+    {
+	return (super.canSerialize(clazz, jsonClazz) ||
+		((jsonClazz == null || jsonClazz == JSONArray.class) &&
+		 List.class.isAssignableFrom(clazz)));
+    }
 
     public ObjectMatch doTryToUnmarshall(Class clazz, Object o)
 	throws UnmarshallException
@@ -48,11 +54,12 @@ class AbstractListSerializer extends Serializer
 	String java_class = jso.getString("javaClass");
 	if(java_class == null)
 	    throw new UnmarshallException("no type hint");
-	if(!(java_class.equals("java.util.AbstractList") ||
+	if(!(java_class.equals("java.util.List") ||
+	     java_class.equals("java.util.AbstractList") ||
 	     java_class.equals("java.util.LinkedList") ||
 	     java_class.equals("java.util.ArrayList") ||
 	     java_class.equals("java.util.Vector")))
-	    throw new UnmarshallException("not an AbstractList");
+	    throw new UnmarshallException("not a List");
 	JSONArray jsonlist = jso.getJSONArray("list");
 	if(jsonlist == null)
 	    throw new UnmarshallException("list missing");
@@ -76,7 +83,8 @@ class AbstractListSerializer extends Serializer
 	if(java_class == null)
 	    throw new UnmarshallException("no type hint");	
 	AbstractList al = null;
-	if(java_class.equals("java.util.AbstractList") ||
+	if(java_class.equals("java.util.List") ||
+	   java_class.equals("java.util.AbstractList") ||
 	   java_class.equals("java.util.ArrayList")) {
 	    al = new ArrayList();
 	} else if(java_class.equals("java.util.LinkedList")) {
@@ -84,7 +92,7 @@ class AbstractListSerializer extends Serializer
 	} else if(java_class.equals("java.util.Vector")) {
 	    al = new Vector();
 	} else {
-	    throw new UnmarshallException("not an AbstractList");
+	    throw new UnmarshallException("not a List");
 	}
 	JSONArray jsonlist = jso.getJSONArray("list");
 	if(jsonlist == null)
@@ -103,7 +111,7 @@ class AbstractListSerializer extends Serializer
     public Object doMarshall(Object o)
 	throws MarshallException
     {
-	AbstractList list = (AbstractList)o;
+	List list = (List)o;
 	JSONObject obj = new JSONObject();
 	JSONArray arr = new JSONArray();
 	obj.put("javaClass", o.getClass().getName());

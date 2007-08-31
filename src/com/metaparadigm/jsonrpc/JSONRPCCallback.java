@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCCallback.java,v 1.1 2004/04/11 10:05:20 mclark Exp $
+ * $Id: JSONRPCCallback.java,v 1.2 2005/01/21 15:23:11 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -22,6 +22,10 @@ package com.metaparadigm.jsonrpc;
 
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.Method;
+
+/**
+ * Interface to be implemented by objects registered for invocation callbacks with the JSONRPCBridge.
+ */
 
 public interface JSONRPCCallback {
 

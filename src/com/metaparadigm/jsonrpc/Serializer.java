@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: Serializer.java,v 1.1.1.1 2004/03/31 14:21:01 mclark Exp $
+ * $Id: Serializer.java,v 1.2 2005/01/21 00:10:50 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -72,5 +72,9 @@ abstract class Serializer
     public ObjectMatch tryToUnmarshall(Class clazz, Object jso)
 	throws UnmarshallException
     { return getBridge().tryToUnmarshall(clazz, jso); }
+    
+    protected boolean isMarshalledObjectNull(Object o){
+        { return getBridge().isMarshalledObjectNull(o); }
+    }
 
 }

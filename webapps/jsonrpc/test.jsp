@@ -4,7 +4,7 @@
   -
   - Author: Michael Clark <michael@metaparadigm.com>
   - Copyright 2004 Metaparadigm Pte Ltd.
-  - $Id: test.jsp,v 1.4 2004/04/04 12:29:14 mclark Exp $
+  - $Id: test.jsp,v 1.5 2005/01/21 16:56:33 mclark Exp $
   -->
  <jsp:directive.page contentType="text/html;charset=UTF-8" language="java" />
  <jsp:directive.page import="com.metaparadigm.jsonrpc.JSONRPCBridge" />
@@ -28,8 +28,14 @@
     <script type="text/javascript" src="test.js"><jsp:text /></script>
     <title>JSONRPC tester</title>
    </head>
-    <body bgcolor="#ffffff" onLoad="onLoad()">
-     <h2>JSON-RPC-Java Tester</h2>
+   <body bgcolor="#ffffff" onLoad="onLoad()">
+
+    <h1><img align="left" valign="texttop" src="images/json.png" width="55" height="55" hspace="6" vspace="0" />JSON-RPC-Java Tester</h1>
+    <div class="tagline">JavaScript to Java remote scripting.</div>
+
+    <hr />
+    <p><a href="./">Back to JSON-RPC-Java Home</a></p>
+
       <form id="testform">
        <table cellpadding="2" cellspacing="0" border="0"><tr>
          <td valign="top">Eval:</td>
@@ -62,6 +68,9 @@
       </table>
      </form>
     </body>
+
+    <hr />
+
    </html>
   </jsp:text>
 </jsp:root>

@@ -1,118 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="css/site.css" />
+    <link rel="stylesheet" type="text/css" href="css/site.css">
     <title>JSON-RPC-Java</title>
   </head>
   <body bgcolor="#ffffff">
-    <h1>JSON-RPC-Java</h1>
-    <p>JSON-RPC-Java is a Java implementation of the
-       <a href="http://www.json-rpc.org/">JSON-RPC</a> protocol.
-    </p>
-    <hr />
+    <h1><img align="left" valign="texttop" src="images/json.png" width="55" height="55" hspace="6" vspace="0" />JSON-RPC-Java</h1>
+    <div class="tagline">JavaScript to Java remote scripting.</div>
+    <hr>
+
     <h2>Introduction</h2>
-    <p>JSON-RPC-Java is a dynamic JSON-RPC to Java ORB (Object Request Broker)
-       that allows you to transparently call server-side Java code from
-       Javascript.
-    </p>
-    <p>There are minimal or zero changes necessary to your existing
-       server-side Java code to allow calling from JavaScript (such as
-       marshalling and unmarshalling of special types) as JSON-RPC-Java
-       dynamically maps JavaScript Objects to Java Objects by dynamic
-       reflection on Java method signatures and dynamic mapping between
-       Java Objects and JavaScript objects.
-    </p>
-    <p>It maps the loosely typed JavaScript objects to Java objects by
-       reflecting on the Java method signatures and matching the fields of
-       JSON objects to Java primitive types, arrays, generic collections and
-       complex objects such as Java Beans.
-    </p>
-    <p>It currently supports marshalling and unmarshalling of the following
-       types:
-       <ul>
-         <li>Primitive types (int, long, short, byte, boolean, char, float, double)</li>
-         <li>Numbers (Float, Integer, etc...), Strings, Char and Byte arrays</li>
-         <li>Java Beans (any Object with set and get methods)</li>
-         <li>Arrays of primitive types, Strings, Numbers, Collections and Java Beans</li>
-         <li>Exceptions (although type information isn't currently preserved)</li>
-	 <li>Concrete and abstract collection types:
-          <ul>
-           <li>AbstractList, ArrayList, LinkedList, and Vector</li>
-           <li>AbstractMap, HashMap, TreeMap, and LinkedHashMap</li>
-           <li>AbstractSet, HashSet, TreeSet, and LinkedHashSet</li>
-           <li>Dictionary, Hashtable</li>
-          </ul>
-         </li>
-         <li>Any arbitrary nested combination of the above</li>
-       </ul></p>
-      <p>It has some advanced ORB (Object Request Broker) type functionality
-with an API to register Java classes as:
-       <ul>
-        <li>References - Objects of classes registered as References will be
-returned as opaque reference objects to JavaScript that when passed
-to succussive Java method calls will then be reassociated back to
-the original Java object (great for security sensitive objects).</li>
-         <li>Callable References - Object of classes registered as Callable References will return dynamic proxies to allow invocation on the particular object instance in the server-side Java. There are changes to the included jsolait json-rpc client for dynamic proxy creation support.</li>
-       </ul>
-      </p>
-    <h2>Documentation</h2>
-    <p>
-     <ul>
-       <li><a href="tutorial/">Tutorial</a></li>
-       <li><a href="docs/">API Documentation</a></li>
-     </ul>
+    <p>JSON-RPC-Java is a key piece of infrastructure that allows JavaScript DHTML web applications to call remote methods in a Java Application Server (remote scripting) without the need for page reloading (as is the case with the vast majority of current web applications). It enables a new breed of fast and highly dynamic enterprise Java web applications.</p>
+    <div class="info-block">
+      <ul>
+	<li><a href="http://www.crockford.com/JSON/">JSON</a></em> (JavaScript Object Notation) is a <a href="http://www.crockford.com/JSON/xml.html">lightweight</a> data-interchange format with language bindings for C, C++, C#, Java, JavaScript, Perl, TCL and others.</li>
+	<li><a href="http://www.json-rpc.org/">JSON-RPC</a> is a simple remote procedure call protocol similar to XML-RPC although it uses the lightweight <a href="http://www.crockford.com/JSON/xml.html">JSON</a></em> format instead of XML.</li>
+	<li>JSON-RPC-Java is a Java implementation of the <a href="http://www.json-rpc.org/">JSON-RPC</a> protocol.</li>
+      </ul>
+    </div>
 
-    <h2>Examples</h2>
-    <p>Try the <a href="test.jsp">JSON-RPC-Java Tester</a> example. Here
-       is the source:
-     <ul>
-       <li><a href="Test.java.txt">Test.java</a>,
-           <a href="test.jsp.xml">test.jsp</a> and
-           <a href="test.js.txt">test.js</a></li>
-     </ul>
-      You'll notice there is only one glue call in the JSP to allow
-      calling of Java object methods from JavaScript.
+    <h2>JSON-RPC-Java Overview</h2>
+    <p>JSON-RPC-Java is a dynamic JSON-RPC to Java ORB (Object Request Broker) that allows you to transparently call server-side Java code from JavaScript. It is designed to run in a Servlet container such as Tomcat and can be used with JBoss to allow calling of EJB methods from within a JavaScript DHTML web application.</p>
+    <p>Minimal or zero changes are necessary to existing server-side Java code to allow calling from JavaScript (such as the marshalling and unmarshalling of special types) as JSON-RPC-Java dynamically maps JavaScript objects to and from Java objects using Java reflection. JSON-RPC-Java also allows simple exporting of Java objects by reflection on their method signatures (a single line of code is required to provide access to a Java object).</p>
+    <p>JSON-RPC-Java currently supports transparent marshalling and unmarshalling of the following types:
+      <ul>
+	<li>Primitive types (int, long, short, byte, boolean, char, float, double)</li>
+	<li>Numbers (Float, Integer, etc...), Strings, Char and Byte arrays</li>
+	<li>Java Beans (any Object with set and get methods)</li>
+	<li>Arrays of primitive types, Strings, Numbers, Collections and Java Beans</li>
+	<li>Exceptions (although type information isn't currently preserved)</li>
+	<li>Concrete and abstract collection types:
+	  <ul>
+	    <li>List, ArrayList, LinkedList, and Vector</li>
+	    <li>Map, HashMap, TreeMap, and LinkedHashMap</li>
+	    <li>Set, HashSet, TreeSet, and LinkedHashSet</li>
+	    <li>Dictionary, Hashtable</li>
+	  </ul>
+	</li>
+	<li>Any arbitrary nested combination of the above (excluding circular references)</li>
+      </ul></p>
+    <p>JSON-RPC-Java has some basic ORB (Object Request Broker) functionality with an API to register Java classes as:
+      <ul>
+	<li>References - Objects of classes registered as References will be returned as opaque reference objects to JavaScript that when passed to succussive Java method calls will then be reassociated back to the original Java object (great for security sensitive objects).</li>
+	<li>Callable References - Objects of classes registered as Callable References will return dynamic proxies to allow invocation on the particular object instance in the server-side Java. There are changes to the included jsolait json-rpc client for dynamic proxy creation support.</li>
+      </ul>
     </p>
-    <p>This example uses the JavaScript JSON-RPC implementation from the
-    <a href="http://jan.kollhof.net/projects/js/jsolait/">JavaScript&nbsp;o&nbsp;lait</a>
-       library by <a href="http://jan.kollhof.net/">Jan-Klaas&nbsp;Kollhof</a>,
-       the author of the
-    <a href="http://json-rpc.org/specs.xhtml">JSON-RPC&nbsp;specification</a>.
-    </p>
+    <p>JSON-RPC-Java is intended for use in next generation Java / DHTML / JavaScript enterprise web applications to provide a similar level of speed and interactivity to that of typical standalone client server GUI applications.</p>
+    <div class="info-block">
+      <ul>
+	<li>No page reloading required to send and recieve information between a web page and the server.</li>
+	<li>Dynamically call server-side Java methods from JavaScript DHTML web applications.</li>
+	<li>Transparently maps Java objects to JavaScript objects.</li>
+	<li>Uses lightweight protocol similar to XML-RPC although much faster.</li>
+	<li>Supports Internet Explorer, Mozilla / Firefox and Safari (plus Konqueror and Opera soon).</li>
+      </ul>
+    </div>
 
-    <h2>Download</h2>
-    <p>JSON-RPC-Java is licensed under the <a href="http://www.gnu.org/licenses/lgpl.html">LGPL</a>. You can download the latest version here:
-     <ul>
-       <li><a href="/jsonrpc-dist/json-rpc-java-0.4.tar.gz">json-rpc-java-0.4.tar.gz</a> (<a href="CHANGES.txt">Changelog</a>)</li>
-     </ul>
-    </p>
+    <h2>Documentation and Examples</h2>
+    <ul>
+      <li><a href="tutorial/">Tutorial</a></li>
+      <li><a href="docs/">API Documentation</a></li>
+      <li><a href="test.jsp">JSON-RPC-Java Demo</a></li>
+      <li>Demo source: <a href="Test.java.txt">Test.java</a>,
+	<a href="test.jsp.xml">test.jsp</a> and
+	<a href="test.js.txt">test.js</a></li>
+    </ul>
+    <p>The demo uses the JavaScript JSON-RPC implementation from the <a href="http://jan.kollhof.net/projects/js/jsolait/">JavaScript&nbsp;o&nbsp;lait</a>  library by <a href="http://jan.kollhof.net/">Jan-Klaas&nbsp;Kollhof</a>, the author of the <a href="http://json-rpc.org/specs.xhtml">JSON-RPC&nbsp;specification</a>. The JavaScript&nbsp;o&nbsp;lait library and the JSON-RPC-Java example code are included in the source distribution.</p>
 
-    <h2>Anonymous CVS</h2>
-    <p><code># <b>export CVSROOT=:pserver:anoncvs@cvs.metaparadigm.com:/cvsroot</b><br>
+    <h2>Source code</h2>
+    <p>You can download the current release version here: <a href="/jsonrpc-dist/json-rpc-java-0.5.tar.gz">json-rpc-java-0.5.tar.gz</a> (<a href="CHANGES.txt">Changelog</a>)</p>
+    <p>JSON-RPC-Java is licensed under the <a href="http://www.gnu.org/licenses/lgpl.html">LGPL</a> which allows use within commerical/proprietary applications.</p>
+    <p>Access to the latest code is available via anonymous CVS:</p>
+    <div class="code-block">
+      <code>
+# <b>export CVSROOT=:pserver:anoncvs@cvs.metaparadigm.com:/cvsroot</b><br>
 # <b>cvs login</b><br>
 Logging in to :pserver:anoncvs@cvs.metaparadigm.com:2401/cvsroot<br>
 CVS password: &lt;enter '<b>anoncvs</b>'&gt;<br>
+# <b>cvs co json-rpc-java</b>
+      </code>
+    </div>
 
-# <b>cvs co json-rpc-java</b></code></p>
+    <h2>Mailing List</h2>
+    <p>Join the <a href="http://oss.metaparadigm.com/mailman/listinfo/json-rpc-java">mailing list</a> to recieve release annoucements, discuss bugs, new feature ideas or contribute to the development of JSON-RPC-Java.</p>
+    <p>If you're not subscribed (the list is subscriber only due to excessive SPAM), then you can email the <a href="mailto:michael@metaparadigm.com">project lead</a> directly.
 
     <h2>Bugs and Limitations</h2>
     <p>
-     <ul>
-      <li>Support is currently limited to Netscape 7, Safari 1.2, newer versions of Mozilla, and Internet Explorer 5 and up. The jsolait jsonrpc client library does not work on IE 5.1 for Mac, Netscape 6, Opera and Konqueror due to their lack of support for the XMLHttpRequest object.</li>
-      <li>Implementation of a Java Applet to provide synchronous communication on browsers with Java VM and Javascript to Java Bridge (Konqueror and Netscape 6) will extend the supported set of browsers. I currently have an experimental implementation of this (with changes to urllib in jsolait) which you can mail for me if you're interested.</li>
-     </ul>
+      <ul>
+	<li>Does not yet support marhsalling of objects with circular references. Circular references are detected and an excpetion is thrown.</li>
+	<li>Support is currently limited to Netscape 7, Safari 1.2, newer versions of Mozilla, and Internet Explorer 5 and up. The jsolait jsonrpc client library does not work on IE 5.1 for Mac, Netscape 6, Opera and Konqueror due to their lack of support for the XMLHttpRequest object.</li>
+	<li><strong><em>News Flash!</em> - Konqueror 3.3 and Opera 8 Beta now implement the XMLHTTPRequest object but it has not yet been tested with the jsolait jsonrpc client.</strong></li>
+      </ul>
     </p>
-    <p>Please send bug reports to <a href="mailto:michael@metaparadigm.com">michael@metaparadigm.com</a></p>
 
     <h2>To do</h2>
     <p>
-     <ul>
-       <li>Standardise method for invocation on unnamed object instances (those returned as CallableReferences). JSON-RPC-Java presently includes a slightly modified version of the jsonrpc client from jsolait which handles unmarshalling of Callable References (automatic creation of ServerProxy object). It also adds an additional attribute <code>objectID</code> to the JSON-RPC protocol message to method calls on these unnamed object instances.</li>
-       <li>Implement Java applet transport to support browsers where XmlHttpObject is not available.</li>
-       <li>Testing, testing, testing.</li>
-     </ul>
+      <ul>
+	<li>Standardise method for invocation on unnamed object instances (those returned as CallableReferences). JSON-RPC-Java presently includes a slightly modified version of the jsonrpc client from jsolait which handles unmarshalling of Callable References (automatic creation of ServerProxy object). It also adds an additional attribute <code>objectID</code> to the JSON-RPC protocol message to method calls on these unnamed object instances.</li>
+	<li>Implement marshalling of objects with circular references (will require an extension to JSON).</li>
+	<li>Implement browser checking for more graceful and informative messages on unsupported browsers.</li>
+      </ul>
     </p>
 
-    <hr />
-    <p>Copyright 2004 Metaparadigm Pte Ltd.</b>
+    <hr>
+    <p>
+      <table cellpadding="0" cellspacing="0" border="0" width="100%">
+	<tr>
+	  <td width="45%"><p><!-- hhmts start -->
+Last modified: Sat Jan 22 00:11:51 SGT 2005
+<!-- hhmts end --></p></td>
+	  <td valign="top"><a href="http://www.spreadfirefox.com/?q=affiliates&amp;id=62211&amp;t=84"><img border="0" alt="Get Firefox!" title="Get Firefox!" src="http://sfx-images.mozilla.org/affiliates/Buttons/80x15/blue_2.gif"/></a></td> 
+	  <td width="45%"><p class="copyright">Copyright 2005 <a href="http://www.metaparadigm.com/">Metaparadigm Pte Ltd</a></p></td>
+	</tr>
+      </table>
+    </p>
   </body>
 </html>

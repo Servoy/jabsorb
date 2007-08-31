@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: ArraySerializer.java,v 1.2 2004/04/09 06:32:37 mclark Exp $
+ * $Id: ArraySerializer.java,v 1.3 2005/01/21 00:05:24 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,7 +20,6 @@
 
 package com.metaparadigm.jsonrpc;
 
-import java.util.ArrayList;
 import java.lang.reflect.Array;
 import org.json.JSONArray;
 

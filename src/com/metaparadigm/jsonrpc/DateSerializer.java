@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: AbstractSetSerializer.java,v 1.2 2004/04/04 16:08:22 mclark Exp $
+ * $Id: DateSerializer.java,v 1.2 2004/12/10 08:11:02 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,18 +20,13 @@
 
 package com.metaparadigm.jsonrpc;
 
-import java.util.AbstractSet;
-import java.util.LinkedHashSet;
-import java.util.HashSet;
-import java.util.TreeSet;
-import java.util.Iterator;
+import java.util.Date;
 import org.json.JSONObject;
 
-class AbstractSetSerializer extends Serializer
+class DateSerializer extends Serializer
 {
     private static Class[] _serializableClasses = new Class[]
-	{ AbstractSet.class, HashSet.class, TreeSet.class,
-	  LinkedHashSet.class };
+	{ Date.class };
 
     private static Class[] _JSONClasses = new Class[]
 	{ JSONObject.class };
@@ -39,6 +34,12 @@ class AbstractSetSerializer extends Serializer
     public Class[] getSerializableClasses() { return _serializableClasses; }
     public Class[] getJSONClasses() { return _JSONClasses; }
 
+    public boolean canSerialize(Class clazz, Class jsonClazz)
+    {
+	return (super.canSerialize(clazz, jsonClazz) ||
+		((jsonClazz == null || jsonClazz == JSONObject.class) &&
+		 Date.class.isAssignableFrom(clazz)));
+    }
 
     public ObjectMatch doTryToUnmarshall(Class clazz, Object o)
 	throws UnmarshallException
@@ -47,14 +48,9 @@ class AbstractSetSerializer extends Serializer
 	String java_class = jso.getString("javaClass");
 	if(java_class == null)
 	    throw new UnmarshallException("no type hint");	
-	if(!(java_class.equals("java.util.AbstractSet") ||
-	     java_class.equals("java.util.LinkedHashSet") ||
-	     java_class.equals("java.util.TreeSet") ||
-	     java_class.equals("java.util.HashSet")))
-	    throw new UnmarshallException("not an AbstractSet");
-	JSONObject jsonset = jso.getJSONObject("set");
-	if(jsonset == null)
-	    throw new UnmarshallException("set missing");
+	if(!(java_class.equals("java.util.Date")))
+	    throw new UnmarshallException("not a Date");
+	int time = jso.getInt("time");
 	return ObjectMatch.OKAY;
     }
 
@@ -65,40 +61,20 @@ class AbstractSetSerializer extends Serializer
 	String java_class = jso.getString("javaClass");
 	if(java_class == null)
 	    throw new UnmarshallException("no type hint");	
-	AbstractSet abset = null;
-	if(java_class.equals("java.util.AbstractSet") ||
-	   java_class.equals("java.util.HashSet")) {
-	    abset= new HashSet();
-	} else if(java_class.equals("java.util.TreeSet")) {
-	    abset= new TreeSet();
-	} else if(java_class.equals("java.util.LinkedHashSet")) {
-	    abset= new LinkedHashSet();
-	} else {
-	    throw new UnmarshallException("not an AbstractSet");
-	}
-	JSONObject jsonset = jso.getJSONObject("set");
-	Iterator i = jsonset.keys();
-	while(i.hasNext()) {
-	    abset.add((String)i.next());
-	}
-	return abset;
+	if(!(java_class.equals("java.util.Date")))
+	    throw new UnmarshallException("not a Date");
+	int time = jso.getInt("time");
+	return new Date((long)time * (long)1000);
     }
 
     public Object doMarshall(Object o)
 	throws MarshallException
     {
-	AbstractSet abset = (AbstractSet)o;
+	Date date = (Date)o;
 	JSONObject obj = new JSONObject();
-	JSONObject set = new JSONObject();
+	int time = (int)((long)date.getTime() / (long)1000);
 	obj.put("javaClass", o.getClass().getName());
-	obj.put("set", set);
-	Object key = null;
-	Iterator i = abset.iterator();
-	while(i.hasNext()) {
-	    key = i.next();
-	    // only support String keys
-	    set.put(key.toString(), 1);
-	}
+	obj.put("time", time);
 	return obj;
     }
 

@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: AbstractMapSerializer.java,v 1.2 2004/04/04 16:08:22 mclark Exp $
+ * $Id: MapSerializer.java,v 1.2 2004/12/10 08:11:02 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,19 +20,18 @@
 
 package com.metaparadigm.jsonrpc;
 
-import java.util.AbstractMap;
 import java.util.Map;
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.LinkedHashMap;
 import java.util.Iterator;
 import org.json.JSONObject;
 
-class AbstractMapSerializer extends Serializer
+class MapSerializer extends Serializer
 {
     private static Class[] _serializableClasses = new Class[]
-	{ AbstractMap.class, HashMap.class, TreeMap.class,
-	  LinkedHashMap.class };
+	{ Map.class, HashMap.class, TreeMap.class, LinkedHashMap.class };
 
     private static Class[] _JSONClasses = new Class[]
 	{ JSONObject.class };
@@ -40,6 +39,12 @@ class AbstractMapSerializer extends Serializer
     public Class[] getSerializableClasses() { return _serializableClasses; }
     public Class[] getJSONClasses() { return _JSONClasses; }
 
+    public boolean canSerialize(Class clazz, Class jsonClazz)
+    {
+	return (super.canSerialize(clazz, jsonClazz) ||
+		((jsonClazz == null || jsonClazz == JSONObject.class) &&
+		 Map.class.isAssignableFrom(clazz)));
+    }
 
     public ObjectMatch doTryToUnmarshall(Class clazz, Object o)
 	throws UnmarshallException
@@ -48,11 +53,12 @@ class AbstractMapSerializer extends Serializer
 	String java_class = jso.getString("javaClass");
 	if(java_class == null)
 	    throw new UnmarshallException("no type hint");	
-	if(!(java_class.equals("java.util.AbstractMap") ||
+	if(!(java_class.equals("java.util.Map") ||
+	     java_class.equals("java.util.AbstractMap") ||
 	     java_class.equals("java.util.LinkedHashMap") ||
 	     java_class.equals("java.util.TreeMap") ||
 	     java_class.equals("java.util.HashMap")))
-	    throw new UnmarshallException("not an AbstractMap");
+	    throw new UnmarshallException("not a Map");
 	JSONObject jsonmap = jso.getJSONObject("map");
 	if(jsonmap == null)
 	    throw new UnmarshallException("map missing");
@@ -79,7 +85,8 @@ class AbstractMapSerializer extends Serializer
 	if(java_class == null)
 	    throw new UnmarshallException("no type hint");	
 	AbstractMap abmap = null;
-	if(java_class.equals("java.util.AbstractMap") ||
+	if(java_class.equals("java.util.Map") ||
+	   java_class.equals("java.util.AbstractMap") ||
 	   java_class.equals("java.util.HashMap")) {
 	    abmap = new HashMap();
 	} else if(java_class.equals("java.util.TreeMap")) {
@@ -87,7 +94,7 @@ class AbstractMapSerializer extends Serializer
 	} else if(java_class.equals("java.util.LinkedHashMap")) {
 	    abmap = new LinkedHashMap();
 	} else {
-	    throw new UnmarshallException("not an AbstractSet");
+	    throw new UnmarshallException("not a Map");
 	}
 	JSONObject jsonmap = jso.getJSONObject("map");
 	if(jsonmap == null)
@@ -109,21 +116,21 @@ class AbstractMapSerializer extends Serializer
     public Object doMarshall(Object o)
 	throws MarshallException
     {
-	AbstractMap abmap = (AbstractMap)o;
+	Map map = (Map)o;
 	JSONObject obj = new JSONObject();
-	JSONObject map = new JSONObject();
+	JSONObject mapdata = new JSONObject();
 	obj.put("javaClass", o.getClass().getName());
-	obj.put("map", abmap);
+	obj.put("map", mapdata);
 	Object key = null;
 	Object val = null;
 	try {
-	    Iterator i = abmap.entrySet().iterator();
+	    Iterator i = map.entrySet().iterator();
 	    while(i.hasNext()) {
 		Map.Entry ent = (Map.Entry)i.next();
 		key = ent.getKey();
 		val = ent.getValue();
 		// only support String keys
-		abmap.put(key.toString(), marshall(val));
+		mapdata.put(key.toString(), marshall(val));
 	    }
 	} catch (MarshallException e) {
 	    throw new MarshallException

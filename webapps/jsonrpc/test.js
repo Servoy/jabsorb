@@ -5,16 +5,16 @@ var jsonserver = null;
 onLoad = function()
 {
     try {
-	jsonrpc = importModule("jsonrpc");
-	try {
-	    jsonserver = new jsonrpc.ServerProxy(jsonurl);
-	} catch(e) {
-	    reportException(e);
-	    throw "connection to jsonrpc server failed.";
-	}
+        jsonrpc = importModule("jsonrpc");
     } catch(e) {
 	reportException(e);
 	throw "importing of jsonrpc module failed.";
+    }
+    try {
+        jsonserver = new jsonrpc.ServerProxy(jsonurl);
+    } catch(e) {
+        reportException(e);
+        throw "connection to jsonrpc server failed.";
     }
 }
 
@@ -94,6 +94,18 @@ doBasicTests = function()
 	rslt = jsonserver.test.aVector();
 	txRslt.value += " returns " + rslt + "\n";
 
+	txRslt.value += "Calling test.aList()";
+	rslt = jsonserver.test.aList();
+	txRslt.value += " returns " + rslt + "\n";
+	
+	txRslt.value += "Calling test.aSet()";
+	rslt = jsonserver.test.aSet();
+	txRslt.value += " returns " + rslt + "\n";
+
+	txRslt.value += "Calling test.aBean()";
+	rslt = jsonserver.test.aBean();
+	txRslt.value += " returns " + rslt + "\n";
+
 	txRslt.value += "Calling test.aHashtable()";
 	rslt = jsonserver.test.aHashtable();
 	txRslt.value += " returns " + rslt + "\n";
@@ -149,7 +161,10 @@ doBasicTests = function()
 	txRslt.value += "Calling test.waggleToWiggle({bang: 'foo', baz: 9})";
 	rslt = jsonserver.test.waggleToWiggle({bang: 'foo', baz: 9});
 	txRslt.value += " returns " + rslt + "\n";
-
+	
+	txRslt.value += "Calling test.echoList([{\"list\":[20,21,22,23,24,25,26,27,28,29],\"javaClass\":\"java.util.Vector\"}])";
+	rslt = jsonserver.test.echoList({"list":[20,21,22,23,24,25,26,27,28,29],"javaClass":"java.util.Vector"});
+	txRslt.value += " returns " + rslt + "\n";
     } catch(e) {
 	var em;
 	if(e.toTraceString) {
@@ -157,7 +172,7 @@ doBasicTests = function()
 	}else{
 	    em = e.message;
 	}
-	txRslt.value = "Error trace: \n\n" + em;
+	txRslt.value += " caught exception: " + em;
     }
     return false;
 }

@@ -4,6 +4,9 @@ import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 public class Test
 {
@@ -76,6 +79,32 @@ public class Test
 	return v;
     }
 
+    public List aList()
+    {
+	List l = new Vector();
+	for(int i=20; i<30; i++) l.add(new Integer(i));
+	return l;
+    }
+
+    public Set aSet()
+    {
+    Set s = new HashSet();
+    for(int i=0; i<5; i++) s.add(new Integer(i));
+    return s;
+    }
+    
+    public BeanA aBean(){
+        BeanA beanA = new BeanA();
+        BeanB beanB = new BeanB();
+        
+        beanB.setBeanA(beanA);
+        beanB.setId(beanB.hashCode());
+        beanA.setBeanB(beanB);
+        beanA.setId(beanA.hashCode());
+        
+        return beanA;
+    }
+
     public Hashtable aHashtable()
     {
 	Hashtable ht = new Hashtable();
@@ -91,6 +120,10 @@ public class Test
     public String[] twice(String string)
     {
 	return new String[] { string, string };
+    }
+
+    public List echoList(List l) {
+        return l;
     }
 
     public byte[] echoByteArray(byte ba[]) {

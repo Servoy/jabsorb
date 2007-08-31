@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCBridge.java,v 1.8 2004/04/11 10:05:20 mclark Exp $
+ * $Id: JSONRPCBridge.java,v 1.14 2005/01/21 00:10:50 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -26,13 +26,10 @@ import java.util.HashMap;
 import java.util.StringTokenizer;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.InvocationTargetException;
-import java.beans.Introspector;
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.beans.BeanInfo;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
@@ -122,9 +119,10 @@ public class JSONRPCBridge
 	    registerSerializer(new BeanSerializer());
 	    registerSerializer(new ReferenceSerializer());
 	    registerSerializer(new DictionarySerializer());
-	    registerSerializer(new AbstractMapSerializer());
-	    registerSerializer(new AbstractSetSerializer());
-	    registerSerializer(new AbstractListSerializer());
+	    registerSerializer(new MapSerializer());
+	    registerSerializer(new SetSerializer());
+	    registerSerializer(new ListSerializer());
+	    registerSerializer(new DateSerializer());
 	    registerSerializer(new StringSerializer());
 	    registerSerializer(new NumberSerializer());
 	    registerSerializer(new BooleanSerializer());
@@ -308,6 +306,13 @@ public class JSONRPCBridge
 
     private Serializer getSerializer(Class clazz, Class jsoClazz)
     {
+	if(debug)
+	    System.out.println
+		("JSONRPCBridge.getSerializer java:" +
+		 (clazz == null ? "null" : clazz.getName()) +
+		 " json:" +
+		 (jsoClazz == null ? "null" : jsoClazz.getName()));
+
 	Serializer ser = null;
 	synchronized (serializerSet) {
 	    ser = (Serializer)serializableMap.get(clazz);
@@ -614,23 +619,18 @@ public class JSONRPCBridge
     private Class getClassFromHint(Object o)
 	throws UnmarshallException
     {
-	if((o instanceof Number) || (o instanceof String))
-	    return o.getClass();
-
+	if(o == null) return null;
 	if(o instanceof JSONObject) {
-	    String class_name = ((JSONObject)o).getString("javaClass");
-	    if(class_name != null) {
-		Class clazz = null;
-		try {
-		    clazz = Class.forName(class_name);
-		} catch (Exception e) {}
-		if(clazz == null)
-		    throw new UnmarshallException("class in hint not found");
+	    try {
+		String class_name = ((JSONObject)o).getString("javaClass");
+		Class clazz = Class.forName(class_name);
 		return clazz;
+	    } catch (NoSuchElementException e) {
+	    } catch (Exception e) {
+		throw new UnmarshallException("class in hint not found");
 	    }
 	}
-
-	throw new UnmarshallException("no class hint");
+	return o.getClass();
     }
 
     protected ObjectMatch tryToUnmarshall(Class clazz, Object jso)
@@ -638,8 +638,8 @@ public class JSONRPCBridge
     {
 	if(clazz == null)
 	    clazz = getClassFromHint(jso);
-	if(clazz.isInterface()) 
-	    throw new UnmarshallException("can't marshall interface");
+	if(clazz == null)
+	    throw new UnmarshallException("no class hint");
 	if(jso == null) {
 	    if(!clazz.isPrimitive())
 		return ObjectMatch.NULL;
@@ -677,8 +677,8 @@ public class JSONRPCBridge
     {
 	if(clazz == null)
 	    clazz = getClassFromHint(jso);
-	if(clazz.isInterface()) 
-	    throw new UnmarshallException("can't marshall interface");
+	if(clazz == null)
+	    throw new UnmarshallException("no class hint");
 	if(jso == null) {
 	    if(!clazz.isPrimitive())
 		return ObjectMatch.NULL;
@@ -707,18 +707,25 @@ public class JSONRPCBridge
 	}
 	return javaArgs;
     }
-
+    
+    protected boolean isMarshalledObjectNull(Object o){
+        boolean isNull = o == null;
+        
+        if(debug){
+            if(isNull){
+                System.out.println("JSONRPCBridge.marshall null");
+            } else{
+                System.out.println("JSONRPCBridge.marshall class " +
+                           o.getClass().getName());
+            }
+        }
+        return isNull;
+    }
 
     protected Object marshall(Object o)
 	throws MarshallException
     {
-	if(debug)
-	    if(o == null)
-		System.out.println("JSONRPCBridge.marshall null");
-	    else
-		System.out.println("JSONRPCBridge.marshall class " +
-				   o.getClass().getName());
-	if (o == null) return o;
+	if (isMarshalledObjectNull(o)) return o;
 	Serializer ser = getSerializer(o.getClass(), null);
 	if(ser != null) return ser.doMarshall(o);
 	throw new MarshallException("can't marshall " +

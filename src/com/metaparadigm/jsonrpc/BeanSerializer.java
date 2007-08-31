@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: BeanSerializer.java,v 1.2 2004/04/04 16:08:22 mclark Exp $
+ * $Id: BeanSerializer.java,v 1.4 2005/01/21 00:10:50 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -21,27 +21,21 @@
 package com.metaparadigm.jsonrpc;
 
 import java.util.Map;
-import java.util.HashSet;
 import java.util.HashMap;
-import java.util.StringTokenizer;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.io.CharArrayWriter;
-import java.io.PrintWriter;
-import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.InvocationTargetException;
 import java.beans.Introspector;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.beans.BeanInfo;
 import org.json.JSONObject;
-import org.json.JSONArray;
 
 class BeanSerializer extends Serializer
 {
     private static HashMap beanCache = new HashMap();
+    private HashSet associationCache = new HashSet();
 
     public boolean canSerialize(Class clazz, Class jsonClazz)
     {
@@ -209,6 +203,7 @@ class BeanSerializer extends Serializer
 	    throw new MarshallException
 		(o.getClass().getName() + " is not a bean");
 	}
+    
 	JSONObject val = new JSONObject();
 	val.put("javaClass", o.getClass().getName());
 	Iterator i = bd.readableProps.entrySet().iterator();
@@ -229,10 +224,11 @@ class BeanSerializer extends Serializer
 		    e = ((InvocationTargetException)e).
 			getTargetException();
 		throw new MarshallException
-		    ("bean " + o.getClass().getName() + "can't invoke " +
+		    ("bean " + o.getClass().getName() + " can't invoke " +
 		     getMethod.getName() + ": " + e.getMessage());
 	    }
 	    try {
+        associationCache.add(new Integer(o.hashCode()));
 		val.put(prop, marshall(result));
 	    } catch (MarshallException e) {
 		throw new MarshallException
@@ -241,5 +237,19 @@ class BeanSerializer extends Serializer
 	}
 	return val;
     }
-
+    
+    public Object marshall(Object o) throws MarshallException{
+        if(isMarshalledObjectNull(o)){
+            return o;
+        }
+        
+        if(associationCache.contains(new Integer(o.hashCode()))){
+            return o.toString();
+        }
+        associationCache.add(new Integer(o.hashCode()));
+        
+        Object result = super.marshall(o);
+        associationCache.remove(new Integer(o.hashCode()));
+        return result;
+    }
 }
