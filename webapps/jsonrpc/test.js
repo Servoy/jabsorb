@@ -1,77 +1,55 @@
 var jsonurl = "/jsonrpc/JSON-RPC";
-var jsonrpc = null;
 var jsonserver = null;
+
+var evalStr;
+var txRslt;
 
 onLoad = function()
 {
+    evalStr = document.getElementById("txEval").value;     
+    txRslt = document.getElementById("txResult");
+
     try {
-        jsonrpc = importModule("jsonrpc");
+	jsonserver = new JSONRpcClient(jsonurl);
     } catch(e) {
-	reportException(e);
-	throw "importing of jsonrpc module failed.";
-    }
-    try {
-        jsonserver = new jsonrpc.ServerProxy(jsonurl);
-    } catch(e) {
-        reportException(e);
-        throw "connection to jsonrpc server failed.";
+	alert(e);
     }
 }
 
 doEval = function()
 {
-    var evalStr = document.getElementById("txEval").value;     
-    var txRslt = document.getElementById("txResult");
     txRslt.value = "Evaluating " + evalStr + "\n\n";
-
-    var rslt;
 
     try {
 
-	rslt = eval(evalStr);
+	var rslt = eval(evalStr);
 	txRslt.value += "" + rslt;
 
     } catch(e) {
-	var em;
-	if(e.toTraceString) {
-	    em = e.toTraceString();
-	}else{
-	    em = e.message;
-	}
-	txRslt.value = "Error trace: \n\n" + em;
+	txRslt.value = "Error trace: \n\n" + e;
     }
     return false;
 }
 
 doListMethods = function()
 {
-    var txRslt = document.getElementById("txResult");
     txRslt.value = "Calling system.listMethods()\n\n";
-
-    var rslt;
 
     try {
 
-	rslt = jsonserver.system.listMethods();
+	var rslt = jsonserver.system.listMethods();
 	for(var i=0; i < rslt.length; i++) {
 	    txRslt.value += rslt[i] + "\n";
 	}
 
     } catch(e) {
-	var em;
-	if(e.toTraceString) {
-	    em = e.toTraceString();
-	}else{
-	    em = e.message;
-	}
-	txRslt.value = "Error trace: \n\n" + em;
+	txRslt.value = "Error trace: \n\n" + e;
     }
     return false;
 }
 
 doBasicTests = function()
 {
-    var txRslt = document.getElementById("txResult");
     txRslt.value = "Running tests\n\n";
 
     var rslt;
@@ -165,21 +143,15 @@ doBasicTests = function()
 	txRslt.value += "Calling test.echoList([{\"list\":[20,21,22,23,24,25,26,27,28,29],\"javaClass\":\"java.util.Vector\"}])";
 	rslt = jsonserver.test.echoList({"list":[20,21,22,23,24,25,26,27,28,29],"javaClass":"java.util.Vector"});
 	txRslt.value += " returns " + rslt + "\n";
+
     } catch(e) {
-	var em;
-	if(e.toTraceString) {
-	    em = e.toTraceString();
-	}else{
-	    em = e.message;
-	}
-	txRslt.value += " caught exception: " + em;
+	txRslt.value += " caught exception: " + e;
     }
     return false;
 }
 
 doReferenceTests = function()
 {
-    var txRslt = document.getElementById("txResult");
     txRslt.value = "Running Reference Tests\n\n";
 
     var rslt;
@@ -207,67 +179,40 @@ doReferenceTests = function()
 	txRslt.value += "returns \"" + rslt + "\"\n\n";
 
     } catch(e) {
-	var em;
-	if(e.toTraceString) {
-	    em = e.toTraceString();
-	}else{
-	    em = e.message;
-	}
-	txRslt.value += "\n" + em + "\n";
+	txRslt.value += "\n" + e + "\n";
     }
     return false;
 }
 
 doContainerTests = function()
 {
-    var txRslt = document.getElementById("txResult");
     txRslt.value = "Running Container tests\n\n";
-
-    var rslt;
-    var wigArrayList;
 
     try {
 
 	txRslt.value += "wigArrayList = test.aWiggleArrayList(2)\n";
-	wigArrayList = jsonserver.test.aWiggleArrayList(2);
+	var wigArrayList = jsonserver.test.aWiggleArrayList(2);
 	txRslt.value += "returns " + wigArrayList + "\n\n";
 
 	txRslt.value += "test.aWiggleArrayList(wigArrayList)\n";
-	rslt = jsonserver.test.wigOrWag(wigArrayList);
+	var rslt = jsonserver.test.wigOrWag(wigArrayList);
 	txRslt.value += "returns \"" + rslt + "\"\n\n";
 
     } catch(e) {
-	var em;
-	if(e.toTraceString) {
-	    em = e.toTraceString();
-	}else{
-	    em = e.message;
-	}
-	txRslt.value += "\n" + em + "\n";
+	txRslt.value += "\n" + e + "\n";
     }
     return false;
 }
 
 doExceptionTest = function()
 {
-    var txRslt = document.getElementById("txResult");
     txRslt.value = "Running Exception test\n\n";
 
-    var rslt;
-
     try {
-
 	txRslt.value = "Calling test.fark()\n\n";
-	rslt = jsonserver.test.fark();
-
+	jsonserver.test.fark();
     } catch(e) {
-	var em;
-	if(e.toTraceString) {
-	    em = e.toTraceString();
-	}else{
-	    em = e.message;
-	}
-	txRslt.value += em;
+	txRslt.value += e;
     }
     return false;
 }

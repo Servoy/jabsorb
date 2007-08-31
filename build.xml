@@ -1,6 +1,6 @@
 <project name="json" default="dist" basedir=".">
 
-  <property name="tomcat" location="/opt/jakarta-tomcat-5.0.19"/>
+  <property name="tomcat" location="../jakarta-tomcat-5.0.19"/>
   <path id="myclasspath">
     <fileset dir="${tomcat}/common/lib"><include name="**/*.jar"/></fileset>
     <fileset dir="${tomcat}/bin"><include name="**/*.jar"/></fileset>
@@ -51,6 +51,7 @@
           tofile="${webapp}/Test.java.txt"/>
     <copy file="${webapp}/test.jsp" tofile="${webapp}/test.jsp.xml"/>
     <copy file="${webapp}/test.js" tofile="${webapp}/test.js.txt"/>
+    <copy file="${webapp}/jsonrpc.js" tofile="${webapp}/jsonrpc.js.txt"/>
     <copy file="${webinf}/web.xml" tofile="${webinf}/web.xml.out"/>
     <loadfile property="generated_web.xml" 
               srcFile="${webapp}/WEB-INF/web.xml.generated"/>

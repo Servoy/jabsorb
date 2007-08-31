@@ -1,6 +1,6 @@
 body { 
   margin-top: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
   margin-left: 40px;
   margin-right: 40px; 
   font-family: Arial, Helvetica, sans-serif;
@@ -43,21 +43,23 @@ h1 {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 24px;
   color: #005159;
-  margin-bottom: 8px;
   margin-top: 16px;
+  margin-bottom: 8px;
 }
 
 h2 {
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   color: #005159;
-  margin-bottom: 8px;
   margin-top: 16px;
+  margin-bottom: 8px;
 }
 
 h3 {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 12px;
+  margin-top: 16px;
+  margin-bottom: 8px;
 }
 
 h4 {
@@ -67,7 +69,6 @@ h4 {
 
 em { 
   font-style: oblique;
-  color: #7b1018;
 }
 
 pre { 
@@ -88,13 +89,17 @@ pre {
   margin-bottom: 12px;
 }
 
+.menu {
+  text-align: left;
+}
+
 .copyright {
   text-align: right;
 }
 
 .info-block { 
   border: 1px solid black;
-  margin-top: 16px;
+  margin-top: 8px;
   margin-bottom: 16px;
   margin-left: 24px;
   margin-right: 24px; 
@@ -114,5 +119,34 @@ pre {
   padding: 12px;
   background: #e8e8e8;
   font-family: Courier;
+  font-size: 12px;
+}
+
+.browser-outer { 
+  margin-top: 8px;
+  margin-bottom: 16px;
+  margin-left: 24px;
+  margin-right: 24px; 
+}
+
+.browser-table {
+  border-collapse: collapse;
+  margin: 0px;
+}
+
+.browser-cell-title {
+  background: #fff8d8;
+  border: 1px solid black;
+  padding: 6px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.browser-cell {
+  background: #e8e8e8;
+  border: 1px solid black;
+  padding: 6px;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 12px;
 }
