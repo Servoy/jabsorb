@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCBridge.java,v 1.6 2004/04/04 16:08:22 mclark Exp $
+ * $Id: JSONRPCBridge.java,v 1.8 2004/04/11 10:05:20 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -26,8 +26,6 @@ import java.util.HashMap;
 import java.util.StringTokenizer;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.io.CharArrayWriter;
-import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.InvocationTargetException;
@@ -100,6 +98,8 @@ public class JSONRPCBridge
     private HashMap objectMap = new HashMap();
     // key Integer hashcode, object held as reference
     protected HashMap referenceMap = new HashMap();
+    // key JSONRPCCallback
+    private HashSet callbackSet = new HashSet();
 
     // key clazz, classes that should be returned as References
     protected HashSet referenceSet = new HashSet();
@@ -127,6 +127,7 @@ public class JSONRPCBridge
 	    registerSerializer(new AbstractListSerializer());
 	    registerSerializer(new StringSerializer());
 	    registerSerializer(new NumberSerializer());
+	    registerSerializer(new BooleanSerializer());
 	    registerSerializer(new PrimitiveSerializer());
 	} catch (Exception e) {
 	    e.printStackTrace();
@@ -291,8 +292,9 @@ public class JSONRPCBridge
 			 classes[i].getName());
 	    }
 	    if(!serializerSet.contains(ser)) {
-		System.out.println("JSONRPCBridge.registerSerializer " +
-				   ser.getClass().getName());
+		if(debug)
+		    System.out.println("JSONRPCBridge.registerSerializer " +
+				       ser.getClass().getName());
 		for(int i=0; i < classes.length; i++) {
 		    serializableMap.put(classes[i], ser);
 		}
@@ -502,6 +504,24 @@ public class JSONRPCBridge
     }
 
 
+    /**
+     * Registers a callback to be called before and after method invocation
+     *
+     *
+     * @param callback The object implementing the JSONRPCCallback Interface
+     */
+    public void registerCallback(JSONRPCCallback callback)
+    {
+	synchronized (callbackSet) {
+	    callbackSet.add(callback);
+	}
+	if(debug)
+	    System.out.println
+		("JSONRPCBridge.registerCallback " +
+		 callback.getClass().getName());
+    }
+
+
     private Method resolveMethod(HashMap methodMap, String methodName,
 				JSONArray arguments)
     {
@@ -693,8 +713,11 @@ public class JSONRPCBridge
 	throws MarshallException
     {
 	if(debug)
-	    System.out.println("JSONRPCBridge.marshall class " +
-			       o.getClass().getName());
+	    if(o == null)
+		System.out.println("JSONRPCBridge.marshall null");
+	    else
+		System.out.println("JSONRPCBridge.marshall class " +
+				   o.getClass().getName());
 	if (o == null) return o;
 	Serializer ser = getSerializer(o.getClass(), null);
 	if(ser != null) return ser.doMarshall(o);
@@ -702,8 +725,34 @@ public class JSONRPCBridge
 				    o.getClass().getName());
     }
 
+    private void preInvokeCallback(Object context, Object instance,
+				   Method m, Object arguments[])
+	throws Exception
+    {
+	synchronized (callbackSet) {
+	    Iterator i = callbackSet.iterator();
+	    while(i.hasNext()) {
+		JSONRPCCallback callback = (JSONRPCCallback)i.next();
+		callback.preInvoke(context, instance, m, arguments);
+	    }
+	}
+    }
 
-    protected JSONRPCResult call(int object_id, String classDotMethod,
+    private void postInvokeCallback(Object context, Object instance,
+				    Method m, Object result)
+	throws Exception
+    {
+	synchronized (callbackSet) {
+	    Iterator i = callbackSet.iterator();
+	    while(i.hasNext()) {
+		JSONRPCCallback callback = (JSONRPCCallback)i.next();
+		callback.postInvoke(context, instance, m, result);
+	    }
+	}
+    }    
+
+    protected JSONRPCResult call(Object context,
+				 int object_id, String classDotMethod,
 				 JSONArray arguments)
     {
 	// Parse the class and methodName
@@ -771,7 +820,9 @@ public class JSONRPCBridge
 		     method.getReturnType().getName() + " " +
 		     method.getName() + "(" + argSignature(method) + ")");
 	    Object javaArgs[] = unmarshallArgs(method, arguments);
+	    preInvokeCallback(context, itsThis, method, javaArgs);
 	    Object o = method.invoke(itsThis, javaArgs);
+	    postInvokeCallback(context, itsThis, method, o);
 	    result = new JSONRPCResult(JSONRPCResult.CODE_SUCCESS,
 				       marshall(o));
 	} catch (UnmarshallException e) {
@@ -783,10 +834,7 @@ public class JSONRPCBridge
 	} catch (Throwable e) {
 	    if(e instanceof InvocationTargetException)
 		e = ((InvocationTargetException)e).getTargetException();
-	    CharArrayWriter caw = new CharArrayWriter();
-	    e.printStackTrace(new PrintWriter(caw));
-	    result = new JSONRPCResult(JSONRPCResult.CODE_EXCEPTION,
-				       "Java Exception: " + caw.toString());
+	    result = new JSONRPCResult(JSONRPCResult.CODE_EXCEPTION, e);
 	}
 
 	// Return the results

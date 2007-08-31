@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCResult.java,v 1.1.1.1 2004/03/31 14:21:00 mclark Exp $
+ * $Id: JSONRPCResult.java,v 1.2 2004/04/11 10:05:20 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,6 +20,8 @@
 
 package com.metaparadigm.jsonrpc;
 
+import java.io.CharArrayWriter;
+import java.io.PrintWriter;
 import org.json.JSONObject;
 
 class JSONRPCResult {
@@ -50,6 +52,15 @@ class JSONRPCResult {
 	JSONObject o = new JSONObject();
 	if(errorCode == CODE_SUCCESS) {
 	    o.put("result", result);
+	} else if (errorCode == CODE_EXCEPTION) {
+	    Exception e = (Exception)result;
+	    CharArrayWriter caw = new CharArrayWriter();
+	    e.printStackTrace(new PrintWriter(caw));
+	    JSONObject err = new JSONObject();
+	    err.put("code", new Integer(errorCode));
+	    err.put("msg", e.getMessage());
+	    err.put("trace", caw.toString());
+	    o.put("error", err);
 	} else {
 	    JSONObject err = new JSONObject();
 	    err.put("code", new Integer(errorCode));

@@ -126,7 +126,7 @@ Module("jsonrpc", "0.1.4", function(thisMod){
                 }else{
                     var o = thisMod.unmarshall(respTxt);
                     // Handle CallableProxy
-                    if(o.objectID && o.JSONRPCType == "CallableReference") {
+                    if(o && o.objectID && o.JSONRPCType == "CallableReference") {
                         var callableRef = new thisMod.ServerProxy(self.url, self.user, self.pass, o.objectID);
                         return callableRef;
                     }
@@ -267,13 +267,7 @@ Module("jsonrpc", "0.1.4", function(thisMod){
             this.password = pass;
             this.objectID = objectID;
             this.add(methodNames);
-            if(tryIntrospection){
-                try{//it's ok if it fails.
-                    this.introspect();
-                }catch(e){
-		    reportException(e);
-                }
-            }
+            if(tryIntrospection) this.introspect();
         }
         
         /**

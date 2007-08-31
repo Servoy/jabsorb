@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: ArraySerializer.java,v 1.1.1.1 2004/03/31 14:21:00 mclark Exp $
+ * $Id: ArraySerializer.java,v 1.2 2004/04/09 06:32:37 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -28,9 +28,10 @@ class ArraySerializer extends Serializer
 {
     private static Class[] _serializableClasses = new Class[]
 	{ int[].class, short[].class, long[].class,
-	  float[].class, double[].class, String[].class,
+	  float[].class, double[].class, boolean[].class,
 	  Integer[].class, Short[].class, Long[].class,
-	  Float[].class, Double[].class };
+	  Float[].class, Double[].class, Boolean[].class,
+	  String[].class };
 
     private static Class[] _JSONClasses = new Class[]
 	{ JSONArray.class };
@@ -107,6 +108,11 @@ class ArraySerializer extends Serializer
 		for(; i< jso.length(); i++)
 		    arr[i] = ((String)unmarshall(cc, jso.get(i))).charAt(0);
 		return (Object)arr;
+	    } else if (clazz == boolean[].class) {
+		boolean arr[] = new boolean[jso.length()];
+		for(; i< jso.length(); i++)
+		    arr[i] = ((Boolean)unmarshall(cc, jso.get(i))).booleanValue();
+		return (Object)arr;
 	    } else {
 		Object arr[] = (Object[])Array.newInstance
 		    (clazz.getComponentType(), jso.length());
@@ -144,6 +150,9 @@ class ArraySerializer extends Serializer
 	    for(int i=0; i < a.length; i++) arr.put(a[i]);
 	} else if(o instanceof char[]) {
 	    char a[] = (char[])o;
+	    for(int i=0; i < a.length; i++) arr.put(a[i]);
+	} else if(o instanceof boolean[]) {
+	    boolean a[] = (boolean[])o;
 	    for(int i=0; i < a.length; i++) arr.put(a[i]);
 	} else if(o instanceof Object[]) {
 	    Object a[] = (Object[])o;

@@ -78,6 +78,10 @@ doBasicTests = function()
 
     try {
 
+	txRslt.value += "Calling test.voidFunction()";
+	rslt = jsonserver.test.voidFunction();
+	txRslt.value += " returns " + rslt + "\n";
+
 	txRslt.value += "Calling test.anArray()";
 	rslt = jsonserver.test.anArray();
 	txRslt.value += " returns " + rslt + "\n";
@@ -108,6 +112,18 @@ doBasicTests = function()
 
 	txRslt.value += "Calling test.echoChar(\"c\")";
 	rslt = jsonserver.test.echoChar("c");
+	txRslt.value += " returns " + rslt + "\n";
+
+	txRslt.value += "Calling test.echoBoolean(true)";
+	rslt = jsonserver.test.echoBoolean(true);
+	txRslt.value += " returns " + rslt + "\n";
+
+	txRslt.value += "Calling test.echoBoolean(false)";
+	rslt = jsonserver.test.echoBoolean(false);
+	txRslt.value += " returns " + rslt + "\n";
+
+	txRslt.value += "Calling test.echoBooleanArray([true,false,true])";
+	rslt = jsonserver.test.echoBooleanArray([true,false,true]);
 	txRslt.value += " returns " + rslt + "\n";
 
 	txRslt.value += "Calling test.echo(\"a string\")";

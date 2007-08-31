@@ -50,6 +50,10 @@ public class Test
 	return callableRef;
     }
 
+    public void voidFunction()
+    {
+
+    }
 
     public int[] anArray()
     {
@@ -99,6 +103,14 @@ public class Test
 
     public char echoChar(char c) {
 	return c;
+    }
+
+    public boolean echoBoolean(boolean b) {
+	return b;
+    }
+
+    public boolean[] echoBooleanArray(boolean ba[]) {
+	return ba;
     }
 
     public String echo(String msg1, String msg2)

@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCServlet.java,v 1.4 2004/04/04 12:29:14 mclark Exp $
+ * $Id: JSONRPCServlet.java,v 1.5 2004/04/11 10:05:20 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -109,7 +109,8 @@ public class JSONRPCServlet extends HttpServlet
 		else
 		    System.out.println("JSONRPCServlet.service call " +
 				       methodName + "(" + arguments + ")");
-	    json_res = json_bridge.call(object_id, methodName, arguments);
+	    json_res = json_bridge.call(session,
+					object_id, methodName, arguments);
 	} catch (ParseException e) {
 	    System.err.println
 		("JSONRPCServlet.service can't parse call: " + data);

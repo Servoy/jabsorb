@@ -10,25 +10,26 @@
     </p>
     <hr />
     <h2>Introduction</h2>
-    <p>JSON-RPC-Java is a dynamic JSON-RPC to Java bridge that allows
-       you to transparently call server-side Java code from Javascript.
+    <p>JSON-RPC-Java is a dynamic JSON-RPC to Java ORB (Object Request Broker)
+       that allows you to transparently call server-side Java code from
+       Javascript.
     </p>
-    <p>There should be no changes necessary to your existing server-side Java
-       code to allow calling from JavaScript (such as marshalling and
-       unmarshalling of special types) as JSON-RPC-Java dynamically maps
-       JavaScript Objects to Java Objects by dynamic reflection on Java
-       method signatures and dynamic mapping between Java Objects and
-       JavaScript objects.
+    <p>There are minimal or zero changes necessary to your existing
+       server-side Java code to allow calling from JavaScript (such as
+       marshalling and unmarshalling of special types) as JSON-RPC-Java
+       dynamically maps JavaScript Objects to Java Objects by dynamic
+       reflection on Java method signatures and dynamic mapping between
+       Java Objects and JavaScript objects.
     </p>
     <p>It maps the loosely typed JavaScript objects to Java objects by
        reflecting on the Java method signatures and matching the fields of
-       JSON objects to Java primitive types, arrays and complex objects
-       such as Java Beans.
+       JSON objects to Java primitive types, arrays, generic collections and
+       complex objects such as Java Beans.
     </p>
     <p>It currently supports marshalling and unmarshalling of the following
        types:
        <ul>
-         <li>Primitive types (int, long, short, byte, char, float, double)</li>
+         <li>Primitive types (int, long, short, byte, boolean, char, float, double)</li>
          <li>Numbers (Float, Integer, etc...), Strings, Char and Byte arrays</li>
          <li>Java Beans (any Object with set and get methods)</li>
          <li>Arrays of primitive types, Strings, Numbers, Collections and Java Beans</li>
@@ -43,6 +44,16 @@
          </li>
          <li>Any arbitrary nested combination of the above</li>
        </ul></p>
+      <p>It has some advanced ORB (Object Request Broker) type functionality
+with an API to register Java classes as:
+       <ul>
+        <li>References - Objects of classes registered as References will be
+returned as opaque reference objects to JavaScript that when passed
+to succussive Java method calls will then be reassociated back to
+the original Java object (great for security sensitive objects).</li>
+         <li>Callable References - Object of classes registered as Callable References will return dynamic proxies to allow invocation on the particular object instance in the server-side Java. There are changes to the included jsolait json-rpc client for dynamic proxy creation support.</li>
+       </ul>
+      </p>
     <h2>Documentation</h2>
     <p>
      <ul>
@@ -71,7 +82,7 @@
     <h2>Download</h2>
     <p>JSON-RPC-Java is licensed under the <a href="http://www.gnu.org/licenses/lgpl.html">LGPL</a>. You can download the latest version here:
      <ul>
-       <li><a href="/jsonrpc-dist/json-rpc-java-0.3.tar.gz">json-rpc-java-0.3.tar.gz</a></li>
+       <li><a href="/jsonrpc-dist/json-rpc-java-0.4.tar.gz">json-rpc-java-0.4.tar.gz</a> (<a href="CHANGES.txt">Changelog</a>)</li>
      </ul>
     </p>
 
@@ -86,8 +97,8 @@ CVS password: &lt;enter '<b>anoncvs</b>'&gt;<br>
     <h2>Bugs and Limitations</h2>
     <p>
      <ul>
-      <li>Support is currently limited to Netscape 7, latest Safari, newer versions of Mozilla, and Internet Explorer 5 and up. The jsolait jsonrpc client library does not work on IE 5.1 for Mac, Netscape 6, Opera and Konqueror due to their lack of support for the XMLHttpRequest object.</li>
-      <li>Implementation of a Java Applet to provide synchronous communication on browsers with Java VM and Javascript to Java Bridge (Konqueror and Netscape 6) will extend the supported set of browsers. I currently have an experimental implementation of this (with changes to urllib in jsolait) which you can mail me if you're interested.</li>
+      <li>Support is currently limited to Netscape 7, Safari 1.2, newer versions of Mozilla, and Internet Explorer 5 and up. The jsolait jsonrpc client library does not work on IE 5.1 for Mac, Netscape 6, Opera and Konqueror due to their lack of support for the XMLHttpRequest object.</li>
+      <li>Implementation of a Java Applet to provide synchronous communication on browsers with Java VM and Javascript to Java Bridge (Konqueror and Netscape 6) will extend the supported set of browsers. I currently have an experimental implementation of this (with changes to urllib in jsolait) which you can mail for me if you're interested.</li>
      </ul>
     </p>
     <p>Please send bug reports to <a href="mailto:michael@metaparadigm.com">michael@metaparadigm.com</a></p>
@@ -95,7 +106,7 @@ CVS password: &lt;enter '<b>anoncvs</b>'&gt;<br>
     <h2>To do</h2>
     <p>
      <ul>
-       <li>Standardise method for invocation on unnamed object instances (those returned as CallableReferences). JSON-RPC-Java presently include a slightly modified version of the jsonrpc client from jsolait which handles unmarshalling of Callable References (automatic creation of ServerProxy object). It also adds an additional attribute <code>objectID</code> to the JSON-RPC protocol message for method calls on these unnamed object instances.</li>
+       <li>Standardise method for invocation on unnamed object instances (those returned as CallableReferences). JSON-RPC-Java presently includes a slightly modified version of the jsonrpc client from jsolait which handles unmarshalling of Callable References (automatic creation of ServerProxy object). It also adds an additional attribute <code>objectID</code> to the JSON-RPC protocol message to method calls on these unnamed object instances.</li>
        <li>Implement Java applet transport to support browsers where XmlHttpObject is not available.</li>
        <li>Testing, testing, testing.</li>
      </ul>
