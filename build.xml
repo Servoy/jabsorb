@@ -28,7 +28,7 @@
   </path>
   -->
 
-  <property name="version" value="cvs"/>
+  <property name="version" value="svn-trunk"/>
   <property name="jsonrpc-jar" value="jsonrpc-${version}.jar"/>
   <property name="jsonrpc-war" value="jsonrpc-${version}.war"/>
   <property name="src" location="src"/>
