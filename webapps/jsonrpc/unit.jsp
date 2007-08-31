@@ -3,6 +3,7 @@
 <%@
 page contentType="text/html; charset=UTF-8" %><%@
 page language="java" %><%@
+page import="com.metaparadigm.jsonrpc.JSONRPCBridge" %><%@
 page import="com.metaparadigm.jsonrpc.test.Test"
 %><jsp:useBean id="JSONRPCBridge" scope="session"
      class="com.metaparadigm.jsonrpc.JSONRPCBridge"
@@ -18,9 +19,10 @@ page import="com.metaparadigm.jsonrpc.test.Test"
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="css/site.css">
+    <link rel="stylesheet" type="text/css" href="css/unit.css">
     <script type="text/javascript" src="jsonrpc.js"></script>
-    <script type="text/javascript" src="test.js"></script>
-    <title>JSON-RPC-Java Tests</title>
+    <script type="text/javascript" src="unit.js"></script>
+    <title>JSON-RPC-Java Unit Tests</title>
    </head>
    <body bgcolor="#ffffff" onLoad="onLoad()">
 
@@ -29,44 +31,46 @@ page import="com.metaparadigm.jsonrpc.test.Test"
     <hr />
     <div class="menu"><a href="index.html">Home</a> | <a href="tutorial.html">Tutorial</a> | <a href="manual.html">Manual</a> | <a href="demos.html">Demos</a> | <a href="docs/">API Documentation</a> | <a href="http://oss.metaparadigm.com/mailman/listinfo/json-rpc-java">Mailing List</a> | <a href="CHANGES.txt">Changelog</a></div>
 
-    <h2>JSON-RPC-Java Tests</h2>
+    <h2>JSON-RPC-Java Unit Tests</h2>
 
-    <table cellpadding="2" cellspacing="0" border="0">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%">
       <tr>
-        <td valign="top">Eval:</td>
-        <td colspan="6">
-          <input type="text" id="eval" size="80"
-	       value="jsonrpc.test.echo({bang: 'foo', baz: 9})" />
+        <td align="left">
+          <input type="button" value="Run Tests" onclick="runTests()" />
         </td>
-      </tr>
+        <td align="right">
+          (
+          <input type="checkbox" id="profile" />
+          Profile
+	  |
+          <input type="checkbox" id="async" checked />
+          Asynchronous
+          )
+          &nbsp;
+          Max parallel async requests
+          <input type="text" id="max_requests" value="8" size="2" />
+        </td> 
       <tr>
-        <td valign="top">Result:</td>
-        <td colspan="6">
-          <textarea wrap="off" id="result" cols="80" rows="26"></textarea>
-        </td>
-      </tr>
-      <tr>
-        <td></td>
-        <td><input type="button" value="Eval"
-                         onclick="doEval()" /></td>
-        <td><input type="button" value="List Methods"
-                         onclick="doListMethods()" /></td>
-	<td><input type="button" value="Basic Tests"
-                         onclick="doBasicTests()" /></td>
-	<td><input type="button" value="Reference Tests"
-                         onclick="doReferenceTests()" /></td>
-	<td><input type="button" value="Container Tests"
-                         onclick="doContainerTests()" /></td>
-	<td><input type="button" value="Exception Test"
-                         onclick="doExceptionTest()" /></td>
-      </tr>
+    </table>
+
+    <p></p>
+
+    <table class="test_table">
+      <thead>
+       <tr>
+        <th class="test_th" width="260"><div class="code_heading">Code</div></th>
+        <th class="test_th" width="100%"><div class="result_heading">Result</div></th>
+        <th class="test_th" width="32"><div class="pass_heading">Pass</div></th>
+       </tr>
+      </thead>
+      <tbody id="tests"></tbody>
     </table>
 
     <br>
     <hr>
     <table cellpadding="0" cellspacing="0" border="0" width="100%">
       <tr>
-	<td><code>$Id: test.jsp,v 1.31 2005/02/13 01:26:47 mclark Exp $</code></td>
+	<td><code>$Id: unit.jsp,v 1.3 2005/02/13 01:26:47 mclark Exp $</code></td>
 	<td><div class="copyright">Copyright 2005 <a href="http://www.metaparadigm.com/">Metaparadigm Pte Ltd</a></div></td>
       </tr>
     </table>

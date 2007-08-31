@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCServlet.java,v 1.5 2004/04/11 10:05:20 mclark Exp $
+ * $Id: JSONRPCServlet.java,v 1.12 2005/02/11 09:41:49 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -27,6 +27,7 @@ import java.io.OutputStreamWriter;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.io.CharArrayWriter;
+import java.util.NoSuchElementException;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -66,21 +67,6 @@ public class JSONRPCServlet extends HttpServlet
 			HttpServletResponse response)
 	throws IOException, ClassCastException
     {
-	response.setContentType("text/plain");
-
-	BufferedReader in = new BufferedReader
-	    (new InputStreamReader(request.getInputStream()));
-	PrintWriter out = new PrintWriter
-	    (new OutputStreamWriter(response.getOutputStream()));
-
-	// Read the request
-        CharArrayWriter data = new CharArrayWriter();
-        char buf[] = new char[buf_size];
-        int ret;
-        while((ret = in.read(buf, 0, buf_size)) != -1) {
-            data.write(buf, 0, ret);
-        }
-
 	// Find the JSONRPCBridge for this session or create one
 	// if it doesn't exist
 	HttpSession session = request.getSession();
@@ -92,13 +78,60 @@ public class JSONRPCServlet extends HttpServlet
 	    session.setAttribute("JSONRPCBridge", json_bridge);
 	}
 
+	// Encode using UTF-8, although We are actually ASCII clean as
+	// all unicode data is JSON escaped using backslash u. This is
+	// less data efficient for foreign character sets but it is
+	// needed to support naughty browsers such as Konqueror and Safari
+	// which do not honour the charset set in the response
+	response.setContentType("text/plain;charset=utf-8");
+	OutputStream out = response.getOutputStream();
+
+	// Decode using the charset in the request if it exists otherwise
+	// use UTF-8 as this is what all browser implementations use.
+	// The JSON-RPC-Java JavaScript client is ASCII clean so it
+	// although here we can correctly handle data from other clients
+	// that do not escape non ASCII data
+	String charset = request.getCharacterEncoding();
+	if(charset == null) charset = "UTF-8";
+	BufferedReader in = new BufferedReader
+	    (new InputStreamReader(request.getInputStream(), charset));
+
+	// Read the request
+        CharArrayWriter data = new CharArrayWriter();
+        char buf[] = new char[buf_size];
+        int ret;
+        while((ret = in.read(buf, 0, buf_size)) != -1) {
+            data.write(buf, 0, ret);
+        }
+
+	if(json_bridge.isDebug())
+	    System.out.println("JSONRPCServlet.service recv: " +
+			       data.toString());
+
 	// Process the request
 	JSONObject json_req = null;
 	Object json_res = null;
 	try {
 	    json_req = new JSONObject(data.toString());
-	    String methodName = (String)json_req.getString("methodName");
-	    JSONArray arguments = json_req.getJSONArray("arguments");
+
+	    // Get method name and arguments
+	    String methodName = null;
+	    JSONArray arguments = null;
+
+	    try { methodName = json_req.getString("method");
+	    } catch (NoSuchElementException ne) {}
+
+	    // Back compatibility for <= 0.7 clients
+	    if (methodName != null) {
+		arguments = json_req.getJSONArray("params");
+	    } else {
+		methodName = json_req.getString("methodName");
+		arguments = json_req.getJSONArray("arguments");
+		System.err.println("JSONRPCServlet.service: " +
+				   "methodName in request deprecated, " +
+				   "please update your JSON-RPC client.");
+	    }
+
 	    // Is this a CallableReference it will have a non-zero objectID
 	    int object_id = json_req.optInt("objectID");
 	    if(json_bridge.isDebug())
@@ -115,13 +148,21 @@ public class JSONRPCServlet extends HttpServlet
 	    System.err.println
 		("JSONRPCServlet.service can't parse call: " + data);
 	    json_res = JSONRPCResult.ERR_PARSE;
+	} catch (NoSuchElementException e) {
+	    System.err.println
+		("JSONRPCServlet.service no method in request");
+	    json_res = JSONRPCResult.ERR_NOMETHOD;
 	}
 
 	// Write the response
 	if(json_bridge.isDebug())
-	    System.out.println("JSONRPCServlet.service returns " +
+	    System.out.println("JSONRPCServlet.service send: " +
 			       json_res.toString());
-	out.print(json_res.toString());
+	byte[] bout = json_res.toString().getBytes("UTF-8");
+	response.setIntHeader("Content-Length", bout.length);
+	response.setHeader("Connection", "keep-alive");
+
+	out.write(bout);
 	out.flush();
 	out.close();
     }

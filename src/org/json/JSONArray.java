@@ -593,7 +593,7 @@ public class JSONArray {
         } else if (value == null) {
             throw new NullPointerException();
         } else if (index < length()) {
-            myArrayList.add(index, value);
+            myArrayList.set(index, value);
         } else {
             while (index != length()) {
                 put(null);

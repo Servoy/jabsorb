@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: NumberSerializer.java,v 1.1.1.1 2004/03/31 14:21:01 mclark Exp $
+ * $Id: NumberSerializer.java,v 1.2 2005/02/08 00:10:46 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -43,7 +43,20 @@ class NumberSerializer extends Serializer
     public Object doUnmarshall(Class clazz, Object jso)
 	throws UnmarshallException
     {
-	return jso;
+	if(clazz == Integer.class) {
+	    return new Integer(((Number)jso).intValue());
+	} else  if(clazz == Long.class) {
+	    return new Long(((Number)jso).longValue());
+	} else  if(clazz == Short.class) {
+	    return new Short(((Number)jso).shortValue());
+	} else  if(clazz == Byte.class) {
+	    return new Byte(((Number)jso).byteValue());
+	} else  if(clazz == Float.class) {
+	    return new Float(((Number)jso).floatValue());
+	} else  if(clazz == Double.class) {
+	    return new Double(((Number)jso).doubleValue());
+	}
+	return null;
     }
 
     public Object doMarshall(Object o)

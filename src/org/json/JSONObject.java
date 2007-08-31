@@ -60,7 +60,7 @@ public class JSONObject {
 
         /**
          * There is only intended to be a single instance of the NULL object,
-         * so this method returns itself.
+         * so the clone method returns itself.
          * @return     NULL.
          */
         protected final Object clone() {
@@ -356,16 +356,6 @@ public class JSONObject {
 
 
     /**
-     * Get an enumeration of the keys of the JSONObject.
-     *
-     * @return An iterator of the keys.
-     */
-    public Iterator keys() {
-        return myHashMap.keySet().iterator();
-    }
-
-
-    /**
      * Determine if the value associated with the key is null or if there is
      *  no value.
      * @param key   A key string.
@@ -374,6 +364,16 @@ public class JSONObject {
      */
     public boolean isNull(String key) {
         return JSONObject.NULL.equals(opt(key));
+    }
+
+
+    /**
+     * Get an enumeration of the keys of the JSONObject.
+     *
+     * @return An iterator of the keys.
+     */
+    public Iterator keys() {
+        return myHashMap.keySet().iterator();
     }
 
 
@@ -413,8 +413,11 @@ public class JSONObject {
      * @return A String.
      */
     static public String numberToString(Number n) throws ArithmeticException {
-        if ((n instanceof Float || n instanceof Double) &&
-                (((Double)n).isInfinite() || ((Double)n).isNaN())) {
+        if (
+                (n instanceof Float &&
+                    (((Float)n).isInfinite() || ((Float)n).isNaN())) ||
+                (n instanceof Double &&
+                    (((Double)n).isInfinite() || ((Double)n).isNaN()))) {
             throw new ArithmeticException(
                 "JSON can only serialize finite numbers.");
         }
@@ -680,9 +683,9 @@ public class JSONObject {
             throw new NullPointerException("Null key.");
         }
         if (value != null) {
-        	myHashMap.put(key, value);
+            myHashMap.put(key, value);
         } else {
-        	remove(key);	
+            remove(key);
         }
         return this;
     }
@@ -729,7 +732,7 @@ public class JSONObject {
             switch (c) {
             case '\\':
             case '"':
-            case '>':
+            case '/':
                 sb.append('\\');
                 sb.append(c);
                 break;
@@ -749,7 +752,7 @@ public class JSONObject {
                 sb.append("\\r");
                 break;
             default:
-                if (c < ' ') {
+                if (c < ' ' || c >= 128) {
                     t = "000" + Integer.toHexString(c);
                     sb.append("\\u" + t.substring(t.length() - 4));
                 } else {
@@ -760,7 +763,7 @@ public class JSONObject {
         sb.append('"');
         return sb.toString();
     }
-    
+
     /**
      * Remove a name and its value, if present.
      * @param key The name to be removed.
@@ -768,7 +771,7 @@ public class JSONObject {
      * or null if there was no value.
      */
     public Object remove(String key) {
-    	return myHashMap.remove(key);	
+        return myHashMap.remove(key);
     }
 
     /**

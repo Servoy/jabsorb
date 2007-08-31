@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCBridge.java,v 1.14 2005/01/21 00:10:50 mclark Exp $
+ * $Id: JSONRPCBridge.java,v 1.19 2005/02/13 03:42:09 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -216,6 +216,7 @@ public class JSONRPCBridge
 	for(int i=0; i < methods.length; i++) {
 	    Method method = methods[i];
 	    int mod = methods[i].getModifiers();
+	    if(Modifier.isPrivate(mod)) continue;
 	    Class param[] = method.getParameterTypes();
 	    MethodKey mk = new MethodKey(method.getName(), param.length);
 	    ArrayList marr = (ArrayList)methodMap.get(mk);
@@ -841,7 +842,7 @@ public class JSONRPCBridge
 	} catch (Throwable e) {
 	    if(e instanceof InvocationTargetException)
 		e = ((InvocationTargetException)e).getTargetException();
-	    result = new JSONRPCResult(JSONRPCResult.CODE_EXCEPTION, e);
+	    result = new JSONRPCResult(JSONRPCResult.CODE_REMOTE_EXCEPTION, e);
 	}
 
 	// Return the results

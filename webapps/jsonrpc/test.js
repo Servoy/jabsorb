@@ -1,158 +1,164 @@
-var jsonurl = "/jsonrpc/JSON-RPC";
-var jsonserver = null;
+jsonurl = "/jsonrpc/JSON-RPC";
+jsonrpc = null;
 
-var evalStr;
-var txRslt;
 
-onLoad = function()
+function clrscr()
 {
-    evalStr = document.getElementById("txEval").value;     
-    txRslt = document.getElementById("txResult");
+    resultNode.value = "";
+}
+
+function print(s)
+{
+    resultNode.value += "" + s;
+    resultNode.scrollTop = resultNode.scrollHeight;
+}
+
+function onLoad()
+{
+    resultNode = document.getElementById("result");
 
     try {
-	jsonserver = new JSONRpcClient(jsonurl);
+	jsonrpc = new JSONRpcClient(jsonurl);
     } catch(e) {
-	alert(e);
+	if(e.message) alert(e.message);
+	else alert(e);
     }
 }
 
-doEval = function()
+function doEval()
 {
-    txRslt.value = "Evaluating " + evalStr + "\n\n";
+    clrscr();
+    evalStr = document.getElementById("eval").value;
+    print("Evaluating " + evalStr + "\n\n");
 
     try {
-
-	var rslt = eval(evalStr);
-	txRslt.value += "" + rslt;
-
+	print(eval(evalStr));
     } catch(e) {
-	txRslt.value = "Error trace: \n\n" + e;
+	print("Exception: \n\n" + e);
     }
     return false;
 }
 
-doListMethods = function()
+function doListMethods()
 {
-    txRslt.value = "Calling system.listMethods()\n\n";
+    clrscr();
+    print("Calling system.listMethods()\n\n");
 
     try {
 
-	var rslt = jsonserver.system.listMethods();
+	var rslt = jsonrpc.system.listMethods();
 	for(var i=0; i < rslt.length; i++) {
-	    txRslt.value += rslt[i] + "\n";
+	    print(rslt[i] + "\n");
 	}
 
     } catch(e) {
-	txRslt.value = "Error trace: \n\n" + e;
+	print("Exception: \n\n" + e);
     }
     return false;
 }
 
-doBasicTests = function()
+function doBasicTests()
 {
-    txRslt.value = "Running tests\n\n";
+    clrscr();
+    print("Running tests\n\n");
 
-    var rslt;
+    // Some test data
+    var bools = [true,false,true];
+    var waggle = { bang: "foo", baz: 9 };
+    var wiggle = { foo: "bang", bar: 11 };
+    var list = {"list":[20,21,22,23,24,25,26,27,28,29],
+		"javaClass":"java.util.Vector"};
 
     try {
 
-	txRslt.value += "Calling test.voidFunction()";
-	rslt = jsonserver.test.voidFunction();
-	txRslt.value += " returns " + rslt + "\n";
+	print("Calling test.voidFunction()");
+	print(" returns " + jsonrpc.test.voidFunction() + "\n");
 
-	txRslt.value += "Calling test.anArray()";
-	rslt = jsonserver.test.anArray();
-	txRslt.value += " returns " + rslt + "\n";
+	print("Calling test.echo(\"hello\")");
+	print(" returns " + jsonrpc.test.echo("hello") + "\n");
 
-	txRslt.value += "Calling test.anArrayList()";
-	rslt = jsonserver.test.anArrayList();
-	txRslt.value += " returns " + rslt + "\n";
+	print("Calling test.echo(1234)");
+	print(" returns " + jsonrpc.test.echo(1234) + "\n");
 
-	txRslt.value += "Calling test.aVector()";
-	rslt = jsonserver.test.aVector();
-	txRslt.value += " returns " + rslt + "\n";
+	print("Calling test.echo([1,2,3])");
+	print(" returns " + jsonrpc.test.echo([1,2,3]) + "\n");
 
-	txRslt.value += "Calling test.aList()";
-	rslt = jsonserver.test.aList();
-	txRslt.value += " returns " + rslt + "\n";
+	print("Calling test.echo([\"foo\", \"bar\", \"baz\"])");
+	print(" returns " + jsonrpc.test.echo(["foo","bar","baz"]) + "\n");
+
+	print("Calling test.echo(" + toJSON(waggle) + ")");
+	print(" returns " + toJSON(jsonrpc.test.echo(waggle)) + "\n");
+
+	print("Calling test.echo(" + toJSON(wiggle) + ")");
+	print(" returns " + toJSON(jsonrpc.test.echo(wiggle)) + "\n");
+
+	print("Calling test.echoChar(\"c\")");
+	print(" returns " + jsonrpc.test.echoChar("c") + "\n");
+
+	print("Calling test.echoIntegerObject(1234567890)");
+	print(" returns " + jsonrpc.test.echoIntegerObject(1234567890) + "\n");
+
+	print("Calling test.echoLongObject(1099511627776)");
+	print(" returns " + jsonrpc.test.echoLongObject(1099511627776) + "\n");
+
+	print("Calling test.echoFloatObject(3.3)");
+	print(" returns " + jsonrpc.test.echoFloatObject(3.3) + "\n");
+
+	print("Calling test.echoDoubleObject(9.9)");
+	print(" returns " + jsonrpc.test.echoDoubleObject(9.9) + "\n");
+
+	print("Calling test.echoBoolean(true)");
+	print(" returns " + jsonrpc.test.echoBoolean(true) + "\n");
+
+	print("Calling test.echoBoolean(false)");
+	print(" returns " + jsonrpc.test.echoBoolean(false) + "\n");
+
+	print("Calling test.echoByteArray(\"test test\")");
+	print(" returns " + jsonrpc.test.echoByteArray("test test") + "\n");
+
+	print("Calling test.echoCharArray(\"test again\")");
+	print(" returns " + jsonrpc.test.echoCharArray("test again") + "\n");
+
+	print("Calling test.echoBooleanArray(" + bools + ")");
+	print(" returns " + jsonrpc.test.echoBooleanArray(bools) + "\n");
+
+	print("Calling test.echoList(" + toJSON(list) + ")");
+	print(" returns " + toJSON(jsonrpc.test.echoList(list)) + "\n");
+
+	print("Calling test.concat(\"a\",\"b\")");
+	print(" returns " + jsonrpc.test.concat("a","b") + "\n");
+
+	print("Calling test.anArray()");
+	print(" returns " + jsonrpc.test.anArray() + "\n");
+
+	print("Calling test.anArrayList()");
+	print(" returns " + toJSON(jsonrpc.test.anArrayList()) + "\n");
+
+	print("Calling test.aVector()");
+	print(" returns " + toJSON(jsonrpc.test.aVector()) + "\n");
+
+	print("Calling test.aList()");
+	print(" returns " + toJSON(jsonrpc.test.aList()) + "\n");
 	
-	txRslt.value += "Calling test.aSet()";
-	rslt = jsonserver.test.aSet();
-	txRslt.value += " returns " + rslt + "\n";
+	print("Calling test.aSet()");
+	print(" returns " + toJSON(jsonrpc.test.aSet()) + "\n");
 
-	txRslt.value += "Calling test.aBean()";
-	rslt = jsonserver.test.aBean();
-	txRslt.value += " returns " + rslt + "\n";
+	print("Calling test.aBean()");
+	print(" returns " + toJSON(jsonrpc.test.aBean()) + "\n");
 
-	txRslt.value += "Calling test.aHashtable()";
-	rslt = jsonserver.test.aHashtable();
-	txRslt.value += " returns " + rslt + "\n";
-
-	txRslt.value += "Calling test.twice(\"foo\")";
-	rslt = jsonserver.test.twice("foo");
-	txRslt.value += " returns " + rslt + "\n";
-
-	txRslt.value += "Calling test.echoByteArray(\"test test\")";
-	rslt = jsonserver.test.echoByteArray("test test");
-	txRslt.value += " returns " + rslt + "\n";
-
-	txRslt.value += "Calling test.echoCharArray(\"test again\")";
-	rslt = jsonserver.test.echoCharArray("test again");
-	txRslt.value += " returns " + rslt + "\n";
-
-	txRslt.value += "Calling test.echoChar(\"c\")";
-	rslt = jsonserver.test.echoChar("c");
-	txRslt.value += " returns " + rslt + "\n";
-
-	txRslt.value += "Calling test.echoBoolean(true)";
-	rslt = jsonserver.test.echoBoolean(true);
-	txRslt.value += " returns " + rslt + "\n";
-
-	txRslt.value += "Calling test.echoBoolean(false)";
-	rslt = jsonserver.test.echoBoolean(false);
-	txRslt.value += " returns " + rslt + "\n";
-
-	txRslt.value += "Calling test.echoBooleanArray([true,false,true])";
-	rslt = jsonserver.test.echoBooleanArray([true,false,true]);
-	txRslt.value += " returns " + rslt + "\n";
-
-	txRslt.value += "Calling test.echo(\"a string\")";
-	rslt = jsonserver.test.echo("a string");
-	txRslt.value += " returns " + rslt + "\n";
-
-	txRslt.value += "Calling test.echo(2)";
-	rslt = jsonserver.test.echo(2);
-	txRslt.value += " returns " + rslt + "\n";
-
-	txRslt.value += "Calling test.echo({bang: 'foo', baz: 9})";
-	rslt = jsonserver.test.echo({bang: 'foo', baz: 9});
-	txRslt.value += " returns " + rslt + "\n";
-
-	txRslt.value += "Calling test.echo([\"abc\", \"def\"])";
-	rslt = jsonserver.test.echo(["abc","def"]);
-	txRslt.value += " returns " + rslt + "\n";
-
-	txRslt.value += "Calling test.echo([3,4])";
-	rslt = jsonserver.test.echo([3,4]);
-	txRslt.value += " returns " + rslt + "\n";
-
-	txRslt.value += "Calling test.waggleToWiggle({bang: 'foo', baz: 9})";
-	rslt = jsonserver.test.waggleToWiggle({bang: 'foo', baz: 9});
-	txRslt.value += " returns " + rslt + "\n";
-	
-	txRslt.value += "Calling test.echoList([{\"list\":[20,21,22,23,24,25,26,27,28,29],\"javaClass\":\"java.util.Vector\"}])";
-	rslt = jsonserver.test.echoList({"list":[20,21,22,23,24,25,26,27,28,29],"javaClass":"java.util.Vector"});
-	txRslt.value += " returns " + rslt + "\n";
+	print("Calling test.aHashtable()");
+	print(" returns " + toJSON(jsonrpc.test.aHashtable()) + "\n");
 
     } catch(e) {
-	txRslt.value += " caught exception: " + e;
+	print(" Exception: \n\n" + e);
     }
     return false;
 }
 
-doReferenceTests = function()
+function doReferenceTests()
 {
-    txRslt.value = "Running Reference Tests\n\n";
+    clrscr();
+    print("Running Reference Tests\n\n");
 
     var rslt;
     var callableRef;
@@ -160,59 +166,64 @@ doReferenceTests = function()
 
     try {
 
-	txRslt.value += "var callableRef = test.getCallableRef()\n";
-	callableRef = jsonserver.test.getCallableRef();
-	txRslt.value += "returns a CallableReference objectID=" +
-	    callableRef.objectID + "\n\n";
+	print("var callableRef = test.getCallableRef()\n");
+	callableRef = jsonrpc.test.getCallableRef();
+	print("returns a CallableReference objectID=" +
+	      callableRef.objectID + "\n\n");
 
-	txRslt.value += "callableRef.ping()\n";
+	print("callableRef.ping()\n");
 	rslt = callableRef.ping()
-	    txRslt.value += "returns \"" + rslt + "\"\n\n";
+	    print("returns \"" + rslt + "\"\n\n");
 
-	txRslt.value += "var ref = callableRef.getRef()\n";
+	print("var ref = callableRef.getRef()\n");
 	ref = callableRef.getRef();
-	txRslt.value += "returns Reference objectID=" +
-	    ref.objectID + "\n\n";
+	print("returns Reference objectID=" +
+	      ref.objectID + "\n\n");
 
-	txRslt.value += "callableRef.whatsInside(ref)\n";
+	print("callableRef.whatsInside(ref)\n");
 	rslt = callableRef.whatsInside(ref);
-	txRslt.value += "returns \"" + rslt + "\"\n\n";
+	print("returns \"" + rslt + "\"\n\n");
 
     } catch(e) {
-	txRslt.value += "\n" + e + "\n";
+	print(" Exception: \n\n" + e);
     }
     return false;
 }
 
-doContainerTests = function()
+function doContainerTests()
 {
-    txRslt.value = "Running Container tests\n\n";
+    clrscr();
+    print("Running Container tests\n\n");
 
     try {
 
-	txRslt.value += "wigArrayList = test.aWiggleArrayList(2)\n";
-	var wigArrayList = jsonserver.test.aWiggleArrayList(2);
-	txRslt.value += "returns " + wigArrayList + "\n\n";
+	print("wigArrayList = test.aWiggleArrayList(2)\n");
+	var wigArrayList = jsonrpc.test.aWiggleArrayList(2);
+	print("returns " + wigArrayList + "\n\n");
 
-	txRslt.value += "test.aWiggleArrayList(wigArrayList)\n";
-	var rslt = jsonserver.test.wigOrWag(wigArrayList);
-	txRslt.value += "returns \"" + rslt + "\"\n\n";
+	print("test.aWiggleArrayList(wigArrayList)\n");
+	var rslt = jsonrpc.test.wigOrWag(wigArrayList);
+	print("returns \"" + rslt + "\"\n\n");
 
     } catch(e) {
-	txRslt.value += "\n" + e + "\n";
+	print("Exception: \n\n" + e);
     }
     return false;
 }
 
-doExceptionTest = function()
+function doExceptionTest()
 {
-    txRslt.value = "Running Exception test\n\n";
+    clrscr();
+    print("Running Exception test\n\n");
 
     try {
-	txRslt.value = "Calling test.fark()\n\n";
-	jsonserver.test.fark();
+	print("Calling test.throwException()\n\n");
+	jsonrpc.test.throwException();
     } catch(e) {
-	txRslt.value += e;
+	print("e.toString()=" + e.toString() + "\n");
+	print("e.name=" + e.name + "\n");
+	print("e.message=" + e.message + "\n");
+	print("e.javaStack=" + e.javaStack + "\n");
     }
     return false;
 }

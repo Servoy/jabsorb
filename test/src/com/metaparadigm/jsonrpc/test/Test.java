@@ -11,52 +11,91 @@ import java.util.HashSet;
 public class Test
 {
 
-    static public class RefTest
+    // Void test
+
+    public void voidFunction() {}
+
+
+    // Exception tests
+
+    public static void throwException()
+	throws Exception
     {
-	private String s;
-
-	public RefTest(String s)
-	{
-	    this.s = s;
-	}
-
-	public String toString()
-	{
-	    return s;
-	}
+	throw new Exception("test exception");
     }
 
-    static public class CallableRefTest
+
+    // Overload tests
+
+    public String[] echo(String strings[])
     {
-	private static RefTest ref = new RefTest("a secret");
-
-	public String ping()
-	{
-	    return "ping pong";
-	}
-
-	public RefTest getRef()
-	{
-	    return ref;
-	}
-
-	public String whatsInside(RefTest r)
-	{
-	    return r.toString();
-	}
+	return strings;
     }
 
-    private static CallableRefTest callableRef = new CallableRefTest();
-
-    public CallableRefTest getCallableRef()
+    public int echo(int i)
     {
-	return callableRef;
+	return i;
     }
 
-    public void voidFunction()
+    public int[] echo(int i[])
     {
-
+	return i;
     }
+
+    public String echo(String message)
+    {
+	return message;
+    }
+
+
+    // Type tests
+
+    public List echoList(List l) {
+        return l;
+    }
+
+    public byte[] echoByteArray(byte ba[]) {
+	return ba;
+    }
+
+    public char[] echoCharArray(char ca[]) {
+	return ca;
+    }
+
+    public char echoChar(char c) {
+	return c;
+    }
+
+    public boolean echoBoolean(boolean b) {
+	return b;
+    }
+
+    public boolean[] echoBooleanArray(boolean ba[]) {
+	return ba;
+    }
+
+    public Integer echoIntegerObject(Integer i)
+    {
+	return i;
+    }
+
+    public Long echoLongObject(Long l)
+    {
+	return l;
+    }
+
+    public Float echoFloatObject(Float f)
+    {
+	return f;
+    }
+
+    public Double echoDoubleObject(Double d)
+    {
+	return d;
+    }
+
+
+    // Container tests
 
     public int[] anArray()
     {
@@ -108,7 +147,7 @@ public class Test
     public Hashtable aHashtable()
     {
 	Hashtable ht = new Hashtable();
-	for(int i=0; i<10; i++) {
+	for(int i=0; i<3; i++) {
 	    Wiggle w = new Wiggle();
 	    w.setFoo("foo " + i);
 	    w.setBar(i);
@@ -117,73 +156,21 @@ public class Test
 	return ht;
     }
 
+
+    // Misc tests
+
     public String[] twice(String string)
     {
 	return new String[] { string, string };
     }
 
-    public List echoList(List l) {
-        return l;
-    }
-
-    public byte[] echoByteArray(byte ba[]) {
-	return ba;
-    }
-
-    public char[] echoCharArray(char ca[]) {
-	return ca;
-    }
-
-    public char echoChar(char c) {
-	return c;
-    }
-
-    public boolean echoBoolean(boolean b) {
-	return b;
-    }
-
-    public boolean[] echoBooleanArray(boolean ba[]) {
-	return ba;
-    }
-
-    public String echo(String msg1, String msg2)
+    public String concat(String msg1, String msg2)
     {
 	return msg1 + " and " + msg2;
     }
 
-    public String echo(String message)
-    {
-	return message;
-    }
 
-    public String echo(String strings[])
-    {
-	StringBuffer buf = new StringBuffer();
-	buf.append("appended strings: ");
-	for(int i=0; i<strings.length; i++) {
-	    if(i > 0) buf.append(",");
-	    buf.append("\"" + strings[i] + "\"");
-	}
-	return buf.toString();
-    }
-
-    public int echo(int number)
-    {
-	return number;
-    }
-
-    public String echo(int nums[])
-    {
-	StringBuffer buf = new StringBuffer();
-	buf.append("[");
-	for(int i=0; i<nums.length; i++) {
-	    if(i > 0) buf.append(",");
-	    buf.append("\"" + nums[i] + "\"");
-	}
-	buf.append("]");
-	return buf.toString();
-    }
-
+    // Bean tests
 
     static public class Wiggle
     {
@@ -230,31 +217,14 @@ public class Test
     }
 
 
-    public String echo(Wiggle wiggle)
+    public Wiggle echo(Wiggle wiggle)
     {
-	return wiggle.toString();
-    }
-
-    public String echo(Waggle waggle)
-    {
-	return waggle.toString();
-    }
-
-
-    public Waggle wiggleToWaggle(Wiggle wiggle)
-    {
-	Waggle waggle = new Waggle();
-	waggle.setBaz(wiggle.getBar());
-	waggle.setBang(wiggle.getFoo());
-	return waggle;
-    }
-
-    public Wiggle waggleToWiggle(Waggle waggle)
-    {
-	Wiggle wiggle = new Wiggle();
-	wiggle.setBar(waggle.getBaz());
-	wiggle.setFoo(waggle.getBang());
 	return wiggle;
+    }
+
+    public Waggle echo(Waggle waggle)
+    {
+	return waggle;
     }
 
     public ArrayList aWiggleArrayList(int numWiggles)
@@ -292,9 +262,49 @@ public class Test
 	return buf.toString();
     }
 
-    public static void fark()
-	throws Exception
+
+    // Reference Tests
+
+    static public class RefTest
     {
-	throw new Exception("fark!");
+	private String s;
+
+	public RefTest(String s)
+	{
+	    this.s = s;
+	}
+
+	public String toString()
+	{
+	    return s;
+	}
     }
+
+    static public class CallableRefTest
+    {
+	private static RefTest ref = new RefTest("a secret");
+
+	public String ping()
+	{
+	    return "ping pong";
+	}
+
+	public RefTest getRef()
+	{
+	    return ref;
+	}
+
+	public String whatsInside(RefTest r)
+	{
+	    return r.toString();
+	}
+    }
+
+    private static CallableRefTest callableRef = new CallableRefTest();
+
+    public CallableRefTest getCallableRef()
+    {
+	return callableRef;
+    }
+
 }

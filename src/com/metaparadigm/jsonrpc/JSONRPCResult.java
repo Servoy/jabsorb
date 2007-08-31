@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCResult.java,v 1.2 2004/04/11 10:05:20 mclark Exp $
+ * $Id: JSONRPCResult.java,v 1.4 2005/02/13 03:42:09 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -30,7 +30,7 @@ class JSONRPCResult {
     private int errorCode;
 
     public final static int CODE_SUCCESS = 0;
-    public final static int CODE_EXCEPTION = 490;
+    public final static int CODE_REMOTE_EXCEPTION = 490;
     public final static int CODE_ERR_PARSE = 590;
     public final static int CODE_ERR_NOMETHOD = 591;
     public final static int CODE_ERR_UNMARSHALL = 592;
@@ -39,7 +39,7 @@ class JSONRPCResult {
     public final static JSONRPCResult ERR_PARSE = new JSONRPCResult
 	(CODE_ERR_PARSE, "couldn't parse request arguments");
     public final static JSONRPCResult ERR_NOMETHOD = new JSONRPCResult
-	(CODE_ERR_NOMETHOD, "method not found");
+	(CODE_ERR_NOMETHOD, "method not found (session may have timed out)");
 
     public JSONRPCResult(int errorCode, Object o)
     {
@@ -52,7 +52,7 @@ class JSONRPCResult {
 	JSONObject o = new JSONObject();
 	if(errorCode == CODE_SUCCESS) {
 	    o.put("result", result);
-	} else if (errorCode == CODE_EXCEPTION) {
+	} else if (errorCode == CODE_REMOTE_EXCEPTION) {
 	    Exception e = (Exception)result;
 	    CharArrayWriter caw = new CharArrayWriter();
 	    e.printStackTrace(new PrintWriter(caw));
