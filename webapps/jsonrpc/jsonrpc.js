@@ -1,7 +1,7 @@
 /*
  * JSON-RPC JavaScript client
  *
- * $Id: jsonrpc.js,v 1.6 2005/01/23 01:30:46 mclark Exp $
+ * $Id: jsonrpc.js,v 1.7 2005/01/25 01:13:52 mclark Exp $
  *
  * Copyright (c) 2003-2004 Jan-Klaas Kollhof
  * Copyright (c) 2005 Michael Clark, Metaparadigm Pte Ltd
@@ -145,8 +145,8 @@ function JSONRpcClient_sendRequest(methodName, args)
     // Send the request
     JSONRpcClient.http.open("POST", this.serverURL, false); // no async
     // setRequestHeader is missing in Opera 8 Beta
-    if(JSONRpcClient.http.setRequestHeader) 
-      JSONRpcClient.http.setRequestHeader("Content-type", "text/plain");
+    if(!JSONRpcClient.isOpera) 
+	JSONRpcClient.http.setRequestHeader("Content-type", "text/plain");
     JSONRpcClient.http.send(req_data);
 
     // Unmarshall the response
@@ -164,6 +164,9 @@ function JSONRpcClient_sendRequest(methodName, args)
 
 JSONRpcClient.getHTTPRequest = function JSONRpcClient_getHTTPRequest()
 {
+    var agent = navigator.userAgent.toLowerCase();
+    JSONRpcClient.isOpera = (agent.indexOf("opera") >= 0);
+
     try { // to get the mozilla httprequest object
 	return new XMLHttpRequest();
     } catch(e) {}
