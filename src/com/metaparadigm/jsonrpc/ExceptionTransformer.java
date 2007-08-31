@@ -19,7 +19,9 @@
 
 package com.metaparadigm.jsonrpc;
 
-public interface ExceptionTransformer
+import java.io.Serializable;
+
+public interface ExceptionTransformer extends Serializable
 {
 
     /**
