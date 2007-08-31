@@ -31,7 +31,7 @@ import com.metaparadigm.jsonrpc.localarg.LocalArgResolver;
 /**
  * An LocalArgResolver implementation that is registered by default on the
  * JSONRPCBridge and will replace an JSONRPCBridge argument on a called method
- * with the seesion specific bridge object.
+ * with the session specific bridge object.
  */
 
 public class JSONRPCBridgeServletArgResolver implements LocalArgResolver {

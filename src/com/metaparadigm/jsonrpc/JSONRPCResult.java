@@ -28,8 +28,8 @@ import org.json.JSONObject;
 
 /**
  * Container for a JSON-RPC result message.
+ * This includes successful results, error results, and remote exceptions results.
  */
-
 public class JSONRPCResult {
 
     private Object result = null;

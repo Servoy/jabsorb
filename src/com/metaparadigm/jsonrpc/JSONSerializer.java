@@ -22,20 +22,13 @@
 
 package com.metaparadigm.jsonrpc;
 
-import java.util.HashSet;
-import java.util.HashMap;
+import java.io.Serializable;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
-import java.text.ParseException;
-import java.io.Serializable;
-import org.json.JSONObject;
-import org.json.JSONArray;
-import org.json.JSONTokener;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.metaparadigm.jsonrpc.serializer.MarshallException;
 import com.metaparadigm.jsonrpc.serializer.ObjectMatch;
@@ -51,17 +44,22 @@ import com.metaparadigm.jsonrpc.serializer.impl.ListSerializer;
 import com.metaparadigm.jsonrpc.serializer.impl.MapSerializer;
 import com.metaparadigm.jsonrpc.serializer.impl.NumberSerializer;
 import com.metaparadigm.jsonrpc.serializer.impl.PrimitiveSerializer;
+import com.metaparadigm.jsonrpc.serializer.impl.RawJSONArraySerializer;
+import com.metaparadigm.jsonrpc.serializer.impl.RawJSONObjectSerializer;
 import com.metaparadigm.jsonrpc.serializer.impl.SetSerializer;
 import com.metaparadigm.jsonrpc.serializer.impl.StringSerializer;
-import com.metaparadigm.jsonrpc.serializer.impl.RawJSONObjectSerializer;
-import com.metaparadigm.jsonrpc.serializer.impl.RawJSONArraySerializer;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is the public entry point to the serialization code and provides
  * methods for marshalling Java objects into JSON objects and unmarshalling JSON
  * objects into Java objects.
  */
-
 public class JSONSerializer implements Serializable {
 
     private final static long serialVersionUID = 2;
@@ -119,6 +117,14 @@ public class JSONSerializer implements Serializable {
      * Register all of the provided standard serializers.
      */
     public void registerDefaultSerializers() throws Exception {
+
+        // the order of registration is important:
+        // when trying to marshall java objects into json, first,
+        // a direct match (by Class) is looked for in the serializeableMap
+        // if a direct match is not found, all serializers are
+        // searched in the reverse order that they were registered here (via the serializerList)
+        // for the first serializer that canSerialize the java class type.
+
         registerSerializer(new RawJSONArraySerializer());
         registerSerializer(new RawJSONObjectSerializer());
         registerSerializer(new BeanSerializer());
@@ -136,6 +142,10 @@ public class JSONSerializer implements Serializable {
     
     /**
      * Register a new type specific serializer.
+     * The order of registration is important.  More specific serializers should be added after less
+     * specific serializers.  This is because when the JSONSerializer is trying to find
+     * a serializer, if it can't find the serializer by a direct match, it will search for a serializer
+     * in the reverse order that they were registered.
      * 
      * @param s A class implementing the Serializer interface
      * (usually derived from AbstractSerializer).
@@ -207,6 +217,30 @@ public class JSONSerializer implements Serializable {
         return null;
     }
 
+    /**
+     * Find the corresponding java Class type from json (as represented by a JSONObject or JSONArray,)
+     * using the javaClass hinting mechanism.
+     *
+     * If the Object is a JSONObject, the simple javaClass property is looked for.
+     * If it is a JSONArray then this method is invoked recursively on the first element of the array.
+     *
+     * then the Class is returned as an array type for the type of class hinted by the first Object
+     * in the array.
+     *
+     * If the object is neither a JSONObject or JSONArray, return the Class of the object directly.
+     * (this implies a primitive type, such as String, Integer or Boolean)
+     *
+     * @param o a JSONObject or JSONArray object to get the Class type from the javaClass hint.
+     *
+     * @return the Class of javaClass hint found, or null if the passed in Object is null, or the
+     * Class of the Object passed in, if that object is not a JSONArray or JSONObject.
+     *
+     * @throws UnmarshallException if javaClass hint was not found (except for null case or primitive object case),
+     *                             or the javaClass hint is not a valid java class.
+     *
+     * todo: the name of this method is a bit misleading because it doesn't actually get the class from
+     * todo: the javaClass hint if the type of Object passed in is not JSONObject|JSONArray.
+     */
     private Class getClassFromHint(Object o) throws UnmarshallException {
         if (o == null)
             return null;
@@ -266,19 +300,39 @@ public class JSONSerializer implements Serializable {
         throw new UnmarshallException("no match");
     }
 
+    /**
+     * Unmarshall json into an equivalent java object.
+     *
+     * This involves finding the correct Serializer to use and then
+     * delegating to that Serializer to unmarshall for us.  This method will be invoked
+     * recursively as Serializers unmarshall complex object graphs.
+     *
+     * @param state can be used by the underlying Serializer objects
+     *              to hold state while unmarshalling.
+     *
+     * @param clazz optional java class to unmarshall to- if set to null
+     *              then it will be looked for via the javaClass hinting mechanism.
+     *
+     * @param json JSONObject or JSONArray that contains the json to unmarshall.
+     *
+     * @return the java object representing the json that was unmarshalled.
+     *
+     * @throws UnmarshallException if there is a problem unmarshalling json to java.
+     */
     public Object unmarshall(SerializerState state, Class clazz, Object json)
             throws UnmarshallException {
-        /*
-         * If we have a JSON object class hint that is a sub class of the
-         * signature 'clazz', then override 'clazz' with the hint class.
-         */
+
+        // If we have a JSON object class hint that is a sub class of the
+        // signature 'clazz', then override 'clazz' with the hint class.
         if (clazz != null && json instanceof JSONObject
                 && ((JSONObject) json).has("javaClass")
                 && clazz.isAssignableFrom(getClassFromHint(json)))
             clazz = getClassFromHint(json);
 
+        // if no clazz type was passed in, look for the javaClass hint
         if (clazz == null)
             clazz = getClassFromHint(json);
+
         if (clazz == null)
             throw new UnmarshallException("no class hint");
         if (json == null || json == JSONObject.NULL) {
@@ -294,6 +348,21 @@ public class JSONSerializer implements Serializable {
         throw new UnmarshallException("can't unmarshall");
     }
 
+    /**
+     * Marshall java into an equivalent json representation (JSONObject or JSONArray.)
+     *
+     * This involves finding the correct Serializer for the class of the given java object
+     * and then invoking it to marshall the java object into json.
+     *
+     * The Serializer will invoke this method recursively while marshalling complex object graphs.
+     *
+     * @param state can be used by the underlying Serializer objects to hold state while marshalling.
+     * @param o java object to convert into json.
+     *
+     * @return the JSONObject or JSONArray containing the json for the marshalled java object.
+     *
+     * @throws MarshallException if there is a problem marshalling java to json.
+     */
     public Object marshall(SerializerState state, Object o)
             throws MarshallException {
         if (o == null) {

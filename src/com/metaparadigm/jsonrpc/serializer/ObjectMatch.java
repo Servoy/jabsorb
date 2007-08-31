@@ -26,23 +26,43 @@ package com.metaparadigm.jsonrpc.serializer;
  * This class is returned from the Serializer tryUnmarshall method to indicate
  * number of mismatched fields. This is used to handle ambiguities with
  * JavaScript's typeless objects combined with and Java's operator overloading.
+ *
+ * todo: wouldn't a better name for this class be ObjectMismatch as it's would be more descriptive
+ * todo: the name ObjectMatch is a little confusing because it implies the opposite of what the class actually stores (ObjectMismatch)
+ * todo: either that, or I'm not understanding something correctly...
  */
-
 public class ObjectMatch {
 
     public final static ObjectMatch OKAY = new ObjectMatch(-1);
     public final static ObjectMatch NULL = new ObjectMatch(0);
 
+    /**
+     * The number of mismatched fields that occured on a tryUnmarshall call.
+     */
     private int mismatch;
 
+    /**
+     * Get the number of mismatched fields that occured on a tryUnmarshall call.
+     * @return the number of mismatched fields that occured on a tryUnmarshall call.
+     */
     public int getMismatch() {
         return mismatch;
     }
 
+    /**
+     * Create a new ObjectMatch object with the given number of mismatches.
+     * @param mismatch the number of mismatched fields that occured on a tryUnmarshall call.
+     */
     public ObjectMatch(int mismatch) {
         this.mismatch = mismatch;
     }
 
+    /**
+     * Compare another ObjectMatch with this ObjectMatch and return the one that has the most mismatches.
+     *
+     * @param m ObjectMatch to compare this ObjectMatch to.
+     * @return this ObjectMatch if it has more mismatches, else the passed in ObjectMatch.
+     */
     public ObjectMatch max(ObjectMatch m) {
         if (this.mismatch > m.mismatch)
             return this;

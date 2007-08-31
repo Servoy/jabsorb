@@ -22,16 +22,33 @@
 
 package com.metaparadigm.jsonrpc.reflect;
 
+/**
+ * A key for identifying a method and the number of arguments to that method uniquely.
+ */
 public class MethodKey {
 
     private String methodName;
 
     private int numArgs;
 
+    /**
+     * Get the method name.
+     * @return the method name.
+     */
     public String getMethodName() { return methodName; }
-    
+
+    /**
+     * Get the number of arguments that the method takes.
+     * @return the number of arguments that the method takes.
+     */
     public int getNumArgs() { return numArgs; }
-    
+
+    /**
+     * Create a MethodKey for a given method name and the number of arguments that
+     * that method takes.
+     * @param methodName method name.
+     * @param numArgs number of arguments the method takes.
+     */
     public MethodKey(String methodName, int numArgs) {
         this.methodName = methodName;
         this.numArgs = numArgs;

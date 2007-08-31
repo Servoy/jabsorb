@@ -24,18 +24,51 @@ package com.metaparadigm.jsonrpc.reflect;
 
 import java.util.HashMap;
 
+/**
+ * Information on the public methods of a class as reflected from the Class itself.
+ * This is produced by the ClassAnalyzer and used in the JSONRPCBridge for
+ * resolving classes and methods to invoke through json-rpc.
+ */
 public class ClassData {
+    /**
+     * The class that this ClassData maps.
+     */
     protected Class clazz;
 
-    // key methodKey, val (Method || Method[])
+    /**
+     * Map of public instance methods.  Key is a MethodKey object, value is either a Method or a Method[].
+     */
     protected HashMap methodMap;
 
-    // key methodKey, val (Method || Method[])
+    /**
+     * Map of public static methods.  Key is a MethodKey object, value is either a Method or a Method[].
+     */
     protected HashMap staticMethodMap;
 
+    /**
+     * Get the class that this ClassData maps.
+     * @return the class that this ClassData maps.
+     */
     public Class getClazz() { return clazz; }
-    
+
+    /**
+     * Get the Map of public non-static methods that can be invoked for the class.
+     * The keys of the Map will be MethodKey objects and the values will be
+     * either a Method object, or an array of Method objects, if there is more than
+     * one possible method that can be invoked matching the MethodKey.
+     *
+     * @return Map of public instance methods which can be invoked for the class.
+     *  this ClassData.
+     */
     public HashMap getMethodMap() { return methodMap; }
-    
+
+    /**
+     * Get the Map of public static methods that can be invoked for the class.
+     * The key of the Map is a MethodKey object and the value is
+     * either a Method object, or an array of Method objects (if there is more than
+     * one possible method that can be invoked matching the MethodKey.)
+     *
+     * @return Map of static methods that can be invoked for the class.
+     */
     public HashMap getStaticMethodMap() { return staticMethodMap; }
 }

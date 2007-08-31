@@ -55,8 +55,8 @@ public class LocalArgController {
     static {
         LocalArgController.registerLocalArgResolver(HttpServletRequest.class,
                 HttpServletRequest.class, new HttpServletRequestArgResolver());
-	LocalArgController.registerLocalArgResolver(HttpServletResponse.class,
-		HttpServletResponse.class, new HttpServletResponseArgResolver());
+        LocalArgController.registerLocalArgResolver(HttpServletResponse.class,
+                HttpServletResponse.class, new HttpServletResponseArgResolver());
         LocalArgController.registerLocalArgResolver(HttpSession.class,
                 HttpServletRequest.class, new HttpSessionArgResolver());
         LocalArgController.registerLocalArgResolver(JSONRPCBridge.class,
@@ -161,6 +161,14 @@ public class LocalArgController {
                 + contextInterface.getName());
     }
 
+    /**
+     * Determine if an argument of the specified class type
+     * can be resolved to a local argument that is filled in
+     * on the server prior to being invoked.
+     *
+     * @param param local argument class.
+     * @return true if the class can be resolved to a local argument.
+     */
     public static boolean isLocalArg(Class param)
     {
         HashSet resolverSet = null;
@@ -170,6 +178,18 @@ public class LocalArgController {
         return (resolverSet != null ? true : false);
     }
 
+    /**
+     * Using the caller's context, resolve a given method call parameter to a local
+     * argument.
+     *
+     * @param context callers context.  In an http servlet environment, this will
+     * contain the servlet request and response objects.
+     *
+     * @param param class type parameter to resolve to a local argument.
+     * @return the run time instance that is resolved, to be used when calling the method.
+     * 
+     * @throws UnmarshallException if there if a failure during resolution.
+     */
     public static Object resolveLocalArg(Object context[], Class param)
             throws UnmarshallException {
         HashSet resolverSet = (HashSet) localArgResolverMap.get(param);

@@ -28,7 +28,6 @@ import com.metaparadigm.jsonrpc.JSONSerializer;
  * Convenience class for implementing Serializers providing default setOwner and
  * canSerialize implementations.
  */
-
 public abstract class AbstractSerializer implements Serializer {
 
     protected JSONSerializer ser;
@@ -37,6 +36,15 @@ public abstract class AbstractSerializer implements Serializer {
         this.ser = ser;
     }
 
+    /**
+     * Default check that simply tests the given serializeable class arrays
+     * to determine if the pair of classes can be serialized/deserialized
+     * from this Serializer.
+     *
+     * @param clazz java type to check if this Serializer can handle.
+     * @param jsonClazz json type to check this Serializer can handle.
+     * @return true if this Serializer can serialize/deserialize the given java,json pair.
+     */
     public boolean canSerialize(Class clazz, Class jsonClazz) {
         boolean canJava = false, canJSON = false;
 

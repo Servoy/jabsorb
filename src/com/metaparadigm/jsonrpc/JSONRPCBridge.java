@@ -199,7 +199,7 @@ public class JSONRPCBridge implements Serializable {
     /* Implementation */
 
     /**
-     * This method retreieves the global bridge singleton.
+     * This method retrieves the global bridge singleton.
      * 
      * It should be used with care as objects should generally be registered
      * within session specific bridges for security reasons.
@@ -273,7 +273,6 @@ public class JSONRPCBridge implements Serializable {
     public static void setSerializer(JSONSerializer ser) {
         JSONRPCBridge.ser = ser;
     }
-
 
     /**
      * Get the CallbackController object associated with this bridge.
@@ -601,6 +600,16 @@ public class JSONRPCBridge implements Serializable {
         return null;
     }
 
+    /**
+     * Resolve the key to a specified instance object.  If an instance object of the requested key
+     * is not found, and this is not the global bridge, then look in the global bridge too.
+     *
+     * If the key is not found in this bridge or the global bridge, the requested key may be a class method
+     * (static method) or may not exist (not registered under the requested key.)
+     *
+     * @param key registered object key being requested by caller.
+     * @return ObjectInstance that has been registered under this key, in this bridge or the global bridge.
+     */
     private ObjectInstance resolveObject(Object key) {
         ObjectInstance oi = null;
         synchronized (state) {
@@ -685,9 +694,35 @@ public class JSONRPCBridge implements Serializable {
                 contextInterface, argResolver);
     }
 
+    /**
+     * Resolve which method the caller is requesting
+     *
+     * If a method with the requested number of arguments does not exist
+     * at all, null will be returned.
+     *
+     * If the object or class (for static methods) being invoked contains
+     * more than one overloaded methods that match the method key signature,
+     * find the closest matching method to invoke according to the JSON
+     * arguments being passed in.
+     *
+     * @param methodMap Map keyed by MethodKey objects and the values will be
+     *                  either a Method object, or an array of Method objects,
+     *                  if there is more than one possible method that can be
+     *                  invoked matching the MethodKey.
+     *
+     * @param methodName method name being called.
+     * @param arguments JSON arguments to the method, as a JSONArray.
+     * @return the Method that most closely matches the call signature, or null
+     *         if there is not a match.
+     */
     private Method resolveMethod(HashMap methodMap, String methodName,
             JSONArray arguments) {
         Method method[] = null;
+
+        // first, match soley by the method name and number of arguments passed in
+        // if there is a single match, return the single match
+        // if there is no match at all, return null
+        // if there are multiple matches, fall through to the second matching phase below
         MethodKey mk = new MethodKey(methodName, arguments.length());
         Object o = methodMap.get(mk);
         if (o instanceof Method) {
@@ -701,6 +736,12 @@ public class JSONRPCBridge implements Serializable {
         else
             return null;
 
+        // second matching phase:  there were overloaded methods on the object
+        // we are invoking so try and find the best match based on the types of
+        // the arguments passed in.
+
+        // try and unmarshall the arguments against each candidate method
+        // to determine which one matches the best
         ArrayList candidate = new ArrayList();
         if (debug)
             log.trace("looking for method " + methodName + "("
@@ -717,6 +758,9 @@ public class JSONRPCBridge implements Serializable {
                             + "(" + argSignature(method[i]) + ")");
             }
         }
+
+        // now search through all the candidates and find one which matches
+        // the json arguments the closest
         MethodCandidate best = null;
         for (int i = 0; i < candidate.size(); i++) {
             MethodCandidate c = (MethodCandidate) candidate.get(i);
@@ -764,6 +808,15 @@ public class JSONRPCBridge implements Serializable {
             return methodCandidate;
     }
 
+    /**
+     * Display a method call argument signature for a method
+     * as a String for debugging/logging purposes.
+     * The string contains the comma separated list of argument types that
+     * the given method takes.
+     *
+     * @param method Method instance to display the argument signature for.
+     * @return the argument signature for the method, as a String.
+     */
     private static String argSignature(Method method) {
         Class param[] = method.getParameterTypes();
         StringBuffer buf = new StringBuffer();
@@ -817,6 +870,26 @@ public class JSONRPCBridge implements Serializable {
         return candidate;
     }
 
+    /**
+     * Convert the arguments to a method call from json into java objects
+     * to be used for invoking the method, later.
+     *
+     * @param context the context of the caller.  This will be the servlet
+     *        request and response objects in an http servlet call environment.
+     *        These are used to insert local arguments (e.g. the request,
+     *        response or session,etc.) when found in the java method call
+     *        argument signature.
+     *
+     * @param method the java method that will later be invoked with the given
+     *               args.
+     *
+     * @param arguments the arguments from the caller, in json format.
+     *
+     * @return the java arguments as unmarshalled from json.
+     *
+     * @throws UnmarshallException if there is a problem unmarshalling the
+     *                             arguments.
+     */
     private Object[] unmarshallArgs(Object context[], Method method,
             JSONArray arguments) throws UnmarshallException {
         Class param[] = method.getParameterTypes();
@@ -846,7 +919,7 @@ public class JSONRPCBridge implements Serializable {
      *            The transport context (the HttpServletRequest object in the
      *            case of the HTTP transport).
      * @param jsonReq
-     *            The JSON-RPC request structured as an JSON object tree.
+     *            The JSON-RPC request structured as a JSON object tree.
      * @return a JSONRPCResult object with the result of the invocation or an
      *         error.
      */
@@ -889,14 +962,23 @@ public class JSONRPCBridge implements Serializable {
             objectID = Integer.parseInt(t.nextToken());
         }
 
+        // one of oi or cd will resolve (first oi is attempted, and if that fails, then cd is attempted)
+
+        // object instance of object being invoked
         ObjectInstance oi = null;
+
+        // ClassData for resolved object instance, or if object instance cannot resolve, class data for
+        // class instance (static method) we are resolving to
         ClassData cd = null;
+
         HashMap methodMap = null;
         Method method = null;
         Object itsThis = null;
 
         if (objectID == 0) {
             // Handle "system.listMethods"
+            // this is called by the browser side javascript
+            // when a new JSONRpcClient object is initialized.
             if (encodedMethod.equals("system.listMethods")) {
                 HashSet m = new HashSet();
                 globalBridge.allInstanceMethods(m);
@@ -934,6 +1016,8 @@ public class JSONRPCBridge implements Serializable {
             cd = ClassAnalyzer.getClassData(oi.clazz);
             methodMap = cd.getMethodMap();
             // Handle "system.listMethods"
+            // this is called by the browser side javascript
+            // when a new JSONRpcClient object with an objectID is initialized.
             if (methodName.equals("listMethods")) {
                 HashSet m = new HashSet();
                 uniqueMethods(m, "", cd.getStaticMethodMap());
@@ -1007,6 +1091,15 @@ public class JSONRPCBridge implements Serializable {
         return result;
     }
 
+    /**
+     * Create unique method names by appending the given prefix to the
+     * keys from the given HashMap and adding them all to the given HashSet.
+     *
+     * @param m HashSet to add unique methods to.
+     * @param prefix prefix to append to each method name found in the
+     *        methodMap.
+     * @param methodMap a HashMap containing MethodKey keys specifying methods.
+     */
     private static void uniqueMethods(HashSet m, String prefix,
             HashMap methodMap) {
         Iterator i = methodMap.entrySet().iterator();
@@ -1017,6 +1110,12 @@ public class JSONRPCBridge implements Serializable {
         }
     }
 
+    /**
+     * Add all static methods that can be invoked on this bridge to the
+     * given HashSet.
+     *
+     * @param m HashSet to add all static methods to.
+     */
     private void allStaticMethods(HashSet m) {
         synchronized (state) {
             HashMap classMap = state.getClassMap();
@@ -1031,6 +1130,10 @@ public class JSONRPCBridge implements Serializable {
         }
     }
 
+    /**
+     * Add all instance methods that can be invoked on this bridge to a HashSet.
+     * @param m HashSet to add all static methods to.
+     */
     private void allInstanceMethods(HashSet m) {
         synchronized (state) {
             HashMap objectMap = state.getObjectMap();
