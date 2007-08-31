@@ -2,6 +2,14 @@ $Id: CHANGES.txt,v 1.107 2006/03/27 05:38:40 mclark Exp $
 
 json-rpc-java/svn/trunk
 
+* Add asynchrounous support to the constructor JSONRpcClient
+  constructor. Previously the constructor would make a
+  synchronous call to system.listmethods. Now if the
+  constructor is called with a function as the first
+  argument, it will construct the proxy asynchrously,
+  calling the function when this is done.
+  -- Michael Clark <michael@metaparadigm.com>
+
 * Add ExceptionTransformer interface and interface to
   JSONRPCBridge to transform exception objects returned
   to the client.

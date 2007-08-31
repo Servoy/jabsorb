@@ -99,12 +99,17 @@ toJSON = function toJSON(o)
 /* JSONRpcClient constructor */
 
 JSONRpcClient =
-function JSONRpcClient_ctor(serverURL, user, pass, objectID)
+function JSONRpcClient_ctor()
 {
-	this.serverURL = serverURL;
-	this.user = user;
-	this.pass = pass;
-	this.objectID = objectID;
+	var arg_shift = 0;
+	if(typeof arguments[0] == "function") {
+		this.readyCB = arguments[0];
+		arg_shift++;
+	}
+	this.serverURL = arguments[arg_shift + 0];
+	this.user = arguments[arg_shift + 1];
+	this.pass = arguments[arg_shift + 2];
+	this.objectID = arguments[arg_shift + 3];
 
 	/* Add standard methods */
 	if(this.objectID) {
@@ -114,8 +119,17 @@ function JSONRpcClient_ctor(serverURL, user, pass, objectID)
 		this._addMethods(["system.listMethods"]);
 		var req = this._makeRequest("system.listMethods", []);
 	}
+	if(this.readyCB) {
+		var self = this;
+		req.cb = function JSONRpcClient_async_create(result, e) {
+			 if(!e) self._addMethods(result);
+			 self.readyCB(result, e);
+	        };
+	}
+
 	var m = this._sendRequest(req);
-	this._addMethods(m);
+	if(!this.readyCB)
+		this._addMethods(m);
 };
 
 
@@ -335,11 +349,7 @@ function JSONRpcClient_sendRequest(req)
 	JSONRpcClient.num_req_active++;
 
 	/* Send the request */
-	if (typeof(this.user) == "undefined") {
-		http.open("POST", this.serverURL, (req.cb != null));
-	} else {
-		http.open("POST", this.serverURL, (req.cb != null), this.user, this.pass);
-	}
+	http.open("POST", this.serverURL, (req.cb != null), this.user, this.pass);
 
 	/* setRequestHeader is missing in Opera 8 Beta */
 	try { http.setRequestHeader("Content-type", "text/plain"); } catch(e) {}
