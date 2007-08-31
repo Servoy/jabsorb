@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: StringSerializer.java,v 1.3 2005/06/16 23:26:14 mclark Exp $
+ * $Id: StringSerializer.java,v 1.3.2.1 2005/12/09 12:31:34 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -22,6 +22,8 @@ package com.metaparadigm.jsonrpc;
 
 public class StringSerializer extends AbstractSerializer
 {
+    private final static long serialVersionUID = 1;
+
     private static Class[] _serializableClasses = new Class[]
 	{ String.class, char.class, Character.class,
 	  byte[].class, char[].class };

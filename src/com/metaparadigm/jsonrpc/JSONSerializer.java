@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONSerializer.java,v 1.9 2005/07/18 12:27:44 mclark Exp $
+ * $Id: JSONSerializer.java,v 1.9.2.2 2005/12/10 07:54:10 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 import java.text.ParseException;
+import java.io.Serializable;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONTokener;
@@ -37,8 +38,10 @@ import org.json.JSONTokener;
  * JSON objects into Java objects.
  */
 
-public class JSONSerializer
+public class JSONSerializer implements Serializable
 {
+    private final static long serialVersionUID = 1;
+
     private final static Logger log =
 	Logger.getLogger(JSONSerializer.class.getName());
 
@@ -47,10 +50,25 @@ public class JSONSerializer
     public void setDebug(boolean debug) { this.debug = debug; }
     public boolean isDebug() { return debug; }
 
+    private void readObject(java.io.ObjectInputStream in)
+        throws java.io.IOException, ClassNotFoundException
+    {
+        in.defaultReadObject();
+        serializableMap = new HashMap();
+        Iterator i = serializerList.iterator();
+        while(i.hasNext()) {
+            Serializer s = (Serializer)i.next();
+            Class classes[] = s.getSerializableClasses();
+            for (int j = 0; j < classes.length; j++) {
+                serializableMap.put(classes[j], s);
+            }
+        }
+    }
+
     // Key Serializer
     private HashSet serializerSet = new HashSet();
     // key Class, val Serializer
-    private HashMap serializableMap = new HashMap();
+    private transient HashMap serializableMap = new HashMap();
     // List for reverse registration order search
     private ArrayList serializerList = new ArrayList();
 
@@ -260,7 +278,9 @@ public class JSONSerializer
      * be helpful when unmarshalling, though if not needed can
      * be left out in favor of increased performance and smaller 
      * size of marshalled String.  Default is true.
-     * @return
+     *
+     * @return whether Java Class hints are included in the serialised
+     *         JSON objects
      */
     public boolean getMarshallClassHints() {
         return marshallClassHints;
@@ -272,7 +292,9 @@ public class JSONSerializer
      * be helpful when unmarshalling, though if not needed can
      * be left out in favor of increased performance and smaller 
      * size of marshalled String.  Default is true.
-     * @return
+     *
+     * @param marshallClassHints flag to enable/disable inclusion
+     *        of Java class hints in the serialized JSON objects
      */
     public void setMarshallClassHints(boolean marshallClassHints) {
         this.marshallClassHints = marshallClassHints;
@@ -283,7 +305,9 @@ public class JSONSerializer
      * in the serialized JSON object.  Defaults to true.  Set to false for 
      * performance gains and small JSON serialized size.  Useful because null and 
      * undefined for JSON object attributes is virtually the same thing.
-     * @return
+     *
+     * @return boolean value as to whether null attributes will be
+     *         in the serialized JSON objects
      */
     public boolean getMarshallNullAttributes() {
         return marshallNullAttributes;
@@ -293,7 +317,9 @@ public class JSONSerializer
      * in the serialized JSON object.  Defaults to true.  Set to false for 
      * performance gains and small JSON serialized size.  Useful because null and 
      * undefined for JSON object attributes is virtually the same thing.
-     * @return
+     *
+     * @param marshallNullAttributes flag to enable/disable marshalling of
+     *        null attributes in the serialized JSON objects
      */
     public void setMarshallNullAttributes(boolean marshallNullAttributes) {
         this.marshallNullAttributes = marshallNullAttributes;

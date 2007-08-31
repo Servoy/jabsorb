@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: ReferenceSerializer.java,v 1.6 2005/02/26 02:46:02 mclark Exp $
+ * $Id: ReferenceSerializer.java,v 1.6.2.1 2005/12/09 12:31:34 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -25,6 +25,8 @@ import org.json.JSONObject;
 
 public class ReferenceSerializer extends AbstractSerializer
 {
+    private final static long serialVersionUID = 1;
+
     private final static Logger log =
 	Logger.getLogger(ReferenceSerializer.class.getName());
 

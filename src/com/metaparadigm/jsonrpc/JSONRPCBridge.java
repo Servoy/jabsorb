@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCBridge.java,v 1.35 2005/07/22 13:41:06 mclark Exp $
+ * $Id: JSONRPCBridge.java,v 1.37.2.2 2005/12/11 01:33:35 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.InvocationTargetException;
+import java.io.Serializable;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
@@ -68,7 +69,7 @@ import org.json.JSONArray;
  * will be accessible to all clients.
  */
 
-public class JSONRPCBridge
+public class JSONRPCBridge implements Serializable
 {
     private final static Logger log =
 	Logger.getLogger(JSONRPCBridge.class.getName());
@@ -111,7 +112,7 @@ public class JSONRPCBridge
     protected HashMap referenceMap = new HashMap();
 
     // ReferenceSerializer if enabled
-    Serializer referenceSer = null;
+    protected Serializer referenceSer = null;
     // key clazz, classes that should be returned as References
     protected HashSet referenceSet = new HashSet();
     // key clazz, classes that should be returned as CallableReferences
@@ -166,7 +167,7 @@ public class JSONRPCBridge
     }
 
 
-    protected static class CallbackData
+    protected static class CallbackData implements Serializable
     {
 	private InvocationCallback cb;
 	private Class contextInterface;
@@ -232,7 +233,7 @@ public class JSONRPCBridge
     }
 
 
-    protected static class ObjectInstance
+    protected static class ObjectInstance implements Serializable
     {
 	private Object o;
 	private Class clazz;
@@ -408,15 +409,15 @@ public class JSONRPCBridge
      * an opaque object to the JSON-RPC client. When the opaque object
      * is passed back through the bridge in subsequent calls, the
      * original object is substitued in calls to Java methods. This
-     * should be uses for any objects that contain security information
+     * should be used for any objects that contain security information
      * or complex types that are not required in the Javascript client
      * but need to be passed as a reference in methods of exported objects.
      * <p />
      * A Reference in JSON format looks like this:
      * <p />
-     * <code>{"result": {"javaClass":"com.metaparadigm.test.Foo",<br />
-     *                   "objectID":5535614,<br />
-     *                   "JSONRPCType":"Reference"} }</code>
+     * <code>{ "javaClass":"com.metaparadigm.test.Foo",<br />
+     *         "objectID":5535614,<br />
+     *         "JSONRPCType":"Reference" }</code>
      *
      * @param clazz The class object that should be marshalled as a reference.
      */
@@ -441,21 +442,23 @@ public class JSONRPCBridge
     /**
      * Registers a class to be returned as a callable reference.
      *
-     * The JSONBridge will return a callable reference to the JSON-RPC client.
-     * Callable references are not explicitly supported by the JSON-RPC.
-     * The implementation in JSON-RPC-Java requires the JSON-RPC client
-     * to connect to a different URL including the returned object_id to
-     * call methods on the reference. The format of the URL is:
+     * The JSONBridge will return a callable reference to the JSON-RPC client
+     * for registered classes instead of passing them by value. The JSONBridge
+     * will take a references to these objects and the JSON-RPC client will
+     * create an invocation proxy for objects of this class for which methods
+     * will be called on the instance on the server.
      * <p />
-     * <code>/JSON-RPC?object_id=&lt;object_id&gt;</code>
+     * <b>Note:</b> A limitation exists in the JSON-RPC client where only
+     * the top most object returned from a method can be made into a proxy.
      * <p />
      * A Callable Reference in JSON format looks like this:
      * <p />
-     * <code>{"result": {"javaClass":"com.metaparadigm.test.Bar",<br />
-     *                   "objectID":4827452,<br />
-     *                   "JSONRPCType":"CallableReference"} }</code>
+     * <code>{ "javaClass":"com.metaparadigm.test.Bar",<br />
+     *         "objectID":4827452,<br />
+     *         "JSONRPCType":"CallableReference" }</code>
      *
-     * @param clazz The class object that should be marshalled as a callable reference.
+     * @param clazz The class object that should be marshalled as a callable
+     *              reference.
      */
     public void registerCallableReference(Class clazz)
 	throws Exception
@@ -1006,14 +1009,20 @@ public class JSONRPCBridge
 	    result = new JSONRPCResult(JSONRPCResult.CODE_SUCCESS,
 				       requestId, ser.marshall(state, o));
 	} catch (UnmarshallException e) {
+	    for(int i=0; i< context.length; i++)
+		errorCallback(context[i], itsThis, method, e);
 	    result = new JSONRPCResult(JSONRPCResult.CODE_ERR_UNMARSHALL,
 				       requestId, e.getMessage());
 	} catch (MarshallException e) {
+	    for(int i=0; i< context.length; i++)
+		errorCallback(context[i], itsThis, method, e);
 	    result = new JSONRPCResult(JSONRPCResult.CODE_ERR_MARSHALL,
 				       requestId, e.getMessage());
 	} catch (Throwable e) {
 	    if(e instanceof InvocationTargetException)
 		e = ((InvocationTargetException)e).getTargetException();
+	    for(int i=0; i< context.length; i++)
+		errorCallback(context[i], itsThis, method, e);
 	    result = new JSONRPCResult(JSONRPCResult.CODE_REMOTE_EXCEPTION,
 				       requestId, e);
 	}
@@ -1022,6 +1031,36 @@ public class JSONRPCBridge
 	return result;
     }
 
+    /**
+     * Calls the 'invocation Error' callback handler.
+     * @param context   The transport context (the HttpServletRequest
+                        object in the case of the HTTP transport).
+     * @param instance  The object instance or null if it is a static method.
+     * @param method    Method that failed the invocation.
+     * @param error     Error resulting from the invocation.
+     * @author connorb (Axxia)
+     */
+    private void errorCallback(Object context, Object instance,
+			       Method method, Throwable error)
+    {
+	synchronized (callbackSet) {
+	    Iterator i = callbackSet.iterator();
+	    while (i.hasNext()) {
+		CallbackData cbdata = (CallbackData)i.next();
+		if (cbdata.understands(context) &&
+		    (cbdata.cb instanceof ErrorInvocationCallback)) {
+		    ErrorInvocationCallback ecb =
+			(ErrorInvocationCallback)cbdata.cb;
+		    try {
+			ecb.invocationError(context, instance, method, error);
+		    } catch (Throwable th) {
+			// Ignore all errors in callback, don't want
+			// event listener to bring everything to its knees.
+		    }
+		}
+	    }
+	}
+    }
 
     private void uniqueMethods(HashSet m, String prefix, HashMap methodMap)
     {

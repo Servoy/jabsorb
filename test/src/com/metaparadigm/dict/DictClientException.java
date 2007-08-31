@@ -1,7 +1,7 @@
 /*
  * Simple Java Dict Client (RFC2229)
  *
- * $Id: DictClientException.java,v 1.2 2005/02/04 05:45:11 mclark Exp $
+ * $Id: DictClientException.java,v 1.2.2.1 2005/12/09 12:31:34 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -22,6 +22,8 @@ package com.metaparadigm.dict;
 
 public class DictClientException extends Exception
 {
+    private final static long serialVersionUID = 1;
+
     private DictCommandResult r;
 
     public DictClientException(DictCommandResult r) {

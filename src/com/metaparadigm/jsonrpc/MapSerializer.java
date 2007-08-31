@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: MapSerializer.java,v 1.4 2005/06/16 23:26:14 mclark Exp $
+ * $Id: MapSerializer.java,v 1.4.2.1 2005/12/09 12:31:34 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -30,6 +30,8 @@ import org.json.JSONObject;
 
 public class MapSerializer extends AbstractSerializer
 {
+    private final static long serialVersionUID = 1;
+
     private static Class[] _serializableClasses = new Class[]
 	{ Map.class, HashMap.class, TreeMap.class, LinkedHashMap.class };
 

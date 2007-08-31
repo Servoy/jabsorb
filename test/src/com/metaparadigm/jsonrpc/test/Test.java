@@ -5,9 +5,11 @@ import java.lang.reflect.Method;
 import javax.servlet.http.HttpServletRequest;
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
 import com.metaparadigm.jsonrpc.InvocationCallback;
+import java.io.Serializable;
 
-public class Test
+public class Test implements Serializable
 {
+    private final static long serialVersionUID = 1;
 
     // Void test
 
@@ -286,8 +288,10 @@ public class Test
 
     // Reference Tests
 
-    static public class RefTest
+    static public class RefTest implements Serializable
     {
+	private final static long serialVersionUID = 1;
+
 	private String s;
 
 	public RefTest(String s)
@@ -301,8 +305,10 @@ public class Test
 	}
     }
 
-    static public class CallableRefTest
+    static public class CallableRefTest implements Serializable
     {
+	private final static long serialVersionUID = 1;
+
 	private static RefTest ref = new RefTest("a secret");
 
 	public String ping()
@@ -349,6 +355,8 @@ public class Test
 
     public static InvocationCallback cb = new InvocationCallback()
 	{
+	    private final static long serialVersionUID = 1;
+
 	    public void preInvoke(Object context, Object instance,
 				  Method m, Object arguments[])
 		throws Exception

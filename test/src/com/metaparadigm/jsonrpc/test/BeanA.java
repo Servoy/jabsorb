@@ -3,10 +3,15 @@
  */
 package com.metaparadigm.jsonrpc.test;
 
+import java.io.Serializable;
+
 /**
  * @author cytan
  */
-public class BeanA {
+public class BeanA implements Serializable
+{
+    private final static long serialVersionUID = 1;
+
     private long id;
     
     public long getId(){

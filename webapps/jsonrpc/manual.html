@@ -43,6 +43,7 @@
           <li><a href="#callable-references">Callable References</a></li>
         </ul>
       </li>
+      <li><a href="#local-arg-resolvers">Local Argument Resolvers</a></li>
       <li><a href="#custom-serializers">Custom Serializers</a></li>
     </ul>
 
@@ -186,14 +187,49 @@
     </ul>
 
     <h2><a name="references">References</a></h2>
-    <p>...</p>
+    <p>JSON-RPC-Java has some basic ORB (Object Request Broker) functionality with the ability to pass objects by reference and keep these references in the user's session.</p>
+    <p>Two types of references are handled: opaque references and callable references.</p>
 
     <h3><a name="opaque-references">Opaque References</a></h3>
-    <p>...</p>
+    <p>Objects of classes registered as References will be returned as opaque reference objects to JavaScript instead of passed by value which is the default behaviour. When these opaque reference objects are passed to succussive Java method calls will then be reassociated back to the original Java object (great for security sensitive objects).</p>
+    <p>A class can be registered as an opaque reference on the JSONRPCBridge as follows:</p>
+    <pre>bridge.registerReference(com.metaparadigm.test.Foo.class)</pre>
+    <p>A reference in JSON format looks like this:</p>
+    <pre>{ "javaClass":"com.metaparadigm.test.Foo",
+  "objectID":5535614,
+  "JSONRPCType":"Reference" }</pre>
+    <p>References could should be used for privileged objects that contain information that needs to be kept secure or complex types that are not required in the Javascript client but need to be passed as a reference in methods of exported objects.</p>
 
     <h3><a name="callable-references">Callable References</a></h3>
-    <p>...</p>
+    <p>Objects of classes registered as Callable References will return dynamic proxies to allow invocation on the particular object instance in the server-side Java. There are extensions to the JSON-RPC protocol in the provided JSON-RPC JavaScript client for dynamic proxy creation support.</p>
+    <p>A class can be registered as a callable reference on the JSONRPCBridge as follows:</p>
+    <pre>bridge.registerCallableReference(com.metaparadigm.test.Bar)</pre>
+    <p>A callable reference in JSON format looks list this:</p>
+    <pre>{ "javaClass":"com.metaparadigm.test.Bar",
+  "objectID":4827452,
+  "JSONRPCType":"CallableReference" }</pre>
+    <p>CallableReferences can be registered for classes that for instance are returned from factory classes as a convenient way to avoid having to manually export these objects returned from these factory methods.</p>
+    <p><b>Note:</b> A limitation exists in the JSON-RPC client where only the top most object returned from a method can be made into a proxy.</p>
 
+    <h2><a name="local-arg-resolvers">Local Argument Resolvers</a></h2>
+    <p>LocalArgResolvers are classes that can resolve an argument from the exported method signatures on the server-side. The exported signature of methods that contain a class registered as a LocalArgResolver have that class removed. It does not need to be provided in call in the JSON-RPC client.</p>
+    <p>The LocalArgResolver provides a mechanism to get access to the HttpServletRequest or HttpSession object associated with a request/method invocation. There are 3 LocalArgResolvers that are enabled by default:
+      <ul>
+        <li>JSONRPCBridgeServletArgResolver</li>
+	<li>HttpSessionArgResolver</li>
+	<li>HttpServletRequestArgResolver</li>
+      </ul>
+    </p>
+    <p>Additional LocalArgResolvers can be created by implementing the <code>LocalArgResolver</code> interface and calling <code>JSONRPCBridge.registerLocalArgResolver()</code></p>
+    <p>An example method that has JSONRPCBridge in the method signature:</p>
+    <pre>public void setDebug(JSONRPCBridge bridge, boolean flag)
+{
+    bridge.setDebug(flag);
+}</pre>
+    <p>This can be called from JavaScript like this:</p>
+    <pre>jsonserver.test.setDebug(true);</pre>
+    <p>The JSONRPCBridge object associated with the users session will be resolved on the server-side and passed in to the remote method. Likewise you can add HttpSession or HttpServletRequest to your methods and have them filled in automatically.</p>
+    
     <h2><a name="custom-serializers">Custom Serializers</a></h2>
     <p>...</p>
 
@@ -201,7 +237,7 @@
     <hr>
     <table cellpadding="0" cellspacing="0" border="0" width="100%">
       <tr>
-	<td><code>$Id: manual.html,v 1.14 2005/02/24 03:05:51 mclark Exp $</code></td>
+	<td><code>$Id: manual.html,v 1.14.2.1 2005/12/11 04:42:37 mclark Exp $</code></td>
 	<td><div class="copyright">Copyright 2005 <a href="http://www.metaparadigm.com/">Metaparadigm Pte Ltd</a></div></td>
       </tr>
     </table>

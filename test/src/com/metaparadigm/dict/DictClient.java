@@ -1,7 +1,7 @@
 /*
  * Simple Java Dict Client (RFC2229)
  *
- * $Id: DictClient.java,v 1.8 2005/02/06 02:08:11 mclark Exp $
+ * $Id: DictClient.java,v 1.8.2.1 2005/12/09 12:31:34 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -29,9 +29,12 @@ import java.io.PrintWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.IOException;
+import java.io.Serializable;
 
-public class DictClient
+public class DictClient implements Serializable
 {
+    private final static long serialVersionUID = 1;
+
     private final static boolean debug = false;
 
     private static String DEFAULT_HOST = "localhost";
@@ -40,14 +43,13 @@ public class DictClient
     private static String host;
     private static int port;
 
-    private ArrayList strategies;
-    private ArrayList databases;
+    private transient ArrayList strategies;
+    private transient ArrayList databases;
 
-    private DictCommandResult r;
-    private String ident;
-    private Socket sock;
-    private PrintWriter out;
-    private BufferedReader in;
+    private transient String ident;
+    private transient Socket sock;
+    private transient PrintWriter out;
+    private transient BufferedReader in;
 
     public DictClient()
     {
@@ -89,7 +91,7 @@ public class DictClient
 	    (new InputStreamReader(sock.getInputStream(), "UTF-8"));
         out = new PrintWriter
 	    (new OutputStreamWriter(sock.getOutputStream(), "UTF-8"));
-	r = new DictCommandResult(in.readLine());
+	DictCommandResult r = new DictCommandResult(in.readLine());
 	if(r.code != DictCommandResult.BANNER) {
 	    close();
 	    throw new DictClientException(r);
@@ -106,7 +108,7 @@ public class DictClient
     {
 	out.print("STATUS\n");
 	out.flush();
-	r = new DictCommandResult(in.readLine());
+	DictCommandResult r = new DictCommandResult(in.readLine());
 	if(r.code != DictCommandResult.STATUS)
 	    throw new DictClientException(r);
 	if(debug) System.out.println("DictClient.status: " + r.msg);
@@ -139,7 +141,7 @@ public class DictClient
 	    out.flush();
 	    String line = in.readLine();
 	    if(line != null /* EOF */ ) {
-		r = new DictCommandResult(line);
+		DictCommandResult r = new DictCommandResult(line);
 		if(r.code != DictCommandResult.CLOSING_CONNECTION) {
 		    System.out.println("DictClient.close: Exception: " + r);
 		}
@@ -170,7 +172,7 @@ public class DictClient
 
 	out.print("SHOW DATABASES\n");
 	out.flush();
-	r = new DictCommandResult(in.readLine());
+	DictCommandResult r = new DictCommandResult(in.readLine());
 	if(r.code != DictCommandResult.DATABASES_PRESENT)
 	    throw new DictClientException(r);
 
@@ -204,7 +206,7 @@ public class DictClient
 
 	out.print("SHOW STRATEGIES\n");
 	out.flush();
-	r = new DictCommandResult(in.readLine());
+	DictCommandResult r = new DictCommandResult(in.readLine());
 	if(r.code != DictCommandResult.STRATEGIES_PRESENT)
 	    throw new DictClientException(r);
 
@@ -239,7 +241,7 @@ public class DictClient
 	out.print("MATCH " + db + " " + strategy +
 		  " \"" + word + "\"\n");
 	out.flush();
-	r = new DictCommandResult(in.readLine());
+	DictCommandResult r = new DictCommandResult(in.readLine());
 	if(r.code == DictCommandResult.NO_MATCH) return matches;
 	else if(r.code != DictCommandResult.MATCH_NUM_RECIEVED)
 	    throw new DictClientException(r);
@@ -270,7 +272,7 @@ public class DictClient
 
 	out.print("DEFINE " + db + " \"" + word + "\"\n");
 	out.flush();
-	r = new DictCommandResult(in.readLine());
+	DictCommandResult r = new DictCommandResult(in.readLine());
 	if(r.code == DictCommandResult.NO_MATCH) return definitions;
 	else if(r.code != DictCommandResult.DEFINE_NUM_RECIEVED)
 	    throw new DictClientException(r);

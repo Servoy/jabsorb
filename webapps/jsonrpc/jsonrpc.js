@@ -1,7 +1,7 @@
 /*
  * JSON-RPC JavaScript client
  *
- * $Id: jsonrpc.js,v 1.34 2005/09/18 05:01:09 mclark Exp $
+ * $Id: jsonrpc.js,v 1.36.2.1 2005/12/09 13:15:32 mclark Exp $
  *
  * Copyright (c) 2003-2004 Jan-Klaas Kollhof
  * Copyright (c) 2005 Michael Clark, Metaparadigm Pte Ltd
@@ -21,8 +21,9 @@
  */
 
 
-// escape a character
+/* escape a character */
 
+escapeJSONChar =
 function escapeJSONChar(c)
 {
     if(c == "\"" || c == "\\") return "\\" + c;
@@ -36,20 +37,21 @@ function escapeJSONChar(c)
     else if(hex.length == 2) return "\\u00" + hex;
     else if(hex.length == 3) return "\\u0" + hex;
     else return "\\u" + hex;
-}
+};
 
 
-// encode a string into JSON format
+/* encode a string into JSON format */
 
+escapeJSONString =
 function escapeJSONString(s)
 {
-    // The following should suffice but Safari's regex is b0rken
-    // (doesn't support callback substitutions)
-    //
-    //   return "\"" + s.replace(/([^\u0020-\u007f]|[\\\"])/g,
-    //                           escapeJSONChar) + "\"";
+    /* The following should suffice but Safari's regex is b0rken
+       (doesn't support callback substitutions)
+       return "\"" + s.replace(/([^\u0020-\u007f]|[\\\"])/g,
+       escapeJSONChar) + "\"";
+    */
 
-    // Rather inefficient way to do it
+    /* Rather inefficient way to do it */
     var parts = s.split("");
     for(var i=0; i < parts.length; i++) {
 	var c =parts[i];
@@ -60,12 +62,12 @@ function escapeJSONString(s)
 	    parts[i] = escapeJSONChar(parts[i]);
     }
     return "\"" + parts.join("") + "\"";
-}
+};
 
 
-// Marshall objects to JSON format
+/* Marshall objects to JSON format */
 
-function toJSON(o)
+toJSON = function toJSON(o)
 {
     if(o == null) {
 	return "null";
@@ -76,7 +78,7 @@ function toJSON(o)
     } else if(o.constructor == Boolean) {
 	return o.toString();
     } else if(o.constructor == Date) {
-    	return '{javaClass: "java.util.Date", time: ' + o.valueOf() +'}';
+	return '{javaClass: "java.util.Date", time: ' + o.valueOf() +'}';
     } else if(o.constructor == Array) {
 	var v = [];
 	for(var i = 0; i < o.length; i++) v.push(toJSON(o[i]));
@@ -85,24 +87,25 @@ function toJSON(o)
 	var v = [];
 	for(attr in o) {
 	    if(o[attr] == null) v.push("\"" + attr + "\": null");
-	    else if(typeof o[attr] == "function"); // skip
+	    else if(typeof o[attr] == "function"); /* skip */
 	    else v.push(escapeJSONString(attr) + ": " + toJSON(o[attr]));
 	}
 	return "{" + v.join(", ") + "}";
     }
-}
+};
 
 
-// JSONRpcClient constructor
+/* JSONRpcClient constructor */
 
-JSONRpcClient = function JSONRpcClient_ctor(serverURL, user, pass, objectID)
+JSONRpcClient =
+function JSONRpcClient_ctor(serverURL, user, pass, objectID)
 {
     this.serverURL = serverURL;
     this.user = user;
     this.pass = pass;
     this.objectID = objectID;
 
-    // Add standard methods
+    /* Add standard methods */
     if(this.objectID) {
 	this._addMethods(["listMethods"]);
 	var req = this._makeRequest("listMethods", []);
@@ -112,10 +115,10 @@ JSONRpcClient = function JSONRpcClient_ctor(serverURL, user, pass, objectID)
     }
     var m = this._sendRequest(req);
     this._addMethods(m);
-}
+};
 
 
-// JSONRpcCLient.Exception
+/* JSONRpcCLient.Exception */
 
 JSONRpcClient.Exception =
 function JSONRpcClient_Exception_ctor(code, message, javaStack)
@@ -130,9 +133,10 @@ function JSONRpcClient_Exception_ctor(code, message, javaStack)
     if(name) this.name = name;
     else this.name = "JSONRpcClientException";
     this.message = message;
-}
+};
 
 JSONRpcClient.Exception.CODE_REMOTE_EXCEPTION = 490;
+JSONRpcClient.Exception.CODE_ERR_CLIENT = 550;
 JSONRpcClient.Exception.CODE_ERR_PARSE = 590;
 JSONRpcClient.Exception.CODE_ERR_NOMETHOD = 591;
 JSONRpcClient.Exception.CODE_ERR_UNMARSHALL = 592;
@@ -144,16 +148,16 @@ JSONRpcClient.Exception.prototype.toString =
 function JSONRpcClient_Exception_toString(code, msg)
 {
     return this.name + ": " + this.message;
-}
+};
 
 
-// Default top level exception handler
+/* Default top level exception handler */
 
 JSONRpcClient.default_ex_handler =
-function JSONRpcClient_default_ex_handler(e) { alert(e); }
+function JSONRpcClient_default_ex_handler(e) { alert(e); };
 
 
-// Client settable variables
+/* Client settable variables */
 
 JSONRpcClient.toplevel_ex_handler = JSONRpcClient.default_ex_handler;
 JSONRpcClient.profile_async = false;
@@ -161,7 +165,7 @@ JSONRpcClient.max_req_active = 1;
 JSONRpcClient.requestId = 1;
 
 
-// JSONRpcClient implementation
+/* JSONRpcClient implementation */
 
 JSONRpcClient.prototype._createMethod =
 function JSONRpcClient_createMethod(methodName)
@@ -173,7 +177,7 @@ function JSONRpcClient_createMethod(methodName)
 	for(var i=0;i<arguments.length;i++) args.push(arguments[i]);
 	if(typeof args[0] == "function") callback = args.shift();
 	var req = fn.client._makeRequest.call(fn.client, fn.methodName,
-					     args, callback);
+					      args, callback);
 	if(callback == null) {
 	    return fn.client._sendRequest.call(fn.client, req);
 	} else {
@@ -181,11 +185,11 @@ function JSONRpcClient_createMethod(methodName)
 	    JSONRpcClient.kick_async();
 	    return req.requestId;
 	}
-    }
+    };
     fn.client = this;
     fn.methodName = methodName;
     return fn;
-}
+};
 
 JSONRpcClient.prototype._addMethods =
 function JSONRpcClient_addMethods(methodNames)
@@ -193,9 +197,9 @@ function JSONRpcClient_addMethods(methodNames)
     for(var i=0; i<methodNames.length; i++) {
 	var obj = this;
 	var names = methodNames[i].split(".");
-	for(var n=0; n<names.length-1; n++){
+	for(var n=0; n<names.length-1; n++) {
 	    var name = names[n];
-	    if(obj[name]){
+	    if(obj[name]) {
 		obj = obj[name];
 	    } else {
 		obj[name]  = new Object();
@@ -203,12 +207,12 @@ function JSONRpcClient_addMethods(methodNames)
 	    }
 	}
 	var name = names[names.length-1];
-	if(!obj[name]){
+	if(!obj[name]) {
 	    var method = this._createMethod(methodNames[i]);
 	    obj[name] = method;
 	}
     }
-}
+};
 
 JSONRpcClient._getCharsetFromHeaders =
 function JSONRpcClient_getCharsetFromHeaders(http)
@@ -221,10 +225,10 @@ function JSONRpcClient_getCharsetFromHeaders(http)
 		return parts[i].substring(8, parts[i].length);
 	}
     } catch (e) {}
-    return "UTF-8"; // default
-}
+    return "UTF-8"; /* default */
+};
 
-// Async queue globals
+/* Async queue globals */
 JSONRpcClient.async_requests = [];
 JSONRpcClient.async_inflight = {};
 JSONRpcClient.async_responses = [];
@@ -253,27 +257,28 @@ function JSONRpcClient_async_handler()
 	if(req.canceled) continue;
 	req.client._sendRequest.call(req.client, req);
     }
-}
+};
 
 JSONRpcClient.kick_async =
 function JSONRpcClient_kick_async()
 {
     if(JSONRpcClient.async_timeout == null)
-	setTimeout(JSONRpcClient._async_handler, 0);
-}
+	JSONRpcClient.async_timeout =
+	    setTimeout(JSONRpcClient._async_handler, 0);
+};
 
 JSONRpcClient.cancelRequest =
 function JSONRpcClient_cancelRequest(requestId)
 {
-    // If it is in flight then mark it as canceled in the inflight map
-    // and the XMLHttpRequest callback will discard the reply.
+    /* If it is in flight then mark it as canceled in the inflight map
+       and the XMLHttpRequest callback will discard the reply. */
     if(JSONRpcClient.async_inflight[requestId]) {
 	JSONRpcClient.async_inflight[requestId].canceled = true;
 	return true;
     }
 
-    // If its not in flight yet then we can just mark it as canceled in
-    // the the request queue and it will get discarded before being sent.
+    /* If its not in flight yet then we can just mark it as canceled in
+       the the request queue and it will get discarded before being sent. */
     for(var i in JSONRpcClient.async_requests) {
 	if(JSONRpcClient.async_requests[i].requestId == requestId) {
 	    JSONRpcClient.async_requests[i].canceled = true;
@@ -281,9 +286,9 @@ function JSONRpcClient_cancelRequest(requestId)
 	}
     }
 
-    // It may have returned from the network and be waiting for its callback
-    // to be dispatched, so mark it as canceled in the response queue
-    // and the response will get discarded before calling the callback.
+    /* It may have returned from the network and be waiting for its callback
+       to be dispatched, so mark it as canceled in the response queue
+       and the response will get discarded before calling the callback. */
     for(var i in JSONRpcClient.async_responses) {
 	if(JSONRpcClient.async_responses[i].requestId == requestId) {
 	    JSONRpcClient.async_responses[i].canceled = true;
@@ -292,7 +297,7 @@ function JSONRpcClient_cancelRequest(requestId)
     }
 
     return false;
-}
+};
 
 JSONRpcClient.prototype._makeRequest =
 function JSONRpcClient_makeRequest(methodName, args, cb)
@@ -315,29 +320,29 @@ function JSONRpcClient_makeRequest(methodName, args, cb)
     req.data = toJSON(obj);
 
     return req;
-}
+};
 
 JSONRpcClient.prototype._sendRequest =
 function JSONRpcClient_sendRequest(req)
 {
     if(req.profile) req.profile.start = new Date();
 
-    // Get free http object from the pool
+    /* Get free http object from the pool */
     var http = JSONRpcClient.poolGetHTTPRequest();
     JSONRpcClient.num_req_active++;
 
-    // Send the request
+    /* Send the request */
     http.open("POST", this.serverURL, (req.cb != null), this.user, this.pass);
 
-    // setRequestHeader is missing in Opera 8 Beta
+    /* setRequestHeader is missing in Opera 8 Beta */
     try { http.setRequestHeader("Content-type", "text/plain"); } catch(e) {}
 
-    // Construct call back if we have one
+    /* Construct call back if we have one */
     if(req.cb) {
 	var self = this;
 	http.onreadystatechange = function() {
 	    if(http.readyState == 4) {
-		http.onreadystatechange = function (){};
+		http.onreadystatechange = function () {};
 		var res = { "cb": req.cb, "result": null, "ex": null};
 		if (req.profile) {
 		    res.profile = req.profile;
@@ -356,29 +361,46 @@ function JSONRpcClient_sendRequest(req)
     }
 
     JSONRpcClient.async_inflight[req.requestId] = req;
-    http.send(req.data);
+	
+    try {
+	http.send(req.data);
+    } catch(e) {
+	JSONRpcClient.poolReturnHTTPRequest(http);
+	JSONRpcClient.num_req_active--;
+	throw new JSONRpcClient.Exception
+	    (JSONRpcClient.Exception.CODE_ERR_CLIENT, "Connection failed");
+    }
 
     if(!req.cb) return this._handleResponse(http);
-}
+};
 
 JSONRpcClient.prototype._handleResponse =
 function JSONRpcClient_handleResponse(http)
 {
-    // Get the charset
+    /* Get the charset */
     if(!this.charset) {
 	this.charset = JSONRpcClient._getCharsetFromHeaders(http);
     }
 
-    // Get request results
-    var status = http.status;
-    var statusText = http.statusText;
-    var data = http.responseText;
+    /* Get request results */
+    var status, statusText, data;
+    try {
+	status = http.status;
+	statusText = http.statusText;
+	data = http.responseText;
+    } catch(e) {
+	JSONRpcClient.poolReturnHTTPRequest(http);
+	JSONRpcClient.num_req_active--;
+	JSONRpcClient.kick_async();
+	throw new JSONRpcClient.Exception
+	    (JSONRpcClient.Exception.CODE_ERR_CLIENT, "Connection failed");
+    }
 
-    // Return http object to the pool;
-    JSONRpcClient.poolReturnHTTPRequest(http)
+    /* Return http object to the pool; */
+    JSONRpcClient.poolReturnHTTPRequest(http);
     JSONRpcClient.num_req_active--;
 
-    // Unmarshall the response
+    /* Unmarshall the response */
     if(status != 200) {
 	throw new JSONRpcClient.Exception(status, statusText);
     }
@@ -393,18 +415,18 @@ function JSONRpcClient_handleResponse(http)
 					  obj.error.trace);
     var res = obj.result;
 
-    // Handle CallableProxy
+    /* Handle CallableProxy */
     if(res && res.objectID && res.JSONRPCType == "CallableReference")
 	return new JSONRpcClient(this.serverURL, this.user,
 				 this.pass, res.objectID);
 
     return res;
-}
+};
 
 
-// XMLHttpRequest wrapper code
+/* XMLHttpRequest wrapper code */
 
-// XMLHttpRequest pool globals
+/* XMLHttpRequest pool globals */
 JSONRpcClient.http_spare = [];
 JSONRpcClient.http_max_spare = 8;
 
@@ -415,15 +437,16 @@ function JSONRpcClient_pool_getHTTPRequest()
 	return JSONRpcClient.http_spare.pop();
     }
     return JSONRpcClient.getHTTPRequest();
-}
+};
 
 JSONRpcClient.poolReturnHTTPRequest =
 function JSONRpcClient_poolReturnHTTPRequest(http)
 {
     if(JSONRpcClient.http_spare.length >= JSONRpcClient.http_max_spare)
 	delete http;
-    JSONRpcClient.http_spare.push(http);
-}
+    else
+	JSONRpcClient.http_spare.push(http);
+};
 
 JSONRpcClient.msxmlNames = [ "MSXML2.XMLHTTP.5.0",
 			     "MSXML2.XMLHTTP.4.0",
@@ -434,13 +457,13 @@ JSONRpcClient.msxmlNames = [ "MSXML2.XMLHTTP.5.0",
 JSONRpcClient.getHTTPRequest =
 function JSONRpcClient_getHTTPRequest()
 {
-    // Mozilla XMLHttpRequest
+    /* Mozilla XMLHttpRequest */
     try {
 	JSONRpcClient.httpObjectName = "XMLHttpRequest";
 	return new XMLHttpRequest();
     } catch(e) {}
 
-    // Microsoft MSXML ActiveX
+    /* Microsoft MSXML ActiveX */
     for (var i=0;i < JSONRpcClient.msxmlNames.length; i++) {
 	try {
 	    JSONRpcClient.httpObjectName = JSONRpcClient.msxmlNames[i];
@@ -448,8 +471,8 @@ function JSONRpcClient_getHTTPRequest()
 	} catch (e) {}
     }
 
-    // None found
+    /* None found */
     JSONRpcClient.httpObjectName = null;
     throw new JSONRpcClient.Exception(0, "Can't create XMLHttpRequest object");
-}
+};
 

@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCServlet.java,v 1.19 2005/08/09 13:41:13 mclark Exp $
+ * $Id: JSONRPCServlet.java,v 1.20 2005/11/04 11:28:40 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -172,7 +172,6 @@ public class JSONRPCServlet extends HttpServlet
 	byte[] bout = json_res.toString().getBytes("UTF-8");
 	if(keepalive) {
 	    response.setIntHeader("Content-Length", bout.length);
-	    response.setHeader("Connection", "keep-alive");
 	}
 
 	out.write(bout);

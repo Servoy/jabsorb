@@ -10,9 +10,12 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.io.Serializable;
 
-public class Browser
+public class Browser implements Serializable
 {
+    private final static long serialVersionUID = 1;
+
     protected static class BrowserStore
     {
 	private Set userAgents = new TreeSet();

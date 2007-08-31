@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: Serializer.java,v 1.3 2005/02/24 03:05:51 mclark Exp $
+ * $Id: Serializer.java,v 1.3.2.1 2005/12/09 12:31:34 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,12 +20,14 @@
 
 package com.metaparadigm.jsonrpc;
 
+import java.io.Serializable;
+
 /**
  * Interface to be implemented by custom serializer objects that convert
  * to and from Java objects and JSON objects.
  */
 
-public interface Serializer
+public interface Serializer extends Serializable
 {
     public void setOwner(JSONSerializer ser);
 

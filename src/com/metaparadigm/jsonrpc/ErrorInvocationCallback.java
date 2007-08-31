@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: LocalArgResolver.java,v 1.3 2005/10/17 12:28:38 mclark Exp $
+ * $Id: ErrorInvocationCallback.java,v 1.1.2.1 2005/12/10 07:54:10 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,18 +20,23 @@
 
 package com.metaparadigm.jsonrpc;
 
+import java.lang.reflect.Method;
+
 /**
- * Interface to be implemented by objects registered to locally resolve
- * method arguments using transport context information.
+ * Interface to be implemented by objects registered for invocation
+ * callbacks that include error information.
  */
 
-public interface LocalArgResolver
+public interface ErrorInvocationCallback extends InvocationCallback
 {
     /**
-     * Resolve an argument locally using the given context information.
-     *
+     * Listener for exceptions thrown from an RPC service.
      * @param context   The transport context (the HttpServletRequest
                         object in the case of the HTTP transport).
+     * @param instance  The object instance or null if it is a static method.
+     * @param method    Method that failed the invocation.
+     * @param error     Error resulting from the invocation.
      */
-    public Object resolveArg(Object context) throws LocalArgResolveException;
+    public void invocationError(Object context, Object instance,
+				Method method, Throwable error);
 }
