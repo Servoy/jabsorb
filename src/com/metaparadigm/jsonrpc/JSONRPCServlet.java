@@ -1,20 +1,22 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCServlet.java,v 1.20 2005/11/04 11:28:40 mclark Exp $
+ * $Id: JSONRPCServlet.java,v 1.20.2.2 2006/03/06 12:39:21 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public (LGPL)
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details: http://www.gnu.org/
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 
@@ -47,7 +49,7 @@ import org.json.JSONArray;
  * The following can be added to your web.xml to export the servlet
  * under the URI &quot;<code>/JSON-RPC</code>&quot;
  * <p />
- * <code>
+ * <pre>
  * &lt;servlet&gt;
  *   &lt;servlet-name&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-name&gt;
  *   &lt;servlet-class&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-class&gt;
@@ -56,7 +58,7 @@ import org.json.JSONArray;
  *   &lt;servlet-name&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-name&gt;
  *   &lt;url-pattern&gt;/JSON-RPC&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
- * </code>
+ * </pre>
  * <p />
  * You can disable the automatic creation of a JSONRPCBridge in the session
  * by placing the XML below into your web.xml inside the &lt;servlet&gt;
@@ -64,22 +66,22 @@ import org.json.JSONArray;
  * is disabled, and you have not added one to the session, only the global
  * bridge will be available.
  * <p />
- * <code>
+ * <pre>
  * &lt;init-param&gt;
  *   &lt;param-name&gt;auto-session-bridge&lt;/param-name&gt;
  *   &lt;param-value&gt;0&lt;/param-value&gt;
  * &lt;/init-param&gt;
- * </code>
+ * </pre>
  * To disable keepalives to workaround issues with certain web containers
  * and configurations of apache / connectors place the following XML into
  * your web.xml inside the &lt;servlet&gt; element.
  * <p />
- * <code>
+ * <pre>
  * &lt;init-param&gt;
  *   &lt;param-name&gt;keepalive&lt;/param-name&gt;
  *   &lt;param-value&gt;0&lt;/param-value&gt;
  * &lt;/init-param&gt;
- * </code>
+ * </pre>
  */
 
 public class JSONRPCServlet extends HttpServlet

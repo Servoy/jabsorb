@@ -1,4 +1,4 @@
-jsonurl = "/jsonrpc/JSON-RPC";
+jsonurl = "JSON-RPC";
 jsonrpc = null;
 
 
@@ -23,23 +23,6 @@ function onLoad()
 	if(e.message) alert(e.message);
 	else alert(e);
     }
-}
-
-function doEval()
-{
-    clrscr();
-    evalStr = document.getElementById("eval").value;
-    print("Evaluating " + evalStr + "\n\n");
-
-    try {
-	print(eval(evalStr));
-    } catch(e) {
-	if(e.javaStack)
-	    print("Exception: \n\n" + e.javaStack);
-	else
-	    print("Exception: \n\n" + e);
-    }
-    return false;
 }
 
 function doListMethods()

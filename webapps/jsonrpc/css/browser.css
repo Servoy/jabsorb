@@ -38,11 +38,15 @@
 
 .br_cell {
     width: 110px;
+    height: 14px;
 }
 
 .plat_cell {
     width: 80px;
+    height: 14px;
 }
 
 .ua_cell {
+    overflow: hidden;
+    height: 14px;
 }

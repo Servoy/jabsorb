@@ -1,4 +1,4 @@
-jsonurl = "/jsonrpc/JSON-RPC";
+jsonurl = "JSON-RPC";
 jsonrpc = null;
 
 function onLoad()

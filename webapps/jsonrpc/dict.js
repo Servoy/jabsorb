@@ -1,4 +1,4 @@
-var jsonurl = "/jsonrpc/JSON-RPC";
+var jsonurl = "JSON-RPC";
 
 var status_interval = 300000;
 var status_timeout = null;

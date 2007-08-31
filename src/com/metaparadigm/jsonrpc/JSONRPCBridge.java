@@ -1,20 +1,22 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCBridge.java,v 1.37.2.2 2005/12/11 01:33:35 mclark Exp $
+ * $Id: JSONRPCBridge.java,v 1.37.2.5 2006/03/27 05:39:21 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public (LGPL)
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details: http://www.gnu.org/
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 
@@ -236,6 +238,16 @@ public class JSONRPCBridge implements Serializable
     protected static class ObjectInstance implements Serializable
     {
 	private Object o;
+	public ObjectInstance(Object o, Class clazz)
+	{
+	    if (! clazz.isInstance(o))
+	    {
+	        throw new ClassCastException("Attempt to register jsonrpc object with invalid class.");
+	    }
+	    this.o = o;
+	    this.clazz = clazz;
+	}
+
 	private Class clazz;
 
 	public ObjectInstance(Object o)
@@ -487,6 +499,7 @@ public class JSONRPCBridge implements Serializable
      * <p />
      * To export instance methods you need to use registerObject.
      *
+     * @param name The named prefix to export the class as
      * @param clazz The class to export static methods from.
      */
     public void registerClass(String name, Class clazz)
@@ -502,6 +515,44 @@ public class JSONRPCBridge implements Serializable
 	}
 	if(debug)
 	    log.info("registered class " + clazz.getName() + " as " + name);
+    }
+
+
+    /**
+     * Unregisters a class exported with registerClass.
+     *
+     * The JSONBridge will unexport all static methods of the class.
+     *
+     * @param name The registered name of the class to unexport static
+     * methods from.
+     */
+    public void unregisterClass(String name)
+	throws Exception
+    {
+	Class clazz = null;
+	synchronized (classMap) {
+	    clazz = (Class)classMap.get(name);
+	    if(clazz != null) {
+		classMap.remove(name);
+		if(debug)
+		    log.info("unregistered class " + clazz.getName() +
+			     " from " + name);
+	    }
+	}
+    }
+
+
+    /**
+     * Lookup a class that is registered with this bridge.
+     *
+     * @param name The registered name of the class to lookup.
+     */
+    public Class lookupClass(String name)
+	throws Exception
+    {
+	synchronized (classMap) {
+	    return (Class)classMap.get(name);
+	}
     }
 
 
@@ -544,13 +595,79 @@ public class JSONRPCBridge implements Serializable
     public void registerObject(Object key, Object o)
     {
 	Class clazz = o.getClass();
-	ObjectInstance inst = new ObjectInstance(o);
+	ObjectInstance oi = new ObjectInstance(o);
 	synchronized (objectMap) {
-	    objectMap.put(key, inst);
+	    objectMap.put(key, oi);
 	}
 	if(debug)
 	    log.info("registered object " + o.hashCode() +
 		     " of class " + clazz.getName() + " as " + key);
+    }
+
+	/**
+	 * Registers an object to export all instance methods defined by interfaceClass.
+	 *
+	 * The JSONBridge will export all instance methods defined by interfaceClass
+	 * of the particular object under the name passed in as a key.
+	 * 
+	 * This will make available these methods of the object as
+	 * <code>&lt;key&gt;.&lt;methodnames&gt;</code> to JSON-RPC clients.
+	 *
+	 * @param key The named prefix to export the object as
+	 * @param o The object instance to be called upon
+	 * @param interfaceClass The type that this object should be registered as.
+	 * 
+	 * This can be used to restrict the exported methods to the methods
+	 * defined in a specific superclass or interface.
+	 */
+	public void registerObject(Object key, Object o, Class interfaceClass)
+	{
+	    ObjectInstance inst = new ObjectInstance(o, interfaceClass);
+    	synchronized (objectMap) {
+    		objectMap.put(key, inst);
+    	}
+    	if(debug) {
+    		log.info("registered object " + o.hashCode() + " of class " + interfaceClass.getName() + " as " + key);
+    	}
+    }    
+
+    /**
+     * Unregisters an object exported with registerObject.
+     *
+     * The JSONBridge will unexport all instance methods and static methods
+     * of the particular object under the name passed in as a key.
+     *
+     * @param key The named prefix of the object to unexport
+     */
+    public void unregisterObject(Object key)
+    {
+	ObjectInstance oi = null;
+	synchronized (objectMap) {
+	    oi = (ObjectInstance)objectMap.get(key);
+	    if(oi != null) {
+		objectMap.remove(key);
+		Class clazz = oi.o.getClass();
+		if(debug)
+		    log.info("unregistered object " + oi.o.hashCode() +
+			     " of class " + clazz.getName() + " from " + key);
+	    }
+	}
+    }
+
+
+    /**
+     * Lookup an object that is registered with this bridge.
+     *
+     * @param key The registered name of the object to lookup.
+     */
+    public Object lookupObject(String key)
+	throws Exception
+    {
+	synchronized (objectMap) {
+	    ObjectInstance oi = (ObjectInstance)objectMap.get(key);
+	    if(oi != null) return oi.o;
+	}
+	return null;
     }
 
 

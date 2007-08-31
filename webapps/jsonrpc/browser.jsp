@@ -20,30 +20,18 @@
 	response.sendRedirect("browser.jsp");
         return;
    }
+  String onLoad;
+  if(testCookies == null && browser.gotSession == false) onLoad = "testCookies()";
+  else if(testCookies != null && browser.gotSession == false) onLoad = null;
+  else if(browser.firstRun) onLoad = "testJSONRPC()";
+  else onLoad = "decodeUserAgents()";
+  String title = "JSON-RPC-Java Browser Compatibility";
+  String head =
+    "    <link rel=\"stylesheet\" type=\"text/css\" href=\"css/browser.css\">\n" +
+    "    <script type=\"text/javascript\" src=\"jsonrpc.js\"></script>\n" +
+    "    <script type=\"text/javascript\" src=\"browser.js\"></script>\n";
 %>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
- "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-  <head>
-    <link rel="stylesheet" type="text/css" href="css/site.css">
-    <link rel="stylesheet" type="text/css" href="css/browser.css">
-    <script type="text/javascript" src="jsonrpc.js"></script>
-    <script type="text/javascript" src="browser.js"></script>
-    <title>JSON-RPC-Java Browser Compatibility</title>
-   </head>
-<% if(testCookies == null && browser.gotSession == false) { %>
-   <body bgcolor="#ffffff" onLoad="testCookies()">
-<% } else if(testCookies != null && browser.gotSession == false) { %>
-   <body bgcolor="#ffffff">
-<% } else if(browser.firstRun) { %>
-   <body bgcolor="#ffffff" onLoad="testJSONRPC()">
-<% } else { %>
-   <body bgcolor="#ffffff" onLoad="decodeUserAgents()">
-<% } %>
-    <h1><img align="left" src="images/json.png" width="55" height="55" hspace="6" vspace="0" alt="JSON logo"/>JSON-RPC-Java</h1>
-    <div class="tagline">JavaScript to Java remote communication.</div>
-    <hr />
-    <div class="menu"><a href="index.html">Home</a> | <a href="tutorial.html">Tutorial</a> | <a href="manual.html">Manual</a> | <a href="demos.html">Demos</a> | <a href="docs/">API Documentation</a> | <a href="http://oss.metaparadigm.com/mailman/listinfo/json-rpc-java">Mailing List</a> | <a href="CHANGES.txt">Changelog</a></div>
+<%@ include file="header.jspinc" %>
 
     <h2>JSON-RPC-Java Browser Compatibility</h2>
 
@@ -91,8 +79,8 @@
 		String userAgent = (String)i.next();
 %>
 <tr>
- <td class="br_td"><div class="br_cell"></div></td>
- <td class="br_td"><div class="plat_cell"></div></td>
+ <td class="br_td"><div class="br_cell">&nbsp;</div></td>
+ <td class="br_td"><div class="plat_cell">&nbsp;</div></td>
  <% if(browser.userAgent != null && browser.userAgent.equals(userAgent)) { %>
  <td class="br_td"><div class="ua_cell"><b><%= userAgent %></b></div></td>
  <% } else { %>
@@ -121,8 +109,8 @@
 		String userAgent = (String)i.next();
 %>
 <tr>
- <td class="br_td"><div class="br_cell"></div></td>
- <td class="br_td"><div class="plat_cell"></div></td>
+ <td class="br_td"><div class="br_cell">&nbsp;</div></td>
+ <td class="br_td"><div class="plat_cell">&nbsp;</div></td>
  <% if(browser.userAgent != null && browser.userAgent.equals(userAgent)) { %>
  <td class="br_td"><div class="ua_cell"><b><%= userAgent %></b></div></td>
  <% } else { %>
@@ -136,16 +124,7 @@
     </table>
 <% } %>
 
-    <br>
-    <hr>
-    <table cellpadding="0" cellspacing="0" border="0" width="100%">
-      <tr>
-	<td><code>$Id: browser.jsp,v 1.8 2005/02/16 01:18:10 mclark Exp $</code></td>
-	<td><div class="copyright">Copyright 2005 <a href="http://www.metaparadigm.com/">Metaparadigm Pte Ltd</a></div></td>
-      </tr>
-    </table>
-  </body>
-</html>
+<%@ include file="footer.jspinc" %>
 
 <%
   if(testCookies != null && browser.gotSession == true)

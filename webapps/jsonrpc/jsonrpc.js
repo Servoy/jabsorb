@@ -1,22 +1,24 @@
 /*
  * JSON-RPC JavaScript client
  *
- * $Id: jsonrpc.js,v 1.36.2.1 2005/12/09 13:15:32 mclark Exp $
+ * $Id: jsonrpc.js,v 1.36.2.3 2006/03/08 15:09:37 mclark Exp $
  *
  * Copyright (c) 2003-2004 Jan-Klaas Kollhof
  * Copyright (c) 2005 Michael Clark, Metaparadigm Pte Ltd
  *
  * This code is based on Jan-Klaas' JavaScript o lait library (jsolait).
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public (LGPL)
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details: http://www.gnu.org/
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 
@@ -332,7 +334,11 @@ function JSONRpcClient_sendRequest(req)
     JSONRpcClient.num_req_active++;
 
     /* Send the request */
-    http.open("POST", this.serverURL, (req.cb != null), this.user, this.pass);
+    if (typeof(this.user) == "undefined") {
+	http.open("POST", this.serverURL, (req.cb != null));
+    } else {
+	http.open("POST", this.serverURL, (req.cb != null), this.user, this.pass);
+    }
 
     /* setRequestHeader is missing in Opera 8 Beta */
     try { http.setRequestHeader("Content-type", "text/plain"); } catch(e) {}

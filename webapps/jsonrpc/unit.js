@@ -1,4 +1,4 @@
-jsonurl = "/jsonrpc/JSON-RPC";
+jsonurl = "JSON-RPC";
 jsonrpc = null;
 
 var tests = [
@@ -138,13 +138,12 @@ function displayTests()
 	var ccell = row.insertCell(row.cells.length);
 	var rcell = row.insertCell(row.cells.length);
 	var pcell = row.insertCell(row.cells.length);
-	ccell.innerHTML = "<div class=\"code_cell\">" +
-	    tests[i].code + "</div>";
+	ccell.innerHTML = "<div class=\"code_cell\">" + tests[i].code + "</div>";
 	ccell.className = "test_td";
-	rcell.className = "test_td";
-	pcell.className = "test_td";
 	rcell.id = "result." + i;
+	rcell.className = "test_td";
 	pcell.id = "pass." + i;
+	pcell.className = "test_td";
     }
 }
 
@@ -196,18 +195,23 @@ function postResults(i, result, e, profile)
 
 var cb;
 
+function testAsyncCB(i)
+{
+    return function (result, e, profile) {
+	postResults(i, result, e, profile);
+    };
+}
+
 function runTestAsync(i)
 {
     try {
-	// create a callback
-	var cb_code = "cb[" + i +"] = function(result, e, profile) " +
-	    "{ postResults(" + i + ", result, e, profile); }";
-	eval(cb_code);
-
-	// insert callback into first argument and submit test
+	// insert post results callback into first argument and submit test
+        var cb = testAsyncCB(i);
 	var code = tests[i].code;
-	code = code.replace(/\(([^\)])/, "(cb[" + i + "], $1");
-	code = code.replace(/\(\)/, "(cb[" + i + "])");
+	code = code.replace(/\(([^\)])/, "(cb, $1");
+	code = code.replace(/\(\)/, "(cb)");
+
+	// run the test
 	eval(code);
     } catch (e) {}
 }

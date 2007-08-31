@@ -1,6 +1,6 @@
 function onLoad()
 {
-    jsonrpc = new JSONRpcClient("/jsonrpc/JSON-RPC");
+    jsonrpc = new JSONRpcClient("JSON-RPC");
 }
 
 function clickHello()

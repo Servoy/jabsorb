@@ -1,7 +1,7 @@
 <project name="json" default="dist" basedir=".">
 
   <!-- Tomcat 5.x classpath and installpath -->
-  <property name="tomcat" location="../jakarta-tomcat-5.0.19"/>
+  <property name="tomcat" location="/opt/jakarta-tomcat-5.5.7"/>
   <property name="installpath" location="${tomcat}/webapps"/>
   <path id="myclasspath">
     <fileset dir="${tomcat}/common/lib"><include name="**/*.jar"/></fileset>
@@ -28,6 +28,9 @@
   </path>
   -->
 
+  <property name="version" value="1.0"/>
+  <property name="jsonrpc-jar" value="jsonrpc-${version}.jar"/>
+  <property name="jsonrpc-war" value="jsonrpc-${version}.war"/>
   <property name="src" location="src"/>
   <property name="build" location="build"/>
 
@@ -44,7 +47,7 @@
   </target>
 
   <target name="dist" depends="compile">
-    <jar destfile="jsonrpc.jar" basedir="${build}" excludes="*~"/>
+    <jar destfile="${jsonrpc-jar}" basedir="${build}" excludes="*~"/>
   </target>
 
   <property name="webapp" location="webapps/jsonrpc"/>
@@ -67,7 +70,7 @@
            srcdir="${test.src}" destdir="${test.classes}">
       <classpath>
         <path refid="myclasspath"/>
-        <pathelement path="jsonrpc.jar"/>
+        <pathelement path="${jsonrpc-jar}"/>
       </classpath>
     </javac>
   </target>
@@ -76,7 +79,7 @@
     <taskdef classname="org.apache.jasper.JspC" name="jasper2">
       <classpath>
         <path refid="myclasspath"/>
-        <pathelement path="jsonrpc.jar"/>
+        <pathelement path="${jsonrpc-jar}"/>
       </classpath>
     </taskdef>
     <jasper2 validateXml="false" uriroot="${webapp}" package=""
@@ -104,16 +107,16 @@
            srcdir="${jsp.out}" destdir="${test.classes}">
       <classpath>
         <path refid="myclasspath"/>
-        <pathelement path="jsonrpc.jar"/>
+        <pathelement path="${jsonrpc-jar}"/>
       </classpath>
     </javac>
   </target>
 
   <target name="test.dist" depends="dist,compile.jsp">
-    <copy file="jsonrpc.jar" tofile="${webinf}/lib/jsonrpc.jar"/>
+    <copy file="${jsonrpc-jar}" tofile="${webinf}/lib/${jsonrpc-jar}"/>
     <jar destfile="${test.lib}/rsrc.jar" basedir="${test.rsrc}"
          excludes="*~"/>
-    <war destfile="jsonrpc.war" basedir="${webapp}"
+    <war destfile="${jsonrpc-war}" basedir="${webapp}"
          excludes="**/*~,**/*.jsp,WEB-INF/web.xml*"
 	 webxml="${webapp}/WEB-INF/web.xml.out"/>
   </target>
@@ -127,7 +130,7 @@
              windowtitle="JSON-RPC-Java API">
       <classpath>
         <path refid="myclasspath"/>
-        <pathelement path="jsonrpc.jar"/>
+        <pathelement path="${jsonrpc-jar}"/>
       </classpath>
       <package name="com.metaparadigm.jsonrpc" />
       <package name="org.json" />
@@ -140,12 +143,12 @@
 
 
   <target name="install" depends="test.dist">
-    <copy file="jsonrpc.war" todir="${installpath}"/>
+    <copy file="${jsonrpc-war}" todir="${installpath}"/>
   </target>
 
   <target name="clean">
-    <delete file="jsonrpc.war"/>
-    <delete file="jsonrpc.jar"/>
+    <delete file="${jsonrpc-war}"/>
+    <delete file="${jsonrpc-jar}"/>
     <delete file="${webapp}/WEB-INF/rsrc.jar"/>
     <delete file="${webapp}/WEB-INF/web.xml.out"/>
     <delete file="${webapp}/WEB-INF/web.xml.generated"/>

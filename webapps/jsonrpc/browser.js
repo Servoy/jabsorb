@@ -18,7 +18,7 @@ function testCookies()
 function testJSONRPC()
 {
     try {
-	jsonrpc = new JSONRpcClient("/jsonrpc/JSON-RPC");
+	jsonrpc = new JSONRpcClient("JSON-RPC");
 	jsonrpc.browser.passUserAgent();
 	redirectSelf();
     } catch(e) {

@@ -1,15 +1,9 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="stylesheet" type="text/css" href="css/site.css" />
-    <title>JSON-RPC-Java Tutorial - JavaScript to Java remote communication</title>
-  </head>
-  <body bgcolor="#ffffff">
-    <h1><img align="left" src="images/json.png" width="55" height="55" hspace="6" vspace="0" alt="JSON logo"/>JSON-RPC-Java</h1>
-    <div class="tagline">JavaScript to Java remote communication.</div>
-    <hr>
-    <div class="menu"><a href="index.html">Home</a> | <a href="tutorial.html">Tutorial</a> | <a href="manual.html">Manual</a> | <a href="demos.html">Demos</a> | <a href="docs/">API Documentation</a> | <a href="http://oss.metaparadigm.com/mailman/listinfo/json-rpc-java">Mailing List</a> | <a href="CHANGES.txt">Changelog</a></div>
+<%!
+  String title = "JSON-RPC-Java Tutorial";
+  String head = "";
+  String onLoad = null;
+%>
+<%@ include file="header.jspinc" %>
 
     <h2>JSON-RPC-Java Tutorial</h2>
 
@@ -140,13 +134,4 @@ out.println("&lt;script type=\"text/javascript\" src=\"myapp.js\"&gt;&lt;/script
 }</pre>
 <p>Take a look at the example <a href="hello.js.txt">hello.js</a> for more details</p>
 
-    <br>
-    <hr>
-    <table cellpadding="0" cellspacing="0" border="0" width="100%">
-      <tr>
-	<td><code>$Id: tutorial.html,v 1.19 2005/02/13 06:24:45 mclark Exp $</code></td>
-	<td><div class="copyright">Copyright 2005 <a href="http://www.metaparadigm.com/">Metaparadigm Pte Ltd</a></div></td>
-      </tr>
-    </table>
-  </body>
-</html>
+<%@ include file="footer.jspinc" %>
