@@ -8,27 +8,27 @@ import java.io.Serializable;
 /**
  * @author cytan
  */
-public class BeanB implements Serializable
-{
-    private final static long serialVersionUID = 1;
+public class BeanB implements Serializable {
+
+    private final static long serialVersionUID = 2;
 
     private long id;
-    
-    public long getId(){
+
+    public long getId() {
         return id;
     }
-    
-    public void setId(long id){
+
+    public void setId(long id) {
         this.id = id;
     }
 
     private BeanA beanA;
-    
-    public BeanA getBeanA(){
+
+    public BeanA getBeanA() {
         return beanA;
     }
-    
-    public void setBeanA(BeanA beanA){
+
+    public void setBeanA(BeanA beanA) {
         this.beanA = beanA;
     }
 }

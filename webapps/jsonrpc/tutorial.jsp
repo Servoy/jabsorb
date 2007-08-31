@@ -69,8 +69,8 @@
 
     <h2><a name="jsonrpcbridge">The JSONRPCBridge</a></h2>
     <p>The JSONRPCBridge holds references to exported objects and decodes and dispatches method calls to them.</p>
-    <p>An instance of the JSONRPCBridge object needs to be placed in a HttpSession object registered under the attribute "JSONRPCBridge" to allow the JSONRPCServlet to locate the bridge.</p>
-    <p>The bridge is implemented as session specific to improve the security of applications by allowing exporting of object methods only to specific users. In this way you can export privileged objects to users after they have gone through your application authentication mechanism. This is a key part of the security mechanism of JSON-RPC-Java.</p>
+    <p>An instance of the JSONRPCBridge can be placed in an HttpSession object registered under the attribute "JSONRPCBridge" to allow the JSONRPCServlet to locate the bridge.</p>
+    <p>Session specific bridges can improve the security of applications by allowing exporting of object methods only to specific users (see the <a href="manual.html#global-bridge">manual</a> for notes about using the global bridge). In this way you can export privileged objects to users after they have gone through your application authentication mechanism.</p>
     <p>To use the bridge to allow calling of Java methods you can put an instance of the bridge in a HttpSession in JSP using the usebean tag or in a Servlet using the HttpSesison API.</p>
 
     <h2><a name="example-jsp">Using the JSONRPCBridge in a JSP page</a></h2>

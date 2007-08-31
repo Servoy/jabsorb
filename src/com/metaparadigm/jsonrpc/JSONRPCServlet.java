@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCServlet.java,v 1.20.2.2 2006/03/06 12:39:21 mclark Exp $
+ * $Id: JSONRPCServlet.java,v 1.29 2006/03/27 05:38:57 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -27,157 +27,147 @@ import java.io.OutputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.CharArrayWriter;
-import java.util.NoSuchElementException;
 import java.util.logging.Logger;
-import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
 import org.json.JSONObject;
-import org.json.JSONArray;
 
 /**
- * This servlet handles JSON-RPC requests over HTTP and hands them to
- * a JSONRPCBridge instance registered in the HttpSession.
- * </p>
- * By default, the JSONRPCServlet places an instance of the JSONRPCBridge
- * object is automatically in the HttpSession object registered under the
- * attribute "JSONRPCBridge".
+ * This servlet handles JSON-RPC requests over HTTP and hands them to a
+ * JSONRPCBridge instance (either a global instance or one in the user's
+ * HttpSession).
  * <p />
- * The following can be added to your web.xml to export the servlet
- * under the URI &quot;<code>/JSON-RPC</code>&quot;
+ * The following can be added to your web.xml to export the servlet under the
+ * URI &quot;<code>/JSON-RPC</code>&quot;
  * <p />
  * <pre>
  * &lt;servlet&gt;
- *   &lt;servlet-name&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-name&gt;
- *   &lt;servlet-class&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-class&gt;
+ * &nbsp;&nbsp;&lt;servlet-name&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-name&gt;
+ * &nbsp;&nbsp;&lt;servlet-class&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-class&gt;
  * &lt;/servlet&gt;
  * &lt;servlet-mapping&gt;
- *   &lt;servlet-name&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-name&gt;
- *   &lt;url-pattern&gt;/JSON-RPC&lt;/url-pattern&gt;
+ * &nbsp;&nbsp;&lt;servlet-name&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-name&gt;
+ * &nbsp;&nbsp;&lt;url-pattern&gt;/JSON-RPC&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
  * </pre>
+ * </p>
+ * The JSONRPCServlet looks for a session specific bridge object
+ * under the attribute <code>"JSONRPCBridge"</code> in the HttpSession
+ * associated with the request (without creating a session if one does
+ * not already exist). If it can't find a session specific bridge instance,
+ * it will default to invoking against the global bridge.
  * <p />
- * You can disable the automatic creation of a JSONRPCBridge in the session
- * by placing the XML below into your web.xml inside the &lt;servlet&gt;
- * element. If you do this, you can add one to the session yourself. If it
- * is disabled, and you have not added one to the session, only the global
- * bridge will be available.
+ * Using a session specific bridge allows you to export certain object 
+ * instances or classes only to specific users, and of course these instances
+ * could be stateful and contain data specific to the user's session.
  * <p />
- * <pre>
- * &lt;init-param&gt;
- *   &lt;param-name&gt;auto-session-bridge&lt;/param-name&gt;
- *   &lt;param-value&gt;0&lt;/param-value&gt;
- * &lt;/init-param&gt;
- * </pre>
- * To disable keepalives to workaround issues with certain web containers
- * and configurations of apache / connectors place the following XML into
- * your web.xml inside the &lt;servlet&gt; element.
+ * An example or creating a session specific bridge in JSP is as follows:
  * <p />
- * <pre>
- * &lt;init-param&gt;
- *   &lt;param-name&gt;keepalive&lt;/param-name&gt;
- *   &lt;param-value&gt;0&lt;/param-value&gt;
- * &lt;/init-param&gt;
- * </pre>
+ * <code>
+ * &lt;jsp:useBean id="JSONRPCBridge" scope="session"
+     class="com.metaparadigm.jsonrpc.JSONRPCBridge"/&gt;
+ * </code>
+ * <p />
+ * An example in Java (i.e. in another Servlet):
+ * <p />
+ * <code>
+ * HttpSession session = request.getSession();<br />
+ * JSONRPCBridge bridge = (JSONRPCBridge) session.getAttribute("JSONRPCBridge");<br>
+ * if(bridge == null) {<br />
+ * &nbsp;&nbsp;&nbsp;&nbsp;bridge = new JSONRPCBridge();<br />
+ * &nbsp;&nbsp;&nbsp;&nbsp;session.setAttribute("JSONRPCBridge", bridge);<br />
+ * }<br />
+ * </code>
  */
 
-public class JSONRPCServlet extends HttpServlet
-{
-    private final static Logger log =
-	Logger.getLogger(JSONRPCServlet.class.getName());
+public class JSONRPCServlet extends HttpServlet {
+
+    private final static long serialVersionUID = 2;
+
+    private final static Logger log = Logger.getLogger(JSONRPCServlet.class
+            .getName());
 
     private final static int buf_size = 4096;
 
-    private static boolean auto_session_bridge = true;
-    private static boolean keepalive = true;
-
-    public void init(ServletConfig config)
-    {
-	if("0".equals(config.getInitParameter("auto-session-bridge")))
-	    auto_session_bridge = false;
-	if("0".equals(config.getInitParameter("keepalive")))
-	    keepalive = false;
-	log.info("auto_session_bridge=" + auto_session_bridge +
-		 ", keepalive=" + keepalive);
+    /**
+     * Find the JSONRPCBridge from the servlet request.
+     * 
+     * @param request
+     * @return the JSONRPCBridge to use for this request
+     */
+    protected JSONRPCBridge findBridge(HttpServletRequest request) {
+        // Find the JSONRPCBridge for this session or create one
+        // if it doesn't exist
+        HttpSession session = request.getSession(false);
+        JSONRPCBridge json_bridge = null;
+        if (session != null)
+            json_bridge = (JSONRPCBridge) session.getAttribute("JSONRPCBridge");
+        if (json_bridge == null) {
+            // Use the global bridge if we can't find a bridge in the session.
+            json_bridge = JSONRPCBridge.getGlobalBridge();
+            if (json_bridge.isDebug())
+                log.info("Using global bridge.");
+        }
+        return json_bridge;
     }
+    
+    public void service(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ClassCastException {
 
-    public void service(HttpServletRequest request,
-			HttpServletResponse response)
-	throws IOException, ClassCastException
-    {
-	// Find the JSONRPCBridge for this session or create one
-	// if it doesn't exist
-	HttpSession session = request.getSession();
-	JSONRPCBridge json_bridge = null;
-	json_bridge = (JSONRPCBridge) session.getAttribute("JSONRPCBridge");
-	if(json_bridge == null) {
-	    // Only create a new bridge if not disabled in config
-	    if(!auto_session_bridge) {
-	    	// Use the global bridge only, and don't set on session.
-		json_bridge = JSONRPCBridge.getGlobalBridge();
-		if (json_bridge.isDebug())
-		    log.info("Using global bridge.");
-	    } else {
-	    	json_bridge = new JSONRPCBridge();
-	    	session.setAttribute("JSONRPCBridge", json_bridge);
-	    	if(json_bridge.isDebug())
-		    log.info("Created a bridge for this session.");
-	    }
-	}
+        // Use protected method in case someone wants to override it
+        JSONRPCBridge json_bridge = findBridge(request);
+        
+        // Encode using UTF-8, although We are actually ASCII clean as
+        // all unicode data is JSON escaped using backslash u. This is
+        // less data efficient for foreign character sets but it is
+        // needed to support naughty browsers such as Konqueror and Safari
+        // which do not honour the charset set in the response
+        response.setContentType("text/plain;charset=utf-8");
+        OutputStream out = response.getOutputStream();
 
-	// Encode using UTF-8, although We are actually ASCII clean as
-	// all unicode data is JSON escaped using backslash u. This is
-	// less data efficient for foreign character sets but it is
-	// needed to support naughty browsers such as Konqueror and Safari
-	// which do not honour the charset set in the response
-	response.setContentType("text/plain;charset=utf-8");
-	OutputStream out = response.getOutputStream();
+        // Decode using the charset in the request if it exists otherwise
+        // use UTF-8 as this is what all browser implementations use.
+        // The JSON-RPC-Java JavaScript client is ASCII clean so it
+        // although here we can correctly handle data from other clients
+        // that do not escape non ASCII data
+        String charset = request.getCharacterEncoding();
+        if (charset == null)
+            charset = "UTF-8";
+        BufferedReader in = new BufferedReader(new InputStreamReader(request
+                .getInputStream(), charset));
 
-	// Decode using the charset in the request if it exists otherwise
-	// use UTF-8 as this is what all browser implementations use.
-	// The JSON-RPC-Java JavaScript client is ASCII clean so it
-	// although here we can correctly handle data from other clients
-	// that do not escape non ASCII data
-	String charset = request.getCharacterEncoding();
-	if(charset == null) charset = "UTF-8";
-	BufferedReader in = new BufferedReader
-	    (new InputStreamReader(request.getInputStream(), charset));
-
-	// Read the request
+        // Read the request
         CharArrayWriter data = new CharArrayWriter();
         char buf[] = new char[buf_size];
         int ret;
-        while((ret = in.read(buf, 0, buf_size)) != -1)
+        while ((ret = in.read(buf, 0, buf_size)) != -1)
             data.write(buf, 0, ret);
-	if(json_bridge.isDebug())
-	    log.fine("recieve: " + data.toString());
+        if (json_bridge.isDebug())
+            log.fine("recieve: " + data.toString());
 
-	// Process the request
-	JSONObject json_req = null;
-	JSONRPCResult json_res = null;
-	try {
-	    json_req = new JSONObject(data.toString());
-	    json_res = json_bridge.call(new Object[] {request}, json_req);
-	} catch (ParseException e) {
-	    log.severe("can't parse call: " + data);
-	    json_res = new JSONRPCResult
-		(JSONRPCResult.CODE_ERR_PARSE, null,
-		 JSONRPCResult.MSG_ERR_PARSE);
-	}
+        // Process the request
+        JSONObject json_req = null;
+        JSONRPCResult json_res = null;
+        try {
+            json_req = new JSONObject(data.toString());
+            json_res = json_bridge.call(new Object[] { request }, json_req);
+        } catch (ParseException e) {
+            log.severe("can't parse call: " + data);
+            json_res = new JSONRPCResult(JSONRPCResult.CODE_ERR_PARSE, null,
+                    JSONRPCResult.MSG_ERR_PARSE);
+        }
 
-	// Write the response
-	if(json_bridge.isDebug())
-	    log.fine("send: " + json_res.toString());
-	byte[] bout = json_res.toString().getBytes("UTF-8");
-	if(keepalive) {
-	    response.setIntHeader("Content-Length", bout.length);
-	}
+        // Write the response
+        if (json_bridge.isDebug())
+            log.fine("send: " + json_res.toString());
+        byte[] bout = json_res.toString().getBytes("UTF-8");
+        response.setIntHeader("Content-Length", bout.length);
 
-	out.write(bout);
-	out.flush();
-	out.close();
+        out.write(bout);
+        out.flush();
+        out.close();
     }
 }

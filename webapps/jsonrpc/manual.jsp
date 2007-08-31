@@ -45,29 +45,60 @@
     <p>JSON-RPC-Java consists of two main user visible components, the JSONRPCBridge and the JSONRPCServlet.</p>
 
     <h3><a name="jsonrpcbridge">JSONRPCBridge</a></h3>
-    <p>The JSONRPCBridge is a per session object that holds references to objects that are exported to a specific client. It is passed JSON-RPC requests from the transport (JSONRPCServlet) and it then performs the unmarshalling of JSON objects to Java objects, performs the method invocation and then marshalls the method's Java object result back to JSON. Serializer objects perform the actual type conversion between Java and JavaScript objects.</p>
-    <p>The JSONRPCBridge must be placed in a HttpSession object registered under the attribute "JSONRPCBridge" to allow the JSONRPCServlet to locate the bridge to make calls on the exported objects.</p>
-    <p>The bridge is implemented as session specific for a number of reasons:</p>
+    <p>The JSONRPCBridge holds references to classes and objects that are
+       exported to allow remote invocation by a JSON-RPC client. It is passed
+       JSON-RPC requests from the transport (JSONRPCServlet) and it then
+       performs the unmarshalling of JSON objects to Java objects, the method
+       invocation and finally marshalls the method's Java object result back
+       to JSON. Serializer objects perform the actual type conversion between
+       Java and JavaScript objects.</p>
+    <p>The JSONRPCServlet (which implements the JSON-RPC HTTP transport) will
+       use either a global singleton JSONRPCBridge instance or optionally one
+       in the user's HttpSession (if it exists). You can place a JSONRPCBridge
+       into a user's HttpSession to allow the JSONRPCServlet to make calls on
+       objects that are exported only to that specific user session (these
+       objects may for instance contain stateful data related to the specific
+       user). A session specific bridge will delegate requests for objects it
+       does not know about to the global singleton JSONRPCBridge instance.</p>
+    <p>Session specific bridges are useful for a number of reasons:</p>
     <ul>
       <li>to improve the security of the application</li>
       <li>export object methods to specific users</li>
+      <li>hold state specific to a user in an exported object</li>
       <li>hold references to objects returned to a specific client</li>
     </ul>
+    <p>The JSONRPCServlet looks for the session specific bridge object
+       under the attribute <code>"JSONRPCBridge"</code> in the HttpSession
+       associated with the request (without creating a session if one does
+       not already exist). If it can't find a session specific bridge instance,
+       it will default to invoking against the global bridge.</p>
+    <p>An example or creating a session specific bridge in JSP is as follows:</p>
+    <pre>&lt;jsp:useBean id="JSONRPCBridge" scope="session"
+           class="com.metaparadigm.jsonrpc.JSONRPCBridge"/&gt;</pre>
+    <p>An example in Java (i.e. in a Servlet):</p>
+    <pre>HttpSession session = request.getSession();
+JSONRPCBridge bridge = (JSONRPCBridge) session.getAttribute("JSONRPCBridge");
+if(bridge == null) {
+    bridge = new JSONRPCBridge();
+    session.setAttribute("JSONRPCBridge", bridge);
+}</pre>
     <p>To export all instance methods of an object to a client:</p>
     <pre>bridge.registerObject("myObject", myObject);</pre>
     <p>To export all static methods of a class to a client:</p>
     <pre>bridge.registerClass("MyClass", com.example.MyClass.class);</pre>
-    <p>If <code>registerObject</code> and <code>registerClass</code> are called multiple times with the same key, then the object is replaced with the new one</p>
+    <p>If <code>registerObject</code> and <code>registerClass</code> are called multiple times with the same key, then the object is replaced with the new one.</p>
     <h3><a name="global-bridge">Global bridge</a></h3>
-    <p>There is a global bridge singleton object that allows exporting objects to all HTTP clients. This can be used for registering factory classes although care must be taken with authentication and security issues as these objects will be accessible to all clients. It can be fetched with <code>JSONRPCBridge.getGlobalBridge()</code>.</p>
+    <p>The global bridge singleton object allows exporting objects to all HTTP clients. This can be used for registering factory classes although care must be taken with authentication and security issues as these objects will be accessible to all clients. It can be fetched with <code>JSONRPCBridge.getGlobalBridge()</code>.</p>
     <p>To export all instance methods of an object to <b>all</b> clients:</p>
     <pre>JSONRPCBridge.getGlobalBridge().registerObject("myObject", myObject);</pre>
     <p>To export all static methods of a class to <b>all</b> clients:</p>
     <pre>JSONRPCBridge.getGlobalBridge().registerClass("MyClass", com.example.MyClass.class);</pre>
-
+    <p><em>See the <a href="docs/com/metaparadigm/jsonrpc/JSONRPCBridge.html">JSONRPCBridge Javadocs</a> for more info.</em></p>
     <h3><a name="jsonrpcservlet">JSONRPCServlet</a></h3>
-    <p>This servlet, the transport part of JSON-RPC-Java, handles JSON-RPC requests over HTTP and dispatches them to a JSONRPCBridge instance registered in the HttpSession.</p>
-    <p>An instance of the JSONRPCBridge object is automatically placed in the HttpSession object registered under the attribute <code>"JSONRPCBridge"</code> by the JSONRPCServlet.</p>
+    <p>This servlet, the transport part of JSON-RPC-Java, handles JSON-RPC
+    requests over HTTP and dispatches them to a JSONRPCBridge instance
+    registered in the HttpSession if one exists (without creating a session
+    if there isn't one already), or otherwise the global bridge.</p>
     <p>The following would be used in your web.xml to export the servlet under the URI <code>"/JSON-RPC"</code> (this is the standard location):</p>
 <pre>&lt;servlet&gt;
   &lt;servlet-name&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-name&gt;
@@ -75,9 +106,9 @@
 &lt;/servlet&gt;
 &lt;servlet-mapping&gt;
   &lt;servlet-name&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-name&gt;
-  &lt;url-pattern&gt;/JSON-RPC&lt;/url-pattern&gt;
-&lt;/servlet-mapping&gt;</pre>
+  &lt;url-pattern&gt;/JSON-RPC&lt;/url-pattern&gt;</pre>pre>
     <p><em>Please note:</em> due to relative mapping of URIs in your web container. You may need to set the URL in your client to: <code>"/&lt;web-app-name&gt;/JSON-RPC"</code>.
+    <p><em>See the <a href="docs/com/metaparadigm/jsonrpc/JSONRPCServlet.html">JSONRPCServlet Javadocs</a> for more info.</em></p>
 
     <h2><a name="type-mapping">Type mapping</a></h2>
     <p>To allow JSON-RPC-Java to transparently unmarshall complex nested objects and with that, the usage of Java's container classes, JSON-RPC needs a mechanism to preserve type information.</p>

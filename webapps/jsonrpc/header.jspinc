@@ -19,7 +19,7 @@
     <h1><img align="left" src="images/json.gif" width="55" height="55" hspace="6" vspace="0" alt="JSON logo"/>JSON-RPC-Java</h1>
     <div class="tagline">JavaScript to Java AJAX communications library.</div>
     <hr>
-    <div class="menu"><a href="http://oss.metaparadigm.com/jsonrpc/">Home</a> | JSON-RPC-Java-1.0 : <a href="index.html">Demos</a> | <a href="tutorial.html">Tutorial</a> | <a href="manual.html">Manual</a> | <a href="docs/">API Documentation</a> | <a href="CHANGES.txt">Changelog</a></div>
+    <div class="menu"><a href="http://oss.metaparadigm.com/jsonrpc/">Home</a> | JSON-RPC-Java-CVS : <a href="index.html">Demos</a> | <a href="tutorial.html">Tutorial</a> | <a href="manual.html">Manual</a> | <a href="docs/">API Documentation</a> | <a href="CHANGES.txt">Changelog</a></div>
 
           </td>
         </tr>

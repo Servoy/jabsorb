@@ -8,7 +8,6 @@ page import="com.metaparadigm.jsonrpc.test.Test"
      class="com.metaparadigm.jsonrpc.test.Test"
 /><%
    response.setDateHeader ("Expires", 0);
-   JSONRPCBridge.enableReferences();
    JSONRPCBridge.registerObject("test", testObject);
    JSONRPCBridge.registerReference(Test.RefTest.class);
    JSONRPCBridge.registerCallableReference(Test.CallableRefTest.class);

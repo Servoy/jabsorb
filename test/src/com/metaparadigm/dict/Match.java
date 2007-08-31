@@ -1,7 +1,7 @@
 /*
  * Simple Java Dict Client (RFC2229)
  *
- * $Id: Match.java,v 1.1.2.1 2006/03/06 12:39:21 mclark Exp $
+ * $Id: Match.java,v 1.4 2006/03/06 12:41:32 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -22,23 +22,30 @@
 
 package com.metaparadigm.dict;
 
-public class Match
-{
+import java.io.Serializable;
+
+public class Match implements Serializable {
+
+    private final static long serialVersionUID = 2;
+
     private String word;
     private String database;
 
-    public String getDatabase() { return database; }
-    public String getWord() { return word; }
-
-    public Match(String database, String word)
-    {
-	this.database = database;
-	this.word = word;
+    public String getDatabase() {
+        return database;
     }
 
-    public String toString()
-    {
-	return "match: " + word + " \"" + database + "\"";
+    public String getWord() {
+        return word;
+    }
+
+    public Match(String database, String word) {
+        this.database = database;
+        this.word = word;
+    }
+
+    public String toString() {
+        return "match: " + word + " \"" + database + "\"";
     }
 
 }

@@ -1,7 +1,7 @@
 /*
  * Simple Java Dict Client (RFC2229)
  *
- * $Id: Strategy.java,v 1.1.2.1 2006/03/06 12:39:21 mclark Exp $
+ * $Id: Strategy.java,v 1.4 2006/03/06 12:41:32 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -22,23 +22,30 @@
 
 package com.metaparadigm.dict;
 
-public class Strategy
-{
+import java.io.Serializable;
+
+public class Strategy implements Serializable {
+
+    private final static long serialVersionUID = 2;
+
     private String strategy;
     private String description;
 
-    public String getStrategy() { return strategy; }
-    public String getDescription() { return description; }
-
-    public Strategy(String strategy, String description)
-    {
-	this.strategy = strategy;
-	this.description = description;
+    public String getStrategy() {
+        return strategy;
     }
 
-    public String toString()
-    {
-	return "strategy: " + strategy + " \"" + description + "\"";
+    public String getDescription() {
+        return description;
+    }
+
+    public Strategy(String strategy, String description) {
+        this.strategy = strategy;
+        this.description = description;
+    }
+
+    public String toString() {
+        return "strategy: " + strategy + " \"" + description + "\"";
     }
 
 }

@@ -1,9 +1,30 @@
+/*
+ * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
+ *
+ * $Id: Browser.java,v 1.8 2006/03/06 12:41:33 mclark Exp $
+ *
+ * Copyright Metaparadigm Pte. Ltd. 2004.
+ * Michael Clark <michael@metaparadigm.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 package com.metaparadigm.jsonrpc.test;
 
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Random;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -12,61 +33,54 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.Serializable;
 
-public class Browser implements Serializable
-{
-    private final static long serialVersionUID = 1;
+public class Browser implements Serializable {
 
-    protected static class BrowserStore
-    {
-	private Set userAgents = new TreeSet();
-	private String dataFile;
+    private final static long serialVersionUID = 2;
 
-	protected BrowserStore(String suffix)
-	{
-	    dataFile = System.getProperty("user.home") +
-		"/.json-rpc-java-browsers-" + suffix + ".txt";
-	    try {
-		load();
-	    } catch(IOException e) {
-		System.out.println("BrowserStore(): " + e);
-	    }
-	}
+    protected static class BrowserStore {
 
-	protected synchronized void load()
-	    throws IOException
-	{
-	    BufferedReader in =
-		new BufferedReader(new FileReader(dataFile));
-	    String line;
-	    while((line = in.readLine()) != null) userAgents.add(line);
-	    in.close();
-	}
+        private Set userAgents = new TreeSet();
+        private String dataFile;
 
-	protected synchronized void save()
-	    throws IOException
-	{
-	    PrintWriter out = new PrintWriter
-		(new BufferedWriter(new FileWriter(dataFile)));
-	    Iterator i = userAgents.iterator();
-	    while(i.hasNext()) out.println(i.next());
-	    out.close();
-	}
+        protected BrowserStore(String suffix) {
+            dataFile = System.getProperty("user.home")
+                    + "/.json-rpc-java-browsers-" + suffix + ".txt";
+            try {
+                load();
+            } catch (IOException e) {
+                System.out.println("BrowserStore(): " + e);
+            }
+        }
 
-	protected boolean addUserAgent(String userAgent)
-	    throws IOException
-	{
-	    if(!userAgents.contains(userAgent)) {
-		userAgents.add(userAgent);
-		save();
-		return true;
-	    }
-	    return false;
-	}
+        protected synchronized void load() throws IOException {
+            BufferedReader in = new BufferedReader(new FileReader(dataFile));
+            String line;
+            while ((line = in.readLine()) != null)
+                userAgents.add(line);
+            in.close();
+        }
 
-	protected Set getUserAgents()
-	{
-	    return userAgents;
-	}
+        protected synchronized void save() throws IOException {
+            PrintWriter out = new PrintWriter(new BufferedWriter(
+                    new FileWriter(dataFile)));
+            Iterator i = userAgents.iterator();
+            while (i.hasNext())
+                out.println(i.next());
+            out.close();
+        }
+
+        protected boolean addUserAgent(String userAgent) throws IOException {
+            if (!userAgents.contains(userAgent)) {
+                userAgents.add(userAgent);
+                save();
+                return true;
+            }
+            return false;
+        }
+
+        protected Set getUserAgents() {
+            return userAgents;
+        }
 
     }
 
@@ -80,50 +94,35 @@ public class Browser implements Serializable
     public boolean passed = false;
     public boolean addNotify = false;
 
-    private String failKey;
-
     /*
-    private static String makeKey()
-    {
-    	byte b[] = new byte[8];
-    	new Random().nextBytes(b);
-	StringBuffer sb = new StringBuffer();
-	for(int i=0; i < 8; i++) {
-	    sb.append(b[i] & 0x0f + 'a');
-	    sb.append((b[i] >> 4) & 0x0f + 'a');
-	}
-	return sb.toString();
-    }
-    */
+     * private static String makeKey() { byte b[] = new byte[8]; new
+     * Random().nextBytes(b); StringBuffer sb = new StringBuffer(); for(int i=0;
+     * i < 8; i++) { sb.append(b[i] & 0x0f + 'a'); sb.append((b[i] >> 4) & 0x0f +
+     * 'a'); } return sb.toString(); }
+     */
 
-    public synchronized void passUserAgent()
-	throws IOException
-    {
-	if(passed) return;
-	System.out.println("Browser.passUserAgent(\"" + userAgent + "\")");
-	addNotify = passStore.addUserAgent(userAgent);
-	passed = true;
+    public synchronized void passUserAgent() throws IOException {
+        if (passed)
+            return;
+        System.out.println("Browser.passUserAgent(\"" + userAgent + "\")");
+        addNotify = passStore.addUserAgent(userAgent);
+        passed = true;
     }
 
-    public synchronized void failUserAgent()
-	throws IOException
-    {
-	if(failed) return;
-	System.out.println("Browser.failUserAgent(\"" + userAgent + "\")");
-	addNotify = failStore.addUserAgent(userAgent);
-	failed = true;
+    public synchronized void failUserAgent() throws IOException {
+        if (failed)
+            return;
+        System.out.println("Browser.failUserAgent(\"" + userAgent + "\")");
+        addNotify = failStore.addUserAgent(userAgent);
+        failed = true;
     }
 
-    public synchronized Set getPassedUserAgents()
-	throws IOException
-    {
-	return passStore.getUserAgents();
+    public synchronized Set getPassedUserAgents() throws IOException {
+        return passStore.getUserAgents();
     }
 
-    public synchronized Set getFailedUserAgents()
-	throws IOException
-    {
-	return failStore.getUserAgents();
+    public synchronized Set getFailedUserAgents() throws IOException {
+        return failStore.getUserAgents();
     }
 
 }

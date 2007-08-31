@@ -2,12 +2,11 @@ package com.metaparadigm.jsonrpc.test;
 
 import java.io.Serializable;
 
-public class Hello implements Serializable
-{
-    private final static long serialVersionUID = 1;
+public class Hello implements Serializable {
+    
+    private final static long serialVersionUID = 2;
 
-    public String sayHello(String who)
-    {
-	return "hello " + who;
+    public String sayHello(String who) {
+        return "hello " + who;
     }
 }
