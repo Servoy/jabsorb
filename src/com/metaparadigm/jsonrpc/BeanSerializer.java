@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: BeanSerializer.java,v 1.4 2005/01/21 00:10:50 mclark Exp $
+ * $Id: BeanSerializer.java,v 1.7 2005/06/16 23:26:14 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.logging.Logger;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import java.beans.Introspector;
@@ -32,10 +33,18 @@ import java.beans.PropertyDescriptor;
 import java.beans.BeanInfo;
 import org.json.JSONObject;
 
-class BeanSerializer extends Serializer
+public class BeanSerializer extends AbstractSerializer
 {
+    private final static Logger log =
+	Logger.getLogger(BeanSerializer.class.getName());
+
     private static HashMap beanCache = new HashMap();
-    private HashSet associationCache = new HashSet();
+
+    private static Class[] _serializableClasses = new Class[] { };
+    private static Class[] _JSONClasses = new Class[] { };
+
+    public Class[] getSerializableClasses() { return _serializableClasses; }
+    public Class[] getJSONClasses() { return _JSONClasses; }
 
     public boolean canSerialize(Class clazz, Class jsonClazz)
     {
@@ -45,18 +54,28 @@ class BeanSerializer extends Serializer
 		(jsonClazz == null || jsonClazz == JSONObject.class));
     }
 
-    private static class BeanData
+    protected static class BeanData
     {
-	private BeanInfo beanInfo;
-	private HashMap readableProps;
-	private HashMap writableProps;	
+        //in absence of getters and setters, these fields are 
+        //public to allow subclasses to access.
+        public BeanInfo beanInfo;
+        public HashMap readableProps;
+        public HashMap writableProps;	
+    }
+
+    protected static class BeanSerializerState
+    {
+        //in absence of getters and setters, these fields are 
+        //public to allow subclasses to access.
+
+        // Circular reference detection
+        public HashSet beanSet = new HashSet();
     }
 
     public static BeanData analyzeBean(Class clazz)
 	throws IntrospectionException
     {
-	System.out.println("BeanSerializer.analyzeBean analyzing " +
-			   clazz.getName());
+	log.info("analyzing " + clazz.getName());
 	BeanData bd = new BeanData();
 	bd.beanInfo = Introspector.getBeanInfo(clazz, Object.class);
 	PropertyDescriptor props[] = bd.beanInfo.getPropertyDescriptors();
@@ -89,7 +108,8 @@ class BeanSerializer extends Serializer
 	return bd;
     }
 
-    public ObjectMatch doTryToUnmarshall(Class clazz, Object o)
+    public ObjectMatch tryUnmarshall(SerializerState state,
+				     Class clazz, Object o)
 	throws UnmarshallException
     {
 	JSONObject jso = (JSONObject)o;
@@ -124,7 +144,7 @@ class BeanSerializer extends Serializer
 			    ("bean " + clazz.getName() +
 			     " method " + setMethod.getName() +
 			     " does not have one arg");
-		    tmp = tryToUnmarshall(param[0], jso.get(field));
+		    tmp = ser.tryUnmarshall(state, param[0], jso.get(field));
 		    if(m == null) m = tmp;
 		    else m = m.max(tmp);
 		} catch (UnmarshallException e) {
@@ -138,7 +158,7 @@ class BeanSerializer extends Serializer
 	return m.max(new ObjectMatch(mismatch));
     }
 
-    public Object doUnmarshall(Class clazz, Object o)
+    public Object unmarshall(SerializerState state, Class clazz, Object o)
 	throws UnmarshallException
     {
 	JSONObject jso = (JSONObject)o;
@@ -148,9 +168,8 @@ class BeanSerializer extends Serializer
 	} catch (IntrospectionException e) {
 	    throw new UnmarshallException(clazz.getName() + " is not a bean");
 	}
-	if(getBridge().isDebug())
-	    System.out.println("BeanSerializer.unmarshall instantiating " +
-			       clazz.getName());
+	if(ser.isDebug())
+	    log.fine("instantiating " + clazz.getName());
 	Object instance = null;
 	try {
 	    instance = clazz.newInstance();
@@ -168,15 +187,14 @@ class BeanSerializer extends Serializer
 	    if(setMethod != null) {
 		try {
 		    Class param[] = setMethod.getParameterTypes();
-		    fieldVal = unmarshall(param[0], jso.get(field));
+		    fieldVal = ser.unmarshall(state, param[0], jso.get(field));
 		} catch (UnmarshallException e) {
 		    throw new UnmarshallException("bean " + clazz.getName() +
 						  " " + e.getMessage());
 		}
-		if(getBridge().isDebug())
-		    System.out.println
-			("BeanSerializer.unmarshall invoking " +
-			 setMethod.getName() + "(" + fieldVal + ")");
+		if(ser.isDebug())
+		    log.fine("invoking " + setMethod.getName() +
+			     "(" + fieldVal + ")");
 		invokeArgs[0] = fieldVal;
 		try {
 		    setMethod.invoke(instance, invokeArgs);
@@ -193,9 +211,21 @@ class BeanSerializer extends Serializer
 	return instance;
     }
 
-    public Object doMarshall(Object o)
+    public Object marshall(SerializerState state, Object o)
 	throws MarshallException
     {
+	BeanSerializerState beanState;
+	try {
+	    beanState = (BeanSerializerState)
+		state.get(BeanSerializerState.class);
+	} catch (Exception e) {
+	    throw new MarshallException("bean serializer internal error");
+	}
+	Integer identity = new Integer(System.identityHashCode (o));
+	if(beanState.beanSet.contains(identity))
+	    throw new MarshallException("circular reference");
+	beanState.beanSet.add(identity);
+
 	BeanData bd = null;
 	try {
 	    bd = getBeanData(o.getClass());
@@ -205,7 +235,8 @@ class BeanSerializer extends Serializer
 	}
     
 	JSONObject val = new JSONObject();
-	val.put("javaClass", o.getClass().getName());
+        if (ser.getMarshallClassHints())
+            val.put("javaClass", o.getClass().getName());
 	Iterator i = bd.readableProps.entrySet().iterator();
 	Object args[] = new Object[0];
 	Object result = null;
@@ -213,10 +244,8 @@ class BeanSerializer extends Serializer
 	    Map.Entry ent = (Map.Entry)i.next();
 	    String prop = (String)ent.getKey();
 	    Method getMethod = (Method)ent.getValue();
-	    if(getBridge().isDebug())
-		System.out.println
-		    ("BeanSerializer.marshall invoking " +
-		     getMethod.getName() + "()");
+	    if(ser.isDebug())
+		log.fine("invoking " + getMethod.getName() + "()");
 	    try {
 		result = getMethod.invoke(o, args);
 	    } catch (Throwable e) {
@@ -228,28 +257,15 @@ class BeanSerializer extends Serializer
 		     getMethod.getName() + ": " + e.getMessage());
 	    }
 	    try {
-        associationCache.add(new Integer(o.hashCode()));
-		val.put(prop, marshall(result));
+                if (result != null || ser.getMarshallNullAttributes()) 
+                    val.put(prop, ser.marshall(state, result));
 	    } catch (MarshallException e) {
 		throw new MarshallException
 		    ("bean " + o.getClass().getName() + " " + e.getMessage());
 	    }
 	}
+
+	beanState.beanSet.remove(identity);
 	return val;
-    }
-    
-    public Object marshall(Object o) throws MarshallException{
-        if(isMarshalledObjectNull(o)){
-            return o;
-        }
-        
-        if(associationCache.contains(new Integer(o.hashCode()))){
-            return o.toString();
-        }
-        associationCache.add(new Integer(o.hashCode()));
-        
-        Object result = super.marshall(o);
-        associationCache.remove(new Integer(o.hashCode()));
-        return result;
     }
 }

@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: Serializer.java,v 1.3 2005/02/24 03:05:51 mclark Exp $
+ * $Id: HttpServletRequestArgResolver.java,v 1.1 2005/04/24 11:13:06 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,27 +20,16 @@
 
 package com.metaparadigm.jsonrpc;
 
-/**
- * Interface to be implemented by custom serializer objects that convert
- * to and from Java objects and JSON objects.
- */
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
-public interface Serializer
+public class HttpServletRequestArgResolver implements LocalArgResolver
 {
-    public void setOwner(JSONSerializer ser);
+    public Object resolveArg(Object context) throws LocalArgResolveException
+    {
+	if(!(context instanceof HttpServletRequest))
+	    throw new LocalArgResolveException("invalid context");
 
-    public Class[] getSerializableClasses();
-    public Class[] getJSONClasses();
-
-    public boolean canSerialize(Class clazz, Class jsonClazz);
-
-    public ObjectMatch tryUnmarshall(SerializerState state,
-				     Class clazz, Object json)
-	throws UnmarshallException;
-
-    public Object unmarshall(SerializerState state, Class clazz, Object json)
-	throws UnmarshallException;
-
-    public Object marshall(SerializerState state, Object o)
-	throws MarshallException;
+	return context;
+    }
 }

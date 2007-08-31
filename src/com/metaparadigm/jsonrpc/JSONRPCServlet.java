@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCServlet.java,v 1.12 2005/02/11 09:41:49 mclark Exp $
+ * $Id: JSONRPCServlet.java,v 1.17 2005/04/23 11:24:17 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -23,11 +23,10 @@ package com.metaparadigm.jsonrpc;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.BufferedReader;
-import java.io.PrintWriter;
 import java.io.CharArrayWriter;
 import java.util.NoSuchElementException;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -40,9 +39,9 @@ import org.json.JSONArray;
  * This servlet handles JSON-RPC requests over HTTP and hands them to
  * a JSONRPCBridge instance registered in the HttpSession.
  * </p>
- * An instance of the JSONRPCBridge object is automatically placed in the
- * HttpSession object registered under the attribute "JSONRPCBridge" by
- * the JSONRPCServlet.
+ * By default, the JSONRPCServlet places an instance of the JSONRPCBridge
+ * object is automatically in the HttpSession object registered under the
+ * attribute "JSONRPCBridge".
  * <p />
  * The following can be added to your web.xml to export the servlet
  * under the URI &quot;<code>/JSON-RPC</code>&quot;
@@ -57,10 +56,26 @@ import org.json.JSONArray;
  *   &lt;url-pattern&gt;/JSON-RPC&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
  * </code>
+ * <p />
+ * You can disable the automatic creation of a JSONRPCBridge in the session
+ * by placing the XML below into your web.xml inside the &lt;servlet&gt;
+ * element. If you do this, you can add one to the session yourself. If it
+ * is disabled, and you have not added one to the session, only the global
+ * bridge will be available.
+ * <p />
+ * <code>
+ * &lt;init-param&gt;
+ *   &lt;param-name&gt;auto-session-bridge&lt;/param-name&gt;
+ *   &lt;param-value&gt;0&lt;/param-value&gt;
+ * &lt;/init-param&gt;
+ * </code>
  */
 
 public class JSONRPCServlet extends HttpServlet
 {
+    private final static Logger log =
+	Logger.getLogger(JSONRPCServlet.class.getName());
+
     private final static int buf_size = 4096;
 
     public void service(HttpServletRequest request,
@@ -71,11 +86,21 @@ public class JSONRPCServlet extends HttpServlet
 	// if it doesn't exist
 	HttpSession session = request.getSession();
 	JSONRPCBridge json_bridge = null;
-	json_bridge = (JSONRPCBridge)
-	    session.getAttribute("JSONRPCBridge");
+	json_bridge = (JSONRPCBridge) session.getAttribute("JSONRPCBridge");
 	if(json_bridge == null) {
-	    json_bridge = new JSONRPCBridge();
-	    session.setAttribute("JSONRPCBridge", json_bridge);
+	    // Only create a new bridge if not disabled in config
+	    if("0".equals(getServletConfig().getInitParameter
+			  ("auto-session-bridge"))) {
+	    	// Use the global bridge only, and don't set on session.
+		json_bridge = JSONRPCBridge.getGlobalBridge();
+		if (json_bridge.isDebug())
+		    log.info("Using global bridge.");
+	    } else {
+	    	json_bridge = new JSONRPCBridge();
+	    	session.setAttribute("JSONRPCBridge", json_bridge);
+	    	if(json_bridge.isDebug())
+		    log.info("Created a bridge for this session.");
+	    }
 	}
 
 	// Encode using UTF-8, although We are actually ASCII clean as
@@ -105,8 +130,7 @@ public class JSONRPCServlet extends HttpServlet
         }
 
 	if(json_bridge.isDebug())
-	    System.out.println("JSONRPCServlet.service recv: " +
-			       data.toString());
+	    log.fine("recieve: " + data.toString());
 
 	// Process the request
 	JSONObject json_req = null;
@@ -127,37 +151,31 @@ public class JSONRPCServlet extends HttpServlet
 	    } else {
 		methodName = json_req.getString("methodName");
 		arguments = json_req.getJSONArray("arguments");
-		System.err.println("JSONRPCServlet.service: " +
-				   "methodName in request deprecated, " +
-				   "please update your JSON-RPC client.");
+		log.warning("methodName in request deprecated, " +
+			    "please update your JSON-RPC client.");
 	    }
 
 	    // Is this a CallableReference it will have a non-zero objectID
 	    int object_id = json_req.optInt("objectID");
 	    if(json_bridge.isDebug())
 		if(object_id != 0)
-		    System.out.println("JSONRPCServlet.service call " +
-				       "objectID=" + object_id + " " +
-				       methodName + "(" + arguments + ")");
+		    log.fine("call " + "objectID=" + object_id + " " +
+			     methodName + "(" + arguments + ")");
 		else
-		    System.out.println("JSONRPCServlet.service call " +
-				       methodName + "(" + arguments + ")");
-	    json_res = json_bridge.call(session,
+		    log.fine("call " + methodName + "(" + arguments + ")");
+	    json_res = json_bridge.call(new Object[] {request},
 					object_id, methodName, arguments);
 	} catch (ParseException e) {
-	    System.err.println
-		("JSONRPCServlet.service can't parse call: " + data);
+	    log.severe("can't parse call: " + data);
 	    json_res = JSONRPCResult.ERR_PARSE;
 	} catch (NoSuchElementException e) {
-	    System.err.println
-		("JSONRPCServlet.service no method in request");
+	    log.severe("no method in request");
 	    json_res = JSONRPCResult.ERR_NOMETHOD;
 	}
 
 	// Write the response
 	if(json_bridge.isDebug())
-	    System.out.println("JSONRPCServlet.service send: " +
-			       json_res.toString());
+	    log.fine("send: " + json_res.toString());
 	byte[] bout = json_res.toString().getBytes("UTF-8");
 	response.setIntHeader("Content-Length", bout.length);
 	response.setHeader("Connection", "keep-alive");

@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: MarshallException.java,v 1.1.1.1 2004/03/31 14:21:00 mclark Exp $
+ * $Id: MarshallException.java,v 1.3 2005/03/08 23:29:53 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,9 +20,14 @@
 
 package com.metaparadigm.jsonrpc;
 
-class MarshallException extends Exception
+/**
+ * Thrown by Serializer objects when they are unable to Marshall the Java
+ * objects into JSON objects.
+ */
+
+public class MarshallException extends Exception
 {
-    protected MarshallException(String msg)
+    public MarshallException(String msg)
     {
 	super(msg);
     }

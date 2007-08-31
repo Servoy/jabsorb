@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: MapSerializer.java,v 1.2 2004/12/10 08:11:02 mclark Exp $
+ * $Id: MapSerializer.java,v 1.4 2005/06/16 23:26:14 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -28,7 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.Iterator;
 import org.json.JSONObject;
 
-class MapSerializer extends Serializer
+public class MapSerializer extends AbstractSerializer
 {
     private static Class[] _serializableClasses = new Class[]
 	{ Map.class, HashMap.class, TreeMap.class, LinkedHashMap.class };
@@ -46,7 +46,8 @@ class MapSerializer extends Serializer
 		 Map.class.isAssignableFrom(clazz)));
     }
 
-    public ObjectMatch doTryToUnmarshall(Class clazz, Object o)
+    public ObjectMatch tryUnmarshall(SerializerState state,
+				     Class clazz, Object o)
 	throws UnmarshallException
     {
 	JSONObject jso = (JSONObject)o;
@@ -68,7 +69,7 @@ class MapSerializer extends Serializer
 	try {
 	    while(i.hasNext()) {
 		key = (String)i.next();
-		m = tryToUnmarshall(null, jsonmap.get(key)).max(m);
+		m = ser.tryUnmarshall(state, null, jsonmap.get(key)).max(m);
 	    }
 	} catch (UnmarshallException e) {
 	    throw new UnmarshallException
@@ -77,7 +78,7 @@ class MapSerializer extends Serializer
 	return m;
     }
 
-    public Object doUnmarshall(Class clazz, Object o)
+    public Object unmarshall(SerializerState state, Class clazz, Object o)
 	throws UnmarshallException
     {
 	JSONObject jso = (JSONObject)o;
@@ -104,7 +105,7 @@ class MapSerializer extends Serializer
 	try {
 	    while(i.hasNext()) {
 		key = (String)i.next();
-		abmap.put(key, unmarshall(null, jsonmap.get(key)));
+		abmap.put(key, ser.unmarshall(state, null, jsonmap.get(key)));
 	    }
 	} catch (UnmarshallException e) {
 	    throw new UnmarshallException
@@ -113,13 +114,14 @@ class MapSerializer extends Serializer
 	return abmap;
     }
 
-    public Object doMarshall(Object o)
+    public Object marshall(SerializerState state, Object o)
 	throws MarshallException
     {
 	Map map = (Map)o;
 	JSONObject obj = new JSONObject();
 	JSONObject mapdata = new JSONObject();
-	obj.put("javaClass", o.getClass().getName());
+        if (ser.getMarshallClassHints())
+            obj.put("javaClass", o.getClass().getName());
 	obj.put("map", mapdata);
 	Object key = null;
 	Object val = null;
@@ -130,7 +132,7 @@ class MapSerializer extends Serializer
 		key = ent.getKey();
 		val = ent.getValue();
 		// only support String keys
-		mapdata.put(key.toString(), marshall(val));
+		mapdata.put(key.toString(), ser.marshall(state, val));
 	    }
 	} catch (MarshallException e) {
 	    throw new MarshallException

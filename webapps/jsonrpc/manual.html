@@ -120,15 +120,15 @@
     <p>The Java string representation of the key object is used as the native JavaScript object type only supports strings as keys.</p>
 
     <h4>Set</h4>
-    <p>Set (HashSet, HashSet, TreeSet, LinkedHashSet) maps to a JavaScript object with a string member <code>javaClass</code> containing the Java class name and a nativeJavaScript object containing the set item strings each with a value of true. eg.</p>
+    <p>Set (HashSet, TreeSet, LinkedHashSet) maps to a JavaScript object with a string member <code>javaClass</code> containing the Java class name and a native JavaScript object containing the set item string values as keys and set objects as values. eg.</p>
 <pre>{
-  "javaClass": "java.util.ArrayList",
-  "set": {"foo key": true}
+  "javaClass": "java.util.HashSet",
+  "set": {"foo key": "foo key"}
 }</pre>
     <p>The Java string representation of the key object is used as the native JavaScript object type only supports strings as keys.</p>
 
     <h2><a name="javascript-client">JavaScript Client</a></h2>
-    <p>The JavaScript client <code>JSONRpcCLient</code> constructs a transparent proxy providing method access to all methods on the JSON-RPC server.</p>
+    <p>The JavaScript client <code>JSONRpcClient</code> constructs a transparent proxy providing method access to all methods on the JSON-RPC server.</p>
     <p>It is constructued like this:</p>
     <pre>var jsonrpc = new JSONRpcClient("/webapp/JSON-RPC/")</pre>
     <p>HTTP authentication can also be used</p>
@@ -201,7 +201,7 @@
     <hr>
     <table cellpadding="0" cellspacing="0" border="0" width="100%">
       <tr>
-	<td><code>$Id: manual.html,v 1.13 2005/02/13 04:20:39 mclark Exp $</code></td>
+	<td><code>$Id: manual.html,v 1.14 2005/02/24 03:05:51 mclark Exp $</code></td>
 	<td><div class="copyright">Copyright 2005 <a href="http://www.metaparadigm.com/">Metaparadigm Pte Ltd</a></div></td>
       </tr>
     </table>

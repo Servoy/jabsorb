@@ -272,7 +272,7 @@ public class JSONArray {
             }
             o = myArrayList.get(i);
             if (o == null) {
-                sb.append("");
+                sb.append("null");
             } else if (o instanceof String) {
                 sb.append(JSONObject.quote((String)o));
             } else if (o instanceof Number) {

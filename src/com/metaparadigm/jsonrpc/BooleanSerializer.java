@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: BooleanSerializer.java,v 1.1 2004/04/09 06:32:37 mclark Exp $
+ * $Id: BooleanSerializer.java,v 1.3 2005/06/16 23:26:14 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,7 +20,7 @@
 
 package com.metaparadigm.jsonrpc;
 
-class BooleanSerializer extends Serializer
+public class BooleanSerializer extends AbstractSerializer
 {
     private static Class[] _serializableClasses = new Class[]
 	{ boolean.class, Boolean.class };
@@ -31,13 +31,14 @@ class BooleanSerializer extends Serializer
     public Class[] getSerializableClasses() { return _serializableClasses; }
     public Class[] getJSONClasses() { return _JSONClasses; }
 
-    public ObjectMatch doTryToUnmarshall(Class clazz, Object jso)
+    public ObjectMatch tryUnmarshall(SerializerState state,
+				     Class clazz, Object jso)
 	throws UnmarshallException
     {
 	return ObjectMatch.OKAY;
     }
 
-    public Object doUnmarshall(Class clazz, Object jso)
+    public Object unmarshall(SerializerState state, Class clazz, Object jso)
 	throws UnmarshallException
     {
 	if(clazz == boolean.class) {
@@ -47,7 +48,7 @@ class BooleanSerializer extends Serializer
 	}
     }
 
-    public Object doMarshall(Object o)
+    public Object marshall(SerializerState state, Object o)
 	throws MarshallException
     {
 	return o;

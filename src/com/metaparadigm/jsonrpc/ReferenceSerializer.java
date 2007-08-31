@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: ReferenceSerializer.java,v 1.4 2005/01/21 00:05:24 mclark Exp $
+ * $Id: ReferenceSerializer.java,v 1.6 2005/02/26 02:46:02 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,29 +20,45 @@
 
 package com.metaparadigm.jsonrpc;
 
+import java.util.logging.Logger;
 import org.json.JSONObject;
 
-class ReferenceSerializer extends Serializer
+public class ReferenceSerializer extends AbstractSerializer
 {
+    private final static Logger log =
+	Logger.getLogger(ReferenceSerializer.class.getName());
+
+    private JSONRPCBridge bridge;
+
+    private static Class[] _serializableClasses = new Class[] { };
+    private static Class[] _JSONClasses = new Class[] { };
+
+    public Class[] getSerializableClasses() { return _serializableClasses; }
+    public Class[] getJSONClasses() { return _JSONClasses; }
+
+    public ReferenceSerializer(JSONRPCBridge bridge)
+    {
+	this.bridge = bridge;
+    }
 
     public boolean canSerialize(Class clazz, Class jsonClazz)
     {
 	return (!clazz.isArray() &&
 		!clazz.isPrimitive() &&
 		!clazz.isInterface() &&
-		(getBridge().isReference(clazz) ||
-		 getBridge().isCallableReference(clazz)) &&
+		(bridge.isReference(clazz) ||
+		 bridge.isCallableReference(clazz)) &&
 		(jsonClazz == null || jsonClazz == JSONObject.class));
     }
 
-
-    public ObjectMatch doTryToUnmarshall(Class clazz, Object o)
+    public ObjectMatch tryUnmarshall(SerializerState state,
+				     Class clazz, Object o)
 	throws UnmarshallException
     {
 	return ObjectMatch.OKAY;
     }
 
-    public Object doUnmarshall(Class clazz, Object o)
+    public Object unmarshall(SerializerState state, Class clazz, Object o)
 	throws UnmarshallException
     {
 	JSONObject jso = (JSONObject)o;
@@ -50,43 +66,39 @@ class ReferenceSerializer extends Serializer
 	String json_type = jso.getString("JSONRPCType");
 	int object_id = jso.getInt("objectID");
 	if(json_type != null && json_type.equals("Reference")) {
-	    synchronized (getBridge().referenceMap) {
-		ref = getBridge().referenceMap.get(new Integer(object_id));
+	    synchronized (bridge.referenceMap) {
+		ref = bridge.referenceMap.get(new Integer(object_id));
 	    }
 	}
 	return ref;
     }
 
-
-    public Object doMarshall(Object o)
+    public Object marshall(SerializerState state, Object o)
 	throws MarshallException
     {
 	Class clazz = o.getClass();
-	if(getBridge().isReference(clazz)) {
-	    if(getBridge().isDebug())
-		System.out.println
-		    ("ReferenceSerializer.doMarshall marshalling " +
-		     "Reference to object " + o.hashCode() +
-		     " of class " + clazz.getName());
-	    synchronized (getBridge().referenceMap) {
-		getBridge().referenceMap.put(new Integer(o.hashCode()), o);
+	Integer identity = new Integer(System.identityHashCode(o));
+	if(bridge.isReference(clazz)) {
+	    if(ser.isDebug())
+		log.fine("marshalling reference to object " +
+			 identity + " of class " + clazz.getName());
+	    synchronized (bridge.referenceMap) {
+		bridge.referenceMap.put(identity, o);
 	    }
 	    JSONObject jso = new JSONObject();
 	    jso.put("JSONRPCType", "Reference");
 	    jso.put("javaClass", clazz.getName());
-	    jso.put("objectID", o.hashCode());
+	    jso.put("objectID", identity);
 	    return jso;
-	} else if (getBridge().isCallableReference(clazz)) {
-	    if(getBridge().isDebug())
-		System.out.println
-		    ("ReferenceSerializer.doMarshall marshalling " +
-		     "CallableReference to object " + o.hashCode() +
-		     " of class " + clazz.getName());
-	    getBridge().registerObject(new Integer(o.hashCode()), o);
+	} else if (bridge.isCallableReference(clazz)) {
+	    if(ser.isDebug())
+		log.fine("marshalling callable reference to object " +
+			 identity + " of class " + clazz.getName());
+	    bridge.registerObject(identity, o);
 	    JSONObject jso = new JSONObject();
 	    jso.put("JSONRPCType", "CallableReference");
 	    jso.put("javaClass", clazz.getName());
-	    jso.put("objectID", o.hashCode());
+	    jso.put("objectID", identity);
 	    return jso;
 	}
 	return null;

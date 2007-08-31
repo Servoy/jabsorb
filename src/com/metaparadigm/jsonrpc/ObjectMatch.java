@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: ObjectMatch.java,v 1.1.1.1 2004/03/31 14:21:00 mclark Exp $
+ * $Id: ObjectMatch.java,v 1.2 2005/02/24 03:05:51 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,7 +20,14 @@
 
 package com.metaparadigm.jsonrpc;
 
-class ObjectMatch
+/**
+ * This class is returned from the Serializer tryUnmarshall method to
+ * indicate number of mismatched fields. This is used to handle ambiguities
+ * with JavaScript's typeless objects combined with and Java's operator
+ * overloading.
+ */
+
+public class ObjectMatch
 {
     public final static ObjectMatch OKAY = new ObjectMatch(-1);
     public final static ObjectMatch NULL = new ObjectMatch(0);

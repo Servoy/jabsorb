@@ -10,7 +10,7 @@ page import="com.metaparadigm.jsonrpc.test.Test"
      class="com.metaparadigm.jsonrpc.test.Test"
 /><%
    response.setDateHeader ("Expires", 0);
-   //JSONRPCBridge.setDebug(true);
+   JSONRPCBridge.enableReferences();
    JSONRPCBridge.registerObject("test", testObject);
    JSONRPCBridge.registerReference(Test.RefTest.class);
    JSONRPCBridge.registerCallableReference(Test.CallableRefTest.class);
@@ -33,32 +33,32 @@ page import="com.metaparadigm.jsonrpc.test.Test"
 
     <table cellpadding="2" cellspacing="0" border="0">
       <tr>
-        <td valign="top">Eval:</td>
-        <td colspan="6">
-          <input type="text" id="eval" size="80"
-	       value="jsonrpc.test.echo({bang: 'foo', baz: 9})" />
-        </td>
+       <td>
+        <input type="text" id="eval" size="80"
+	 value="jsonrpc.test.echo({bang: 'foo', baz: 9})" />
+       </td>
+       <td><input type="button" value="Eval" onclick="doEval()" /></td>
       </tr>
+      <tr><td></td></tr>
       <tr>
-        <td valign="top">Result:</td>
-        <td colspan="6">
-          <textarea wrap="off" id="result" cols="80" rows="26"></textarea>
-        </td>
-      </tr>
-      <tr>
-        <td></td>
-        <td><input type="button" value="Eval"
-                         onclick="doEval()" /></td>
-        <td><input type="button" value="List Methods"
-                         onclick="doListMethods()" /></td>
-	<td><input type="button" value="Basic Tests"
-                         onclick="doBasicTests()" /></td>
-	<td><input type="button" value="Reference Tests"
-                         onclick="doReferenceTests()" /></td>
-	<td><input type="button" value="Container Tests"
-                         onclick="doContainerTests()" /></td>
-	<td><input type="button" value="Exception Test"
-                         onclick="doExceptionTest()" /></td>
+       <td>
+        <textarea wrap="off" id="result" cols="80" rows="24"></textarea>
+       </td>
+       <td valign="top">
+        <h3>Tests</h3>
+        <p><a href="javascript:doListMethods();">List Methods</a><br>
+        <a href="javascript:doBasicTests();">Basic Tests</a><br>
+        <a href="javascript:doReferenceTests();">Reference Tests</a><br>
+        <a href="javascript:doContainerTests();">Container Tests</a><br>
+        <a href="javascript:doExceptionTest();">Exception Test</a></p>
+        <h3>Debug</h3>
+        <p><a href="javascript:setDebug(true);">Debug On</a><br>
+        <a href="javascript:setDebug(false);">Debug Off</a></p>
+        <h3>Callbacks</h3>
+        <p><a href="javascript:setCallback(true);">Callback On</a><br>
+        <a href="javascript:setCallback(false);">Callback Off</a></p>
+	<p><em><strong>Note:</strong> the debug and callback controls only affect debug output on the server side.</em></p>
+       </td>
       </tr>
     </table>
 
@@ -66,7 +66,7 @@ page import="com.metaparadigm.jsonrpc.test.Test"
     <hr>
     <table cellpadding="0" cellspacing="0" border="0" width="100%">
       <tr>
-	<td><code>$Id: test.jsp,v 1.31 2005/02/13 01:26:47 mclark Exp $</code></td>
+	<td><code>$Id: test.jsp,v 1.34 2005/04/24 19:52:08 mclark Exp $</code></td>
 	<td><div class="copyright">Copyright 2005 <a href="http://www.metaparadigm.com/">Metaparadigm Pte Ltd</a></div></td>
       </tr>
     </table>

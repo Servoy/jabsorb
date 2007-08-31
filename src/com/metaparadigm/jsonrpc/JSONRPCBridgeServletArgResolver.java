@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCCallback.java,v 1.2 2005/01/21 15:23:11 mclark Exp $
+ * $Id: JSONRPCBridgeServletArgResolver.java,v 1.1 2005/04/24 11:13:06 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,21 +20,18 @@
 
 package com.metaparadigm.jsonrpc;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.lang.reflect.Method;
 
-/**
- * Interface to be implemented by objects registered for invocation callbacks with the JSONRPCBridge.
- */
+public class JSONRPCBridgeServletArgResolver implements LocalArgResolver
+{
+    public Object resolveArg(Object context) throws LocalArgResolveException
+    {
+	if(!(context instanceof HttpServletRequest))
+	    throw new LocalArgResolveException("invalid context");
 
-public interface JSONRPCCallback {
-
-    public void preInvoke(Object context, Object instance,
-			  Method m, Object arguments[])
-	throws Exception;
-
-    public void postInvoke(Object context, Object instance,
-			   Method m, Object result)
-	throws Exception;
-
+	HttpServletRequest request = (HttpServletRequest)context;
+	HttpSession session = request.getSession();
+	return session.getAttribute("JSONRPCBridge");
+    }
 }

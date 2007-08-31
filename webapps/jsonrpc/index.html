@@ -25,6 +25,9 @@
 
     <h2>News</h2>
     <ul>
+      <li><strong>17 Jun 2005</strong> - <em>Released 0.9 (aka "About time for a release release") - Contains many updates and bug fixes including: Public access to many APIs (documentation still needed on many of these), conversion of numeric String types into methods with number signatures, LocalArgResolverImplementation, and many small bug fixes and changes. See <a href="/jsonrpc-dist/CHANGES.txt">CHANGES.txt</a> for complete details.</em></li>
+      <li><strong>24 Apr 2005</strong> - <em>The LocalArgResolver implementationis now in CVS - this allows you to get access to the HttpServletRequest or HttpSession object from within a method being called via JSON-RPC.</em></li>
+      <li><strong>25 Feb 2005</strong> - <em>Presented a talk on <a href="/jsonrpc-dist/json-rpc-java-talk-20050225.pdf">Building next generation web applications using JSON-RPC-Java</a> to the Singapore Linux Users Groups.</em></li>
       <li><strong>14 Feb 2005</strong> - <em>Released 0.8 (aka "Valentine Rooster") - Contains many updates and bug fixes including: Unicode and other character set support (UTF-8, ISO-8859-1 have been tested), Asynchronous support, Unicode test suite, Regression test suite, Dictionary demo, Browser Compatiblity database, Hello World sample app, Tutorial and Manual updates and a protocol sync with the JSON-RPC spec. See <a href="/jsonrpc-dist/CHANGES.txt">CHANGES.txt</a> for complete details.</em></li>
       <li><strong>10 Feb 2005</strong> - <em>Added the first cut of a new Unicode test page. Submissions for more languages and texts are needed. It's in CVS and the CVS snapshot tarball. Version 0.8 will be released very soon (test feedback appreciated) targeting Unicode UTF-8 support across all supported browsers and a testing framework for other encodings.</em></li>
       <li><strong>9 Feb 2005</strong> - <em>Happy Chinese New Year! New CVS tarball available containing a bunch of small fixes, a new Hello World demo, a dynamic browser compatibility database, and the start of a new unit testing framework with profiling support. Visit the <a href="demos.html">Demos</a> page.</em></li>
@@ -124,7 +127,7 @@
     </ul>
 
     <h2>Source code</h2>
-    <p>You can download the current release version here: <a href="http://oss.metaparadigm.com/jsonrpc-dist/json-rpc-java-0.8.tar.gz">json-rpc-java-0.8.tar.gz</a> (<a href="http://oss.metaparadigm.com/jsonrpc-dist/CHANGES.txt">Changelog</a>)</p>
+    <p>You can download the current release version here: <a href="http://oss.metaparadigm.com/jsonrpc-dist/json-rpc-java-0.9.tar.gz">json-rpc-java-0.9.tar.gz</a> (<a href="http://oss.metaparadigm.com/jsonrpc-dist/CHANGES.txt">Changelog</a>)</p>
     <p>Regular snapshots of the current CVS version here: <a href="http://oss.metaparadigm.com/jsonrpc-dist/json-rpc-java-cvs.tar.gz">json-rpc-java-cvs.tar.gz</a> (<a href="CHANGES.txt">Changelog</a>)</p>
     <p>JSON-RPC-Java is licensed under the <a href="http://www.gnu.org/licenses/lgpl.html">LGPL</a> which allows use within commerical/proprietary applications (with conditions).</p>
     <p>Access to the latest code is available via anonymous CVS:</p>
@@ -150,6 +153,10 @@ CVS password: &lt;enter '<b>anoncvs</b>'&gt;<br>
 
     <h2>To Do List</h2>
     <ul>
+      <li>Implement a Java JSON-RPC client using dynamic proxies so JSON-RPC can be used as an alternative to RMI et al.</li>
+      <li>Implement system.methodSignature and system.methodHelp introspection methods a la XML-RPC.</li>
+      <li>Make BeanSerializer require that Bean objects implement Serializer before it will marshall or unmarshall them (to add an additional layer of security).</li>
+      <li>Allow InvocationCallback.preInvoke throw some type of Exception to cancel method call (could be used for certain types of access control).</li>
       <li>Update Manual: async top-level exception handler, async parallelism, profiling, opaque and callable references, custom serializers.</li>
       <li>Make JSONRPCBridge.registerSerializer() and Serializer base class public to allow external custom serializers. Add javadocs to these interfaces.</li>
       <li>Allow a CallableReference to also be used as an opaque Reference (allow them to be passed back to Java methods on the server).</li>
@@ -170,6 +177,16 @@ CVS password: &lt;enter '<b>anoncvs</b>'&gt;<br>
     </ul>
     <p>Like to join the team and help out? We are looking for talented Java and JavaScript developers who can help out with development, testing and documentation. Contact <a href="mailto:michael@metaparadigm.com">Michael Clark</a> if you're interested.</p>
 
+    <h2>Other JSON-RPC-Java Resources</h2>
+    <ul>
+      <li>Presentations:
+        <ul>
+          <li><a href="http://www.nimret.org/space/My+Presentations/JSON-RPC+Java">Rich Clients: JSON-RPC</a> - Nimret Sandhu</li>
+          <li><a href="/jsonrpc-dist/json-rpc-java-talk-20050225.pdf">Building next generation web applications using JSON-RPC-Java</a> - Michael Clark</li>
+        </ul>
+      </li>
+    </ul>
+
     <h2>Similar projects and related Links</h2>
     <ul>
       <li><a href="http://www.ashleyit.com/rs/main.htm">JSRS</a> - Javascript Remote Scripting</li>
@@ -182,7 +199,7 @@ CVS password: &lt;enter '<b>anoncvs</b>'&gt;<br>
     <hr>
     <table cellpadding="0" cellspacing="0" border="0" width="100%">
       <tr>
-	<td><code>$Id: index.html,v 1.70 2005/02/14 03:18:14 mclark Exp $</code></td>
+	<td><code>$Id: index.html,v 1.79 2005/06/17 01:29:20 mclark Exp $</code></td>
 	<td><div class="copyright">Copyright 2005 <a href="http://www.metaparadigm.com/">Metaparadigm Pte Ltd</a></div></td>
       </tr>
     </table>

@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: NumberSerializer.java,v 1.2 2005/02/08 00:10:46 mclark Exp $
+ * $Id: NumberSerializer.java,v 1.4 2005/06/16 23:26:14 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,7 +20,7 @@
 
 package com.metaparadigm.jsonrpc;
 
-class NumberSerializer extends Serializer
+public class NumberSerializer extends AbstractSerializer
 {
     private static Class[] _serializableClasses = new Class[]
 	{ Integer.class, Byte.class, Short.class, Long.class,
@@ -28,38 +28,73 @@ class NumberSerializer extends Serializer
 
     private static Class[] _JSONClasses = new Class[]
 	{ Integer.class, Byte.class, Short.class, Long.class,
-	  Float.class, Double.class };
+	  Float.class, Double.class, String.class };
 
     public Class[] getSerializableClasses() { return _serializableClasses; }
     public Class[] getJSONClasses() { return _JSONClasses; }
 
-
-    public ObjectMatch doTryToUnmarshall(Class clazz, Object jso)
+    public ObjectMatch tryUnmarshall(SerializerState state,
+				     Class clazz, Object jso)
 	throws UnmarshallException
     {
+	try {
+	    toNumber(clazz, jso);
+	} catch (NumberFormatException e) {
+	    throw new UnmarshallException("not a number");
+	}
 	return ObjectMatch.OKAY;
     }
 
-    public Object doUnmarshall(Class clazz, Object jso)
-	throws UnmarshallException
+    public Object toNumber(Class clazz, Object jso)
+        throws NumberFormatException 
     {
-	if(clazz == Integer.class) {
-	    return new Integer(((Number)jso).intValue());
-	} else  if(clazz == Long.class) {
-	    return new Long(((Number)jso).longValue());
-	} else  if(clazz == Short.class) {
-	    return new Short(((Number)jso).shortValue());
-	} else  if(clazz == Byte.class) {
-	    return new Byte(((Number)jso).byteValue());
-	} else  if(clazz == Float.class) {
-	    return new Float(((Number)jso).floatValue());
-	} else  if(clazz == Double.class) {
-	    return new Double(((Number)jso).doubleValue());
-	}
-	return null;
+        if (clazz == Integer.class) {
+          if (jso instanceof String) 
+            return new Integer((String)jso);
+          else 
+            return new Integer(((Number) jso).intValue());
+        } else if (clazz == Long.class) {
+          if (jso instanceof String) 
+            return new Long((String)jso);
+          else 
+            return new Long(((Number) jso).longValue());
+        } else if (clazz == Short.class) {
+          if (jso instanceof String) 
+            return new Short((String)jso);
+          else 
+            return new Short(((Number) jso).shortValue());
+        } else if (clazz == Byte.class) {
+          if (jso instanceof String) 
+            return new Byte((String)jso);
+          else 
+            return new Byte(((Number) jso).byteValue());
+        } else if (clazz == Float.class) {
+          if (jso instanceof String) 
+            return new Float((String)jso);
+          else 
+            return new Float(((Number) jso).floatValue());
+        } else if (clazz == Double.class) {
+          if (jso instanceof String) 
+            return new Double((String)jso);
+          else 
+            return new Double(((Number) jso).doubleValue());
+        }
+        return null;
+    }
+  
+    public Object unmarshall(SerializerState state, Class clazz, Object jso)
+        throws UnmarshallException 
+    {
+        try {
+            if (jso==null||"".equals(jso))
+                return null;
+            return toNumber(clazz, jso);
+        } catch (NumberFormatException nfe) {
+            throw new UnmarshallException("cannot convert object "+jso+" to type "+clazz.getName());
+        }
     }
 
-    public Object doMarshall(Object o)
+    public Object marshall(SerializerState state, Object o)
 	throws MarshallException
     {
 	return o;

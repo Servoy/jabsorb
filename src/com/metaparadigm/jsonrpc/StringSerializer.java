@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: StringSerializer.java,v 1.1.1.1 2004/03/31 14:21:01 mclark Exp $
+ * $Id: StringSerializer.java,v 1.3 2005/06/16 23:26:14 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,40 +20,41 @@
 
 package com.metaparadigm.jsonrpc;
 
-class StringSerializer extends Serializer
+public class StringSerializer extends AbstractSerializer
 {
     private static Class[] _serializableClasses = new Class[]
 	{ String.class, char.class, Character.class,
 	  byte[].class, char[].class };
 
     private static Class[] _JSONClasses = new Class[]
-	{ String.class };
+	{ String.class, Integer.class };
 
     public Class[] getSerializableClasses() { return _serializableClasses; }
     public Class[] getJSONClasses() { return _JSONClasses; }
 
-
-    public ObjectMatch doTryToUnmarshall(Class clazz, Object jso)
+    public ObjectMatch tryUnmarshall(SerializerState state,
+				     Class clazz, Object jso)
 	throws UnmarshallException
     {
 	return ObjectMatch.OKAY;
     }
 
-    public Object doUnmarshall(Class clazz, Object jso)
+    public Object unmarshall(SerializerState state, Class clazz, Object jso)
 	throws UnmarshallException
     {
+        String val = jso instanceof String?(String)jso:jso.toString();
 	if(clazz == char.class) {
-	    return new Character(((String)jso).charAt(0));
+	    return new Character(val.charAt(0));
 	} else if (clazz == byte[].class) {
-	    return ((String)jso).getBytes();
+	    return val.getBytes();
 	} else if (clazz == char[].class) {
-	    return ((String)jso).toCharArray();	    
+	    return val.toCharArray();	    
 	} else {
-	    return jso;
+	    return val;
 	}
     }
 
-    public Object doMarshall(Object o)
+    public Object marshall(SerializerState state, Object o)
 	throws MarshallException
     {
 	if(o instanceof Character) {

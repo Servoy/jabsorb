@@ -11,6 +11,7 @@
    JSONRPCBridge.registerObject("browser", browser);
    if(browser.userAgent == null)
 	browser.userAgent = request.getHeader("User-Agent");
+   String testCookies = request.getParameter("test-cookies");
    String testResult = request.getParameter("test-result");
    if(!browser.firstRun && !browser.passed && !browser.failed &&
 	browser.userAgent != null &&
@@ -30,7 +31,11 @@
     <script type="text/javascript" src="browser.js"></script>
     <title>JSON-RPC-Java Browser Compatibility</title>
    </head>
-<% if(browser.firstRun) { %>
+<% if(testCookies == null && browser.gotSession == false) { %>
+   <body bgcolor="#ffffff" onLoad="testCookies()">
+<% } else if(testCookies != null && browser.gotSession == false) { %>
+   <body bgcolor="#ffffff">
+<% } else if(browser.firstRun) { %>
    <body bgcolor="#ffffff" onLoad="testJSONRPC()">
 <% } else { %>
    <body bgcolor="#ffffff" onLoad="decodeUserAgents()">
@@ -42,7 +47,11 @@
 
     <h2>JSON-RPC-Java Browser Compatibility</h2>
 
-<% if(browser.firstRun) { %>
+<% if(testCookies == null && browser.gotSession == false) { %>
+    <p>Testing to see if you have cookies enabled...</p>
+<% } else if(testCookies != null && browser.gotSession == false) { %>
+    <p>Cookies not enabled. Feed me, Feed me, I want cookies!</p>
+<% } else if(browser.firstRun) { %>
     <p>Testing JSON-RPC-Java. The page will reload in one moment...</p>
     <p><em>Note:</em> You need a recent browser (post year 2000) with an ECMAScript 3rd Edition (ECMA-262) interpreter to run this page ie. Netscape JavaScript 1.5, Microsoft JScript 5.0 or any other conforming implementations.</p>
     <p>If your browser does not support this scripting standard, it will not be entered in the browser compatibility database (and this page will not reload).</p>
@@ -131,11 +140,15 @@
     <hr>
     <table cellpadding="0" cellspacing="0" border="0" width="100%">
       <tr>
-	<td><code>$Id: browser.jsp,v 1.7 2005/02/13 02:51:21 mclark Exp $</code></td>
+	<td><code>$Id: browser.jsp,v 1.8 2005/02/16 01:18:10 mclark Exp $</code></td>
 	<td><div class="copyright">Copyright 2005 <a href="http://www.metaparadigm.com/">Metaparadigm Pte Ltd</a></div></td>
       </tr>
     </table>
   </body>
 </html>
 
-<% browser.firstRun = false; %>
+<%
+  if(testCookies != null && browser.gotSession == true)
+      browser.firstRun = false;
+  browser.gotSession = true;
+%>

@@ -71,6 +71,7 @@ public class Browser
     private static BrowserStore failStore = new BrowserStore("fail");
 
     public String userAgent;
+    public boolean gotSession = false;
     public boolean firstRun = true;
     public boolean failed = false;
     public boolean passed = false;

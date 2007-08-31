@@ -10,6 +10,11 @@ function redirectSelf(f)
     return false;
 }
 
+function testCookies()
+{
+    redirectSelf("test-cookies=");
+}
+
 function testJSONRPC()
 {
     try {
@@ -32,7 +37,9 @@ function decodeOneUserAgent(ua)
 
     if(ua.match(/Mac OS X/)) d.platform = "Mac OS X";
     else if(ua.match(/Mac_PowerPC/)) d.platform = "Mac OS";
+    else if(ua.match(/Macintosh/)) d.platform = "Mac OS";
     else if(ua.match(/Linux/)) d.platform = "Linux";
+    else if(ua.match(/FreeBSD/)) d.platform = "FreeBSD";
     else if(ua.match(/(Win95|Windows 95)/)) d.platform = "Win95";
     else if(ua.match(/(Win98|Windows 98)/)) d.platform = "Win98";
     else if(ua.match(/Win 9x/)) d.platform = "Win9x";
@@ -41,13 +48,17 @@ function decodeOneUserAgent(ua)
     else if(ua.match(/(WinNT5\.1|Windows NT 5\.1)/)) d.platform = "WinXP";
     else if(ua.match(/(WinNT5\.1|Windows NT 5\.2)/)) d.platform = "Win2003";
     else if(ua.match(/Windows CE/)) d.platform = "WinCE";
+    else if(ua.match(/Symbian OS/)) d.platform = "Symbian";
     if(ua.match(/PalmOS/)) d.platform = "PalmOS";
 
     if((m = ua.match(/Firefox\/([^\s$]+)/))) {
 	d.browser = "Firefox";
 	d.version = m[1];
-    } else if((m = ua.match(/Galeon\/([^\s$]+)/))) {
+    } else if((m = ua.match(/Galeon[;\/]\s?([^\s;$]+)/))) {
 	d.browser = "Galeon";
+	d.version = m[1];
+    } else if((m = ua.match(/Epiphany\/([^\s$]+)/))) {
+	d.browser = "Epiphany";
 	d.version = m[1];
     } else if((m = ua.match(/Netscape\/([^\s$]+)/))) {
 	d.browser = "Netscape";
@@ -61,12 +72,18 @@ function decodeOneUserAgent(ua)
     } else if((m = ua.match(/Safari\/([^\s$]+)/))) {
 	d.browser = "Safari";
 	d.version = m[1];
+    } else if((m = ua.match(/NetFront\/([^\s$]+)/))) {
+	d.browser = "NetFront";
+	d.version = m[1];
     } else if((m = ua.match(/Opera[\/\s]([^\s$]+)/))) {
 	d.browser = "Opera";
 	d.version = m[1];
     } else if((m = ua.match(/Konqueror\/([^\s$;]+)/))) {
 	d.browser = "Konqueror";
 	d.version = m[1];
+    } else if((m = ua.match(/WebPro/))) {
+	d.browser = "WebPro";
+	d.version = "";
     } else if((m = ua.match(/Mozilla\/5\.0.*rv:([^\)]*).*Gecko/))) {
 	d.browser = "Mozilla";
 	d.version = m[1];

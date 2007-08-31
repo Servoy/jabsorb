@@ -1,7 +1,7 @@
 /*
  * JSON-RPC JavaScript client
  *
- * $Id: jsonrpc.js,v 1.25 2005/02/13 03:42:09 mclark Exp $
+ * $Id: jsonrpc.js,v 1.29 2005/06/16 23:42:47 mclark Exp $
  *
  * Copyright (c) 2003-2004 Jan-Klaas Kollhof
  * Copyright (c) 2005 Michael Clark, Metaparadigm Pte Ltd
@@ -76,7 +76,8 @@ function toJSON(o)
     } else if(o.constructor == Boolean) {
 	return o.toString();
     } else if(o.constructor == Date) {
-	return o.valueOf().toString();
+    	return '{javaClass: "java.util.Date", time: ' + o.valueOf()/1000 +'}';
+	//return o.valueOf().toString();
     } else if(o.constructor == Array) {
 	var v = [];
 	for(var i = 0; i < o.length; i++) v.push(toJSON(o[i]));
@@ -126,7 +127,7 @@ function JSONRpcClient_Exception_ctor(code, message, javaStack)
     }
     if(name) this.name = name;
     else this.name = "JSONRpcClientException";
-    this.message = this.name + ": " + message;
+    this.message = message;
 }
 
 JSONRpcClient.Exception.CODE_REMOTE_EXCEPTION = 490;
@@ -140,7 +141,7 @@ JSONRpcClient.Exception.prototype = new Error();
 JSONRpcClient.Exception.prototype.toString =
 function JSONRpcClient_Exception_toString(code, msg)
 {
-    return this.message;
+    return this.name + ": " + this.message;
 }
 
 
@@ -372,7 +373,7 @@ JSONRpcClient.poolReturnHTTPRequest =
 function JSONRpcClient_poolReturnHTTPRequest(http)
 {
     if(JSONRpcClient.http_spare.length >= JSONRpcClient.http_max_spare)
-	delete htpp;
+	delete http;
     JSONRpcClient.http_spare.push(http);
 }
 

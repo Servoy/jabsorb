@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: DictionarySerializer.java,v 1.3 2004/04/21 00:44:48 mclark Exp $
+ * $Id: DictionarySerializer.java,v 1.5 2005/06/16 23:26:14 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -26,7 +26,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import org.json.JSONObject;
 
-class DictionarySerializer extends Serializer
+public class DictionarySerializer extends AbstractSerializer
 {
     private static Class[] _serializableClasses = new Class[]
 	{ Hashtable.class };
@@ -44,7 +44,8 @@ class DictionarySerializer extends Serializer
 		 Dictionary.class.isAssignableFrom(clazz)));
     }
 
-    public ObjectMatch doTryToUnmarshall(Class clazz, Object o)
+    public ObjectMatch tryUnmarshall(SerializerState state,
+				     Class clazz, Object o)
 	throws UnmarshallException
     {
 	JSONObject jso = (JSONObject)o;
@@ -63,7 +64,7 @@ class DictionarySerializer extends Serializer
 	try {
 	    while(i.hasNext()) {
 		key = (String)i.next();
-		m = tryToUnmarshall(null, jsonmap.get(key)).max(m);
+		m = ser.tryUnmarshall(state, null, jsonmap.get(key)).max(m);
 	    }
 	} catch (UnmarshallException e) {
 	    throw new UnmarshallException
@@ -72,7 +73,7 @@ class DictionarySerializer extends Serializer
 	return m;
     }
 
-    public Object doUnmarshall(Class clazz, Object o)
+    public Object unmarshall(SerializerState state, Class clazz, Object o)
 	throws UnmarshallException
     {
 	JSONObject jso = (JSONObject)o;
@@ -94,7 +95,7 @@ class DictionarySerializer extends Serializer
 	try {
 	    while(i.hasNext()) {
 		key = (String)i.next();
-		ht.put(key, unmarshall(null, jsonmap.get(key)));
+		ht.put(key, ser.unmarshall(state, null, jsonmap.get(key)));
 	    }
 	} catch (UnmarshallException e) {
 	    throw new UnmarshallException
@@ -103,13 +104,14 @@ class DictionarySerializer extends Serializer
 	return ht;
     }
 
-    public Object doMarshall(Object o)
+    public Object marshall(SerializerState state, Object o)
 	throws MarshallException
     {
 	Dictionary ht = (Dictionary)o;
 	JSONObject obj = new JSONObject();
 	JSONObject mapdata = new JSONObject();
-	obj.put("javaClass", o.getClass().getName());
+        if (ser.getMarshallClassHints())
+            obj.put("javaClass", o.getClass().getName());
 	obj.put("map", mapdata);
 	Object key = null;
 	Object val = null;
@@ -119,7 +121,7 @@ class DictionarySerializer extends Serializer
 		key = en.nextElement();
 		val = ht.get(key);
 		// only support String keys
-		mapdata.put(key.toString(), marshall(val));
+		mapdata.put(key.toString(), ser.marshall(state, val));
 	    }
 	} catch (MarshallException e) {
 	    throw new MarshallException

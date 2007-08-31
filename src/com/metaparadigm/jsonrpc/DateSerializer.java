@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: DateSerializer.java,v 1.2 2004/12/10 08:11:02 mclark Exp $
+ * $Id: DateSerializer.java,v 1.4 2005/06/16 23:26:14 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,13 +20,15 @@
 
 package com.metaparadigm.jsonrpc;
 
+import java.sql.Timestamp;
 import java.util.Date;
+
 import org.json.JSONObject;
 
-class DateSerializer extends Serializer
+public class DateSerializer extends AbstractSerializer
 {
     private static Class[] _serializableClasses = new Class[]
-	{ Date.class };
+	{ Date.class, Timestamp.class, java.sql.Date.class };
 
     private static Class[] _JSONClasses = new Class[]
 	{ JSONObject.class };
@@ -34,14 +36,8 @@ class DateSerializer extends Serializer
     public Class[] getSerializableClasses() { return _serializableClasses; }
     public Class[] getJSONClasses() { return _JSONClasses; }
 
-    public boolean canSerialize(Class clazz, Class jsonClazz)
-    {
-	return (super.canSerialize(clazz, jsonClazz) ||
-		((jsonClazz == null || jsonClazz == JSONObject.class) &&
-		 Date.class.isAssignableFrom(clazz)));
-    }
-
-    public ObjectMatch doTryToUnmarshall(Class clazz, Object o)
+    public ObjectMatch tryUnmarshall(SerializerState state,
+				     Class clazz, Object o)
 	throws UnmarshallException
     {
 	JSONObject jso = (JSONObject)o;
@@ -54,27 +50,42 @@ class DateSerializer extends Serializer
 	return ObjectMatch.OKAY;
     }
 
-    public Object doUnmarshall(Class clazz, Object o)
+    public Object unmarshall(SerializerState state, Class clazz, Object o)
 	throws UnmarshallException
     {
 	JSONObject jso = (JSONObject)o;
-	String java_class = jso.getString("javaClass");
-	if(java_class == null)
-	    throw new UnmarshallException("no type hint");	
-	if(!(java_class.equals("java.util.Date")))
-	    throw new UnmarshallException("not a Date");
-	int time = jso.getInt("time");
-	return new Date((long)time * (long)1000);
+	long time = (long)jso.getInt("time");
+	time = time * 1000;
+        if (jso.has("javaClass")) {
+            try {
+                clazz = Class.forName(jso.getString("javaClass"));
+            } catch (ClassNotFoundException cnfe) {
+                throw new UnmarshallException(cnfe.getMessage());
+            }
+        }
+	if(Date.class.equals(clazz)) {
+            return new Date(time);
+        } else if (Timestamp.class.equals(clazz)){
+            return new Timestamp(time);
+        } else if (java.sql.Date.class.equals(clazz)){
+            return new java.sql.Date(time);
+	} 
+        throw new UnmarshallException("invalid class "+clazz);	
     }
 
-    public Object doMarshall(Object o)
+    public Object marshall(SerializerState state, Object o)
 	throws MarshallException
     {
-	Date date = (Date)o;
-	JSONObject obj = new JSONObject();
-	int time = (int)((long)date.getTime() / (long)1000);
-	obj.put("javaClass", o.getClass().getName());
-	obj.put("time", time);
+	long time;
+	if (o instanceof Date) {
+	    time = ((Date)o).getTime() / 1000;
+	} else {
+	    throw new MarshallException("cannot marshall date using class "+o.getClass());
+	}
+	JSONObject obj = new JSONObject();	
+        if (ser.getMarshallClassHints())
+            obj.put("javaClass", o.getClass().getName());
+	obj.put("time", (int)time);
 	return obj;
     }
 

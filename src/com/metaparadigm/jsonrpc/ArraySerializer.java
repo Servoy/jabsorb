@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: ArraySerializer.java,v 1.3 2005/01/21 00:05:24 mclark Exp $
+ * $Id: ArraySerializer.java,v 1.5 2005/06/16 23:26:14 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -23,7 +23,7 @@ package com.metaparadigm.jsonrpc;
 import java.lang.reflect.Array;
 import org.json.JSONArray;
 
-class ArraySerializer extends Serializer
+public class ArraySerializer extends AbstractSerializer
 {
     private static Class[] _serializableClasses = new Class[]
 	{ int[].class, short[].class, long[].class,
@@ -38,7 +38,6 @@ class ArraySerializer extends Serializer
     public Class[] getSerializableClasses() { return _serializableClasses; }
     public Class[] getJSONClasses() { return _JSONClasses; }
 
-
     public boolean canSerialize(Class clazz, Class jsonClazz)
     {
 	Class cc = clazz.getComponentType();
@@ -47,8 +46,8 @@ class ArraySerializer extends Serializer
 		 (clazz.isArray() && !cc.isPrimitive())));
     }
 
-
-    public ObjectMatch doTryToUnmarshall(Class clazz, Object o)
+    public ObjectMatch tryUnmarshall(SerializerState state,
+				     Class clazz, Object o)
 	throws UnmarshallException
     {
 	JSONArray jso = (JSONArray)o;
@@ -57,7 +56,7 @@ class ArraySerializer extends Serializer
 	ObjectMatch m = new ObjectMatch(-1);
 	try {
 	    for(; i< jso.length(); i++)
-		m = tryToUnmarshall(cc, jso.get(i)).max(m);
+		m = ser.tryUnmarshall(state, cc, jso.get(i)).max(m);
 	} catch (UnmarshallException e) {
 	    throw new UnmarshallException
 		("element " + i + " " + e.getMessage());
@@ -65,7 +64,7 @@ class ArraySerializer extends Serializer
 	return m;
     }
 
-    public Object doUnmarshall(Class clazz, Object o)
+    public Object unmarshall(SerializerState state, Class clazz, Object o)
 	throws UnmarshallException
     {
 	JSONArray jso = (JSONArray)o;
@@ -75,48 +74,56 @@ class ArraySerializer extends Serializer
 	    if(clazz == int[].class) {
 		int arr[] = new int[jso.length()];
 		for(; i< jso.length(); i++)
-		    arr[i] = ((Number)unmarshall(cc, jso.get(i))).intValue();
+		    arr[i] = ((Number)ser.unmarshall
+			      (state, cc, jso.get(i))).intValue();
 		return (Object)arr;
 	    } else if (clazz == byte[].class) {
 		byte arr[] = new byte[jso.length()];
 		for(; i< jso.length(); i++)
-		    arr[i] = ((Number)unmarshall(cc, jso.get(i))).byteValue();
+		    arr[i] = ((Number)ser.unmarshall
+			      (state, cc, jso.get(i))).byteValue();
 		return (Object)arr;
 	    } else if (clazz == short[].class) {
 		short arr[] = new short[jso.length()];
 		for(; i< jso.length(); i++)
-		    arr[i] = ((Number)unmarshall(cc, jso.get(i))).shortValue();
+		    arr[i] = ((Number)ser.unmarshall
+			      (state, cc, jso.get(i))).shortValue();
 		return (Object)arr;
 	    } else if (clazz == long[].class) {
 		long arr[] = new long[jso.length()];
 		for(; i< jso.length(); i++)
-		    arr[i] = ((Number)unmarshall(cc, jso.get(i))).longValue();
+		    arr[i] = ((Number)ser.unmarshall
+			      (state, cc, jso.get(i))).longValue();
 		return (Object)arr;
 	    } else if (clazz == float[].class) {
 		float arr[] = new float[jso.length()];
 		for(; i< jso.length(); i++)
-		    arr[i] = ((Number)unmarshall(cc, jso.get(i))).floatValue();
+		    arr[i] = ((Number)ser.unmarshall
+			      (state, cc, jso.get(i))).floatValue();
 		return (Object)arr;
 	    } else if (clazz == double[].class) {
 		double arr[] = new double[jso.length()];
 		for(; i< jso.length(); i++)
-		    arr[i] =((Number)unmarshall(cc, jso.get(i))).doubleValue();
+		    arr[i] =((Number)ser.unmarshall
+			     (state, cc, jso.get(i))).doubleValue();
 		return (Object)arr;
 	    } else if (clazz == char[].class) {
 		char arr[] = new char[jso.length()];
 		for(; i< jso.length(); i++)
-		    arr[i] = ((String)unmarshall(cc, jso.get(i))).charAt(0);
+		    arr[i] = ((String)ser.unmarshall
+			      (state, cc, jso.get(i))).charAt(0);
 		return (Object)arr;
 	    } else if (clazz == boolean[].class) {
 		boolean arr[] = new boolean[jso.length()];
 		for(; i< jso.length(); i++)
-		    arr[i] = ((Boolean)unmarshall(cc, jso.get(i))).booleanValue();
+		    arr[i] = ((Boolean)ser.unmarshall
+			      (state, cc, jso.get(i))).booleanValue();
 		return (Object)arr;
 	    } else {
 		Object arr[] = (Object[])Array.newInstance
 		    (clazz.getComponentType(), jso.length());
 		for(; i< jso.length(); i++)
-		    arr[i] = getBridge().unmarshall(cc, jso.get(i));
+		    arr[i] = ser.unmarshall(state, cc, jso.get(i));
 		return (Object)arr;
 	    }
 	} catch (UnmarshallException e) {
@@ -125,7 +132,7 @@ class ArraySerializer extends Serializer
 	}
     }
 
-    public Object doMarshall(Object o)
+    public Object marshall(SerializerState state, Object o)
 	throws MarshallException
     {
 	JSONArray arr = new JSONArray();
@@ -155,7 +162,7 @@ class ArraySerializer extends Serializer
 	    for(int i=0; i < a.length; i++) arr.put(a[i]);
 	} else if(o instanceof Object[]) {
 	    Object a[] = (Object[])o;
-	    for(int i=0; i < a.length; i++) arr.put(marshall(a[i]));
+	    for(int i=0; i < a.length; i++) arr.put(ser.marshall(state, a[i]));
 	}
 	return arr;
     }

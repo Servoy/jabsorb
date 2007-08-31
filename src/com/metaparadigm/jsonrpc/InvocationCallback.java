@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: Serializer.java,v 1.3 2005/02/24 03:05:51 mclark Exp $
+ * $Id: InvocationCallback.java,v 1.2 2005/02/24 03:05:51 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,27 +20,22 @@
 
 package com.metaparadigm.jsonrpc;
 
+import javax.servlet.http.HttpSession;
+import java.lang.reflect.Method;
+
 /**
- * Interface to be implemented by custom serializer objects that convert
- * to and from Java objects and JSON objects.
+ * Interface to be implemented by objects registered for invocation
+ * callbacks with the JSONRPCBridge.
  */
 
-public interface Serializer
-{
-    public void setOwner(JSONSerializer ser);
+public interface InvocationCallback {
 
-    public Class[] getSerializableClasses();
-    public Class[] getJSONClasses();
+    public void preInvoke(Object context, Object instance,
+			  Method m, Object arguments[])
+	throws Exception;
 
-    public boolean canSerialize(Class clazz, Class jsonClazz);
+    public void postInvoke(Object context, Object instance,
+			   Method m, Object result)
+	throws Exception;
 
-    public ObjectMatch tryUnmarshall(SerializerState state,
-				     Class clazz, Object json)
-	throws UnmarshallException;
-
-    public Object unmarshall(SerializerState state, Class clazz, Object json)
-	throws UnmarshallException;
-
-    public Object marshall(SerializerState state, Object o)
-	throws MarshallException;
 }

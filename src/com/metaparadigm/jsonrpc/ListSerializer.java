@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: ListSerializer.java,v 1.2 2004/12/10 08:11:02 mclark Exp $
+ * $Id: ListSerializer.java,v 1.4 2005/06/16 23:26:14 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -29,7 +29,7 @@ import java.util.Iterator;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
-class ListSerializer extends Serializer
+public class ListSerializer extends AbstractSerializer
 {
     private static Class[] _serializableClasses = new Class[]
 	{ List.class, ArrayList.class, LinkedList.class, Vector.class };
@@ -43,11 +43,12 @@ class ListSerializer extends Serializer
     public boolean canSerialize(Class clazz, Class jsonClazz)
     {
 	return (super.canSerialize(clazz, jsonClazz) ||
-		((jsonClazz == null || jsonClazz == JSONArray.class) &&
+		((jsonClazz == null || jsonClazz == JSONObject.class) &&
 		 List.class.isAssignableFrom(clazz)));
     }
 
-    public ObjectMatch doTryToUnmarshall(Class clazz, Object o)
+    public ObjectMatch tryUnmarshall(SerializerState state,
+				     Class clazz, Object o)
 	throws UnmarshallException
     {
 	JSONObject jso = (JSONObject)o;
@@ -67,7 +68,7 @@ class ListSerializer extends Serializer
 	ObjectMatch m = new ObjectMatch(-1);
 	try {
 	    for(; i < jsonlist.length(); i++)
-		m = tryToUnmarshall(null, jsonlist.get(i)).max(m);
+		m = ser.tryUnmarshall(state, null, jsonlist.get(i)).max(m);
 	} catch (UnmarshallException e) {
 	    throw new UnmarshallException
 		("element " + i + " " + e.getMessage());
@@ -75,7 +76,7 @@ class ListSerializer extends Serializer
 	return m;
     }
 
-    public Object doUnmarshall(Class clazz, Object o)
+    public Object unmarshall(SerializerState state, Class clazz, Object o)
 	throws UnmarshallException
     {
 	JSONObject jso = (JSONObject)o;
@@ -100,7 +101,7 @@ class ListSerializer extends Serializer
 	int i = 0;
 	try {
 	    for(; i < jsonlist.length(); i++)
-		al.add(unmarshall(null, jsonlist.get(i)));
+		al.add(ser.unmarshall(state, null, jsonlist.get(i)));
 	} catch (UnmarshallException e) {
 	    throw new UnmarshallException
 		("element " + i + " " + e.getMessage());
@@ -108,19 +109,20 @@ class ListSerializer extends Serializer
 	return al;
     }
 
-    public Object doMarshall(Object o)
+    public Object marshall(SerializerState state, Object o)
 	throws MarshallException
     {
 	List list = (List)o;
 	JSONObject obj = new JSONObject();
 	JSONArray arr = new JSONArray();
-	obj.put("javaClass", o.getClass().getName());
+        if (ser.getMarshallClassHints())
+            obj.put("javaClass", o.getClass().getName());
 	obj.put("list", arr);
 	int index=0;
 	try {
 	    Iterator i = list.iterator();
 	    while(i.hasNext()) {
-		arr.put(marshall(i.next()));
+		arr.put(ser.marshall(state, i.next()));
 		index++;
 	    }
 	} catch (MarshallException e) {

@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: UnmarshallException.java,v 1.1.1.1 2004/03/31 14:21:00 mclark Exp $
+ * $Id: UnmarshallException.java,v 1.3 2005/03/08 23:29:53 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -20,9 +20,14 @@
 
 package com.metaparadigm.jsonrpc;
 
-class UnmarshallException extends Exception
+/**
+ * Thrown by Serializer objects when they are unable to Unmarshall the JSON
+ * objects into Java objects.
+ */
+
+public class UnmarshallException extends Exception
 {
-    protected UnmarshallException(String msg)
+    public UnmarshallException(String msg)
     {
 	super(msg);
     }

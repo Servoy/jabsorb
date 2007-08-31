@@ -1,12 +1,10 @@
 package com.metaparadigm.jsonrpc.test;
 
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.Vector;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
+import java.lang.reflect.Method;
+import javax.servlet.http.HttpServletRequest;
+import com.metaparadigm.jsonrpc.JSONRPCBridge;
+import com.metaparadigm.jsonrpc.InvocationCallback;
 
 public class Test
 {
@@ -74,6 +72,11 @@ public class Test
 	return ba;
     }
 
+    public Integer[] echoIntegerArray(Integer i[])
+    {
+	return i;
+    }
+
     public Integer echoIntegerObject(Integer i)
     {
 	return i;
@@ -94,6 +97,10 @@ public class Test
 	return d;
     }
 
+    public Date echoDateObject(Date d)
+    {
+        return d;
+    }
 
     // Container tests
 
@@ -127,9 +134,9 @@ public class Test
 
     public Set aSet()
     {
-    Set s = new HashSet();
-    for(int i=0; i<5; i++) s.add(new Integer(i));
-    return s;
+	Set s = new HashSet();
+	for(int i=0; i<5; i++) s.add(new Integer(i));
+	return s;
     }
     
     public BeanA aBean(){
@@ -198,6 +205,7 @@ public class Test
     {
 	private int baz;
 	private String bang;
+	Integer bork;
 
 	public Waggle() {}
 
@@ -212,6 +220,9 @@ public class Test
 
 	public String getBang() { return bang; }
 	public void setBang(String bang) { this.bang = bang; }
+
+	public Integer getBork() { return bork; }
+	public void setBork(Integer bork) { this.bork = bork; }
 
 	public String toString() { return "waggle " + baz + " and " + bang; }
     }
@@ -306,5 +317,45 @@ public class Test
     {
 	return callableRef;
     }
+
+
+    // Debug control
+
+    public void setDebug(JSONRPCBridge bridge, boolean flag)
+    {
+	bridge.setDebug(flag);
+    }
+
+    // Callback tests
+
+    public void setCallback(JSONRPCBridge bridge, boolean flag)
+    {
+	if(flag) {
+	    bridge.registerCallback(cb, HttpServletRequest.class);
+	} else {
+	    bridge.unregisterCallback(cb, HttpServletRequest.class);
+	}
+    }
+
+    public static InvocationCallback cb = new InvocationCallback()
+	{
+	    public void preInvoke(Object context, Object instance,
+				  Method m, Object arguments[])
+		throws Exception
+	    {
+		System.out.print("Test.preInvoke");
+		if(instance != null)
+		    System.out.print(" instance=" + instance);
+		System.out.print(" method="+ m.getName());
+		for(int i=0; i < arguments.length; i++)
+		    System.out.print(" arg[" + i + "]=" + arguments[i]);
+		System.out.println("");
+	    }
+
+	    public void postInvoke(Object context, Object instance,
+				   Method m, Object result)
+		throws Exception
+	    {}
+	};
 
 }
