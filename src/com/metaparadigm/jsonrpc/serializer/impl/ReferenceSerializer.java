@@ -22,8 +22,10 @@
 
 package com.metaparadigm.jsonrpc.serializer.impl;
 
-import java.util.logging.Logger;
 import org.json.JSONObject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
 import com.metaparadigm.jsonrpc.serializer.AbstractSerializer;
@@ -36,8 +38,7 @@ public class ReferenceSerializer extends AbstractSerializer {
 
     private final static long serialVersionUID = 2;
 
-    private final static Logger log = Logger
-            .getLogger(ReferenceSerializer.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(ReferenceSerializer.class);
 
     private JSONRPCBridge bridge;
 
@@ -90,7 +91,7 @@ public class ReferenceSerializer extends AbstractSerializer {
         Integer identity = new Integer(System.identityHashCode(o));
         if (bridge.isReference(clazz)) {
             if (ser.isDebug())
-                log.fine("marshalling reference to object " + identity
+                log.trace("marshalling reference to object " + identity
                         + " of class " + clazz.getName());
             synchronized (bridge.getBridgeState()) {
                 bridge.getReferenceMap().put(identity, o);
@@ -102,7 +103,7 @@ public class ReferenceSerializer extends AbstractSerializer {
             return jso;
         } else if (bridge.isCallableReference(clazz)) {
             if (ser.isDebug())
-                log.fine("marshalling callable reference to object " + identity
+                log.trace("marshalling callable reference to object " + identity
                         + " of class " + clazz.getName());
             bridge.registerObject(identity, o);
             JSONObject jso = new JSONObject();

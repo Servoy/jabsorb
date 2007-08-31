@@ -6,6 +6,7 @@
   <path id="myclasspath">
     <fileset dir="${tomcat}/common/lib"><include name="**/*.jar"/></fileset>
     <fileset dir="${tomcat}/bin"><include name="**/*.jar"/></fileset>
+    <fileset dir="./lib"><include name="**/*.jar"/></fileset>
   </path>
 
   <!-- JBoss 4.0 classpath and installpath -->
@@ -15,6 +16,7 @@
   <path id="myclasspath">
     <fileset dir="${jboss}/server/standard/lib"><include name="**/*.jar"/></fileset>
     <fileset dir="${jboss}/server/default/deploy/jbossweb-tomcat50.sar"><include name="**/*.jar"/></fileset>
+    <fileset dir="./lib"><include name="**/*.jar"/></fileset>
   </path>
   -->
 
@@ -25,13 +27,14 @@
   <path id="myclasspath">
     <fileset dir="${jboss}/lib"><include name="**/*.jar"/></fileset>
     <fileset dir="${jboss}/server/default/deploy/jbossweb-tomcat50.sar"><include name="**/*.jar"/></fileset>
+    <fileset dir="./lib"><include name="**/*.jar"/></fileset>
   </path>
   -->
 
-
   <property name="version" value="svn-trunk"/>
-  <property name="jsonrpc-jar" value="jsonrpc-${version}.jar"/>
-  <property name="jsonrpc-war" value="jsonrpc-${version}.war"/>
+  <property name="jsonrpc-prefix" value="jsonrpc-${version}"/>
+  <property name="jsonrpc-jar" value="${jsonrpc-prefix}.jar"/>
+  <property name="jsonrpc-war" value="${jsonrpc-prefix}.war"/>
   <property name="src" location="src"/>
   <property name="build" location="build"/>
 
@@ -115,11 +118,16 @@
 
   <target name="test.dist" depends="dist,compile.jsp">
     <copy file="${jsonrpc-jar}" tofile="${webinf}/lib/${jsonrpc-jar}"/>
+    <copy todir="${test.lib}">
+      <fileset dir="./lib">
+        <include name="**/*.jar"/>
+      </fileset>
+    </copy>
     <jar destfile="${test.lib}/rsrc.jar" basedir="${test.rsrc}"
          excludes="*~"/>
     <war destfile="${jsonrpc-war}" basedir="${webapp}"
          excludes="**/*~,**/*.jsp,WEB-INF/web.xml*"
-	 webxml="${webapp}/WEB-INF/web.xml.out"/>
+         webxml="${webapp}/WEB-INF/web.xml.out"/>
   </target>
 
   <target name="docs">
@@ -153,10 +161,14 @@
     <copy file="${jsonrpc-war}" todir="${installpath}"/>
   </target>
 
+  <target name="uninstall">
+    <delete file="${installpath}/${jsonrpc-war}"/>
+    <delete dir="${installpath}/${jsonrpc-prefix}/"/>
+  </target>
+
   <target name="clean">
     <delete file="${jsonrpc-war}"/>
     <delete file="${jsonrpc-jar}"/>
-    <delete file="${webapp}/WEB-INF/rsrc.jar"/>
     <delete file="${webapp}/WEB-INF/web.xml.out"/>
     <delete file="${webapp}/WEB-INF/web.xml.generated"/>
     <delete file="${webapp}/Test.java.txt"/>

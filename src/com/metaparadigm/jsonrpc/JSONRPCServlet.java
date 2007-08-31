@@ -27,13 +27,16 @@ import java.io.OutputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.CharArrayWriter;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
+
 import org.json.JSONObject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This servlet handles JSON-RPC requests over HTTP and hands them to a
@@ -87,8 +90,7 @@ public class JSONRPCServlet extends HttpServlet {
 
     private final static long serialVersionUID = 2;
 
-    private final static Logger log = Logger.getLogger(JSONRPCServlet.class
-            .getName());
+    private final static Logger log = LoggerFactory.getLogger(JSONRPCServlet.class);
 
     private final static int buf_size = 4096;
 
@@ -146,7 +148,7 @@ public class JSONRPCServlet extends HttpServlet {
         while ((ret = in.read(buf, 0, buf_size)) != -1)
             data.write(buf, 0, ret);
         if (json_bridge.isDebug())
-            log.fine("recieve: " + data.toString());
+            log.trace("recieve: " + data.toString());
 
         // Process the request
         JSONObject json_req = null;
@@ -154,16 +156,16 @@ public class JSONRPCServlet extends HttpServlet {
         try {
             json_req = new JSONObject(data.toString());
             json_res = json_bridge.call
-		(new Object[] { request, response }, json_req);
+                    (new Object[] { request, response }, json_req);
         } catch (ParseException e) {
-            log.severe("can't parse call: " + data);
+            log.error("can't parse call: " + data);
             json_res = new JSONRPCResult(JSONRPCResult.CODE_ERR_PARSE, null,
                     JSONRPCResult.MSG_ERR_PARSE);
         }
 
         // Write the response
         if (json_bridge.isDebug())
-            log.fine("send: " + json_res.toString());
+            log.trace("send: " + json_res.toString());
         byte[] bout = json_res.toString().getBytes("UTF-8");
         response.setIntHeader("Content-Length", bout.length);
 

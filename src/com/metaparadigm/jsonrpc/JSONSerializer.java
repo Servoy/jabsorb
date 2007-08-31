@@ -27,12 +27,15 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.logging.Logger;
+
 import java.text.ParseException;
 import java.io.Serializable;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONTokener;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.metaparadigm.jsonrpc.serializer.MarshallException;
 import com.metaparadigm.jsonrpc.serializer.ObjectMatch;
@@ -63,8 +66,7 @@ public class JSONSerializer implements Serializable {
 
     private final static long serialVersionUID = 2;
 
-    private final static Logger log = Logger.getLogger(JSONSerializer.class
-            .getName());
+    private final static Logger log = LoggerFactory.getLogger(JSONSerializer.class);
 
     //  Debugging enabled on this serializer.
     private boolean debug = false;
@@ -178,7 +180,7 @@ public class JSONSerializer implements Serializable {
      */
     private Serializer getSerializer(Class clazz, Class jsoClazz) {
         if (isDebug())
-            log.fine("looking for serializer - java:"
+            log.trace("looking for serializer - java:"
                     + (clazz == null ? "null" : clazz.getName()) + " json:"
                     + (jsoClazz == null ? "null" : jsoClazz.getName()));
 
@@ -187,7 +189,7 @@ public class JSONSerializer implements Serializable {
             s = (Serializer) serializableMap.get(clazz);
             if (s != null && s.canSerialize(clazz, jsoClazz)) {
                 if (isDebug())
-                    log.fine("direct match serializer "
+                    log.trace("direct match serializer "
                             + s.getClass().getName());
                 return s;
             }
@@ -196,7 +198,7 @@ public class JSONSerializer implements Serializable {
                 s = (Serializer) i.next();
                 if (s.canSerialize(clazz, jsoClazz)) {
                     if (isDebug())
-                        log.fine("search found serializer "
+                        log.trace("search found serializer "
                                 + s.getClass().getName());
                     return s;
                 }
@@ -296,11 +298,11 @@ public class JSONSerializer implements Serializable {
             throws MarshallException {
         if (o == null) {
             if (isDebug())
-                log.fine("marshall null");
+                log.trace("marshall null");
             return JSONObject.NULL;
         }
         if (isDebug())
-            log.fine("marshall class " + o.getClass().getName());
+            log.trace("marshall class " + o.getClass().getName());
         Serializer s = getSerializer(o.getClass(), null);
         if (s != null)
             return s.marshall(state, o);

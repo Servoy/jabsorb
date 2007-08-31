@@ -28,14 +28,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger; 
+import org.slf4j.LoggerFactory;
 
 import com.metaparadigm.jsonrpc.localarg.LocalArgController;
 
 public class ClassAnalyzer {
 
-    private final static Logger log = Logger.getLogger(ClassAnalyzer.class
-            .getName());
+    private final static Logger log = LoggerFactory.getLogger(ClassAnalyzer.class);
     
     // key clazz, val ClassData
     private static HashMap classCache = new HashMap();

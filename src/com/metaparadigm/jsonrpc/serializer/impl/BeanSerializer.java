@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.logging.Logger;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import java.beans.Introspector;
@@ -34,6 +33,9 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.beans.BeanInfo;
 import org.json.JSONObject;
+
+import org.slf4j.Logger; 
+import org.slf4j.LoggerFactory;
 
 import com.metaparadigm.jsonrpc.serializer.AbstractSerializer;
 import com.metaparadigm.jsonrpc.serializer.MarshallException;
@@ -45,8 +47,7 @@ public class BeanSerializer extends AbstractSerializer {
 
     private final static long serialVersionUID = 2;
 
-    private final static Logger log = Logger.getLogger(BeanSerializer.class
-            .getName());
+    private final static Logger log = LoggerFactory.getLogger(BeanSerializer.class);
 
     private static HashMap beanCache = new HashMap();
 
@@ -180,7 +181,7 @@ public class BeanSerializer extends AbstractSerializer {
             throw new UnmarshallException(clazz.getName() + " is not a bean");
         }
         if (ser.isDebug())
-            log.fine("instantiating " + clazz.getName());
+            log.trace("instantiating " + clazz.getName());
         Object instance = null;
         try {
             instance = clazz.newInstance();
@@ -203,7 +204,7 @@ public class BeanSerializer extends AbstractSerializer {
                             + " " + e.getMessage());
                 }
                 if (ser.isDebug())
-                    log.fine("invoking " + setMethod.getName() + "(" + fieldVal
+                    log.trace("invoking " + setMethod.getName() + "(" + fieldVal
                             + ")");
                 invokeArgs[0] = fieldVal;
                 try {
@@ -255,7 +256,7 @@ public class BeanSerializer extends AbstractSerializer {
             String prop = (String) ent.getKey();
             Method getMethod = (Method) ent.getValue();
             if (ser.isDebug())
-                log.fine("invoking " + getMethod.getName() + "()");
+                log.trace("invoking " + getMethod.getName() + "()");
             try {
                 result = getMethod.invoke(o, args);
             } catch (Throwable e) {

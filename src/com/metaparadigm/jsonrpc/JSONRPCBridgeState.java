@@ -24,8 +24,10 @@ package com.metaparadigm.jsonrpc;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.logging.Logger;
 import java.io.Serializable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.metaparadigm.jsonrpc.serializer.Serializer;
 import com.metaparadigm.jsonrpc.serializer.impl.ReferenceSerializer;
@@ -39,8 +41,7 @@ public class JSONRPCBridgeState implements Serializable {
     
     private final static long serialVersionUID = 2;
     
-    private final static Logger log = Logger.getLogger(JSONRPCBridgeState.class
-            .getName());
+    private final static Logger log = LoggerFactory.getLogger(JSONRPCBridgeState.class);
 
     // bridge this state information is associated with
     private JSONRPCBridge bridge;

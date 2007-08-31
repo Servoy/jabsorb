@@ -2,6 +2,16 @@ $Id: CHANGES.txt,v 1.107 2006/03/27 05:38:40 mclark Exp $
 
 json-rpc-java/svn/trunk
 
+* Switch from java.util logging to SLF4J.
+  (the simple logging facade for java--see http://slf4j.org)
+  so that json-rpc-java can be easily integrated with projects
+  that use other java logging systems.  The test webapp still
+  uses java.util logging (although it's now via SLF4J.)
+  The json-rpc-java library now has a dependency on slf4j.
+* Added conveniance target 'uninstall' that removes .war and
+  the expanded .war folder from tomcat.
+  -- Arthur Blake <arthur_blake@users.sourceforge.net>
+
 * Add asynchrounous support to the constructor JSONRpcClient
   constructor. Previously the constructor would make a
   synchronous call to system.listmethods. Now if the

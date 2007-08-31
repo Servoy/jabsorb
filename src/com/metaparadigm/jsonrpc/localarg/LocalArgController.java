@@ -25,11 +25,13 @@ package com.metaparadigm.jsonrpc.localarg;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
 import com.metaparadigm.jsonrpc.localarg.impl.HttpServletRequestArgResolver;
@@ -45,8 +47,7 @@ import com.metaparadigm.jsonrpc.serializer.UnmarshallException;
 
 public class LocalArgController {
 
-    private final static Logger log = Logger.getLogger(LocalArgController.class
-            .getName());
+    private final static Logger log = LoggerFactory.getLogger(LocalArgController.class);
 
     // key argClazz, val HashSet<LocalArgResolverData>
     private static HashMap localArgResolverMap = new HashMap();
@@ -143,7 +144,7 @@ public class LocalArgController {
             if (resolverSet == null
                     || !resolverSet.remove(new LocalArgResolverData(
                             argResolver, argClazz, contextInterface))) {
-                log.warning("local arg resolver "
+                log.warn("local arg resolver "
                         + argResolver.getClass().getName()
                         + " not registered for local class "
                         + argClazz.getName() + " with context "

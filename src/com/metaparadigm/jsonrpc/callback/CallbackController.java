@@ -25,8 +25,10 @@ package com.metaparadigm.jsonrpc.callback;
 import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.HashSet;
-import java.util.logging.Logger;
 import java.io.Serializable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class that is instantiated per bridge to maintain the list of
@@ -36,8 +38,7 @@ import java.io.Serializable;
 public class CallbackController implements Serializable {
     private final static long serialVersionUID = 2;
 
-    private final static Logger log = Logger.getLogger(CallbackController.class
-            .getName());
+    private final static Logger log = LoggerFactory.getLogger(CallbackController.class);
 
     // key CallbackData
     private HashSet callbackSet;

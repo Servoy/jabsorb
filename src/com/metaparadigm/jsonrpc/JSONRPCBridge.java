@@ -29,12 +29,15 @@ import java.util.StringTokenizer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.logging.Logger;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import java.io.Serializable;
+
 import org.json.JSONObject;
 import org.json.JSONArray;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.metaparadigm.jsonrpc.callback.CallbackController;
 import com.metaparadigm.jsonrpc.callback.InvocationCallback;
@@ -107,8 +110,7 @@ public class JSONRPCBridge implements Serializable {
             return t;
         }
     };
-    private final static Logger log = Logger.getLogger(JSONRPCBridge.class
-            .getName());
+    private final static Logger log = LoggerFactory.getLogger(JSONRPCBridge.class);
 
     // Global bridge (for exporting to all users)
     private final static JSONRPCBridge globalBridge = new JSONRPCBridge();
@@ -123,7 +125,6 @@ public class JSONRPCBridge implements Serializable {
             e.printStackTrace();
         }
     }
-
 
     /* Instance fields */
 
@@ -496,7 +497,7 @@ public class JSONRPCBridge implements Serializable {
 
         if (cd != null) {
             if (debug)
-                log.fine("found class " + cd.getClazz().getName() + " named "
+                log.trace("found class " + cd.getClazz().getName() + " named "
                         + className);
             return cd;
         }
@@ -607,7 +608,7 @@ public class JSONRPCBridge implements Serializable {
             oi = (ObjectInstance)objectMap.get(key);
         }
         if (debug && oi != null)
-            log.fine("found object " + oi.o.hashCode() + " of class "
+            log.trace("found object " + oi.o.hashCode() + " of class "
                     + oi.clazz.getName() + " with key " + key);
         if (oi == null && this != globalBridge)
             return globalBridge.resolveObject(key);
@@ -692,7 +693,7 @@ public class JSONRPCBridge implements Serializable {
         if (o instanceof Method) {
             Method m = (Method) o;
             if (debug)
-                log.fine("found method " + methodName + "(" + argSignature(m)
+                log.trace("found method " + methodName + "(" + argSignature(m)
                         + ")");
             return m;
         } else if (o instanceof Method[])
@@ -702,17 +703,17 @@ public class JSONRPCBridge implements Serializable {
 
         ArrayList candidate = new ArrayList();
         if (debug)
-            log.fine("looking for method " + methodName + "("
+            log.trace("looking for method " + methodName + "("
                     + argSignature(arguments) + ")");
         for (int i = 0; i < method.length; i++) {
             try {
                 candidate.add(tryUnmarshallArgs(method[i], arguments));
                 if (debug)
-                    log.fine("+++ possible match with method " + methodName
+                    log.trace("+++ possible match with method " + methodName
                             + "(" + argSignature(method[i]) + ")");
             } catch (Exception e) {
                 if (debug)
-                    log.fine("xxx " + e.getMessage() + " in " + methodName
+                    log.trace("xxx " + e.getMessage() + " in " + methodName
                             + "(" + argSignature(method[i]) + ")");
             }
         }
@@ -733,7 +734,7 @@ public class JSONRPCBridge implements Serializable {
         if (best != null) {
             Method m = best.method;
             if (debug)
-                log.fine("found method " + methodName + "(" + argSignature(m)
+                log.trace("found method " + methodName + "(" + argSignature(m)
                         + ")");
             return m;
         }
@@ -861,13 +862,13 @@ public class JSONRPCBridge implements Serializable {
             arguments = jsonReq.getJSONArray("params");
             requestId = jsonReq.opt("id");
         } catch (NoSuchElementException e) {
-            log.severe("no method or parameters in request");
+            log.error("no method or parameters in request");
             return new JSONRPCResult(JSONRPCResult.CODE_ERR_NOMETHOD, null,
                     JSONRPCResult.MSG_ERR_NOMETHOD);
         }
 
         if (isDebug())
-            log.fine("call " + encodedMethod + "(" + arguments + ")"
+            log.trace("call " + encodedMethod + "(" + arguments + ")"
                     + ", requestId=" + requestId);
 
         String className = null;
@@ -954,7 +955,7 @@ public class JSONRPCBridge implements Serializable {
         // Call the method
         try {
             if (debug)
-                log.fine("invoking " + method.getReturnType().getName() + " "
+                log.trace("invoking " + method.getReturnType().getName() + " "
                         + method.getName() + "(" + argSignature(method) + ")");
 
             // Unmarshall arguments
