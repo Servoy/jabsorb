@@ -1,0 +1,21 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="../css/site.css" />
+    <title>JSON-RPC-Java</title>
+  </head>
+  <body bgcolor="#ffffff">
+    <h1>JSON-RPC-Java Tutorial</h1>
+    <p>This is a work in progress.</p>
+    <hr />
+    <h2>Placing the JSONRPCBridge in your JSP</h2>
+    <p>An instance of the JSONRPCBridge object needs to be placed in a HttpSession object registered under the attribute "JSONRPCBridge" to allow the JSONRPCServlet to locate the bridge.</p>
+<p>The bridge is implemented as session specific to improve the security of applications by allowing exporting of object methods only to specific HttpSessions.</p>
+<p>To use the bridge to allow calling of Java methods you can easily place a bridge in a HttpSession in JSP using the usebean tag. eg.</p>
+<p><code>&lt;jsp:useBean id="JSONRPCBridge" scope="session" class="com.metaparadigm.jsonrpc.JSONRPCBridge" /&gt;</code></p>
+<p>Then export the object you wish to call methods on. eg.</p>
+<p><code>JSONRPCBridge.registerObject("test", testObject);</code></p>
+<p>That is all that is requied to make available all methods of the object as test.&lt;methodnames&gt; to JSON-RPC clients.</p>
+    <hr />
+    <p>Copyright 2004 Metaparadigm Pte Ltd.</b>
+  </body>
+</html>

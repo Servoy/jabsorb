@@ -1,0 +1,47 @@
+body { 
+      margin-left: 7%;
+      margin-right: 7%; 
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 15px
+      }
+p { 
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 15px
+      }
+code {
+      font-family: Courier;
+      font-size: 15px
+      }
+pre {
+      font-family: Courier;
+      font-size: 15px
+      }
+ul { 
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 15px
+      }
+td { 
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 15px
+      }
+h1 {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 18px
+      }
+h2 {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 16px;
+      color: #990066
+      }
+h3 {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 15px
+      }
+h4 {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 15px
+      }
+.small {
+      font-size: 12px
+      }
+

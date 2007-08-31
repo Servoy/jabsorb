@@ -1,0 +1,119 @@
+<project name="json" default="dist" basedir=".">
+
+  <property name="tomcat" location="/opt/jakarta-tomcat-5.0.19"/>
+  <path id="myclasspath">
+    <fileset dir="${tomcat}/common/lib"><include name="**/*.jar"/></fileset>
+    <fileset dir="${tomcat}/bin"><include name="**/*.jar"/></fileset>
+  </path>
+
+  <property name="src" location="src"/>
+  <property name="build" location="build"/>
+
+  <taskdef classname="org.apache.jasper.JspC" name="jasper2">
+    <classpath refid="myclasspath"/>
+  </taskdef>
+
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init">
+    <javac srcdir="${src}" destdir="${build}">
+      <classpath refid="myclasspath"/>
+    </javac>
+  </target>
+
+  <target name="dist" depends="compile">
+    <jar destfile="jsonrpc.jar" basedir="${build}" excludes="*~"/>
+  </target>
+
+  <property name="webapp" location="webapps/jsonrpc"/>
+  <property name="webinf" location="${webapp}/WEB-INF"/>
+  <property name="test.src" location="test/src"/>
+  <property name="test.lib" location="${webinf}/lib"/>
+  <property name="test.classes" location="${webinf}/classes"/>
+  <property name="jsp.out" location="${test.src}/com/metaparadigm/jsp"/>
+  <property name="jsp.package" value="com.metaparadigm.jsp"/>
+
+  <target name="test.init">
+    <tstamp/>
+    <mkdir dir="${test.lib}"/>
+    <mkdir dir="${test.classes}"/>
+    <mkdir dir="${jsp.out}"/>
+  </target>
+
+  <target name="test.jsp" depends="test.init">
+    <jasper2 validateXml="false" uriroot="${webapp}" package="${jsp.package}"
+             webXmlFragment="${webinf}/web.xml.generated"
+             outputDir="${jsp.out}"/>
+    <copy file="${test.src}/com/metaparadigm/jsonrpc/test/Test.java"
+          tofile="${webapp}/Test.java.txt"/>
+    <copy file="${webapp}/test.jsp" tofile="${webapp}/test.jsp.xml"/>
+    <copy file="${webapp}/test.js" tofile="${webapp}/test.js.txt"/>
+    <copy file="${webinf}/web.xml" tofile="${webinf}/web.xml.out"/>
+    <loadfile property="generated_web.xml" 
+              srcFile="${webapp}/WEB-INF/web.xml.generated"/>
+    <replace file="${webapp}/WEB-INF/web.xml.out" 
+             token="&lt;!--GENERATED_JSPS--&gt;" 
+             value="${generated_web.xml}" />
+  </target>
+
+  <target name="compile.test" depends="test.init,test.jsp">
+    <javac srcdir="${test.src}" destdir="${test.classes}">
+      <classpath>
+        <path refid="myclasspath"/>
+        <pathelement path="jsonrpc.jar"/>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="test.dist" depends="dist,compile.test,docs">
+    <copy file="jsonrpc.jar" tofile="${webinf}/lib/jsonrpc.jar"/>
+    <war destfile="jsonrpc.war" basedir="${webapp}"
+         excludes="**/*~,**/*.jsp,WEB-INF/web.xml*"
+	 webxml="${webapp}/WEB-INF/web.xml.out"/>
+  </target>
+
+  <target name="docs">
+    <javadoc destdir="${webapp}/docs"
+             public="true"
+             nodeprecated="true"
+             windowtitle="JSON-RPC-Java API">
+      <classpath>
+        <path refid="myclasspath"/>
+        <pathelement path="jsonrpc.jar"/>
+      </classpath>
+      <fileset dir="${src}" defaultexcludes="yes">
+        <include name="com/metaparadigm/jsonrpc/**" />
+      </fileset>
+      <doctitle><![CDATA[<h1>JSON-RPC-Java API Documentation</h1>]]></doctitle>
+      <bottom><![CDATA[<i>Copyright &#169; 2004 Metaparadigm Pte Ltd.</i>]]></bottom>
+     </javadoc>
+  </target>
+
+
+  <target name="install" depends="test.dist">
+    <copy file="jsonrpc.war" todir="${tomcat}/webapps"/>
+  </target>
+
+  <target name="clean">
+    <delete file="jsonrpc.war"/>
+    <delete file="jsonrpc.jar"/>
+    <delete file="${webapp}/WEB-INF/web.xml.out"/>
+    <delete file="${webapp}/WEB-INF/web.xml.generated"/>
+    <delete>
+      <fileset dir="." defaultexcludes="no">
+        <include name="**/*~"/>
+      </fileset>
+    </delete>
+    <delete includeEmptyDirs="true" quiet="true">
+      <fileset dir="${build}"/>
+      <fileset dir="${webapp}/docs"/>
+      <fileset dir="${test.lib}"/>
+      <fileset dir="${test.classes}"/>
+      <fileset dir="${test.src}/com/metaparadigm/jsp"/>
+    </delete>
+  </target>
+
+</project>
