@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCServlet.java,v 1.1.1.1 2004/03/31 14:20:58 mclark Exp $
+ * $Id: JSONRPCServlet.java,v 1.4 2004/04/04 12:29:14 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -39,9 +39,9 @@ import org.json.JSONArray;
  * This servlet handles JSON-RPC requests over HTTP and hands them to
  * a JSONRPCBridge instance registered in the HttpSession.
  * </p>
- * An instance of the JSONRPCBridge object needs to be placed in a
- * HttpSession object registered under the attribute "JSONRPCBridge" to
- * allow the JSONRPCServlet to locate the bridge.
+ * An instance of the JSONRPCBridge object is automatically placed in the
+ * HttpSession object registered under the attribute "JSONRPCBridge" by
+ * the JSONRPCServlet.
  * <p />
  * The following can be added to your web.xml to export the servlet
  * under the URI &quot;<code>/JSON-RPC</code>&quot;
@@ -64,7 +64,7 @@ public class JSONRPCServlet extends HttpServlet
 
     public void service(HttpServletRequest request,
 			HttpServletResponse response)
-	throws IOException
+	throws IOException, ClassCastException
     {
 	response.setContentType("text/plain");
 
@@ -81,25 +81,16 @@ public class JSONRPCServlet extends HttpServlet
             data.write(buf, 0, ret);
         }
 
-	// Find the JSONRPCBridge for this session
+	// Find the JSONRPCBridge for this session or create one
+	// if it doesn't exist
 	HttpSession session = request.getSession();
 	JSONRPCBridge json_bridge = null;
-	try {
-	    json_bridge = (JSONRPCBridge)
-		session.getAttribute("JSONRPCBridge");
-	} catch (ClassCastException e) {}
-	// Otherwise use global bridge; which may of course have no methods
-	// as users generally would register objects into session specific
-        // bridges and possible only factory classes into the global bridge
-	if(json_bridge == null)
-	    json_bridge = JSONRPCBridge.getGlobalBridge();
-
-	// Is this a call to a CallableReference, if so it will have an
-        // object_id in the URL
-	int object_id = -1;
-	String object_id_s = request.getParameter("object_id");
-	if(object_id_s != null)
-	    object_id = Integer.parseInt(object_id_s);
+	json_bridge = (JSONRPCBridge)
+	    session.getAttribute("JSONRPCBridge");
+	if(json_bridge == null) {
+	    json_bridge = new JSONRPCBridge();
+	    session.setAttribute("JSONRPCBridge", json_bridge);
+	}
 
 	// Process the request
 	JSONObject json_req = null;
@@ -108,9 +99,16 @@ public class JSONRPCServlet extends HttpServlet
 	    json_req = new JSONObject(data.toString());
 	    String methodName = (String)json_req.getString("methodName");
 	    JSONArray arguments = json_req.getJSONArray("arguments");
+	    // Is this a CallableReference it will have a non-zero objectID
+	    int object_id = json_req.optInt("objectID");
 	    if(json_bridge.isDebug())
-		System.out.println("JSONRPCServlet.service call " +
-				   methodName + "(" + arguments + ")");
+		if(object_id != 0)
+		    System.out.println("JSONRPCServlet.service call " +
+				       "objectID=" + object_id + " " +
+				       methodName + "(" + arguments + ")");
+		else
+		    System.out.println("JSONRPCServlet.service call " +
+				       methodName + "(" + arguments + ")");
 	    json_res = json_bridge.call(object_id, methodName, arguments);
 	} catch (ParseException e) {
 	    System.err.println

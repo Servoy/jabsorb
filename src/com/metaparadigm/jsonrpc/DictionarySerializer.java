@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: DictionarySerializer.java,v 1.1 2004/04/01 06:51:29 mclark Exp $
+ * $Id: DictionarySerializer.java,v 1.2 2004/04/04 16:08:22 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -42,7 +42,7 @@ class DictionarySerializer extends Serializer
 	throws UnmarshallException
     {
 	JSONObject jso = (JSONObject)o;
-	String java_class = jso.getString("java_class");
+	String java_class = jso.getString("javaClass");
 	if(java_class == null)
 	    throw new UnmarshallException("no type hint");	
 	if(!(java_class.equals("java.util.Dictionary") ||
@@ -70,7 +70,7 @@ class DictionarySerializer extends Serializer
 	throws UnmarshallException
     {
 	JSONObject jso = (JSONObject)o;
-	String java_class = jso.getString("java_class");
+	String java_class = jso.getString("javaClass");
 	if(java_class == null)
 	    throw new UnmarshallException("no type hint");	
 	Hashtable ht = null;
@@ -103,7 +103,7 @@ class DictionarySerializer extends Serializer
 	Dictionary ht = (Dictionary)o;
 	JSONObject obj = new JSONObject();
 	JSONObject map = new JSONObject();
-	obj.put("java_class", o.getClass().getName());
+	obj.put("javaClass", o.getClass().getName());
 	obj.put("map", map);
 	Object key = null;
 	Object val = null;

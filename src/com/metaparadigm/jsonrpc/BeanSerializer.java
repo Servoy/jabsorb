@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: BeanSerializer.java,v 1.1.1.1 2004/03/31 14:21:00 mclark Exp $
+ * $Id: BeanSerializer.java,v 1.2 2004/04/04 16:08:22 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -210,7 +210,7 @@ class BeanSerializer extends Serializer
 		(o.getClass().getName() + " is not a bean");
 	}
 	JSONObject val = new JSONObject();
-	val.put("java_class", o.getClass().getName());
+	val.put("javaClass", o.getClass().getName());
 	Iterator i = bd.readableProps.entrySet().iterator();
 	Object args[] = new Object[0];
 	Object result = null;

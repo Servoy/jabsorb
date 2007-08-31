@@ -84,7 +84,7 @@ public class Test
 	return ht;
     }
 
-    public static String[] twice(String string)
+    public String[] twice(String string)
     {
 	return new String[] { string, string };
     }
@@ -101,17 +101,17 @@ public class Test
 	return c;
     }
 
-    public static String echo(String msg1, String msg2)
+    public String echo(String msg1, String msg2)
     {
 	return msg1 + " and " + msg2;
     }
 
-    public static String echo(String message)
+    public String echo(String message)
     {
 	return message;
     }
 
-    public static String echo(String strings[])
+    public String echo(String strings[])
     {
 	StringBuffer buf = new StringBuffer();
 	buf.append("appended strings: ");
@@ -122,12 +122,12 @@ public class Test
 	return buf.toString();
     }
 
-    public static int echo(int number)
+    public int echo(int number)
     {
 	return number;
     }
 
-    public static String echo(int nums[])
+    public String echo(int nums[])
     {
 	StringBuffer buf = new StringBuffer();
 	buf.append("[");

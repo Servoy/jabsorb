@@ -1,7 +1,7 @@
 /*
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCBridge.java,v 1.2 2004/04/01 06:51:29 mclark Exp $
+ * $Id: JSONRPCBridge.java,v 1.6 2004/04/04 16:08:22 mclark Exp $
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -43,16 +43,16 @@ import org.json.JSONArray;
  * requests recieved by the JSONRPCServlet and invokes methods on exported
  * Java objects.
  * <p />
- * An instance of the JSONRPCBridge object needs to be placed in a
- * HttpSession object registered under the attribute "JSONRPCBridge" to
- * allow the JSONRPCServlet to locate the bridge.
+ * An instance of the JSONRPCBridge object is automatically placed in the
+ * HttpSession object registered under the attribute "JSONRPCBridge" by
+ * the JSONRPCServlet.
  * <p />
  * The bridge is implemented as session specific to improve the security
  * of applications by allowing exporting of object methods only to
  * specific HttpSessions.
  * <p />
  * To use the bridge to allow calling of Java methods you can easily
- * place a bridge in a HttpSession in JSP using the usebean tag. eg.
+ * access the HttpSession specific bridge in JSP using the usebean tag. eg.
  * <p />
  * <code>&lt;jsp:useBean id="JSONRPCBridge" scope="session"
 	class="com.metaparadigm.jsonrpc.JSONRPCBridge" /&gt;</code>
@@ -61,11 +61,14 @@ import org.json.JSONArray;
  * <p />
  * <code>JSONRPCBridge.registerObject("test", testObject);</code>
  * <p />
- * This will make available all methods of the object as <code>test.&lt;methodnames&gt;</code> to JSON-RPC clients.
+ * This will make available all methods of the object as <code>test.&lt;methodnames&gt;</code> to JSON-RPC clients. This method should generally be performed
+ * after an authentication check to only export specific objects to clients
+ * that are authorised to use them.
  * <p />
  * There exists a global bridge singleton object that will allow exporting
- * objects to any HTTP client with no need for a HttpSession although it
- * is not recommended for general usage.
+ * objects to all HTTP clients. This can be used for registering factory
+ * classes although care must be taken with authentication as these objects
+ * will be accessible to all clients.
  */
 
 public class JSONRPCBridge
@@ -75,7 +78,7 @@ public class JSONRPCBridge
     public void setDebug(boolean debug) { this.debug = debug; }
     protected boolean isDebug() { return debug; }
 
-    private static JSONRPCBridge globalBridge;
+    private static JSONRPCBridge globalBridge = new JSONRPCBridge(false);
 
     /**
      * This method retreieves the global bridge singleton.
@@ -87,7 +90,6 @@ public class JSONRPCBridge
      */
     public static JSONRPCBridge getGlobalBridge() { return globalBridge; }
 
-
     // key clazz, val ClassData
     private static HashMap classCache = new HashMap();
 
@@ -96,11 +98,13 @@ public class JSONRPCBridge
     private HashMap classMap = new HashMap();
     // key "session exported instance name", val ObjectInstance
     private HashMap objectMap = new HashMap();
+    // key Integer hashcode, object held as reference
+    protected HashMap referenceMap = new HashMap();
 
-    // Refererence Serializer
-    protected ReferenceSerializer refSerializer =
-	new ReferenceSerializer(this);
-
+    // key clazz, classes that should be returned as References
+    protected HashSet referenceSet = new HashSet();
+    // key clazz, classes that should be returned as CallableReferences
+    protected HashSet callableReferenceSet = new HashSet();
     // Key Serializer
     private HashSet serializerSet = new HashSet();
     // key Class, val Serializer
@@ -109,23 +113,25 @@ public class JSONRPCBridge
     private ArrayList serializerList = new ArrayList();
 
 
-    static {
-	globalBridge = new JSONRPCBridge();
+    public JSONRPCBridge(boolean global) {}
+
+    public JSONRPCBridge()
+    {
 	try {
-	    globalBridge.registerSerializer(new ArraySerializer());
-	    globalBridge.registerSerializer(new BeanSerializer());
-	    globalBridge.registerSerializer(new DictionarySerializer());
-	    globalBridge.registerSerializer(new AbstractMapSerializer());
-	    globalBridge.registerSerializer(new AbstractSetSerializer());
-	    globalBridge.registerSerializer(new AbstractListSerializer());
-	    globalBridge.registerSerializer(new StringSerializer());
-	    globalBridge.registerSerializer(new NumberSerializer());
-	    globalBridge.registerSerializer(new PrimitiveSerializer());
+	    registerSerializer(new ArraySerializer());
+	    registerSerializer(new BeanSerializer());
+	    registerSerializer(new ReferenceSerializer());
+	    registerSerializer(new DictionarySerializer());
+	    registerSerializer(new AbstractMapSerializer());
+	    registerSerializer(new AbstractSetSerializer());
+	    registerSerializer(new AbstractListSerializer());
+	    registerSerializer(new StringSerializer());
+	    registerSerializer(new NumberSerializer());
+	    registerSerializer(new PrimitiveSerializer());
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
     }
-
 
     protected static class ClassData
     {
@@ -285,12 +291,12 @@ public class JSONRPCBridge
 			 classes[i].getName());
 	    }
 	    if(!serializerSet.contains(ser)) {
-		ser.setBridge(this);
 		System.out.println("JSONRPCBridge.registerSerializer " +
 				   ser.getClass().getName());
 		for(int i=0; i < classes.length; i++) {
 		    serializableMap.put(classes[i], ser);
 		}
+		ser.setBridge(this);
 		serializerSet.add(ser);
 		serializerList.add(0, ser);
 	    }
@@ -314,18 +320,15 @@ public class JSONRPCBridge
 	    while(i.hasNext()) {
 		ser = (Serializer)i.next();
 		if(ser.canSerialize(clazz, jsoClazz)) {
-		if(debug)
-		    System.out.println
-			("JSONRPCBridge.getSerializer search found " +
-			 ser.getClass().getName());
+		    if(debug)
+			System.out.println
+			    ("JSONRPCBridge.getSerializer search found " +
+			     ser.getClass().getName()); 
 		    return ser;
 		}
 	    }
 	}
-	if(this != globalBridge)
-	    return globalBridge.getSerializer(clazz, jsoClazz);
-	else
-	    return null;
+	return null;
     }
 
 
@@ -343,22 +346,29 @@ public class JSONRPCBridge
      * <p />
      * A Reference in JSON format looks like this:
      * <p />
-     * <code>{"result": {"java_class":"com.metaparadigm.test.Foo",<br />
-     *                   "object_id":5535614,<br />
-     *                   "json_type":"Reference"} }</code>
+     * <code>{"result": {"javaClass":"com.metaparadigm.test.Foo",<br />
+     *                   "objectID":5535614,<br />
+     *                   "JSONRPCType":"Reference"} }</code>
      *
      * @param clazz The class object that should be marshalled as a reference.
      */
     public void registerReference(Class clazz)
 	throws Exception
     {
-	synchronized (refSerializer.referenceSet) {
-	    refSerializer.referenceSet.add(clazz);
+	synchronized (referenceSet) {
+	    referenceSet.add(clazz);
 	}
 	if(debug)
 	    System.out.println
 		("JSONRPCBridge.registerReference registered " +
 		 clazz.getName());
+    }
+
+    protected boolean isReference(Class clazz)
+    {
+	if(referenceSet.contains(clazz)) return true;
+	if(this == globalBridge) return false;
+	return globalBridge.isReference(clazz);
     }
 
 
@@ -375,22 +385,29 @@ public class JSONRPCBridge
      * <p />
      * A Callable Reference in JSON format looks like this:
      * <p />
-     * <code>{"result": {"java_class":"com.metaparadigm.test.Bar",<br />
-     *                   "object_id":4827452,<br />
-     *                   "json_type":"CallableReference"} }</code>
+     * <code>{"result": {"javaClass":"com.metaparadigm.test.Bar",<br />
+     *                   "objectID":4827452,<br />
+     *                   "JSONRPCType":"CallableReference"} }</code>
      *
      * @param clazz The class object that should be marshalled as a callable reference.
      */
     public void registerCallableReference(Class clazz)
 	throws Exception
     {
-	synchronized (refSerializer.callableReferenceSet) {
-	    refSerializer.callableReferenceSet.add(clazz);
+	synchronized (callableReferenceSet) {
+	    callableReferenceSet.add(clazz);
 	}
 	if(debug)
 	    System.out.println
 		("JSONRPCBridge.registerCallableReference registered " +
 		 clazz.getName());
+    }
+
+    protected boolean isCallableReference(Class clazz)
+    {
+	if(callableReferenceSet.contains(clazz)) return true;
+	if(this == globalBridge) return false;
+	return globalBridge.isCallableReference(clazz);
     }
 
 
@@ -478,7 +495,10 @@ public class JSONRPCBridge
 		("JSONRPCBridge.resolveObject found object " +
 		 oi.o.hashCode() + " of class " + oi.cd.clazz.getName() +
 		 " with key " + key);
-	return oi;
+	if(oi == null && this != globalBridge)
+	    return globalBridge.resolveObject(key);
+	else
+	    return oi;
     }
 
 
@@ -578,7 +598,7 @@ public class JSONRPCBridge
 	    return o.getClass();
 
 	if(o instanceof JSONObject) {
-	    String class_name = ((JSONObject)o).getString("java_class");
+	    String class_name = ((JSONObject)o).getString("javaClass");
 	    if(class_name != null) {
 		Class clazz = null;
 		try {
@@ -606,8 +626,6 @@ public class JSONRPCBridge
 	    else
 		throw new UnmarshallException("can't assign null primitive");
 	}
-	if(refSerializer.canSerialize(clazz, jso.getClass()))
-	    return refSerializer.doTryToUnmarshall(clazz, jso);
 	Serializer ser = getSerializer(clazz, jso.getClass());
 	if(ser != null) return ser.doTryToUnmarshall(clazz, jso);
 
@@ -647,8 +665,6 @@ public class JSONRPCBridge
 	    else
 		throw new UnmarshallException("can't assign null primitive");
 	}
-	if(refSerializer.canSerialize(clazz, jso.getClass()))
-	    return refSerializer.doUnmarshall(clazz, jso);
 	Serializer ser = getSerializer(clazz, jso.getClass());
 	if(ser != null) return ser.doUnmarshall(clazz, jso);
 
@@ -680,8 +696,6 @@ public class JSONRPCBridge
 	    System.out.println("JSONRPCBridge.marshall class " +
 			       o.getClass().getName());
 	if (o == null) return o;
-	if(refSerializer.canSerialize(o.getClass(), null))
-	    return refSerializer.doMarshall(o);
 	Serializer ser = getSerializer(o.getClass(), null);
 	if(ser != null) return ser.doMarshall(o);
 	throw new MarshallException("can't marshall " +
@@ -690,7 +704,7 @@ public class JSONRPCBridge
 
 
     protected JSONRPCResult call(int object_id, String classDotMethod,
-			      JSONArray arguments)
+				 JSONArray arguments)
     {
 	// Parse the class and methodName
 	StringTokenizer t = new StringTokenizer(classDotMethod, ".");
@@ -704,11 +718,18 @@ public class JSONRPCBridge
 	Method method = null;
 	Object itsThis = null;
 
-	if(object_id == -1) {
+	if(object_id == 0) {
 	    // Handle "system.listMethods"
 	    if(classDotMethod.equals("system.listMethods")) {
-		return new JSONRPCResult(JSONRPCResult.CODE_SUCCESS,
-					 listMethods());
+		HashSet m = new HashSet();
+		globalBridge.allStaticMethods(m);
+		globalBridge.allInstanceMethods(m);
+		allStaticMethods(m);
+		allInstanceMethods(m);
+		JSONArray methods = new JSONArray();
+		Iterator i = m.iterator();
+		while(i.hasNext()) methods.put((String)i.next());
+		return new JSONRPCResult(JSONRPCResult.CODE_SUCCESS, methods);
 	    }
 	    // Look up the class, object instance and method objects
 	    if(className == null || methodName == null ||
@@ -728,8 +749,13 @@ public class JSONRPCBridge
 	    methodMap = oi.cd.methodMap;
 	    // Handle "system.listMethods"
 	    if(classDotMethod.equals("system.listMethods")) {
-		return new JSONRPCResult(JSONRPCResult.CODE_SUCCESS,
-					 listMethods(oi.cd.methodMap));
+		HashSet m = new HashSet();
+		uniqueMethods(m, "", oi.cd.staticMethodMap);
+		uniqueMethods(m, "", oi.cd.methodMap);
+		JSONArray methods = new JSONArray();
+		Iterator i = m.iterator();
+		while(i.hasNext()) methods.put((String)i.next());
+		return new JSONRPCResult(JSONRPCResult.CODE_SUCCESS, methods);
 	    }
 	    methodName = className;
 	}
@@ -768,42 +794,32 @@ public class JSONRPCBridge
     }
 
 
-    private Object listMethods(HashMap methodMap)
+    private void uniqueMethods(HashSet m, String prefix, HashMap methodMap)
     {
-	HashSet m = new HashSet();
 	Iterator i = methodMap.entrySet().iterator();
 	while(i.hasNext()) {
 	    Map.Entry mentry = (Map.Entry)i.next();
 	    MethodKey mk = (MethodKey)mentry.getKey();
-	    m.add(mk.methodName);
+	    m.add(prefix + mk.methodName);
 	}
-	Iterator j = m.iterator();
-	JSONArray methods = new JSONArray();
-	while(j.hasNext()) {
-	    String methodName = (String)j.next();
-	    methods.put(methodName);
-	}
-	return methods;
     }
 
 
-    private Object listMethods()
+    private void allStaticMethods(HashSet m)
     {
-	HashSet m = new HashSet();
 	synchronized (classMap) {
 	    Iterator i = classMap.entrySet().iterator();
 	    while(i.hasNext()) {
 		Map.Entry cdentry = (Map.Entry)i.next();
-		String className = (String)cdentry.getKey();
+		String name = (String)cdentry.getKey();
 		ClassData cd = (ClassData)cdentry.getValue();
-		Iterator j = cd.staticMethodMap.entrySet().iterator();
-		while(j.hasNext()) {
-		    Map.Entry mentry = (Map.Entry)j.next();
-		    MethodKey mk = (MethodKey)mentry.getKey();
-		    m.add(className + "." + mk.methodName);
-		}
+		uniqueMethods(m, name + ".", cd.staticMethodMap);
 	    }
 	}
+    }
+
+    private void allInstanceMethods(HashSet m)
+    {
 	synchronized (objectMap) {
 	    Iterator i = objectMap.entrySet().iterator();
 	    while(i.hasNext()) {
@@ -812,21 +828,10 @@ public class JSONRPCBridge
 		if (!(key instanceof String)) continue;
 		String name = (String)key;
 		ObjectInstance oi = (ObjectInstance)oientry.getValue();
-		Iterator j = oi.cd.methodMap.entrySet().iterator();
-		while(j.hasNext()) {
-		    Map.Entry mentry = (Map.Entry)j.next();
-		    MethodKey mk = (MethodKey)mentry.getKey();
-		    m.add(name + "." + mk.methodName);
-		}
+		uniqueMethods(m, name + ".", oi.cd.methodMap);
+		uniqueMethods(m, name + ".", oi.cd.staticMethodMap);
 	    }
 	}
-	Iterator i = m.iterator();
-	JSONArray methods = new JSONArray();
-	while(i.hasNext()) {
-	    String methodName = (String)i.next();
-	    methods.put(methodName);
-	}
-	return methods;
     }
 
 }

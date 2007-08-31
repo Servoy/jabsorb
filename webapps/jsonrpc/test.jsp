@@ -4,7 +4,7 @@
   -
   - Author: Michael Clark <michael@metaparadigm.com>
   - Copyright 2004 Metaparadigm Pte Ltd.
-  - $Id: test.jsp,v 1.2 2004/04/01 06:51:29 mclark Exp $
+  - $Id: test.jsp,v 1.4 2004/04/04 12:29:14 mclark Exp $
   -->
  <jsp:directive.page contentType="text/html;charset=UTF-8" language="java" />
  <jsp:directive.page import="com.metaparadigm.jsonrpc.JSONRPCBridge" />
@@ -15,6 +15,7 @@
 	class="com.metaparadigm.jsonrpc.test.Test" />
  <jsp:scriptlet>
    response.setDateHeader ("Expires", 0);
+   JSONRPCBridge.setDebug(true);
    JSONRPCBridge.registerObject("test", testObject);
    JSONRPCBridge.registerReference(Test.RefTest.class);
    JSONRPCBridge.registerCallableReference(Test.CallableRefTest.class);

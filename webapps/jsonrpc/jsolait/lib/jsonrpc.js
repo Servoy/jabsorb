@@ -97,7 +97,7 @@ Module("jsonrpc", "0.1.4", function(thisMod){
         
         var postData = function(url, user, pass, data, callback){
             var rslt = urllib.postURL(url, user, pass, data, [["Content-Type", "text/plain"]], callback);
-            return rslt;
+	    return rslt;
         }
         
         thisMod.unmarshall = function(s){
@@ -109,7 +109,7 @@ Module("jsonrpc", "0.1.4", function(thisMod){
             }
         }
         
-        var handleResponse=function(resp){
+        var handleResponse=function(self, resp){
             var status=null;
             try{//see if the server responded with a response code 200 OK.
                 status = resp.status;
@@ -124,16 +124,25 @@ Module("jsonrpc", "0.1.4", function(thisMod){
                 if(respTxt == null || respTxt == ""){
                     throw new thisMod.MalformedJSONRPC("The server responded with an empty document.", "");
                 }else{
-                    return thisMod.unmarshall(respTxt);
+                    var o = thisMod.unmarshall(respTxt);
+                    // Handle CallableProxy
+                    if(o.objectID && o.JSONRPCType == "CallableReference") {
+                        var callableRef = new thisMod.ServerProxy(self.url, self.user, self.pass, o.objectID);
+                        return callableRef;
+                    }
+                    return o;
                 }
             }else{
                 throw new thisMod.InvalidServerResponse(status);
             }
         }
         
-        var createRequest=function(methodName, args){
-            return lang.objToJson({"methodName" : methodName, "arguments" : args});
-        }
+	    var createRequest=function(objectID, methodName, args){
+	    if(objectID)
+                return lang.objToJson({"objectID" : objectID, "methodName" : methodName, "arguments" : args});
+	    else
+	    	return lang.objToJson({"methodName" : methodName, "arguments" : args});
+	    }
         
         /**
             Class for creating JSON-RPC methods.
@@ -147,11 +156,12 @@ Module("jsonrpc", "0.1.4", function(thisMod){
             @param user=null             The user name to use for HTTP authentication.
             @param pass=null             The password to use for HTTP authentication.
         */
-        thisClass.prototype.init = function(url, methodName, user, pass){
+        thisClass.prototype.init = function(url, methodName, user, pass, objectID){
             this.methodName = methodName;
             this.url = url;
             this.user = user;
             this.password = pass;
+            this.objectID = objectID;
             //this is pretty much a hack.
             //we create a function which mimics this class and return it instead of instanciating an object really. 
             var fn=function(){
@@ -160,20 +170,19 @@ Module("jsonrpc", "0.1.4", function(thisMod){
                     args.push(arguments[i]);
                 }
                 //sync or async call
+                var data = createRequest(fn.objectID, fn.methodName, args);
                 if(typeof arguments[arguments.length-1] != "function"){
-                    var data = createRequest(fn.methodName, args);
                     var resp = postData(fn.url, fn.user, fn.password, data);
-                    return handleResponse(resp);
+                    return handleResponse(fn, resp);
                 }else{
                     args.pop();
-                    var data = createRequest(fn.methodName, args);
                     args = arguments;
                     //callback for async postData
                     var cllbck = function(resp){
                         var rslt = null;
                         var exc =null;
                         try{
-                            rslt = handleResponse(resp);
+                            rslt = handleResponse(fn, resp);
                         }catch(e){
                             exc = e;
                         }
@@ -189,11 +198,12 @@ Module("jsonrpc", "0.1.4", function(thisMod){
             fn.methodName = this.methodName;
             fn.url = this.url;
             fn.user = this.user;
-            fn.password=this.password;
+            fn.password = this.password;
+            fn.objectID = this.objectID;
             fn.callAsync = this.callAsync;
             fn.toMulticall = this.toMulticall;
             fn.toString = this.toString;
-            fn.setAuthentication=this.setAuthentication;
+            fn.setAuthentication = this.setAuthentication;
             fn.constructor = thisClass;
             return fn;
         }
@@ -215,6 +225,8 @@ Module("jsonrpc", "0.1.4", function(thisMod){
         thisClass.prototype.user;
         ///The password used for HTTP authorization.
         thisClass.prototype.password;
+        ///The objectID to invoke on
+        thisClass.prototype.objectID;
     })
     
     /**
@@ -236,7 +248,7 @@ Module("jsonrpc", "0.1.4", function(thisMod){
             @param user=null             The user name to use for HTTP authentication.
             @param pass=null             The password to use for HTTP authentication.
         */
-        thisClass.prototype.init = function(url, methodNames, user, pass){
+        thisClass.prototype.init = function(url, methodNames, user, pass, objectID){
             if(methodNames instanceof Array){
                 if(methodNames.length > 0){
                     var tryIntrospection=false;
@@ -244,6 +256,7 @@ Module("jsonrpc", "0.1.4", function(thisMod){
                     var tryIntrospection=true;
                 }
             }else{
+                objectID=pass;
                 pass=user;
                 user=methodNames;
                 methodNames=[];
@@ -252,11 +265,13 @@ Module("jsonrpc", "0.1.4", function(thisMod){
             this.url = url;
             this.user = user;
             this.password = pass;
+            this.objectID = objectID;
             this.add(methodNames);
             if(tryIntrospection){
                 try{//it's ok if it fails.
                     this.introspect();
                 }catch(e){
+		    reportException(e);
                 }
             }
         }
@@ -282,7 +297,7 @@ Module("jsonrpc", "0.1.4", function(thisMod){
                 var name = names[names.length-1];
                 if(obj[name]){
                 }else{
-                    var mth = new thisMod.JSONRPCMethod(this.url, methodNames[i], this.user, this.password);
+                    var mth = new thisMod.JSONRPCMethod(this.url, methodNames[i], this.user, this.password, this.objectID);
                     obj[name] = mth;
                     this.methods.push(mth);
                 }
@@ -317,6 +332,8 @@ Module("jsonrpc", "0.1.4", function(thisMod){
         thisClass.prototype.user;
         ///The password used for HTTP authentication.
         thisClass.prototype.password;
+        ///The object to invoke on
+        thisClass.prototype.objectID;
         ///All methods.
         thisClass.prototype.methods=new Array();
     })

@@ -69,9 +69,9 @@
     </p>
 
     <h2>Download</h2>
-    <p>JSON-RPC-Java is licensed unger the <a href="http://www.gnu.org/licenses/lgpl.html">LGPL</a>. You can download the latest version here:
+    <p>JSON-RPC-Java is licensed under the <a href="http://www.gnu.org/licenses/lgpl.html">LGPL</a>. You can download the latest version here:
      <ul>
-       <li><a href="/jsonrpc-dist/json-rpc-java-0.2.tar.gz">json-rpc-java-0.2.tar.gz</a></li>
+       <li><a href="/jsonrpc-dist/json-rpc-java-0.3.tar.gz">json-rpc-java-0.3.tar.gz</a></li>
      </ul>
     </p>
 
@@ -86,7 +86,8 @@ CVS password: &lt;enter '<b>anoncvs</b>'&gt;<br>
     <h2>Bugs and Limitations</h2>
     <p>
      <ul>
-      <li>Problems loading jsolait on IE 5.1 for Mac, Netscape 6 and Konqueror</li>
+      <li>Support is currently limited to Netscape 7, latest Safari, newer versions of Mozilla, and Internet Explorer 5 and up. The jsolait jsonrpc client library does not work on IE 5.1 for Mac, Netscape 6, Opera and Konqueror due to their lack of support for the XMLHttpRequest object.</li>
+      <li>Implementation of a Java Applet to provide synchronous communication on browsers with Java VM and Javascript to Java Bridge (Konqueror and Netscape 6) will extend the supported set of browsers. I currently have an experimental implementation of this (with changes to urllib in jsolait) which you can mail me if you're interested.</li>
      </ul>
     </p>
     <p>Please send bug reports to <a href="mailto:michael@metaparadigm.com">michael@metaparadigm.com</a></p>
@@ -94,8 +95,8 @@ CVS password: &lt;enter '<b>anoncvs</b>'&gt;<br>
     <h2>To do</h2>
     <p>
      <ul>
-       <li>Complete support for Callable References in a standard way.</li>
-       <li>Implement JSRS transport to support browsers where XmlHttpObject is not available.</li>
+       <li>Standardise method for invocation on unnamed object instances (those returned as CallableReferences). JSON-RPC-Java presently include a slightly modified version of the jsonrpc client from jsolait which handles unmarshalling of Callable References (automatic creation of ServerProxy object). It also adds an additional attribute <code>objectID</code> to the JSON-RPC protocol message for method calls on these unnamed object instances.</li>
+       <li>Implement Java applet transport to support browsers where XmlHttpObject is not available.</li>
        <li>Testing, testing, testing.</li>
      </ul>
     </p>
