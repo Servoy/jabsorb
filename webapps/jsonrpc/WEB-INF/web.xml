@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="ISO-8859-1"?> 
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app>
+
+  <servlet>
+    <servlet-name>com.metaparadigm.jsonrpc.JSONRPCServlet</servlet-name>
+    <servlet-class>com.metaparadigm.jsonrpc.JSONRPCServlet</servlet-class>
+  </servlet>
+
+<!--GENERATED_JSPS-->
+
+    <servlet-mapping>
+        <servlet-name>index_jsp</servlet-name>
+        <url-pattern>/index.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>tutorial_jsp</servlet-name>
+        <url-pattern>/tutorial.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>manual_jsp</servlet-name>
+        <url-pattern>/manual.html</url-pattern>
+    </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>com.metaparadigm.jsonrpc.JSONRPCServlet</servlet-name>
+    <url-pattern>/JSON-RPC</url-pattern>
+  </servlet-mapping>
+
+</web-app>

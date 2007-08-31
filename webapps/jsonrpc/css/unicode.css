@@ -1,0 +1,61 @@
+.test_table {
+    width: 100%;
+    border: 1px solid #e8e8e8;
+    border-collapse: collapse;
+}
+
+.test_th {
+    background: #e8e8e8;
+    color: #000000;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: left;
+}
+
+.test_td {
+    border: 1px solid #e8e8e8;
+    vertical-align: text-top;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    text-align: left;
+}
+
+.desc_heading {
+    width: 150px;
+    height: 16px;
+}
+
+.recv_heading {
+    height: 16px;
+    overflow: hidden;
+}
+
+.echo_heading {
+    height: 16px;
+    overflow: hidden;
+}
+
+.pass_heading {
+    width: 32px;
+    height: 16px;
+}
+
+.desc_cell {
+    width: 150px;
+}
+
+.recv_cell {
+}
+
+.echo_cell {
+}
+
+.pass_cell {
+    width: 32px;
+}
+
+.fail_cell {
+    width: 32px;
+    color: #ff0000;
+}
