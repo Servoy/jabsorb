@@ -1,3 +1,10 @@
+/*
+ * jabsorb - a Java to JavaScript Advanced Object Request Broker
+ * http://www.jabsorb.org
+ *
+ * This module is based on public domain code from json.org.
+ */
+
 package org.jabsorb.json;
 
 import java.util.HashMap;

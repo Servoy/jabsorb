@@ -1,12 +1,13 @@
 /*
- * JSON-RPC JavaScript client
+ * jabsorb - a Java to JavaScript Advanced Object Request Broker
+ * http://www.jabsorb.org
  *
- * $Id: jsonrpc.js,v 1.40 2006/03/08 15:09:24 mclark Exp $
- *
+ * Copyright 2007 Arthur Blake and William Becker
  * Copyright (c) 2003-2004 Jan-Klaas Kollhof
  * Copyright (c) 2005 Michael Clark, Metaparadigm Pte Ltd
  *
- * This code is based on Jan-Klaas' JavaScript o lait library (jsolait).
+ * This code is based on original code from the json-rpc-java library
+ * which is based on Jan-Klaas' JavaScript o lait library (jsolait).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +22,6 @@
  * limitations under the License.
  *
  */
-
 
 /* escape a character */
 

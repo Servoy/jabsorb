@@ -1,7 +1,11 @@
 /*
- * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
+ * jabsorb - a Java to JavaScript Advanced Object Request Broker
+ * http://www.jabsorb.org
  *
- * $Id: JSONRPCServlet.java,v 1.29 2006/03/27 05:38:57 mclark Exp $
+ * Copyright 2007 Arthur Blake and William Becker
+ *
+ * based on original code from
+ * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>

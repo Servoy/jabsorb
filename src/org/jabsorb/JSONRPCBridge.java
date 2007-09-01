@@ -1,9 +1,13 @@
 /*
+ * jabsorb - a Java to JavaScript Advanced Object Request Broker
+ * http://www.jabsorb.org
+ *
+ * Copyright 2007 Arthur Blake and William Becker
+ *
+ * based on original code from
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
- * $Id: JSONRPCBridge.java,v 1.53 2006/03/27 05:38:40 mclark Exp $
- *
- * Copyright Metaparadigm Pte. Ltd. 2004, 2005.
+ * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
