@@ -27,45 +27,62 @@
 package org.jabsorb.reflect;
 
 /**
- * A key for identifying a method and the number of arguments to that method uniquely.
+ * A key for identifying a method and the number of arguments to that method
+ * uniquely.
  */
-public class MethodKey {
+public class MethodKey
+{
 
-    private String methodName;
+  private String methodName;
 
-    private int numArgs;
+  private int numArgs;
 
-    /**
-     * Get the method name.
-     * @return the method name.
-     */
-    public String getMethodName() { return methodName; }
+  /**
+   * Get the method name.
+   *
+   * @return the method name.
+   */
+  public String getMethodName()
+  {
+    return methodName;
+  }
 
-    /**
-     * Get the number of arguments that the method takes.
-     * @return the number of arguments that the method takes.
-     */
-    public int getNumArgs() { return numArgs; }
+  /**
+   * Get the number of arguments that the method takes.
+   *
+   * @return the number of arguments that the method takes.
+   */
+  public int getNumArgs()
+  {
+    return numArgs;
+  }
 
-    /**
-     * Create a MethodKey for a given method name and the number of arguments that
-     * that method takes.
-     * @param methodName method name.
-     * @param numArgs number of arguments the method takes.
-     */
-    public MethodKey(String methodName, int numArgs) {
-        this.methodName = methodName;
-        this.numArgs = numArgs;
+  /**
+   * Create a MethodKey for a given method name and the number of arguments
+   * that that method takes.
+   *
+   * @param methodName method name.
+   * @param numArgs    number of arguments the method takes.
+   */
+  public MethodKey(String methodName, int numArgs)
+  {
+    this.methodName = methodName;
+    this.numArgs = numArgs;
+  }
+
+  public int hashCode()
+  {
+    return methodName.hashCode() * numArgs;
+  }
+
+  public boolean equals(Object o)
+  {
+    if (!(o instanceof MethodKey))
+    {
+      return false;
     }
-
-    public int hashCode() {
-        return methodName.hashCode() * numArgs;
-    }
-
-    public boolean equals(Object o) {
-        if (!(o instanceof MethodKey))
-            return false;
-        return (methodName.equals(((MethodKey) o).methodName) && numArgs == ((MethodKey) o).numArgs);
-    }
+    return (methodName.equals(((MethodKey) o).methodName) &&
+      numArgs == ((MethodKey) o).numArgs);
+  }
 
 }

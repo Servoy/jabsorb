@@ -1,7 +1,11 @@
 /*
- * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
+ * jabsorb - a Java to JavaScript Advanced Object Request Broker
+ * http://www.jabsorb.org
  *
- * $Id: MarshallException.java,v 1.3 2006/03/06 12:41:32 mclark Exp $
+ * Copyright 2007 Arthur Blake and William Becker
+ *
+ * based on original code from
+ * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -26,12 +30,12 @@ package org.jabsorb.serializer;
  * Thrown by Serializer objects when they are unable to Marshall the Java
  * objects into JSON objects.
  */
+public class MarshallException extends Exception
+{
+  private final static long serialVersionUID = 2;
 
-public class MarshallException extends Exception {
-
-    private final static long serialVersionUID = 2;
-
-    public MarshallException(String msg) {
-        super(msg);
-    }
+  public MarshallException(String msg)
+  {
+    super(msg);
+  }
 }

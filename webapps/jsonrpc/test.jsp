@@ -39,7 +39,7 @@ String onLoad = "onLoad()";%>
         <h3>Callbacks</h3>
         <p><a href="javascript:setCallback(true);">Callback On</a><br>
         <a href="javascript:setCallback(false);">Callback Off</a></p>
-	<p><em><strong>Note:</strong> the debug and callback controls only affect debug output on the server side.</em></p>
+          <p><em><strong>Note:</strong> the debug and callback controls only affect debug output on the server side.</em></p>
        </td>
       </tr>
     </table>

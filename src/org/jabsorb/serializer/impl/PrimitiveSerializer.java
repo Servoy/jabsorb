@@ -1,7 +1,11 @@
 /*
- * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
+ * jabsorb - a Java to JavaScript Advanced Object Request Broker
+ * http://www.jabsorb.org
  *
- * $Id: PrimitiveSerializer.java,v 1.4 2006/03/06 12:41:33 mclark Exp $
+ * Copyright 2007 Arthur Blake and William Becker
+ *
+ * based on original code from
+ * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -28,84 +32,131 @@ import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
 
-public class PrimitiveSerializer extends AbstractSerializer {
+public class PrimitiveSerializer extends AbstractSerializer
+{
+  private final static long serialVersionUID = 2;
 
-    private final static long serialVersionUID = 2;
+  private static Class[] _serializableClasses = new Class[]{int.class,
+    byte.class, short.class, long.class, float.class, double.class};
 
-    private static Class[] _serializableClasses = new Class[] { int.class,
-            byte.class, short.class, long.class, float.class, double.class };
+  private static Class[] _JSONClasses = new Class[]{Integer.class,
+    Byte.class, Short.class, Long.class, Float.class, Double.class,
+    String.class};
 
-    private static Class[] _JSONClasses = new Class[] { Integer.class,
-            Byte.class, Short.class, Long.class, Float.class, Double.class,
-            String.class };
+  public Class[] getSerializableClasses()
+  {
+    return _serializableClasses;
+  }
 
-    public Class[] getSerializableClasses() {
-        return _serializableClasses;
+  public Class[] getJSONClasses()
+  {
+    return _JSONClasses;
+  }
+
+  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
+    Object jso) throws UnmarshallException
+  {
+    try
+    {
+      toPrimitive(clazz, jso);
     }
-
-    public Class[] getJSONClasses() {
-        return _JSONClasses;
+    catch (NumberFormatException e)
+    {
+      throw new UnmarshallException("not a primitive");
     }
+    return ObjectMatch.OKAY;
+  }
 
-    public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
-            Object jso) throws UnmarshallException {
-        try {
-            toPrimitive(clazz, jso);
-        } catch (NumberFormatException e) {
-            throw new UnmarshallException("not a primitive");
-        }
-        return ObjectMatch.OKAY;
+  public Object toPrimitive(Class clazz, Object jso)
+    throws NumberFormatException
+  {
+    if (int.class.equals(clazz))
+    {
+      if (jso instanceof String)
+      {
+        return new Integer((String) jso);
+      }
+      else
+      {
+        return new Integer(((Number) jso).intValue());
+      }
     }
+    else if (long.class.equals(clazz))
+    {
+      if (jso instanceof String)
+      {
+        return new Long((String) jso);
+      }
+      else
+      {
+        return new Long(((Number) jso).longValue());
+      }
+    }
+    else if (short.class.equals(clazz))
+    {
+      if (jso instanceof String)
+      {
+        return new Short((String) jso);
+      }
+      else
+      {
+        return new Short(((Number) jso).shortValue());
+      }
+    }
+    else if (byte.class.equals(clazz))
+    {
+      if (jso instanceof String)
+      {
+        return new Byte((String) jso);
+      }
+      else
+      {
+        return new Byte(((Number) jso).byteValue());
+      }
+    }
+    else if (float.class.equals(clazz))
+    {
+      if (jso instanceof String)
+      {
+        return new Float((String) jso);
+      }
+      else
+      {
+        return new Float(((Number) jso).floatValue());
+      }
+    }
+    else if (double.class.equals(clazz))
+    {
+      if (jso instanceof String)
+      {
+        return new Double((String) jso);
+      }
+      else
+      {
+        return new Double(((Number) jso).doubleValue());
+      }
+    }
+    return null;
+  }
 
-    public Object toPrimitive(Class clazz, Object jso)
-            throws NumberFormatException {
-        if (int.class.equals(clazz)) {
-            if (jso instanceof String)
-                return new Integer((String) jso);
-            else
-                return new Integer(((Number) jso).intValue());
-        } else if (long.class.equals(clazz)) {
-            if (jso instanceof String)
-                return new Long((String) jso);
-            else
-                return new Long(((Number) jso).longValue());
-        } else if (short.class.equals(clazz)) {
-            if (jso instanceof String)
-                return new Short((String) jso);
-            else
-                return new Short(((Number) jso).shortValue());
-        } else if (byte.class.equals(clazz)) {
-            if (jso instanceof String)
-                return new Byte((String) jso);
-            else
-                return new Byte(((Number) jso).byteValue());
-        } else if (float.class.equals(clazz)) {
-            if (jso instanceof String)
-                return new Float((String) jso);
-            else
-                return new Float(((Number) jso).floatValue());
-        } else if (double.class.equals(clazz)) {
-            if (jso instanceof String)
-                return new Double((String) jso);
-            else
-                return new Double(((Number) jso).doubleValue());
-        }
-        return null;
+  public Object unmarshall(SerializerState state, Class clazz, Object jso)
+    throws UnmarshallException
+  {
+    try
+    {
+      return toPrimitive(clazz, jso);
     }
+    catch (NumberFormatException nfe)
+    {
+      throw new UnmarshallException("cannot convert object " + jso
+        + " to type " + clazz.getName());
+    }
+  }
 
-    public Object unmarshall(SerializerState state, Class clazz, Object jso)
-            throws UnmarshallException {
-        try {
-            return toPrimitive(clazz, jso);
-        } catch (NumberFormatException nfe) {
-            throw new UnmarshallException("cannot convert object " + jso
-                    + " to type " + clazz.getName());
-        }
-    }
-
-    public Object marshall(SerializerState state, Object o)
-            throws MarshallException {
-        return o;
-    }
+  public Object marshall(SerializerState state, Object o)
+    throws MarshallException
+  {
+    return o;
+  }
 
 }

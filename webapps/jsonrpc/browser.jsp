@@ -7,29 +7,44 @@
 <jsp:useBean id="browser" scope="session"
      class="org.jabsorb.test.Browser" />
 <%
-   response.setDateHeader ("Expires", 0);
-   JSONRPCBridge.registerObject("browser", browser);
-   if(browser.userAgent == null)
-	browser.userAgent = request.getHeader("User-Agent");
-   String testCookies = request.getParameter("test-cookies");
-   String testResult = request.getParameter("test-result");
-   if(!browser.firstRun && !browser.passed && !browser.failed &&
-	browser.userAgent != null &&
-	testResult != null && testResult.equals("fail")) {
-	browser.failUserAgent();
-	response.sendRedirect("browser.jsp");
-        return;
-   }
+  response.setDateHeader("Expires", 0);
+  JSONRPCBridge.registerObject("browser", browser);
+  if (browser.userAgent == null)
+  {
+    browser.userAgent = request.getHeader("User-Agent");
+  }
+  String testCookies = request.getParameter("test-cookies");
+  String testResult = request.getParameter("test-result");
+  if (!browser.firstRun && !browser.passed && !browser.failed &&
+    browser.userAgent != null &&
+    testResult != null && testResult.equals("fail"))
+  {
+    browser.failUserAgent();
+    response.sendRedirect("browser.jsp");
+    return;
+  }
   String onLoad;
-  if(testCookies == null && browser.gotSession == false) onLoad = "testCookies()";
-  else if(testCookies != null && browser.gotSession == false) onLoad = null;
-  else if(browser.firstRun) onLoad = "testJSONRPC()";
-  else onLoad = "decodeUserAgents()";
+  if (testCookies == null && browser.gotSession == false)
+  {
+    onLoad = "testCookies()";
+  }
+  else if (testCookies != null && browser.gotSession == false)
+  {
+    onLoad = null;
+  }
+  else if (browser.firstRun)
+  {
+    onLoad = "testJSONRPC()";
+  }
+  else
+  {
+    onLoad = "decodeUserAgents()";
+  }
   String title = "JSON-RPC-Java Browser Compatibility";
   String head =
     "    <link rel=\"stylesheet\" type=\"text/css\" href=\"css/browser.css\">\n" +
-    "    <script type=\"text/javascript\" src=\"jsonrpc.js\"></script>\n" +
-    "    <script type=\"text/javascript\" src=\"browser.js\"></script>\n";
+      "    <script type=\"text/javascript\" src=\"jsonrpc.js\"></script>\n" +
+      "    <script type=\"text/javascript\" src=\"browser.js\"></script>\n";
 %>
 <%@ include file="header.jspinc" %>
 
@@ -73,10 +88,11 @@
       </thead>
       <tbody id="good-browsers">
 <%
-        Iterator i;
-	i = browser.getPassedUserAgents().iterator();
-	while(i.hasNext()) {
-		String userAgent = (String)i.next();
+  Iterator i;
+  i = browser.getPassedUserAgents().iterator();
+  while (i.hasNext())
+  {
+    String userAgent = (String) i.next();
 %>
 <tr>
  <td class="br_td"><div class="br_cell">&nbsp;</div></td>
@@ -104,9 +120,10 @@
       </thead>
       <tbody id="bad-browsers">
 <%
-	i = browser.getFailedUserAgents().iterator();
-	while(i.hasNext()) {
-		String userAgent = (String)i.next();
+  i = browser.getFailedUserAgents().iterator();
+  while (i.hasNext())
+  {
+    String userAgent = (String) i.next();
 %>
 <tr>
  <td class="br_td"><div class="br_cell">&nbsp;</div></td>
@@ -127,7 +144,9 @@
 <%@ include file="footer.jspinc" %>
 
 <%
-  if(testCookies != null && browser.gotSession == true)
-      browser.firstRun = false;
+  if (testCookies != null && browser.gotSession == true)
+  {
+    browser.firstRun = false;
+  }
   browser.gotSession = true;
 %>

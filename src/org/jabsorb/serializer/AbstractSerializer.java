@@ -1,7 +1,11 @@
 /*
- * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
+ * jabsorb - a Java to JavaScript Advanced Object Request Broker
+ * http://www.jabsorb.org
  *
- * $Id: AbstractSerializer.java,v 1.2 2006/03/06 12:41:32 mclark Exp $
+ * Copyright 2007 Arthur Blake and William Becker
+ *
+ * based on original code from
+ * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -25,43 +29,59 @@ package org.jabsorb.serializer;
 import org.jabsorb.JSONSerializer;
 
 /**
- * Convenience class for implementing Serializers providing default setOwner and
- * canSerialize implementations.
+ * Convenience class for implementing Serializers providing default setOwner
+ * and canSerialize implementations.
  */
-public abstract class AbstractSerializer implements Serializer {
+public abstract class AbstractSerializer implements Serializer
+{
 
-    protected JSONSerializer ser;
+  protected JSONSerializer ser;
 
-    public void setOwner(JSONSerializer ser) {
-        this.ser = ser;
+  public void setOwner(JSONSerializer ser)
+  {
+    this.ser = ser;
+  }
+
+  /**
+   * Default check that simply tests the given serializeable class arrays to
+   * determine if the pair of classes can be serialized/deserialized from this
+   * Serializer.
+   *
+   * @param clazz     java type to check if this Serializer can handle.
+   * @param jsonClazz json type to check this Serializer can handle.
+   *
+   * @return true if this Serializer can serialize/deserialize the given
+   *         java,json pair.
+   */
+  public boolean canSerialize(Class clazz, Class jsonClazz)
+  {
+    boolean canJava = false, canJSON = false;
+
+    Class serializableClasses[] = getSerializableClasses();
+    for (int i = 0; i < serializableClasses.length; i++)
+    {
+      if (clazz == serializableClasses[i])
+      {
+        canJava = true;
+      }
     }
 
-    /**
-     * Default check that simply tests the given serializeable class arrays
-     * to determine if the pair of classes can be serialized/deserialized
-     * from this Serializer.
-     *
-     * @param clazz java type to check if this Serializer can handle.
-     * @param jsonClazz json type to check this Serializer can handle.
-     * @return true if this Serializer can serialize/deserialize the given java,json pair.
-     */
-    public boolean canSerialize(Class clazz, Class jsonClazz) {
-        boolean canJava = false, canJSON = false;
-
-        Class serializableClasses[] = getSerializableClasses();
-        for (int i = 0; i < serializableClasses.length; i++)
-            if (clazz == serializableClasses[i])
-                canJava = true;
-
-        if (jsonClazz == null) {
-            canJSON = true;
-        } else {
-            Class jsonClasses[] = getJSONClasses();
-            for (int i = 0; i < jsonClasses.length; i++)
-                if (jsonClazz == jsonClasses[i])
-                    canJSON = true;
+    if (jsonClazz == null)
+    {
+      canJSON = true;
+    }
+    else
+    {
+      Class jsonClasses[] = getJSONClasses();
+      for (int i = 0; i < jsonClasses.length; i++)
+      {
+        if (jsonClazz == jsonClasses[i])
+        {
+          canJSON = true;
         }
-
-        return (canJava && canJSON);
+      }
     }
+
+    return (canJava && canJSON);
+  }
 }

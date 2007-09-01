@@ -1,7 +1,11 @@
 /*
- * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
+ * jabsorb - a Java to JavaScript Advanced Object Request Broker
+ * http://www.jabsorb.org
  *
- * $Id: UnmarshallException.java,v 1.3 2006/03/06 12:41:32 mclark Exp $
+ * Copyright 2007 Arthur Blake and William Becker
+ *
+ * based on original code from
+ * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -27,11 +31,13 @@ package org.jabsorb.serializer;
  * objects into Java objects.
  */
 
-public class UnmarshallException extends Exception {
+public class UnmarshallException extends Exception
+{
 
-    private final static long serialVersionUID = 2;
+  private final static long serialVersionUID = 2;
 
-    public UnmarshallException(String msg) {
-        super(msg);
-    }
+  public UnmarshallException(String msg)
+  {
+    super(msg);
+  }
 }

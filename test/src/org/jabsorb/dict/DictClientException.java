@@ -29,18 +29,20 @@ package org.jabsorb.dict;
 /**
  * Simple Java Dict Client (RFC2229)
  */
-public class DictClientException extends Exception {
+public class DictClientException extends Exception
+{
+  private final static long serialVersionUID = 2;
 
-    private final static long serialVersionUID = 2;
+  private DictCommandResult r;
 
-    private DictCommandResult r;
+  public DictClientException(DictCommandResult r)
+  {
+    super("DictClientException: code=" + r.code + ", " + r.msg);
+    this.r = r;
+  }
 
-    public DictClientException(DictCommandResult r) {
-        super("DictClientException: code=" + r.code + ", " + r.msg);
-        this.r = r;
-    }
-
-    public DictCommandResult getResult() {
-        return r;
-    }
+  public DictCommandResult getResult()
+  {
+    return r;
+  }
 }

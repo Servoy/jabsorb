@@ -120,17 +120,17 @@ out.println("&lt;script type=\"text/javascript\" src=\"myapp.js\"&gt;&lt;/script
     <p>The following example shows the simplest JSON-RPC client application<p>
 <pre>onLoad = function()
 {
-    try {
+  try {
 
-	jsonrpc = new JSONRpcClient("/&lt;your webapp name here&gt;/JSON-RPC");
+    jsonrpc = new JSONRpcClient("/&lt;your webapp name here&gt;/JSON-RPC");
 
-        // Call a Java method on the server
-        var result = jsonrpc.myTestObject.myFunction("hello");
-        alert(result);
+    // Call a Java method on the server
+    var result = jsonrpc.myTestObject.myFunction("hello");
+    alert(result);
 
-    } catch(e) {
-	alert(e);
-    }
+  } catch(e) {
+    alert(e);
+  }
 }</pre>
 <p>Take a look at the example <a href="hello.js.txt">hello.js</a> for more details</p>
 

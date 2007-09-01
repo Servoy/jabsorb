@@ -31,36 +31,40 @@ import java.io.Serializable;
 /**
  * Simple Java Dict Client (RFC2229)
  */
-public class Definition implements Serializable {
+public class Definition implements Serializable
+{
+  private final static long serialVersionUID = 2;
 
-    private final static long serialVersionUID = 2;
+  private String word;
 
-    private String word;
+  private String database;
 
-    private String database;
+  private String definition;
 
-    private String definition;
+  public String getDatabase()
+  {
+    return database;
+  }
 
-    public String getDatabase() {
-        return database;
-    }
+  public String getWord()
+  {
+    return word;
+  }
 
-    public String getWord() {
-        return word;
-    }
+  public String getDefinition()
+  {
+    return definition;
+  }
 
-    public String getDefinition() {
-        return definition;
-    }
+  public Definition(String database, String word, String definition)
+  {
+    this.database = database;
+    this.word = word;
+    this.definition = definition;
+  }
 
-    public Definition(String database, String word, String definition) {
-        this.database = database;
-        this.word = word;
-        this.definition = definition;
-    }
-
-    public String toString() {
-        return "definition: " + word + " \"" + database + "\"\n" + definition;
-    }
-
+  public String toString()
+  {
+    return "definition: " + word + " \"" + database + "\"\n" + definition;
+  }
 }

@@ -1,4 +1,12 @@
-$Id: CHANGES.txt,v 1.107 2006/03/27 05:38:40 mclark Exp $
+CHANGES log
+
+2007-08-31
+* jabsorb library created as a fork based on the json-rpc-java trunk
+  reformatted code to new style guidelines
+  repackaged into org.jabsorb package space
+  merged org.json classes (which were already a fork off the orginals anyway)
+  into org.jabsorb.json package space.
+  -- Arthur Blake and William Becker
 
 json-rpc-java/svn/trunk
 

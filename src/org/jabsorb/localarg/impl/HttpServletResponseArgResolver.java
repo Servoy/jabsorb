@@ -31,19 +31,19 @@ import javax.servlet.http.HttpServletResponse;
 import org.jabsorb.localarg.LocalArgResolveException;
 import org.jabsorb.localarg.LocalArgResolver;
 
-
 /**
  * An LocalArgResolver implementation that is registered by default on the
  * JSONRPCBridge and will replace an HttpServletResponse argument on a called
  * method with the current request object.
  */
-
-public class HttpServletResponseArgResolver implements LocalArgResolver {
-
-    public Object resolveArg(Object context) throws LocalArgResolveException {
-        if (!(context instanceof HttpServletResponse))
-            throw new LocalArgResolveException("invalid context");
-
-        return context;
+public class HttpServletResponseArgResolver implements LocalArgResolver
+{
+  public Object resolveArg(Object context) throws LocalArgResolveException
+  {
+    if (!(context instanceof HttpServletResponse))
+    {
+      throw new LocalArgResolveException("invalid context");
     }
+    return context;
+  }
 }

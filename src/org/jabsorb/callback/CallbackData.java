@@ -29,38 +29,42 @@ package org.jabsorb.callback;
 import java.io.Serializable;
 
 /**
- * Container class for information about callbacks and the transport
- * they are associated with.
+ * Container class for information about callbacks and the transport they are
+ * associated with.
  */
+public class CallbackData implements Serializable
+{
+  private final static long serialVersionUID = 2;
 
-public class CallbackData implements Serializable {
-    private final static long serialVersionUID = 2;
+  private InvocationCallback cb;
 
-    private InvocationCallback cb;
+  private Class contextInterface;
 
-    private Class contextInterface;
+  public InvocationCallback getCallback()
+  {
+    return cb;
+  }
 
-    public InvocationCallback getCallback()
-    {
-        return cb;
-    }
+  public CallbackData(InvocationCallback cb, Class contextInterface)
+  {
+    this.cb = cb;
+    this.contextInterface = contextInterface;
+  }
 
-    public CallbackData(InvocationCallback cb, Class contextInterface) {
-        this.cb = cb;
-        this.contextInterface = contextInterface;
-    }
+  public boolean understands(Object context)
+  {
+    return contextInterface.isAssignableFrom(context.getClass());
+  }
 
-    public boolean understands(Object context) {
-        return contextInterface.isAssignableFrom(context.getClass());
-    }
+  public int hashCode()
+  {
+    return cb.hashCode() * contextInterface.hashCode();
+  }
 
-    public int hashCode() {
-        return cb.hashCode() * contextInterface.hashCode();
-    }
-
-    public boolean equals(Object o) {
-        CallbackData cmp = (CallbackData) o;
-        return (cb.equals(cmp.cb) && contextInterface
-                .equals(cmp.contextInterface));
-    }
+  public boolean equals(Object o)
+  {
+    CallbackData cmp = (CallbackData) o;
+    return (cb.equals(cmp.cb) && contextInterface
+      .equals(cmp.contextInterface));
+  }
 }

@@ -47,7 +47,7 @@ page import="org.jabsorb.dict.DictClient"
     <table cellpadding="0" cellspacing="0" width="100%" style="border: 1px solid #c0c0c0; border-collapse: collapse;">
       <tr>
         <td width="150">
-	  <select id="matches" size="24" class="dict_match_select">
+          <select id="matches" size="24" class="dict_match_select">
             <option></option>
           </select>
         </td>

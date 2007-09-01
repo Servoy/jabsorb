@@ -1,15 +1,15 @@
 function onLoad()
 {
-    jsonrpc = new JSONRpcClient("JSON-RPC");
+  jsonrpc = new JSONRpcClient("JSON-RPC");
 }
 
 function resultCallback(result, e)
 {
-	alert("The server replied: " + result);
+  alert("The server replied: " + result);
 }
 
 function clickHello()
 {
-    var whoNode = document.getElementById("who");
-    var result = jsonrpc.hello.sayHello(resultCallback, whoNode.value);
+  var whoNode = document.getElementById("who");
+  var result = jsonrpc.hello.sayHello(resultCallback, whoNode.value);
 }

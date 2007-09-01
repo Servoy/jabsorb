@@ -26,112 +26,132 @@
 
 package org.jabsorb;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.io.Serializable;
 
 import org.jabsorb.serializer.Serializer;
 import org.jabsorb.serializer.impl.ReferenceSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * Contains state information related to a JSONRPCBridge instance.
- * This state information includes exported classes, objects and references.
+ * Contains state information related to a JSONRPCBridge instance. This state
+ * information includes exported classes, objects and references.
  */
+public class JSONRPCBridgeState implements Serializable
+{
 
-public class JSONRPCBridgeState implements Serializable {
-    
-    private final static long serialVersionUID = 2;
-    
-    private final static Logger log = LoggerFactory.getLogger(JSONRPCBridgeState.class);
+  private final static long serialVersionUID = 2;
 
-    // bridge this state information is associated with
-    private JSONRPCBridge bridge;
+  private final static Logger log = LoggerFactory.getLogger(JSONRPCBridgeState.class);
 
-    // key "exported class name", val Class
-    private HashMap classMap = new HashMap();
+  // bridge this state information is associated with
+  private JSONRPCBridge bridge;
 
-    // key "exported instance name", val ObjectInstance
-    private HashMap objectMap = new HashMap();
+  // key "exported class name", val Class
+  private HashMap classMap = new HashMap();
 
-    // key Integer hashcode, object held as reference
-    private HashMap referenceMap = null;
-    
-    // ReferenceSerializer if enabled
-    private Serializer referenceSerializer = null;
+  // key "exported instance name", val ObjectInstance
+  private HashMap objectMap = new HashMap();
 
-    // key clazz, classes that should be returned as References
-    private HashSet referenceSet = null;
+  // key Integer hashcode, object held as reference
+  private HashMap referenceMap = null;
 
-    // key clazz, classes that should be returned as CallableReferences
-    private HashSet callableReferenceSet = null;
+  // ReferenceSerializer if enabled
+  private Serializer referenceSerializer = null;
+
+  // key clazz, classes that should be returned as References
+  private HashSet referenceSet = null;
+
+  // key clazz, classes that should be returned as CallableReferences
+  private HashSet callableReferenceSet = null;
 
 
-    public JSONRPCBridgeState(JSONRPCBridge bridge) {
-        this.bridge = bridge;
+  public JSONRPCBridgeState(JSONRPCBridge bridge)
+  {
+    this.bridge = bridge;
+  }
+
+  public HashSet getCallableReferenceSet()
+  {
+    return callableReferenceSet;
+  }
+
+  public void setCallableReferenceSet(HashSet callableReferenceSet)
+  {
+    this.callableReferenceSet = callableReferenceSet;
+  }
+
+  public HashMap getClassMap()
+  {
+    return classMap;
+  }
+
+  public void setClassMap(HashMap classMap)
+  {
+    this.classMap = classMap;
+  }
+
+  public HashMap getObjectMap()
+  {
+    return objectMap;
+  }
+
+  public void setObjectMap(HashMap objectMap)
+  {
+    this.objectMap = objectMap;
+  }
+
+  public HashMap getReferenceMap()
+  {
+    return referenceMap;
+  }
+
+  public void setReferenceMap(HashMap referenceMap)
+  {
+    this.referenceMap = referenceMap;
+  }
+
+  public Serializer getReferenceSerializer()
+  {
+    return referenceSerializer;
+  }
+
+  public void setReferenceSerializer(Serializer referenceSerializer)
+  {
+    this.referenceSerializer = referenceSerializer;
+  }
+
+  public HashSet getReferenceSet()
+  {
+    return referenceSet;
+  }
+
+  public void setReferenceSet(HashSet referenceSet)
+  {
+    this.referenceSet = referenceSet;
+  }
+
+  public synchronized void enableReferences() throws Exception
+  {
+    if (referenceSerializer == null)
+    {
+      referenceSerializer = new ReferenceSerializer(bridge);
+      bridge.registerSerializer(referenceSerializer);
+      log.info("enabled references on this bridge");
     }
-
-    public HashSet getCallableReferenceSet() {
-        return callableReferenceSet;
+    if (referenceMap == null)
+    {
+      referenceMap = new HashMap();
     }
-
-    public void setCallableReferenceSet(HashSet callableReferenceSet) {
-        this.callableReferenceSet = callableReferenceSet;
+    if (referenceSet == null)
+    {
+      referenceSet = new HashSet();
     }
-
-    public HashMap getClassMap() {
-        return classMap;
+    if (callableReferenceSet == null)
+    {
+      callableReferenceSet = new HashSet();
     }
-
-    public void setClassMap(HashMap classMap) {
-        this.classMap = classMap;
-    }
-
-    public HashMap getObjectMap() {
-        return objectMap;
-    }
-
-    public void setObjectMap(HashMap objectMap) {
-        this.objectMap = objectMap;
-    }
-
-    public HashMap getReferenceMap() {
-        return referenceMap;
-    }
-
-    public void setReferenceMap(HashMap referenceMap) {
-        this.referenceMap = referenceMap;
-    }
-
-    public Serializer getReferenceSerializer() {
-        return referenceSerializer;
-    }
-
-    public void setReferenceSerializer(Serializer referenceSerializer) {
-        this.referenceSerializer = referenceSerializer;
-    }
-
-    public HashSet getReferenceSet() {
-        return referenceSet;
-    }
-
-    public void setReferenceSet(HashSet referenceSet) {
-        this.referenceSet = referenceSet;
-    }
-
-    public synchronized void enableReferences() throws Exception {
-        if (referenceSerializer == null) {
-            referenceSerializer = new ReferenceSerializer(bridge);
-            bridge.registerSerializer(referenceSerializer);
-            log.info("enabled references on this bridge");
-        }
-        if (referenceMap == null)
-            referenceMap = new HashMap(); 
-        if (referenceSet == null)
-            referenceSet = new HashSet();
-        if (callableReferenceSet == null)
-            callableReferenceSet = new HashSet();
-    }
+  }
 }

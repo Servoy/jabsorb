@@ -1,7 +1,11 @@
 /*
- * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
+ * jabsorb - a Java to JavaScript Advanced Object Request Broker
+ * http://www.jabsorb.org
  *
- * $Id: StringSerializer.java,v 1.4 2006/03/06 12:41:33 mclark Exp $
+ * Copyright 2007 Arthur Blake and William Becker
+ *
+ * based on original code from
+ * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -28,53 +32,73 @@ import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
 
-public class StringSerializer extends AbstractSerializer {
+public class StringSerializer extends AbstractSerializer
+{
+  private final static long serialVersionUID = 2;
 
-    private final static long serialVersionUID = 2;
+  private static Class[] _serializableClasses = new Class[]{String.class,
+    char.class, Character.class, byte[].class, char[].class};
 
-    private static Class[] _serializableClasses = new Class[] { String.class,
-            char.class, Character.class, byte[].class, char[].class };
+  private static Class[] _JSONClasses = new Class[]{String.class,
+    Integer.class};
 
-    private static Class[] _JSONClasses = new Class[] { String.class,
-            Integer.class };
+  public Class[] getSerializableClasses()
+  {
+    return _serializableClasses;
+  }
 
-    public Class[] getSerializableClasses() {
-        return _serializableClasses;
+  public Class[] getJSONClasses()
+  {
+    return _JSONClasses;
+  }
+
+  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
+                                   Object jso) throws UnmarshallException
+  {
+    return ObjectMatch.OKAY;
+  }
+
+  public Object unmarshall(SerializerState state, Class clazz, Object jso)
+    throws UnmarshallException
+  {
+    String val = jso instanceof String ? (String) jso : jso.toString();
+    if (clazz == char.class)
+    {
+      return new Character(val.charAt(0));
     }
-
-    public Class[] getJSONClasses() {
-        return _JSONClasses;
+    else if (clazz == byte[].class)
+    {
+      return val.getBytes();
     }
-
-    public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
-            Object jso) throws UnmarshallException {
-        return ObjectMatch.OKAY;
+    else if (clazz == char[].class)
+    {
+      return val.toCharArray();
     }
-
-    public Object unmarshall(SerializerState state, Class clazz, Object jso)
-            throws UnmarshallException {
-        String val = jso instanceof String ? (String) jso : jso.toString();
-        if (clazz == char.class) {
-            return new Character(val.charAt(0));
-        } else if (clazz == byte[].class) {
-            return val.getBytes();
-        } else if (clazz == char[].class) {
-            return val.toCharArray();
-        } else {
-            return val;
-        }
+    else
+    {
+      return val;
     }
+  }
 
-    public Object marshall(SerializerState state, Object o)
-            throws MarshallException {
-        if (o instanceof Character) {
-            return o.toString();
-        } else if (o instanceof byte[]) {
-            return new String((byte[]) o);
-        } else if (o instanceof char[]) {
-            return new String((char[]) o);
-        } else
-            return o;
+  public Object marshall(SerializerState state, Object o)
+    throws MarshallException
+  {
+    if (o instanceof Character)
+    {
+      return o.toString();
     }
+    else if (o instanceof byte[])
+    {
+      return new String((byte[]) o);
+    }
+    else if (o instanceof char[])
+    {
+      return new String((char[]) o);
+    }
+    else
+    {
+      return o;
+    }
+  }
 
 }

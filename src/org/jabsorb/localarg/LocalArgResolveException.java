@@ -30,12 +30,12 @@ package org.jabsorb.localarg;
  * Thrown by LocalArgResolver objects when they are unable to resolve context
  * information into the local argument object.
  */
+public class LocalArgResolveException extends Exception
+{
+  private final static long serialVersionUID = 2;
 
-public class LocalArgResolveException extends Exception {
-
-    private final static long serialVersionUID = 2;
-
-    public LocalArgResolveException(String msg) {
-        super(msg);
-    }
+  public LocalArgResolveException(String msg)
+  {
+    super(msg);
+  }
 }

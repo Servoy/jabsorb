@@ -31,12 +31,13 @@ import java.io.Serializable;
 public interface ExceptionTransformer extends Serializable
 {
 
-    /**
-     * Transform the exception to the format desired for transport to the
-     * client.  This method should not itself throw an exception.
-     * @return one of the JSON-compatible types (JSONObject, String,
-     *   Boolean etc.), or a Throwable 
-     */
-    public Object transform(Throwable t);
+  /**
+   * Transform the exception to the format desired for transport to the
+   * client.  This method should not itself throw an exception.
+   *
+   * @return one of the JSON-compatible types (JSONObject, String, Boolean
+   *         etc.), or a Throwable
+   */
+  public Object transform(Throwable t);
 
 }

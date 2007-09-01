@@ -34,7 +34,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.jabsorb.localarg.LocalArgController;
-import org.slf4j.Logger; 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
@@ -42,116 +42,144 @@ import org.slf4j.LoggerFactory;
  * A &quot;factory&quot; for producing ClassData information from Class objects.
  * Gathers the ClassData information via reflection and internally caches it.
  */
-public class ClassAnalyzer {
+public class ClassAnalyzer
+{
+  private final static Logger log = LoggerFactory.getLogger(ClassAnalyzer.class);
 
-    private final static Logger log = LoggerFactory.getLogger(ClassAnalyzer.class);
-    
-    // key clazz, val ClassData
-    private static HashMap classCache = new HashMap();
+  // key clazz, val ClassData
+  private static HashMap classCache = new HashMap();
 
-    /**
-     * Empty the internal cache of ClassData information.
-     */
-    public static void invalidateCache() {
-        classCache = new HashMap();
+  /**
+   * Empty the internal cache of ClassData information.
+   */
+  public static void invalidateCache()
+  {
+    classCache = new HashMap();
+  }
+
+  /**
+   * Analyze a class and create a ClassData object containing all of the
+   * public methods (both static and non-static) in the class.
+   *
+   * @param clazz class to be analyzed.
+   *
+   * @return a ClassData object containing all the public static and
+   *         non-static methods that can be invoked on the class.
+   */
+  private static ClassData analyzeClass(Class clazz)
+  {
+    log.info("analyzing " + clazz.getName());
+    Method methods[] = clazz.getMethods();
+    ClassData cd = new ClassData();
+    cd.clazz = clazz;
+
+    // Create temporary method map
+    HashMap staticMethodMap = new HashMap();
+    HashMap methodMap = new HashMap();
+    for (int i = 0; i < methods.length; i++)
+    {
+      Method method = methods[i];
+      if (method.getDeclaringClass() == Object.class)
+      {
+        continue;
+      }
+      int mod = methods[i].getModifiers();
+      if (!Modifier.isPublic(mod))
+      {
+        continue;
+      }
+      Class param[] = method.getParameterTypes();
+
+      // don't count locally resolved args
+      int argCount = 0;
+      for (int n = 0; n < param.length; n++)
+      {
+        if (LocalArgController.isLocalArg(param[n]))
+        {
+          continue;
+        }
+        argCount++;
+      }
+
+      MethodKey mk = new MethodKey(method.getName(), argCount);
+      ArrayList marr = (ArrayList) methodMap.get(mk);
+      if (marr == null)
+      {
+        marr = new ArrayList();
+        methodMap.put(mk, marr);
+      }
+      marr.add(method);
+      if (Modifier.isStatic(mod))
+      {
+        marr = (ArrayList) staticMethodMap.get(mk);
+        if (marr == null)
+        {
+          marr = new ArrayList();
+          staticMethodMap.put(mk, marr);
+        }
+        marr.add(method);
+      }
     }
-
-    /**
-     * Analyze a class and create a ClassData object containing all of the public methods
-     * (both static and non-static) in the class.
-     *
-     * @param clazz class to be analyzed.
-     *
-     * @return a ClassData object containing all the public static and non-static methods
-     * that can be invoked on the class.
-     */
-    private static ClassData analyzeClass(Class clazz) {
-        log.info("analyzing " + clazz.getName());
-        Method methods[] = clazz.getMethods();
-        ClassData cd = new ClassData();
-        cd.clazz = clazz;
-
-        // Create temporary method map
-        HashMap staticMethodMap = new HashMap();
-        HashMap methodMap = new HashMap();
-        for (int i = 0; i < methods.length; i++) {
-            Method method = methods[i];
-            if (method.getDeclaringClass() == Object.class)
-                continue;
-            int mod = methods[i].getModifiers();
-            if (!Modifier.isPublic(mod))
-                continue;
-            Class param[] = method.getParameterTypes();
-
-            // don't count locally resolved args
-            int argCount = 0;
-            for (int n = 0; n < param.length; n++) {
-                if (LocalArgController.isLocalArg(param[n])) continue;
-                argCount++;
-            }
-
-            MethodKey mk = new MethodKey(method.getName(), argCount);
-            ArrayList marr = (ArrayList) methodMap.get(mk);
-            if (marr == null) {
-                marr = new ArrayList();
-                methodMap.put(mk, marr);
-            }
-            marr.add(method);
-            if (Modifier.isStatic(mod)) {
-                marr = (ArrayList) staticMethodMap.get(mk);
-                if (marr == null) {
-                    marr = new ArrayList();
-                    staticMethodMap.put(mk, marr);
-                }
-                marr.add(method);
-            }
-        }
-        cd.methodMap = new HashMap();
-        cd.staticMethodMap = new HashMap();
-        // Convert ArrayLists to arrays
-        Iterator i = methodMap.entrySet().iterator();
-        while (i.hasNext()) {
-            Map.Entry entry = (Map.Entry) i.next();
-            MethodKey mk = (MethodKey) entry.getKey();
-            ArrayList marr = (ArrayList) entry.getValue();
-            if (marr.size() == 1) {
-                cd.methodMap.put(mk, marr.get(0));
-            } else {
-                cd.methodMap.put(mk, marr.toArray(new Method[0]));
-            }
-        }
-        i = staticMethodMap.entrySet().iterator();
-        while (i.hasNext()) {
-            Map.Entry entry = (Map.Entry) i.next();
-            MethodKey mk = (MethodKey) entry.getKey();
-            ArrayList marr = (ArrayList) entry.getValue();
-            if (marr.size() == 1) {
-                cd.staticMethodMap.put(mk, marr.get(0));
-            } else {
-                cd.staticMethodMap.put(mk, marr.toArray(new Method[0]));
-            }
-        }
-        return cd;
+    cd.methodMap = new HashMap();
+    cd.staticMethodMap = new HashMap();
+    // Convert ArrayLists to arrays
+    Iterator i = methodMap.entrySet().iterator();
+    while (i.hasNext())
+    {
+      Map.Entry entry = (Map.Entry) i.next();
+      MethodKey mk = (MethodKey) entry.getKey();
+      ArrayList marr = (ArrayList) entry.getValue();
+      if (marr.size() == 1)
+      {
+        cd.methodMap.put(mk, marr.get(0));
+      }
+      else
+      {
+        cd.methodMap.put(mk, marr.toArray(new Method[0]));
+      }
     }
-
-    /**
-     * Get ClassData containing information on public methods that can be invoked for a given class.
-     *
-     * The ClassData will be cached, and multiple calls to getClassData for the same class will return
-     * the same cached ClassData object (unless invalidateCache is called to clear the cache.)
-     *
-     * @param clazz class to get ClassData for.
-     * @return ClassData object for the given class.
-     */
-    public static ClassData getClassData(Class clazz) {
-        ClassData cd;
-        synchronized (classCache) {
-            cd = (ClassData) classCache.get(clazz);
-            if (cd == null) {
-                cd = analyzeClass(clazz);
-                classCache.put(clazz, cd);
-            }
-        }
-        return cd;
+    i = staticMethodMap.entrySet().iterator();
+    while (i.hasNext())
+    {
+      Map.Entry entry = (Map.Entry) i.next();
+      MethodKey mk = (MethodKey) entry.getKey();
+      ArrayList marr = (ArrayList) entry.getValue();
+      if (marr.size() == 1)
+      {
+        cd.staticMethodMap.put(mk, marr.get(0));
+      }
+      else
+      {
+        cd.staticMethodMap.put(mk, marr.toArray(new Method[0]));
+      }
     }
+    return cd;
+  }
+
+  /**
+   * Get ClassData containing information on public methods that can be
+   * invoked for a given class.
+   * <p/>
+   * The ClassData will be cached, and multiple calls to getClassData for the
+   * same class will return the same cached ClassData object (unless
+   * invalidateCache is called to clear the cache.)
+   *
+   * @param clazz class to get ClassData for.
+   *
+   * @return ClassData object for the given class.
+   */
+  public static ClassData getClassData(Class clazz)
+  {
+    ClassData cd;
+    synchronized (classCache)
+    {
+      cd = (ClassData) classCache.get(clazz);
+      if (cd == null)
+      {
+        cd = analyzeClass(clazz);
+        classCache.put(clazz, cd);
+      }
+    }
+    return cd;
+  }
 }

@@ -31,28 +31,31 @@ import java.io.Serializable;
 /**
  * Simple Java Dict Client (RFC2229)
  */
-public class Strategy implements Serializable {
+public class Strategy implements Serializable
+{
+  private final static long serialVersionUID = 2;
 
-    private final static long serialVersionUID = 2;
+  private String strategy;
+  private String description;
 
-    private String strategy;
-    private String description;
+  public String getStrategy()
+  {
+    return strategy;
+  }
 
-    public String getStrategy() {
-        return strategy;
-    }
+  public String getDescription()
+  {
+    return description;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public Strategy(String strategy, String description)
+  {
+    this.strategy = strategy;
+    this.description = description;
+  }
 
-    public Strategy(String strategy, String description) {
-        this.strategy = strategy;
-        this.description = description;
-    }
-
-    public String toString() {
-        return "strategy: " + strategy + " \"" + description + "\"";
-    }
-
+  public String toString()
+  {
+    return "strategy: " + strategy + " \"" + description + "\"";
+  }
 }

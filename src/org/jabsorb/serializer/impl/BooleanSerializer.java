@@ -1,7 +1,11 @@
 /*
- * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
+ * jabsorb - a Java to JavaScript Advanced Object Request Broker
+ * http://www.jabsorb.org
  *
- * $Id: BooleanSerializer.java,v 1.4 2006/03/06 12:41:33 mclark Exp $
+ * Copyright 2007 Arthur Blake and William Becker
+ *
+ * based on original code from
+ * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -28,49 +32,61 @@ import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
 
-public class BooleanSerializer extends AbstractSerializer {
+public class BooleanSerializer extends AbstractSerializer
+{
+  private final static long serialVersionUID = 2;
 
-    private final static long serialVersionUID = 2;
+  private static Class[] _serializableClasses = new Class[]{boolean.class,
+    Boolean.class};
 
-    private static Class[] _serializableClasses = new Class[] { boolean.class,
-            Boolean.class };
+  private static Class[] _JSONClasses = new Class[]{Boolean.class,
+    String.class};
 
-    private static Class[] _JSONClasses = new Class[] { Boolean.class,
-            String.class };
+  public Class[] getSerializableClasses()
+  {
+    return _serializableClasses;
+  }
 
-    public Class[] getSerializableClasses() {
-        return _serializableClasses;
+  public Class[] getJSONClasses()
+  {
+    return _JSONClasses;
+  }
+
+  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
+                                   Object jso) throws UnmarshallException
+  {
+    return ObjectMatch.OKAY;
+  }
+
+  public Object unmarshall(SerializerState state, Class clazz, Object jso)
+    throws UnmarshallException
+  {
+    if (jso instanceof String)
+    {
+      try
+      {
+        jso = new Boolean((String) jso);
+      }
+      catch (Exception e)
+      {
+        throw new UnmarshallException("Cannot convert " + jso
+          + " to Boolean");
+      }
     }
-
-    public Class[] getJSONClasses() {
-        return _JSONClasses;
+    if (clazz == boolean.class)
+    {
+      return new Boolean(((Boolean) jso).booleanValue());
     }
-
-    public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
-            Object jso) throws UnmarshallException {
-        return ObjectMatch.OKAY;
+    else
+    {
+      return jso;
     }
+  }
 
-    public Object unmarshall(SerializerState state, Class clazz, Object jso)
-            throws UnmarshallException {
-        if (jso instanceof String) {
-            try {
-                jso = new Boolean((String) jso);
-            } catch (Exception e) {
-                throw new UnmarshallException("Cannot convert " + jso
-                        + " to Boolean");
-            }
-        }
-        if (clazz == boolean.class) {
-            return new Boolean(((Boolean) jso).booleanValue());
-        } else {
-            return jso;
-        }
-    }
-
-    public Object marshall(SerializerState state, Object o)
-            throws MarshallException {
-        return o;
-    }
+  public Object marshall(SerializerState state, Object o)
+    throws MarshallException
+  {
+    return o;
+  }
 
 }

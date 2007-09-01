@@ -30,8 +30,7 @@ page import="org.jabsorb.test.Test"
         <td align="right">
           (
           <input type="checkbox" id="profile" />
-          Profile
-	  |
+          Profile  |
           <input type="checkbox" id="async" checked />
           Asynchronous
           )

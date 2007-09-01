@@ -31,27 +31,31 @@ import java.io.Serializable;
 /**
  * @author cytan
  */
-public class BeanA implements Serializable {
+public class BeanA implements Serializable
+{
+  private final static long serialVersionUID = 2;
 
-    private final static long serialVersionUID = 2;
+  private long id;
 
-    private long id;
+  public long getId()
+  {
+    return id;
+  }
 
-    public long getId() {
-        return id;
-    }
+  public void setId(long id)
+  {
+    this.id = id;
+  }
 
-    public void setId(long id) {
-        this.id = id;
-    }
+  private BeanB beanB;
 
-    private BeanB beanB;
+  public BeanB getBeanB()
+  {
+    return beanB;
+  }
 
-    public BeanB getBeanB() {
-        return beanB;
-    }
-
-    public void setBeanB(BeanB beanB) {
-        this.beanB = beanB;
-    }
+  public void setBeanB(BeanB beanB)
+  {
+    this.beanB = beanB;
+  }
 }
