@@ -1,7 +1,11 @@
 /*
- * Simple Java Dict Client (RFC2229)
+ * jabsorb - a Java to JavaScript Advanced Object Request Broker
+ * http://www.jabsorb.org
  *
- * $Id: DictClient.java,v 1.8.2.2 2006/03/06 12:39:21 mclark Exp $
+ * Copyright 2007 Arthur Blake and William Becker
+ *
+ * based on original code from
+ * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
  *
  * Copyright Metaparadigm Pte. Ltd. 2004.
  * Michael Clark <michael@metaparadigm.com>
@@ -31,6 +35,9 @@ import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.io.Serializable;
 
+/**
+ * Simple Java Dict Client (RFC2229)
+ */
 public class DictClient implements Serializable {
 
     private final static long serialVersionUID = 2;
