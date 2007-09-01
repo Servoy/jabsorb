@@ -95,11 +95,11 @@
     <jasper2 validateXml="false" uriroot="${webapp}" package=""
              webXmlFragment="${webinf}/web.xml.generated"
              outputDir="${jsp.out}"/>
-    <copy file="${test.src}/org/jabsorb/jsonrpc/test/Hello.java"
+    <copy file="${test.src}/org/jabsorb/test/Hello.java"
           tofile="${webapp}/Hello.java.txt"/>
     <copy file="${webapp}/hello.jsp" tofile="${webapp}/hello.jsp.txt"/>
     <copy file="${webapp}/hello.js" tofile="${webapp}/hello.js.txt"/>
-    <copy file="${test.src}/org/jabsorb/jsonrpc/test/Test.java"
+    <copy file="${test.src}/org/jabsorb/test/Test.java"
           tofile="${webapp}/Test.java.txt"/>
     <copy file="${webapp}/test.jsp" tofile="${webapp}/test.jsp.txt"/>
     <copy file="${webapp}/test.js" tofile="${webapp}/test.js.txt"/>
@@ -147,13 +147,13 @@
         <path refid="myclasspath"/>
         <pathelement path="${app-jar}"/>
       </classpath>
-      <package name="org.jabsorb.jsonrpc" />
-      <package name="org.jabsorb.jsonrpc.reflect" />
-      <package name="org.jabsorb.jsonrpc.callback" />
-      <package name="org.jabsorb.jsonrpc.localarg" />
-      <package name="org.jabsorb.jsonrpc.localarg.impl" />
-      <package name="org.jabsorb.jsonrpc.serializer" />
-      <package name="org.jabsorb.jsonrpc.serializer.impl" />
+      <package name="org.jabsorb" />
+      <package name="org.jabsorb.reflect" />
+      <package name="org.jabsorb.callback" />
+      <package name="org.jabsorb.localarg" />
+      <package name="org.jabsorb.localarg.impl" />
+      <package name="org.jabsorb.serializer" />
+      <package name="org.jabsorb.serializer.impl" />
       <package name="org.jabsorb.json" />
       <!-- link href="http://java.sun.com/j2se/1.4.2/docs/api/" / -->
       <!-- link href="http://java.sun.com/products/servlet/2.2/javadoc/" / -->
