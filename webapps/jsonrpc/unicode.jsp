@@ -1,24 +1,22 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page language="java" %>
-<%@ page import="com.metaparadigm.jsonrpc.JSONRPCBridge" %>
-<%@ page import="com.metaparadigm.jsonrpc.test.Unicode" %>
+<%@ page import="org.jabsorb.JSONRPCBridge" %>
+<%@ page import="org.jabsorb.testa.jsonrpc.test.Unicode" %>
 <jsp:useBean id="JSONRPCBridge" scope="session"
-     class="com.metaparadigm.jsonrpc.JSONRPCBridge" />
+     class="org.jabsorb.JSONRPCBridge" />
 <jsp:useBean id="unicode" scope="session"
-     class="com.metaparadigm.jsonrpc.test.Unicode" />
+     class="org.jabsorb.testa.jsonrpc.test.Unicode" />
 <%
    response.setDateHeader ("Expires", 0);
    //JSONRPCBridge.setDebug(true);
    JSONRPCBridge.registerObject("unicode", unicode);
 %>
-<%!
-  String title = "JSON-RPC-Java Unicode Tests";
+<%!String title = "JSON-RPC-Java Unicode Tests";
   String head =
     "    <link rel=\"stylesheet\" type=\"text/css\" href=\"css/unicode.css\">\n" +
     "    <script type=\"text/javascript\" src=\"jsonrpc.js\"></script>\n" +
     "    <script type=\"text/javascript\" src=\"unicode.js\"></script>\n";
-  String onLoad = "onLoad()";
-%>
+  String onLoad = "onLoad()";%>
 <%@ include file="header.jspinc" %>
 
     <h2>JSON-RPC-Java Unicode Tests</h2>

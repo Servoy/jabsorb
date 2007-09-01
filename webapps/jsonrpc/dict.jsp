@@ -1,25 +1,23 @@
 <%@
 page contentType="text/html; charset=UTF-8" %><%@
 page language="java" %><%@
-page import="com.metaparadigm.jsonrpc.JSONRPCBridge" %><%@
-page import="com.metaparadigm.dict.DictClient"
+page import="org.jabsorb.JSONRPCBridge" %><%@
+page import="org.jabsorb.testa.dict.DictClient"
 %><jsp:useBean id="JSONRPCBridge" scope="session"
-     class="com.metaparadigm.jsonrpc.JSONRPCBridge"
+     class="org.jabsorb.JSONRPCBridge"
 /><jsp:useBean id="dict" scope="session"
-     class="com.metaparadigm.dict.DictClient"
+     class="org.jabsorb.testa.dict.DictClient"
 /> <%
    response.setDateHeader ("Expires", 0);
    //JSONRPCBridge.setDebug(true);
    JSONRPCBridge.registerObject("dict", dict);
 %>
-<%!
-  String title = "JSON-RPC-Java Dictionary Demo";
+<%!String title = "JSON-RPC-Java Dictionary Demo";
   String head =
     "    <link rel=\"stylesheet\" type=\"text/css\" href=\"css/dict.css\">\n" +
     "    <script type=\"text/javascript\" src=\"jsonrpc.js\"></script>\n" +
     "    <script type=\"text/javascript\" src=\"dict.js\"></script>\n";
-  String onLoad = "onLoad()";
-%>
+  String onLoad = "onLoad()";%>
 <%@ include file="header.jspinc" %>
 
     <h2>JSON-RPC-Java Dictionary Client</h2>

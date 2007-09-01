@@ -1,11 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page language="java" %>
 <%@ page import="java.util.Iterator" %>
-<%@ page import="com.metaparadigm.jsonrpc.JSONRPCBridge" %>
+<%@ page import="org.jabsorb.JSONRPCBridge" %>
 <jsp:useBean id="JSONRPCBridge" scope="session"
-     class="com.metaparadigm.jsonrpc.JSONRPCBridge" />
+     class="org.jabsorb.JSONRPCBridge" />
 <jsp:useBean id="browser" scope="session"
-     class="com.metaparadigm.jsonrpc.test.Browser" />
+     class="org.jabsorb.testa.jsonrpc.test.Browser" />
 <%
    response.setDateHeader ("Expires", 0);
    JSONRPCBridge.registerObject("browser", browser);

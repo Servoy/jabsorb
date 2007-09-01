@@ -1,9 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
  "http://www.w3.org/TR/html4/loose.dtd">
 <jsp:useBean id="JSONRPCBridge" scope="session"
-     class="com.metaparadigm.jsonrpc.JSONRPCBridge" />
+     class="org.jabsorb.JSONRPCBridge" />
 <jsp:useBean id="hello" scope="session"
-     class="com.metaparadigm.jsonrpc.test.Hello" />
+     class="org.jabsorb.testa.jsonrpc.test.Hello" />
 <% JSONRPCBridge.registerObject("hello", hello); %>
 <html>
   <head>

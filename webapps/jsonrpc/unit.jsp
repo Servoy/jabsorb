@@ -1,25 +1,23 @@
 <%@
 page contentType="text/html; charset=UTF-8" %><%@
 page language="java" %><%@
-page import="com.metaparadigm.jsonrpc.JSONRPCBridge" %><%@
-page import="com.metaparadigm.jsonrpc.test.Test"
+page import="org.jabsorb.JSONRPCBridge" %><%@
+page import="org.jabsorb.testa.jsonrpc.test.Test"
 %><jsp:useBean id="JSONRPCBridge" scope="session"
-     class="com.metaparadigm.jsonrpc.JSONRPCBridge"
+     class="org.jabsorb.JSONRPCBridge"
 /><jsp:useBean id="testObject" scope="session"
-     class="com.metaparadigm.jsonrpc.test.Test"
+     class="org.jabsorb.testa.jsonrpc.test.Test"
 /><%
    response.setDateHeader ("Expires", 0);
    JSONRPCBridge.setDebug(true);
    JSONRPCBridge.registerObject("test", testObject);
 %>
-<%!
-  String title = "JSON-RPC-Java Unit Tests";
+<%!String title = "JSON-RPC-Java Unit Tests";
   String head =
     "    <link rel=\"stylesheet\" type=\"text/css\" href=\"css/unit.css\">\n" +
     "    <script type=\"text/javascript\" src=\"jsonrpc.js\"></script>\n" +
     "    <script type=\"text/javascript\" src=\"unit.js\"></script>\n";
-  String onLoad = "onLoad()";
-%>
+  String onLoad = "onLoad()";%>
 <%@ include file="header.jspinc" %>
 
     <h2>JSON-RPC-Java Unit Tests</h2>

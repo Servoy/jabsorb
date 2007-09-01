@@ -1,23 +1,21 @@
 <%@
 page contentType="text/html; charset=UTF-8" %><%@
 page language="java" %><%@
-page import="com.metaparadigm.jsonrpc.test.Test"
+page import="org.jabsorb.testa.jsonrpc.test.Test"
 %><jsp:useBean id="JSONRPCBridge" scope="session"
-     class="com.metaparadigm.jsonrpc.JSONRPCBridge"
+     class="org.jabsorb.JSONRPCBridge"
 /><jsp:useBean id="testObject" scope="session"
-     class="com.metaparadigm.jsonrpc.test.Test"
+     class="org.jabsorb.testa.jsonrpc.test.Test"
 /><%
    response.setDateHeader ("Expires", 0);
    JSONRPCBridge.registerObject("test", testObject);
    JSONRPCBridge.registerReference(Test.RefTest.class);
    JSONRPCBridge.registerCallableReference(Test.CallableRefTest.class);
 %>
-<%!
-String title = "JSON-RPC-Java Tests";
+<%!String title = "JSON-RPC-Java Tests";
 String head = "    <script type=\"text/javascript\" src=\"jsonrpc.js\"></script>" +
               "    <script type=\"text/javascript\" src=\"test.js\"></script>";
-String onLoad = "onLoad()";
-%>
+String onLoad = "onLoad()";%>
 <%@ include file="header.jspinc" %>
 
     <h2>JSON-RPC-Java Tests</h2>
