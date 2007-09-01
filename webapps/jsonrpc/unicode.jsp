@@ -1,11 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page language="java" %>
 <%@ page import="org.jabsorb.JSONRPCBridge" %>
-<%@ page import="org.jabsorb.testa.jsonrpc.test.Unicode" %>
+<%@ page import="org.jabsorb.test.Unicode" %>
 <jsp:useBean id="JSONRPCBridge" scope="session"
      class="org.jabsorb.JSONRPCBridge" />
 <jsp:useBean id="unicode" scope="session"
-     class="org.jabsorb.testa.jsonrpc.test.Unicode" />
+     class="org.jabsorb.test.Unicode" />
 <%
    response.setDateHeader ("Expires", 0);
    //JSONRPCBridge.setDebug(true);

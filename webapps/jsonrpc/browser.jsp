@@ -5,7 +5,7 @@
 <jsp:useBean id="JSONRPCBridge" scope="session"
      class="org.jabsorb.JSONRPCBridge" />
 <jsp:useBean id="browser" scope="session"
-     class="org.jabsorb.testa.jsonrpc.test.Browser" />
+     class="org.jabsorb.test.Browser" />
 <%
    response.setDateHeader ("Expires", 0);
    JSONRPCBridge.registerObject("browser", browser);

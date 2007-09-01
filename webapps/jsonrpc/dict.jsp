@@ -2,11 +2,11 @@
 page contentType="text/html; charset=UTF-8" %><%@
 page language="java" %><%@
 page import="org.jabsorb.JSONRPCBridge" %><%@
-page import="org.jabsorb.testa.dict.DictClient"
+page import="org.jabsorb.dict.DictClient"
 %><jsp:useBean id="JSONRPCBridge" scope="session"
      class="org.jabsorb.JSONRPCBridge"
 /><jsp:useBean id="dict" scope="session"
-     class="org.jabsorb.testa.dict.DictClient"
+     class="org.jabsorb.dict.DictClient"
 /> <%
    response.setDateHeader ("Expires", 0);
    //JSONRPCBridge.setDebug(true);

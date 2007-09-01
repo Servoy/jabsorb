@@ -3,7 +3,7 @@
 <jsp:useBean id="JSONRPCBridge" scope="session"
      class="org.jabsorb.JSONRPCBridge" />
 <jsp:useBean id="hello" scope="session"
-     class="org.jabsorb.testa.jsonrpc.test.Hello" />
+     class="org.jabsorb.test.Hello" />
 <% JSONRPCBridge.registerObject("hello", hello); %>
 <html>
   <head>

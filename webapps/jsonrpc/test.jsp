@@ -1,11 +1,11 @@
 <%@
 page contentType="text/html; charset=UTF-8" %><%@
 page language="java" %><%@
-page import="org.jabsorb.testa.jsonrpc.test.Test"
+page import="org.jabsorb.test.Test"
 %><jsp:useBean id="JSONRPCBridge" scope="session"
      class="org.jabsorb.JSONRPCBridge"
 /><jsp:useBean id="testObject" scope="session"
-     class="org.jabsorb.testa.jsonrpc.test.Test"
+     class="org.jabsorb.test.Test"
 /><%
    response.setDateHeader ("Expires", 0);
    JSONRPCBridge.registerObject("test", testObject);
