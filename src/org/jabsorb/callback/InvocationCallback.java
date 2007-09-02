@@ -37,26 +37,42 @@ public interface InvocationCallback extends Serializable
 {
   /**
    * Callback before invocation of an RPC method.
-   *
-   * @param context   The transport context (the HttpServletRequest object in
-   *                  the case of the HTTP transport).
-   * @param instance  The object instance or null if it is a static method.
-   * @param method    Method that failed the invocation.
-   * @param arguments The arguments passed to the method
+   * 
+   * TODO: is the throws necessary?
+   * 
+   * @param context
+   *          The transport context (the HttpServletRequest object in the case
+   *          of the HTTP transport).
+   * @param instance
+   *          The object instance or null if it is a static method.
+   * @param method
+   *          Method that failed the invocation.
+   * @param arguments
+   *          The arguments passed to the method
+   * @throws Exception
+   *           if the invocation doesn't work.
    */
   public void preInvoke(Object context, Object instance, Method method,
-                        Object arguments[]) throws Exception;
+      Object arguments[]) throws Exception;
 
   /**
    * Callback after invocation of an RPC method.
-   *
-   * @param context  The transport context (the HttpServletRequest object in
-   *                 the case of the HTTP transport).
-   * @param instance The object instance or null if it is a static method.
-   * @param method   Method that failed the invocation.
-   * @param result   The returned result from the method
+   * 
+   * TODO: is the throws necessary?
+   * 
+   * @param context
+   *          The transport context (the HttpServletRequest object in the case
+   *          of the HTTP transport).
+   * @param instance
+   *          The object instance or null if it is a static method.
+   * @param method
+   *          Method that failed the invocation.
+   * @param result
+   *          The returned result from the method
+   * @throws Exception
+   *           if the invocation doesn't work.
    */
   public void postInvoke(Object context, Object instance, Method method,
-                         Object result) throws Exception;
+      Object result) throws Exception;
 
 }

@@ -29,27 +29,27 @@ package org.jabsorb.serializer;
 import org.jabsorb.JSONSerializer;
 
 /**
- * Convenience class for implementing Serializers providing default setOwner
- * and canSerialize implementations.
+ * Convenience class for implementing Serializers providing default setOwner and
+ * canSerialize implementations.
  */
 public abstract class AbstractSerializer implements Serializer
 {
 
+  /**
+   * Main serialiser
+   */
   protected JSONSerializer ser;
-
-  public void setOwner(JSONSerializer ser)
-  {
-    this.ser = ser;
-  }
 
   /**
    * Default check that simply tests the given serializeable class arrays to
    * determine if the pair of classes can be serialized/deserialized from this
    * Serializer.
-   *
-   * @param clazz     java type to check if this Serializer can handle.
-   * @param jsonClazz json type to check this Serializer can handle.
-   *
+   * 
+   * @param clazz
+   *          java type to check if this Serializer can handle.
+   * @param jsonClazz
+   *          json type to check this Serializer can handle.
+   * 
    * @return true if this Serializer can serialize/deserialize the given
    *         java,json pair.
    */
@@ -83,5 +83,16 @@ public abstract class AbstractSerializer implements Serializer
     }
 
     return (canJava && canJSON);
+  }
+
+  /**
+   * Set the JSONSerialiser that spawned this object.
+   * 
+   * @param ser
+   *          The parent serialiser.
+   */
+  public void setOwner(JSONSerializer ser)
+  {
+    this.ser = ser;
   }
 }

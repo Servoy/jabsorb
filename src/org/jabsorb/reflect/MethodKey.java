@@ -32,14 +32,43 @@ package org.jabsorb.reflect;
  */
 public class MethodKey
 {
-
+  /**
+   * The name of the method
+   */
   private String methodName;
 
+  /**
+   * The number of arguments passed to the method
+   */
   private int numArgs;
 
   /**
+   * Create a MethodKey for a given method name and the number of arguments that
+   * that method takes.
+   * 
+   * @param methodName
+   *          method name.
+   * @param numArgs
+   *          number of arguments the method takes.
+   */
+  public MethodKey(String methodName, int numArgs)
+  {
+    this.methodName = methodName;
+    this.numArgs = numArgs;
+  }
+
+  public boolean equals(Object o)
+  {
+    if (!(o instanceof MethodKey))
+    {
+      return false;
+    }
+    return (methodName.equals(((MethodKey) o).methodName) && numArgs == ((MethodKey) o).numArgs);
+  }
+
+  /**
    * Get the method name.
-   *
+   * 
    * @return the method name.
    */
   public String getMethodName()
@@ -49,7 +78,7 @@ public class MethodKey
 
   /**
    * Get the number of arguments that the method takes.
-   *
+   * 
    * @return the number of arguments that the method takes.
    */
   public int getNumArgs()
@@ -57,32 +86,9 @@ public class MethodKey
     return numArgs;
   }
 
-  /**
-   * Create a MethodKey for a given method name and the number of arguments
-   * that that method takes.
-   *
-   * @param methodName method name.
-   * @param numArgs    number of arguments the method takes.
-   */
-  public MethodKey(String methodName, int numArgs)
-  {
-    this.methodName = methodName;
-    this.numArgs = numArgs;
-  }
-
   public int hashCode()
   {
     return methodName.hashCode() * numArgs;
-  }
-
-  public boolean equals(Object o)
-  {
-    if (!(o instanceof MethodKey))
-    {
-      return false;
-    }
-    return (methodName.equals(((MethodKey) o).methodName) &&
-      numArgs == ((MethodKey) o).numArgs);
   }
 
 }

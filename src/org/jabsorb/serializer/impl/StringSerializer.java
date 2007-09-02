@@ -32,34 +32,69 @@ import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
 
+/**
+ * Serialises String values
+ */
 public class StringSerializer extends AbstractSerializer
 {
+  /**
+   * Unique serialisation id.
+   * 
+   * TODO: should this number be generated?
+   */
   private final static long serialVersionUID = 2;
 
-  private static Class[] _serializableClasses = new Class[]{String.class,
-    char.class, Character.class, byte[].class, char[].class};
+  /**
+   * Classes that this can serialise.
+   */
+  private static Class[] _serializableClasses = new Class[] { String.class,
+      char.class, Character.class, byte[].class, char[].class };
 
-  private static Class[] _JSONClasses = new Class[]{String.class,
-    Integer.class};
-
-  public Class[] getSerializableClasses()
-  {
-    return _serializableClasses;
-  }
+  /**
+   * Classes that this can serialise to.
+   */
+  private static Class[] _JSONClasses = new Class[] { String.class,
+      Integer.class };
 
   public Class[] getJSONClasses()
   {
     return _JSONClasses;
   }
 
+  public Class[] getSerializableClasses()
+  {
+    return _serializableClasses;
+  }
+
+  public Object marshall(SerializerState state, Object o)
+      throws MarshallException
+  {
+    if (o instanceof Character)
+    {
+      return o.toString();
+    }
+    else if (o instanceof byte[])
+    {
+      return new String((byte[]) o);
+    }
+    else if (o instanceof char[])
+    {
+      return new String((char[]) o);
+    }
+    else
+    {
+      return o;
+    }
+  }
+
   public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
-                                   Object jso) throws UnmarshallException
+      Object jso) throws UnmarshallException
   {
     return ObjectMatch.OKAY;
   }
 
   public Object unmarshall(SerializerState state, Class clazz, Object jso)
-    throws UnmarshallException
+      throws UnmarshallException
   {
     String val = jso instanceof String ? (String) jso : jso.toString();
     if (clazz == char.class)
@@ -77,27 +112,6 @@ public class StringSerializer extends AbstractSerializer
     else
     {
       return val;
-    }
-  }
-
-  public Object marshall(SerializerState state, Object o)
-    throws MarshallException
-  {
-    if (o instanceof Character)
-    {
-      return o.toString();
-    }
-    else if (o instanceof byte[])
-    {
-      return new String((byte[]) o);
-    }
-    else if (o instanceof char[])
-    {
-      return new String((char[]) o);
-    }
-    else
-    {
-      return o;
     }
   }
 

@@ -41,100 +41,210 @@ import org.slf4j.LoggerFactory;
  */
 public class JSONRPCBridgeState implements Serializable
 {
-
+  /**
+   * Unique serialisation id.
+   * 
+   * TODO: should this number be generated?
+   */
   private final static long serialVersionUID = 2;
 
-  private final static Logger log = LoggerFactory.getLogger(JSONRPCBridgeState.class);
+  /**
+   * The logger for this class
+   */
+  private final static Logger log = LoggerFactory
+      .getLogger(JSONRPCBridgeState.class);
 
-  // bridge this state information is associated with
+  /**
+   * bridge this state information is associated with
+   */
   private JSONRPCBridge bridge;
 
-  // key "exported class name", val Class
+  /**
+   * key "exported class name", val Class
+   */
   private HashMap classMap = new HashMap();
 
-  // key "exported instance name", val ObjectInstance
+  /**
+   * key "exported instance name", val ObjectInstance
+   */
   private HashMap objectMap = new HashMap();
 
-  // key Integer hashcode, object held as reference
+  /**
+   * key Integer hashcode, object held as reference
+   */
   private HashMap referenceMap = null;
 
-  // ReferenceSerializer if enabled
+  /**
+   * ReferenceSerializer if enabled
+   */
   private Serializer referenceSerializer = null;
 
-  // key clazz, classes that should be returned as References
+  /**
+   * key clazz, classes that should be returned as References
+   */
   private HashSet referenceSet = null;
 
-  // key clazz, classes that should be returned as CallableReferences
+  /**
+   * key clazz, classes that should be returned as CallableReferences
+   */
   private HashSet callableReferenceSet = null;
 
-
+  /**
+   * Creates a new JSONRPCBridgeState
+   * 
+   * @param bridge
+   *          The bridge this state is for
+   */
   public JSONRPCBridgeState(JSONRPCBridge bridge)
   {
     this.bridge = bridge;
   }
 
+  /**
+   * Gets the classes that have been registed as callable references.
+   * 
+   * @return key clazz, classes that should be returned as CallableReferences
+   */
   public HashSet getCallableReferenceSet()
   {
     return callableReferenceSet;
   }
 
+  /**
+   * Sets the internal callable reference set.
+   * 
+   * @param callableReferenceSet
+   *          the set to set.
+   * 
+   * TODO: Is this really good coding practice?
+   */
   public void setCallableReferenceSet(HashSet callableReferenceSet)
   {
     this.callableReferenceSet = callableReferenceSet;
   }
 
+  /**
+   * Gets the registered classes
+   * 
+   * @return key "exported class name", val Class
+   */
   public HashMap getClassMap()
   {
     return classMap;
   }
 
+  /**
+   * Sets the class map
+   * 
+   * @param classMap
+   *          The class map to set.
+   * 
+   * TODO: Again, dodgy coding practice!
+   */
   public void setClassMap(HashMap classMap)
   {
     this.classMap = classMap;
   }
 
+  /**
+   * Gets the known objects
+   * 
+   * @return key "exported instance name", val ObjectInstance
+   */
   public HashMap getObjectMap()
   {
     return objectMap;
   }
 
+  /**
+   * Sets the object map
+   * 
+   * @param objectMap
+   *          The object map to set.
+   * 
+   * TODO: Again, dodgy coding practice!
+   */
   public void setObjectMap(HashMap objectMap)
   {
     this.objectMap = objectMap;
   }
 
+  /**
+   * Gets the known references
+   * 
+   * @return key Integer hashcode, object held as reference
+   */
   public HashMap getReferenceMap()
   {
     return referenceMap;
   }
 
+  /**
+   * Sets the reference map
+   * 
+   * @param referenceMap
+   *          The reference map to set.
+   * 
+   * TODO: Again, dodgy coding practice!
+   */
   public void setReferenceMap(HashMap referenceMap)
   {
     this.referenceMap = referenceMap;
   }
 
+  /**
+   * Gets the serialiser for references
+   * 
+   * @return The reference serialiser
+   */
   public Serializer getReferenceSerializer()
   {
     return referenceSerializer;
   }
 
+  /**
+   * Sets the reference serialiser
+   * 
+   * @param referenceSerializer
+   *          The referenceSerialiser to set.
+   * 
+   * TODO: Again, dodgy coding practice!
+   */
   public void setReferenceSerializer(Serializer referenceSerializer)
   {
     this.referenceSerializer = referenceSerializer;
   }
 
+  /**
+   * Gets the reference set
+   * 
+   * @return key clazz, classes that should be returned as References
+   */
   public HashSet getReferenceSet()
   {
     return referenceSet;
   }
 
+  /**
+   * Sets the referenceset
+   * 
+   * @param referenceSet
+   *          The reference set to set
+   * 
+   * TODO: Again, dodgy coding practice!
+   */
   public void setReferenceSet(HashSet referenceSet)
   {
     this.referenceSet = referenceSet;
   }
 
+  /**
+   * 
+   * @throws Exception
+   */
   public synchronized void enableReferences() throws Exception
   {
+    // TODO: why have setters for these when they are all created here?
     if (referenceSerializer == null)
     {
       referenceSerializer = new ReferenceSerializer(bridge);

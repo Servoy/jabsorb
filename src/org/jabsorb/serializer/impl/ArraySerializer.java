@@ -35,16 +35,30 @@ import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
 
+/**
+ * Responsible for serialising Java arrays
+ */
 public class ArraySerializer extends AbstractSerializer
 {
+  /**
+   * Unique serialisation id.
+   * 
+   * TODO: should this number be generated?
+   */
   private final static long serialVersionUID = 2;
 
-  private static Class[] _serializableClasses = new Class[]{int[].class,
-    short[].class, long[].class, float[].class, double[].class,
-    boolean[].class, Integer[].class, Short[].class, Long[].class,
-    Float[].class, Double[].class, Boolean[].class, String[].class};
+  /**
+   * The classes that this can serialise
+   */
+  private final static Class[] _serializableClasses = new Class[] {
+      int[].class, short[].class, long[].class, float[].class, double[].class,
+      boolean[].class, Integer[].class, Short[].class, Long[].class,
+      Float[].class, Double[].class, Boolean[].class, String[].class };
 
-  private static Class[] _JSONClasses = new Class[]{JSONArray.class};
+  /**
+   * The class that this serialises to
+   */
+  private final static Class[] _JSONClasses = new Class[] { JSONArray.class };
 
   public Class[] getSerializableClasses()
   {
@@ -59,13 +73,12 @@ public class ArraySerializer extends AbstractSerializer
   public boolean canSerialize(Class clazz, Class jsonClazz)
   {
     Class cc = clazz.getComponentType();
-    return (super.canSerialize(clazz, jsonClazz) ||
-      ((jsonClazz == null || jsonClazz == JSONArray.class) &&
-        (clazz.isArray() && !cc.isPrimitive())));
+    return (super.canSerialize(clazz, jsonClazz) || ((jsonClazz == null || jsonClazz == JSONArray.class) && (clazz
+        .isArray() && !cc.isPrimitive())));
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
-                                   Object o) throws UnmarshallException
+  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object o)
+      throws UnmarshallException
   {
     JSONArray jso = (JSONArray) o;
     Class cc = clazz.getComponentType();
@@ -86,32 +99,31 @@ public class ArraySerializer extends AbstractSerializer
   }
 
   public Object unmarshall(SerializerState state, Class clazz, Object o)
-    throws UnmarshallException
+      throws UnmarshallException
   {
     JSONArray jso = (JSONArray) o;
     Class cc = clazz.getComponentType();
     int i = 0;
     try
     {
+      // TODO: Is there a nicer way of doing this without all the ifs?
       if (clazz == int[].class)
       {
         int arr[] = new int[jso.length()];
         for (; i < jso.length(); i++)
         {
-          arr[i] = ((Number) ser.unmarshall(state, cc, jso.get(i)))
-            .intValue();
+          arr[i] = ((Number) ser.unmarshall(state, cc, jso.get(i))).intValue();
         }
-        return (Object) arr;
+        return arr;
       }
       else if (clazz == byte[].class)
       {
         byte arr[] = new byte[jso.length()];
         for (; i < jso.length(); i++)
         {
-          arr[i] = ((Number) ser.unmarshall(state, cc, jso.get(i)))
-            .byteValue();
+          arr[i] = ((Number) ser.unmarshall(state, cc, jso.get(i))).byteValue();
         }
-        return (Object) arr;
+        return arr;
       }
       else if (clazz == short[].class)
       {
@@ -119,19 +131,18 @@ public class ArraySerializer extends AbstractSerializer
         for (; i < jso.length(); i++)
         {
           arr[i] = ((Number) ser.unmarshall(state, cc, jso.get(i)))
-            .shortValue();
+              .shortValue();
         }
-        return (Object) arr;
+        return arr;
       }
       else if (clazz == long[].class)
       {
         long arr[] = new long[jso.length()];
         for (; i < jso.length(); i++)
         {
-          arr[i] = ((Number) ser.unmarshall(state, cc, jso.get(i)))
-            .longValue();
+          arr[i] = ((Number) ser.unmarshall(state, cc, jso.get(i))).longValue();
         }
-        return (Object) arr;
+        return arr;
       }
       else if (clazz == float[].class)
       {
@@ -139,9 +150,9 @@ public class ArraySerializer extends AbstractSerializer
         for (; i < jso.length(); i++)
         {
           arr[i] = ((Number) ser.unmarshall(state, cc, jso.get(i)))
-            .floatValue();
+              .floatValue();
         }
-        return (Object) arr;
+        return arr;
       }
       else if (clazz == double[].class)
       {
@@ -149,19 +160,18 @@ public class ArraySerializer extends AbstractSerializer
         for (; i < jso.length(); i++)
         {
           arr[i] = ((Number) ser.unmarshall(state, cc, jso.get(i)))
-            .doubleValue();
+              .doubleValue();
         }
-        return (Object) arr;
+        return arr;
       }
       else if (clazz == char[].class)
       {
         char arr[] = new char[jso.length()];
         for (; i < jso.length(); i++)
         {
-          arr[i] = ((String) ser.unmarshall(state, cc, jso.get(i)))
-            .charAt(0);
+          arr[i] = ((String) ser.unmarshall(state, cc, jso.get(i))).charAt(0);
         }
-        return (Object) arr;
+        return arr;
       }
       else if (clazz == boolean[].class)
       {
@@ -169,19 +179,19 @@ public class ArraySerializer extends AbstractSerializer
         for (; i < jso.length(); i++)
         {
           arr[i] = ((Boolean) ser.unmarshall(state, cc, jso.get(i)))
-            .booleanValue();
+              .booleanValue();
         }
-        return (Object) arr;
+        return arr;
       }
       else
       {
-        Object arr[] = (Object[]) Array.newInstance(clazz
-          .getComponentType(), jso.length());
+        Object arr[] = (Object[]) Array.newInstance(clazz.getComponentType(),
+            jso.length());
         for (; i < jso.length(); i++)
         {
           arr[i] = ser.unmarshall(state, cc, jso.get(i));
         }
-        return (Object) arr;
+        return arr;
       }
     }
     catch (UnmarshallException e)
@@ -191,7 +201,7 @@ public class ArraySerializer extends AbstractSerializer
   }
 
   public Object marshall(SerializerState state, Object o)
-    throws MarshallException
+      throws MarshallException
   {
     JSONArray arr = new JSONArray();
     if (o instanceof int[])

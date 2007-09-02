@@ -41,20 +41,20 @@ public class ClassData
   protected Class clazz;
 
   /**
-   * Map of public instance methods.  Key is a MethodKey object, value is
-   * either a Method or a Method[].
+   * Map of public instance methods. Key is a MethodKey object, value is either
+   * a Method or a Method[].
    */
   protected HashMap methodMap;
 
   /**
-   * Map of public static methods.  Key is a MethodKey object, value is either
-   * a Method or a Method[].
+   * Map of public static methods. Key is a MethodKey object, value is either a
+   * Method or a Method[].
    */
   protected HashMap staticMethodMap;
 
   /**
    * Get the class that this ClassData maps.
-   *
+   * 
    * @return the class that this ClassData maps.
    */
   public Class getClazz()
@@ -63,14 +63,13 @@ public class ClassData
   }
 
   /**
-   * Get the Map of public non-static methods that can be invoked for the
-   * class. The keys of the Map will be MethodKey objects and the values will
-   * be either a Method object, or an array of Method objects, if there is
-   * more than one possible method that can be invoked matching the
-   * MethodKey.
-   *
-   * @return Map of public instance methods which can be invoked for the
-   *         class. this ClassData.
+   * Get the Map of public non-static methods that can be invoked for the class.
+   * The keys of the Map will be MethodKey objects and the values will be either
+   * a Method object, or an array of Method objects, if there is more than one
+   * possible method that can be invoked matching the MethodKey.
+   * 
+   * @return Map of public instance methods which can be invoked for the class.
+   *         this ClassData.
    */
   public HashMap getMethodMap()
   {
@@ -78,11 +77,11 @@ public class ClassData
   }
 
   /**
-   * Get the Map of public static methods that can be invoked for the class.
-   * The key of the Map is a MethodKey object and the value is either a Method
+   * Get the Map of public static methods that can be invoked for the class. The
+   * key of the Map is a MethodKey object and the value is either a Method
    * object, or an array of Method objects (if there is more than one possible
    * method that can be invoked matching the MethodKey.)
-   *
+   * 
    * @return Map of static methods that can be invoked for the class.
    */
   public HashMap getStaticMethodMap()

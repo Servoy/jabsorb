@@ -40,18 +40,30 @@ import org.slf4j.LoggerFactory;
  */
 public class CallbackController implements Serializable
 {
+  /**
+   * Generated version id. TODO: Should this be a more randomised number?
+   */
   private final static long serialVersionUID = 2;
 
-  private final static Logger log = LoggerFactory.getLogger(CallbackController.class);
+  /**
+   * The log used for this class. TODO: is this necessary, considering it is
+   * only used when debugging is on?
+   */
+  private final static Logger log = LoggerFactory
+      .getLogger(CallbackController.class);
 
-  // key CallbackData
+  /**
+   * Holds all callbacks registered with this controller. Type: CallbackData
+   */
   private HashSet callbackSet;
 
-  // Debugging enabled on this bridge
+  /**
+   * Whether debugging is enabled.
+   */
   private boolean debug;
 
   /**
-   * Default constructor
+   * Default constructor.
    */
   public CallbackController()
   {
@@ -60,10 +72,10 @@ public class CallbackController implements Serializable
   }
 
   /**
-   * Enable or disable debugging message from this callback
-   * controllerinstance.
-   *
-   * @param debug flag to enable or disable debugging messages
+   * Enable or disable debugging message from this callback controllerinstance.
+   * 
+   * @param debug
+   *          flag to enable or disable debugging messages
    */
   public void setDebug(boolean debug)
   {
@@ -72,9 +84,8 @@ public class CallbackController implements Serializable
 
   /**
    * Are debugging messages enabled on this callback controller instance.
-   *
-   * @return true or false depending on whether debugging messages are
-   *         enabled.
+   * 
+   * @return true or false depending on whether debugging messages are enabled.
    */
   protected boolean isDebug()
   {
@@ -83,15 +94,15 @@ public class CallbackController implements Serializable
 
   /**
    * Registers a callback to be called before and after method invocation
-   *
-   * @param callback         The object implementing the InvocationCallback
-   *                         Interface
-   * @param contextInterface The type of transport Context interface the
-   *                         callback is interested in eg. HttpServletRequest.class
-   *                         for the servlet transport.
+   * 
+   * @param callback
+   *          The object implementing the InvocationCallback Interface
+   * @param contextInterface
+   *          The type of transport Context interface the callback is interested
+   *          in eg. HttpServletRequest.class for the servlet transport.
    */
   public void registerCallback(InvocationCallback callback,
-                               Class contextInterface)
+      Class contextInterface)
   {
 
     synchronized (callbackSet)
@@ -101,20 +112,20 @@ public class CallbackController implements Serializable
     if (debug)
     {
       log.info("registered callback " + callback.getClass().getName()
-        + " with context interface " + contextInterface.getName());
+          + " with context interface " + contextInterface.getName());
     }
   }
 
   /**
    * Unregisters a callback
-   *
-   * @param callback         The previously registered InvocationCallback
-   *                         object
-   * @param contextInterface The previously registered transport Context
-   *                         interface.
+   * 
+   * @param callback
+   *          The previously registered InvocationCallback object
+   * @param contextInterface
+   *          The previously registered transport Context interface.
    */
   public void unregisterCallback(InvocationCallback callback,
-                                 Class contextInterface)
+      Class contextInterface)
   {
 
     synchronized (callbackSet)
@@ -124,21 +135,29 @@ public class CallbackController implements Serializable
     if (debug)
     {
       log.info("unregistered callback " + callback.getClass().getName()
-        + " with context " + contextInterface.getName());
+          + " with context " + contextInterface.getName());
     }
   }
 
   /**
    * Calls the 'preInvoke' callback handler.
-   *
-   * @param context   The transport context (the HttpServletRequest object in
-   *                  the case of the HTTP transport).
-   * @param instance  The object instance or null if it is a static method.
-   * @param method    the method that is about to be called.
-   * @param arguments the argements to be passed to the method.
+   * 
+   * TODO: make exception thrown more specific
+   * 
+   * @param context
+   *          The transport context (the HttpServletRequest object in the case
+   *          of the HTTP transport).
+   * @param instance
+   *          The object instance or null if it is a static method.
+   * @param method
+   *          the method that is about to be called.
+   * @param arguments
+   *          the argements to be passed to the method.
+   * @throws Exception
+   *           if preInvoke fails
    */
   public void preInvokeCallback(Object context, Object instance, Method method,
-                                Object arguments[]) throws Exception
+      Object arguments[]) throws Exception
   {
     synchronized (callbackSet)
     {
@@ -148,8 +167,7 @@ public class CallbackController implements Serializable
         CallbackData cbdata = (CallbackData) i.next();
         if (cbdata.understands(context))
         {
-          cbdata.getCallback().preInvoke(context, instance, method,
-            arguments);
+          cbdata.getCallback().preInvoke(context, instance, method, arguments);
         }
       }
     }
@@ -157,15 +175,23 @@ public class CallbackController implements Serializable
 
   /**
    * Calls the 'postInvoke' callback handler.
-   *
-   * @param context  The transport context (the HttpServletRequest object in
-   *                 the case of the HTTP transport).
-   * @param instance The object instance or null if it is a static method.
-   * @param method   the method that was just called.
-   * @param result   The object that was returned.
+   * 
+   * TODO: make exception more specific
+   * 
+   * @param context
+   *          The transport context (the HttpServletRequest object in the case
+   *          of the HTTP transport).
+   * @param instance
+   *          The object instance or null if it is a static method.
+   * @param method
+   *          the method that was just called.
+   * @param result
+   *          The object that was returned.
+   * @throws Exception
+   *           if postInvoke fails
    */
-  public void postInvokeCallback(Object context, Object instance, Method method,
-                                 Object result) throws Exception
+  public void postInvokeCallback(Object context, Object instance,
+      Method method, Object result) throws Exception
   {
     synchronized (callbackSet)
     {
@@ -175,8 +201,7 @@ public class CallbackController implements Serializable
         CallbackData cbdata = (CallbackData) i.next();
         if (cbdata.understands(context))
         {
-          cbdata.getCallback().postInvoke(context, instance, method,
-            result);
+          cbdata.getCallback().postInvoke(context, instance, method, result);
         }
       }
     }
@@ -184,15 +209,19 @@ public class CallbackController implements Serializable
 
   /**
    * Calls the 'invocation Error' callback handler.
-   *
-   * @param context  The transport context (the HttpServletRequest object in
-   *                 the case of the HTTP transport).
-   * @param instance The object instance or null if it is a static method.
-   * @param method   Method that failed the invocation.
-   * @param error    Error resulting from the invocation.
+   * 
+   * @param context
+   *          The transport context (the HttpServletRequest object in the case
+   *          of the HTTP transport).
+   * @param instance
+   *          The object instance or null if it is a static method.
+   * @param method
+   *          Method that failed the invocation.
+   * @param error
+   *          Error resulting from the invocation.
    */
   public void errorCallback(Object context, Object instance, Method method,
-                            Throwable error)
+      Throwable error)
   {
     synchronized (callbackSet)
     {
@@ -201,10 +230,10 @@ public class CallbackController implements Serializable
       {
         CallbackData cbdata = (CallbackData) i.next();
         if (cbdata.understands(context)
-          && (cbdata.getCallback() instanceof ErrorInvocationCallback))
+            && (cbdata.getCallback() instanceof ErrorInvocationCallback))
         {
           ErrorInvocationCallback ecb = (ErrorInvocationCallback) cbdata
-            .getCallback();
+              .getCallback();
           try
           {
             ecb.invocationError(context, instance, method, error);

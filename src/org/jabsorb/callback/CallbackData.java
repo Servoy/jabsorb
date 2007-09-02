@@ -34,37 +34,80 @@ import java.io.Serializable;
  */
 public class CallbackData implements Serializable
 {
+  /**
+   * Generated version id. TODO: Should this be a more randomised number?
+   */
   private final static long serialVersionUID = 2;
 
-  private InvocationCallback cb;
+  /**
+   * The object implementing the InvocationCallback Interface
+   */
+  private final InvocationCallback cb;
 
-  private Class contextInterface;
+  /**
+   * The type of transport Context interface the callback is interested in eg.
+   * HttpServletRequest.class for the servlet transport.
+   */
+  private final Class contextInterface;
 
-  public InvocationCallback getCallback()
-  {
-    return cb;
-  }
-
+  /**
+   * Creates a new Callback data holder
+   * 
+   * @param cb
+   *          The object implementing the InvocationCallback Interface
+   * @param contextInterface
+   *          The type of transport Context interface the callback is interested
+   *          in eg. HttpServletRequest.class for the servlet transport.
+   */
   public CallbackData(InvocationCallback cb, Class contextInterface)
   {
     this.cb = cb;
     this.contextInterface = contextInterface;
   }
 
-  public boolean understands(Object context)
+  /**
+   * Whether two CallbackDatas are the same.
+   * 
+   * @param o
+   *          The object to compare with this one.
+   * @return true if they share the same callback and contextInterface
+   */
+  public boolean equals(Object o)
   {
-    return contextInterface.isAssignableFrom(context.getClass());
+    CallbackData cmp = (CallbackData) o;
+    return (cb.equals(cmp.cb) && contextInterface.equals(cmp.contextInterface));
   }
 
+  /**
+   * Gets the callback
+   * 
+   * @return InvocationCallback
+   */
+  public InvocationCallback getCallback()
+  {
+    return cb;
+  }
+
+  /**
+   * Creates a hash for this object.
+   * 
+   * @return a unique key.
+   */
   public int hashCode()
   {
     return cb.hashCode() * contextInterface.hashCode();
   }
 
-  public boolean equals(Object o)
+  /**
+   * Whether the context for this object can be used with the given object
+   * 
+   * @param context
+   *          The object to test
+   * @return Whether the context for this object is assignable from the given
+   *         object.
+   */
+  public boolean understands(Object context)
   {
-    CallbackData cmp = (CallbackData) o;
-    return (cb.equals(cmp.cb) && contextInterface
-      .equals(cmp.contextInterface));
+    return contextInterface.isAssignableFrom(context.getClass());
   }
 }

@@ -34,17 +34,31 @@ import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
 
+/**
+ * Serialises numeric values
+ */
 public class NumberSerializer extends AbstractSerializer
 {
+  /**
+   * Unique serialisation id.
+   * 
+   * TODO: should this number be generated?
+   */
   private final static long serialVersionUID = 2;
 
-  private static Class[] _serializableClasses = new Class[]{Integer.class,
-    Byte.class, Short.class, Long.class, Float.class, Double.class,
-    BigDecimal.class};
+  /**
+   * Classes that this can serialise.
+   */
+  private static Class[] _serializableClasses = new Class[] { Integer.class,
+      Byte.class, Short.class, Long.class, Float.class, Double.class,
+      BigDecimal.class };
 
-  private static Class[] _JSONClasses = new Class[]{Integer.class,
-    Byte.class, Short.class, Long.class, Float.class, Double.class,
-    BigDecimal.class, String.class};
+  /**
+   * Classes that this can serialise to.
+   */
+  private static Class[] _JSONClasses = new Class[] { Integer.class, Byte.class,
+      Short.class, Long.class, Float.class, Double.class, BigDecimal.class,
+      String.class };
 
   public Class[] getSerializableClasses()
   {
@@ -56,8 +70,8 @@ public class NumberSerializer extends AbstractSerializer
     return _JSONClasses;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
-                                   Object jso) throws UnmarshallException
+  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object jso)
+      throws UnmarshallException
   {
     try
     {
@@ -70,19 +84,29 @@ public class NumberSerializer extends AbstractSerializer
     return ObjectMatch.OKAY;
   }
 
-  public Object toNumber(Class clazz, Object jso)
-    throws NumberFormatException
+  /**
+   * Converts a javascript object to a Java number
+   * 
+   * @param clazz
+   *          The class of the Java object that it should be converted to
+   * @param jso
+   *          The javascript object
+   * @return A Java primitive type in its java.lang wrapper.
+   * @throws NumberFormatException
+   *           If clazz is numeric and jso does not parse into a number.
+   */
+  public Object toNumber(Class clazz, Object jso) throws NumberFormatException
   {
+    // TODO: isn't this largely a dupe of PrimitiveSerialiser.toPrimitive()?
+    // We should probably have just one method that does this, or have one use
+    // the other
     if (clazz == Integer.class)
     {
       if (jso instanceof String)
       {
         return new Integer((String) jso);
       }
-      else
-      {
-        return new Integer(((Number) jso).intValue());
-      }
+      return new Integer(((Number) jso).intValue());
     }
     else if (clazz == Long.class)
     {
@@ -90,10 +114,7 @@ public class NumberSerializer extends AbstractSerializer
       {
         return new Long((String) jso);
       }
-      else
-      {
-        return new Long(((Number) jso).longValue());
-      }
+      return new Long(((Number) jso).longValue());
     }
     else if (clazz == Short.class)
     {
@@ -101,10 +122,7 @@ public class NumberSerializer extends AbstractSerializer
       {
         return new Short((String) jso);
       }
-      else
-      {
-        return new Short(((Number) jso).shortValue());
-      }
+      return new Short(((Number) jso).shortValue());
     }
     else if (clazz == Byte.class)
     {
@@ -112,10 +130,7 @@ public class NumberSerializer extends AbstractSerializer
       {
         return new Byte((String) jso);
       }
-      else
-      {
-        return new Byte(((Number) jso).byteValue());
-      }
+      return new Byte(((Number) jso).byteValue());
     }
     else if (clazz == Float.class)
     {
@@ -123,10 +138,7 @@ public class NumberSerializer extends AbstractSerializer
       {
         return new Float((String) jso);
       }
-      else
-      {
-        return new Float(((Number) jso).floatValue());
-      }
+      return new Float(((Number) jso).floatValue());
     }
     else if (clazz == Double.class)
     {
@@ -134,10 +146,7 @@ public class NumberSerializer extends AbstractSerializer
       {
         return new Double((String) jso);
       }
-      else
-      {
-        return new Double(((Number) jso).doubleValue());
-      }
+      return new Double(((Number) jso).doubleValue());
     }
     else if (clazz == BigDecimal.class)
     {
@@ -145,16 +154,13 @@ public class NumberSerializer extends AbstractSerializer
       {
         return new BigDecimal((String) jso);
       }
-      else
-      {
-        return new BigDecimal(((Number) jso).doubleValue()); // hmmm?
-      }
+      return new BigDecimal(((Number) jso).doubleValue()); // hmmm?
     }
     return null;
   }
 
   public Object unmarshall(SerializerState state, Class clazz, Object jso)
-    throws UnmarshallException
+      throws UnmarshallException
   {
     try
     {
@@ -166,13 +172,13 @@ public class NumberSerializer extends AbstractSerializer
     }
     catch (NumberFormatException nfe)
     {
-      throw new UnmarshallException("cannot convert object " + jso
-        + " to type " + clazz.getName());
+      throw new UnmarshallException("cannot convert object " + jso + " to type "
+          + clazz.getName());
     }
   }
 
   public Object marshall(SerializerState state, Object o)
-    throws MarshallException
+      throws MarshallException
   {
     return o;
   }

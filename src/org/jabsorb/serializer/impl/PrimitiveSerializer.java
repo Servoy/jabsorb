@@ -32,16 +32,29 @@ import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
 
+/**
+ * Serialises privitive Java values
+ */
 public class PrimitiveSerializer extends AbstractSerializer
 {
+  /**
+   * Unique serialisation id.
+   * 
+   * TODO: should this number be generated?
+   */
   private final static long serialVersionUID = 2;
 
-  private static Class[] _serializableClasses = new Class[]{int.class,
-    byte.class, short.class, long.class, float.class, double.class};
+  /**
+   * Classes that this can serialise.
+   */
+  private static Class[] _serializableClasses = new Class[] { int.class,
+      byte.class, short.class, long.class, float.class, double.class };
 
-  private static Class[] _JSONClasses = new Class[]{Integer.class,
-    Byte.class, Short.class, Long.class, Float.class, Double.class,
-    String.class};
+  /**
+   * Classes that this can serialise to.
+   */
+  private static Class[] _JSONClasses = new Class[] { Integer.class, Byte.class,
+      Short.class, Long.class, Float.class, Double.class, String.class };
 
   public Class[] getSerializableClasses()
   {
@@ -53,8 +66,8 @@ public class PrimitiveSerializer extends AbstractSerializer
     return _JSONClasses;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
-    Object jso) throws UnmarshallException
+  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object jso)
+      throws UnmarshallException
   {
     try
     {
@@ -67,19 +80,28 @@ public class PrimitiveSerializer extends AbstractSerializer
     return ObjectMatch.OKAY;
   }
 
+  /**
+   * Converts a javascript object to a Java object
+   * 
+   * @param clazz
+   *          The class of the Java object that it should be converted to
+   * @param jso
+   *          The javascript object
+   * @return A Java primitive type in its java.lang wrapper.
+   * @throws NumberFormatException
+   *           If clazz is numeric and jso does not parse into a number.
+   */
   public Object toPrimitive(Class clazz, Object jso)
-    throws NumberFormatException
+      throws NumberFormatException
   {
+    // TODO: is there a better way of doing this instead of all the if elses?
     if (int.class.equals(clazz))
     {
       if (jso instanceof String)
       {
         return new Integer((String) jso);
       }
-      else
-      {
-        return new Integer(((Number) jso).intValue());
-      }
+      return new Integer(((Number) jso).intValue());
     }
     else if (long.class.equals(clazz))
     {
@@ -87,10 +109,7 @@ public class PrimitiveSerializer extends AbstractSerializer
       {
         return new Long((String) jso);
       }
-      else
-      {
-        return new Long(((Number) jso).longValue());
-      }
+      return new Long(((Number) jso).longValue());
     }
     else if (short.class.equals(clazz))
     {
@@ -98,10 +117,7 @@ public class PrimitiveSerializer extends AbstractSerializer
       {
         return new Short((String) jso);
       }
-      else
-      {
-        return new Short(((Number) jso).shortValue());
-      }
+      return new Short(((Number) jso).shortValue());
     }
     else if (byte.class.equals(clazz))
     {
@@ -109,10 +125,7 @@ public class PrimitiveSerializer extends AbstractSerializer
       {
         return new Byte((String) jso);
       }
-      else
-      {
-        return new Byte(((Number) jso).byteValue());
-      }
+      return new Byte(((Number) jso).byteValue());
     }
     else if (float.class.equals(clazz))
     {
@@ -120,10 +133,7 @@ public class PrimitiveSerializer extends AbstractSerializer
       {
         return new Float((String) jso);
       }
-      else
-      {
-        return new Float(((Number) jso).floatValue());
-      }
+      return new Float(((Number) jso).floatValue());
     }
     else if (double.class.equals(clazz))
     {
@@ -131,16 +141,13 @@ public class PrimitiveSerializer extends AbstractSerializer
       {
         return new Double((String) jso);
       }
-      else
-      {
-        return new Double(((Number) jso).doubleValue());
-      }
+      return new Double(((Number) jso).doubleValue());
     }
     return null;
   }
 
   public Object unmarshall(SerializerState state, Class clazz, Object jso)
-    throws UnmarshallException
+      throws UnmarshallException
   {
     try
     {
@@ -148,13 +155,13 @@ public class PrimitiveSerializer extends AbstractSerializer
     }
     catch (NumberFormatException nfe)
     {
-      throw new UnmarshallException("cannot convert object " + jso
-        + " to type " + clazz.getName());
+      throw new UnmarshallException("cannot convert object " + jso + " to type "
+          + clazz.getName());
     }
   }
 
   public Object marshall(SerializerState state, Object o)
-    throws MarshallException
+      throws MarshallException
   {
     return o;
   }

@@ -46,58 +46,97 @@ import org.jabsorb.serializer.UnmarshallException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Serialises java beans that are known to have readable and writable properties
+ */
 public class BeanSerializer extends AbstractSerializer
 {
-  private final static long serialVersionUID = 2;
-
-  private final static Logger log =
-    LoggerFactory.getLogger(BeanSerializer.class);
-
-  private static HashMap beanCache = new HashMap();
-
-  private static Class[] _serializableClasses = new Class[]{};
-
-  private static Class[] _JSONClasses = new Class[]{};
-
-  public Class[] getSerializableClasses()
-  {
-    return _serializableClasses;
-  }
-
-  public Class[] getJSONClasses()
-  {
-    return _JSONClasses;
-  }
-
-  public boolean canSerialize(Class clazz, Class jsonClazz)
-  {
-    return (!clazz.isArray() && !clazz.isPrimitive()
-      && !clazz.isInterface() &&
-      (jsonClazz == null || jsonClazz == JSONObject.class));
-  }
-
-  protected static class BeanData
-  {
-    // in absence of getters and setters, these fields are
-    // public to allow subclasses to access.
-    public BeanInfo beanInfo;
-
-    public HashMap readableProps;
-
-    public HashMap writableProps;
-  }
-
+  /**
+   * Used to check for circular reference detection.
+   * 
+   * TODO: Why not just use a HashSet?
+   */
   public static class BeanSerializerState
   {
+    // TODO: Legacy comment. WTF?
     // in absence of getters and setters, these fields are
     // public to allow subclasses to access.
 
-    // Circular reference detection
+    /**
+     * Used for Circular reference detection
+     */
     public HashSet beanSet = new HashSet();
   }
 
-  public static BeanData analyzeBean(Class clazz)
-    throws IntrospectionException
+  /**
+   * Stores the readable and writable properties for the Bean.
+   */
+  protected static class BeanData
+  {
+    // TODO: Legacy comment. WTF?
+    // in absence of getters and setters, these fields are
+    // public to allow subclasses to access.
+    /**
+     * The bean info for a certain bean
+     */
+    public BeanInfo beanInfo;
+
+    /**
+     * The readable properties of the bean.
+     */
+    public HashMap readableProps;
+
+    /**
+     * The writable properties of the bean.
+     */
+    public HashMap writableProps;
+  }
+
+  /**
+   * Unique serialisation id.
+   * 
+   * TODO: should this number be generated?
+   */
+  private final static long serialVersionUID = 2;
+
+  /**
+   * The logger for this class
+   * 
+   * TODO: should logging happen only when debug mode is set (need to add debug
+   * mode as well). If so we can get rid of this object.
+   */
+  private final static Logger log = LoggerFactory
+      .getLogger(BeanSerializer.class);
+
+  /**
+   * Caches analysed beans
+   */
+  private static HashMap beanCache = new HashMap();
+
+  /**
+   * Classes that this can serialise.
+   * 
+   * TODO: Yay for bloat!
+   */
+  private static Class[] _serializableClasses = new Class[] {};
+
+  /**
+   * Classes that this can serialise to.
+   * 
+   * TODO: Yay for bloat!
+   */
+  private static Class[] _JSONClasses = new Class[] {};
+
+  /**
+   * Analyses a bean, returning a BeanData with the data extracted from it.
+   * 
+   * @param clazz
+   *          The class of the bean to analyse
+   * @return A populated BeanData
+   * @throws IntrospectionException
+   *           If a problem occurs during getting the bean info.
+   */
+  public static BeanData analyzeBean(Class clazz) throws IntrospectionException
   {
     log.info("analyzing " + clazz.getName());
     BeanData bd = new BeanData();
@@ -109,20 +148,26 @@ public class BeanSerializer extends AbstractSerializer
     {
       if (props[i].getWriteMethod() != null)
       {
-        bd.writableProps.put(props[i].getName(), props[i]
-          .getWriteMethod());
+        bd.writableProps.put(props[i].getName(), props[i].getWriteMethod());
       }
       if (props[i].getReadMethod() != null)
       {
-        bd.readableProps.put(props[i].getName(), props[i]
-          .getReadMethod());
+        bd.readableProps.put(props[i].getName(), props[i].getReadMethod());
       }
     }
     return bd;
   }
 
-  public static BeanData getBeanData(Class clazz)
-    throws IntrospectionException
+  /**
+   * Gets the bean data from cache if possible, otherwise analyses the bean.
+   * 
+   * @param clazz
+   *          The class of the bean to analyse
+   * @return A populated BeanData
+   * @throws IntrospectionException
+   *           If a problem occurs during getting the bean info.
+   */
+  public static BeanData getBeanData(Class clazz) throws IntrospectionException
   {
     BeanData bd;
     synchronized (beanCache)
@@ -137,161 +182,28 @@ public class BeanSerializer extends AbstractSerializer
     return bd;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
-                                   Object o) throws UnmarshallException
+  public boolean canSerialize(Class clazz, Class jsonClazz)
   {
-    JSONObject jso = (JSONObject) o;
-    BeanData bd = null;
-    try
-    {
-      bd = getBeanData(clazz);
-    }
-    catch (IntrospectionException e)
-    {
-      throw new UnmarshallException(clazz.getName() + " is not a bean");
-    }
-
-    int match = 0, mismatch = 0;
-    Iterator i = bd.writableProps.entrySet().iterator();
-    while (i.hasNext())
-    {
-      Map.Entry ent = (Map.Entry) i.next();
-      String prop = (String) ent.getKey();
-      if (jso.has(prop))
-      {
-        match++;
-      }
-      else
-      {
-        mismatch++;
-      }
-    }
-    if (match == 0)
-    {
-      throw new UnmarshallException("bean has no matches");
-    }
-
-    ObjectMatch m = null, tmp = null;
-    i = jso.keys();
-    while (i.hasNext())
-    {
-      String field = (String) i.next();
-      Method setMethod = (Method) bd.writableProps.get(field);
-      if (setMethod != null)
-      {
-        try
-        {
-          Class param[] = setMethod.getParameterTypes();
-          if (param.length != 1)
-          {
-            throw new UnmarshallException("bean " + clazz.getName()
-              + " method " + setMethod.getName()
-              + " does not have one arg");
-          }
-          tmp = ser.tryUnmarshall(state, param[0], jso.get(field));
-          if (m == null)
-          {
-            m = tmp;
-          }
-          else
-          {
-            m = m.max(tmp);
-          }
-        }
-        catch (UnmarshallException e)
-        {
-          throw new UnmarshallException("bean " + clazz.getName()
-            + " " + e.getMessage());
-        }
-      }
-      else
-      {
-        mismatch++;
-      }
-    }
-    return m.max(new ObjectMatch(mismatch));
+    return (!clazz.isArray() && !clazz.isPrimitive() && !clazz.isInterface() && (jsonClazz == null || jsonClazz == JSONObject.class));
   }
 
-  public Object unmarshall(SerializerState state, Class clazz, Object o)
-    throws UnmarshallException
+  public Class[] getJSONClasses()
   {
-    JSONObject jso = (JSONObject) o;
-    BeanData bd = null;
-    try
-    {
-      bd = getBeanData(clazz);
-    }
-    catch (IntrospectionException e)
-    {
-      throw new UnmarshallException(clazz.getName() + " is not a bean");
-    }
-    if (ser.isDebug())
-    {
-      log.trace("instantiating " + clazz.getName());
-    }
-    Object instance = null;
-    try
-    {
-      instance = clazz.newInstance();
-    }
-    catch (Exception e)
-    {
-      throw new UnmarshallException("can't instantiate bean "
-        + clazz.getName() + ": " + e.getMessage());
-    }
-    Object invokeArgs[] = new Object[1];
-    Object fieldVal;
-    Iterator i = jso.keys();
-    while (i.hasNext())
-    {
-      String field = (String) i.next();
-      Method setMethod = (Method) bd.writableProps.get(field);
-      if (setMethod != null)
-      {
-        try
-        {
-          Class param[] = setMethod.getParameterTypes();
-          fieldVal = ser.unmarshall(state, param[0], jso.get(field));
-        }
-        catch (UnmarshallException e)
-        {
-          throw new UnmarshallException("bean " + clazz.getName()
-            + " " + e.getMessage());
-        }
-        if (ser.isDebug())
-        {
-          log.trace("invoking " + setMethod.getName() + "(" + fieldVal
-            + ")");
-        }
-        invokeArgs[0] = fieldVal;
-        try
-        {
-          setMethod.invoke(instance, invokeArgs);
-        }
-        catch (Throwable e)
-        {
-          if (e instanceof InvocationTargetException)
-          {
-            e = ((InvocationTargetException) e)
-              .getTargetException();
-          }
-          throw new UnmarshallException("bean " + clazz.getName()
-            + "can't invoke " + setMethod.getName() + ": "
-            + e.getMessage());
-        }
-      }
-    }
-    return instance;
+    return _JSONClasses;
+  }
+
+  public Class[] getSerializableClasses()
+  {
+    return _serializableClasses;
   }
 
   public Object marshall(SerializerState state, Object o)
-    throws MarshallException
+      throws MarshallException
   {
     BeanSerializerState beanState;
     try
     {
-      beanState = (BeanSerializerState) state
-        .get(BeanSerializerState.class);
+      beanState = (BeanSerializerState) state.get(BeanSerializerState.class);
     }
     catch (Exception e)
     {
@@ -312,8 +224,7 @@ public class BeanSerializer extends AbstractSerializer
     }
     catch (IntrospectionException e)
     {
-      throw new MarshallException(o.getClass().getName()
-        + " is not a bean");
+      throw new MarshallException(o.getClass().getName() + " is not a bean");
     }
 
     JSONObject val = new JSONObject();
@@ -344,8 +255,7 @@ public class BeanSerializer extends AbstractSerializer
           e = ((InvocationTargetException) e).getTargetException();
         }
         throw new MarshallException("bean " + o.getClass().getName()
-          + " can't invoke " + getMethod.getName() + ": "
-          + e.getMessage());
+            + " can't invoke " + getMethod.getName() + ": " + e.getMessage());
       }
       try
       {
@@ -356,12 +266,161 @@ public class BeanSerializer extends AbstractSerializer
       }
       catch (MarshallException e)
       {
-        throw new MarshallException("bean " + o.getClass().getName()
-          + " " + e.getMessage());
+        throw new MarshallException("bean " + o.getClass().getName() + " "
+            + e.getMessage());
       }
     }
 
     beanState.beanSet.remove(identity);
     return val;
+  }
+
+  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object o)
+      throws UnmarshallException
+  {
+    JSONObject jso = (JSONObject) o;
+    BeanData bd = null;
+    try
+    {
+      bd = getBeanData(clazz);
+    }
+    catch (IntrospectionException e)
+    {
+      throw new UnmarshallException(clazz.getName() + " is not a bean");
+    }
+
+    int match = 0;
+    int mismatch = 0;
+    Iterator i = bd.writableProps.entrySet().iterator();
+    while (i.hasNext())
+    {
+      Map.Entry ent = (Map.Entry) i.next();
+      String prop = (String) ent.getKey();
+      if (jso.has(prop))
+      {
+        match++;
+      }
+      else
+      {
+        mismatch++;
+      }
+    }
+    if (match == 0)
+    {
+      throw new UnmarshallException("bean has no matches");
+    }
+
+    ObjectMatch m = null;
+    ObjectMatch tmp = null;
+    i = jso.keys();
+    while (i.hasNext())
+    {
+      String field = (String) i.next();
+      Method setMethod = (Method) bd.writableProps.get(field);
+      if (setMethod != null)
+      {
+        try
+        {
+          Class param[] = setMethod.getParameterTypes();
+          if (param.length != 1)
+          {
+            throw new UnmarshallException("bean " + clazz.getName()
+                + " method " + setMethod.getName() + " does not have one arg");
+          }
+          tmp = ser.tryUnmarshall(state, param[0], jso.get(field));
+          if (m == null)
+          {
+            m = tmp;
+          }
+          else
+          {
+            m = m.max(tmp);
+          }
+        }
+        catch (UnmarshallException e)
+        {
+          throw new UnmarshallException("bean " + clazz.getName() + " "
+              + e.getMessage());
+        }
+      }
+      else
+      {
+        mismatch++;
+      }
+    }
+    if (m != null)
+    {
+      return m.max(new ObjectMatch(mismatch));
+    }
+    return new ObjectMatch(mismatch);
+  }
+
+  public Object unmarshall(SerializerState state, Class clazz, Object o)
+      throws UnmarshallException
+  {
+    JSONObject jso = (JSONObject) o;
+    BeanData bd = null;
+    try
+    {
+      bd = getBeanData(clazz);
+    }
+    catch (IntrospectionException e)
+    {
+      throw new UnmarshallException(clazz.getName() + " is not a bean");
+    }
+    if (ser.isDebug())
+    {
+      log.trace("instantiating " + clazz.getName());
+    }
+    Object instance = null;
+    try
+    {
+      instance = clazz.newInstance();
+    }
+    catch (Exception e)
+    {
+      throw new UnmarshallException("can't instantiate bean " + clazz.getName()
+          + ": " + e.getMessage());
+    }
+    Object invokeArgs[] = new Object[1];
+    Object fieldVal;
+    Iterator i = jso.keys();
+    while (i.hasNext())
+    {
+      String field = (String) i.next();
+      Method setMethod = (Method) bd.writableProps.get(field);
+      if (setMethod != null)
+      {
+        try
+        {
+          Class param[] = setMethod.getParameterTypes();
+          fieldVal = ser.unmarshall(state, param[0], jso.get(field));
+        }
+        catch (UnmarshallException e)
+        {
+          throw new UnmarshallException("bean " + clazz.getName() + " "
+              + e.getMessage());
+        }
+        if (ser.isDebug())
+        {
+          log.trace("invoking " + setMethod.getName() + "(" + fieldVal + ")");
+        }
+        invokeArgs[0] = fieldVal;
+        try
+        {
+          setMethod.invoke(instance, invokeArgs);
+        }
+        catch (Throwable e)
+        {
+          if (e instanceof InvocationTargetException)
+          {
+            e = ((InvocationTargetException) e).getTargetException();
+          }
+          throw new UnmarshallException("bean " + clazz.getName()
+              + "can't invoke " + setMethod.getName() + ": " + e.getMessage());
+        }
+      }
+    }
+    return instance;
   }
 }

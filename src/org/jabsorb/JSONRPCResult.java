@@ -37,23 +37,72 @@ import org.jabsorb.json.JSONObject;
  */
 public class JSONRPCResult
 {
-
-  private Object result = null;
-  private Object id = null;
-  private int errorCode;
-
+  /**
+   * Denotes that the call was a success
+   */
   public final static int CODE_SUCCESS = 0;
+
+  /**
+   * Denotes that an exception was thrown on the server
+   */
   public final static int CODE_REMOTE_EXCEPTION = 490;
+
+  /**
+   * Denotes that an error occured while parsing the request.
+   */
   public final static int CODE_ERR_PARSE = 590;
+
+  /**
+   * Denotes (when using a callable reference) that no method was found with the
+   * given name.
+   */
   public final static int CODE_ERR_NOMETHOD = 591;
+
+  /**
+   * Denotes that an error occured while unmarshalling the request.
+   */
   public final static int CODE_ERR_UNMARSHALL = 592;
+
+  /**
+   * Denotes that an error occured while marshalling the response.
+   */
   public final static int CODE_ERR_MARSHALL = 593;
 
-  public final static String MSG_ERR_PARSE =
-    "couldn't parse request arguments";
-  public final static String MSG_ERR_NOMETHOD =
-    "method not found (session may have timed out)";
+  /**
+   * The error method shown when an error occured while parsing the request.
+   */
+  public final static String MSG_ERR_PARSE = "couldn't parse request arguments";
 
+  /**
+   * The error method shown when no method was found with the given name.
+   */
+  public final static String MSG_ERR_NOMETHOD = "method not found (session may have timed out)";
+
+  /**
+   * The result of the call
+   */
+  private Object result = null;
+
+  /**
+   * The id of the response.
+   */
+  private Object id = null;
+
+  /**
+   * An error code if a problem occured (CODE_SUCCESS otherwise)
+   */
+  private int errorCode;
+
+  /**
+   * Creates a new JSONRPCResult
+   * 
+   * @param errorCode
+   *          An error code if a problem occured (CODE_SUCCESS otherwise)
+   * @param id
+   *          The id of the response.
+   * @param o
+   *          The result of the call
+   */
   public JSONRPCResult(int errorCode, Object id, Object o)
   {
     this.errorCode = errorCode;
@@ -61,19 +110,34 @@ public class JSONRPCResult
     this.result = o;
   }
 
-  public Object getResult()
+  /**
+   * Gets the error code
+   * 
+   * @return the error code
+   */
+  public int getErrorCode()
   {
-    return result;
+    return errorCode;
   }
 
+  /**
+   * Gets the id of the response.
+   * 
+   * @return the id of the response.
+   */
   public Object getId()
   {
     return id;
   }
 
-  public int getErrorCode()
+  /**
+   * Gets the result of the call
+   * 
+   * @return the result
+   */
+  public Object getResult()
   {
-    return errorCode;
+    return result;
   }
 
   public String toString()

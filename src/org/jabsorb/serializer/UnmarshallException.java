@@ -33,9 +33,19 @@ package org.jabsorb.serializer;
 
 public class UnmarshallException extends Exception
 {
-
+  /**
+   * Unique serialisation id.
+   * 
+   * TODO: should this number be generated?
+   */
   private final static long serialVersionUID = 2;
 
+  /**
+   * Creates a new UnmarshallException
+   * 
+   * @param msg
+   *          The string to display
+   */
   public UnmarshallException(String msg)
   {
     super(msg);

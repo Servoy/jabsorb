@@ -13,9 +13,9 @@ import java.text.ParseException;
  * A JSONTokener takes a source string and extracts characters and tokens from
  * it. It is used by the JSONObject and JSONArray constructors to parse JSON
  * source strings.
- * <p/>
+ * 
  * Public Domain 2002 JSON.org
- *
+ * 
  * @author JSON.org
  * @version 0.1
  */
@@ -23,49 +23,12 @@ public class JSONTokener
 {
 
   /**
-   * The index of the next character.
-   */
-  private int myIndex;
-
-
-  /**
-   * The source string being tokenized.
-   */
-  private String mySource;
-
-
-  /**
-   * Construct a JSONTokener from a string.
-   *
-   * @param s A source string.
-   */
-  public JSONTokener(String s)
-  {
-    myIndex = 0;
-    mySource = s;
-  }
-
-
-  /**
-   * Back up one character. This provides a sort of lookahead capability, so
-   * that you can test for a digit or letter before attempting to parse the
-   * next number or identifier.
-   */
-  public void back()
-  {
-    if (myIndex > 0)
-    {
-      myIndex -= 1;
-    }
-  }
-
-
-  /**
    * Get the hex value of a character (base16).
-   *
-   * @param c A character between '0' and '9' or between 'A' and 'F' or
-   *          between 'a' and 'f'.
-   *
+   * 
+   * @param c
+   *          A character between '0' and '9' or between 'A' and 'F' or between
+   *          'a' and 'f'.
+   * 
    * @return An int between 0 and 15, or -1 if c was not a hex digit.
    */
   public static int dehexchar(char c)
@@ -85,11 +48,79 @@ public class JSONTokener
     return -1;
   }
 
+  /**
+   * Convert %hh sequences to single characters, and convert plus to space.
+   * 
+   * @param s
+   *          A string that may contain plus and %hh sequences.
+   * 
+   * @return The unescaped string.
+   */
+  public static String unescape(String s)
+  {
+    int len = s.length();
+    StringBuffer b = new StringBuffer();
+    for (int i = 0; i < len; ++i)
+    {
+      char c = s.charAt(i);
+      if (c == '+')
+      {
+        c = ' ';
+      }
+      else if (c == '%' && i + 2 < len)
+      {
+        int d = dehexchar(s.charAt(i + 1));
+        int e = dehexchar(s.charAt(i + 2));
+        if (d >= 0 && e >= 0)
+        {
+          c = (char) (d * 16 + e);
+          i += 2;
+        }
+      }
+      b.append(c);
+    }
+    return b.toString();
+  }
+
+  /**
+   * The index of the next character.
+   */
+  private int myIndex;
+
+  /**
+   * The source string being tokenized.
+   */
+  private String mySource;
+
+  /**
+   * Construct a JSONTokener from a string.
+   * 
+   * @param s
+   *          A source string.
+   */
+  public JSONTokener(String s)
+  {
+    myIndex = 0;
+    mySource = s;
+  }
+
+  /**
+   * Back up one character. This provides a sort of lookahead capability, so
+   * that you can test for a digit or letter before attempting to parse the next
+   * number or identifier.
+   */
+  public void back()
+  {
+    if (myIndex > 0)
+    {
+      myIndex -= 1;
+    }
+  }
 
   /**
    * Determine if the source string still contains characters that next() can
    * consume.
-   *
+   * 
    * @return true if not yet at the end of the source.
    */
   public boolean more()
@@ -97,10 +128,9 @@ public class JSONTokener
     return myIndex < mySource.length();
   }
 
-
   /**
    * Get the next character in the source string.
-   *
+   * 
    * @return The next character, or 0 if past the end of the source string.
    */
   public char next()
@@ -110,38 +140,39 @@ public class JSONTokener
     return c;
   }
 
-
   /**
    * Consume the next character, and check that it matches a specified
    * character.
-   *
-   * @param c The character to match.
-   *
+   * 
+   * @param c
+   *          The character to match.
+   * 
    * @return The character.
-   *
-   * @throws ParseException if the character does not match.
+   * 
+   * @throws ParseException
+   *           if the character does not match.
    */
   public char next(char c) throws ParseException
   {
     char n = next();
     if (n != c)
     {
-      throw syntaxError("Expected '" + c + "' and instead saw '" +
-        n + "'.");
+      throw syntaxError("Expected '" + c + "' and instead saw '" + n + "'.");
     }
     return n;
   }
 
-
   /**
    * Get the next n characters.
-   *
-   * @param n The number of characters to take.
-   *
+   * 
+   * @param n
+   *          The number of characters to take.
+   * 
    * @return A string of n characters.
-   *
-   * @throws ParseException Substring bounds error if there are not n
-   *                        characters remaining in the source string.
+   * 
+   * @throws ParseException
+   *           Substring bounds error if there are not n characters remaining in
+   *           the source string.
    */
   public String next(int n) throws ParseException
   {
@@ -155,14 +186,15 @@ public class JSONTokener
     return mySource.substring(i, j);
   }
 
-
   /**
    * Get the next char in the string, skipping whitespace and comments
    * (slashslash and slashstar).
-   *
+   * 
    * @return A character, or 0 if there are no more characters.
+   * @throws ParseException
+   *           If string is malformed
    */
-  public char nextClean() throws java.text.ParseException
+  public char nextClean() throws ParseException
   {
     while (true)
     {
@@ -175,8 +207,7 @@ public class JSONTokener
             do
             {
               c = next();
-            }
-            while (c != '\n' && c != '\r' && c != 0);
+            } while (c != '\n' && c != '\r' && c != 0);
             break;
           case '*':
             while (true)
@@ -208,17 +239,18 @@ public class JSONTokener
     }
   }
 
-
   /**
    * Return the characters up to the next close quote character. Backslash
-   * processing is done. The formal JSON format does not allow strings in
-   * single quotes, but an implementation is allowed to accept them.
-   *
-   * @param quote The quoting character, either " or '
-   *
+   * processing is done. The formal JSON format does not allow strings in single
+   * quotes, but an implementation is allowed to accept them.
+   * 
+   * @param quote
+   *          The quoting character, either " or '
+   * 
    * @return A String.
-   *
-   * @throws ParseException Unterminated string.
+   * 
+   * @throws ParseException
+   *           Unterminated string.
    */
   public String nextString(char quote) throws ParseException
   {
@@ -275,9 +307,10 @@ public class JSONTokener
   /**
    * Get the text up but not including the specified character or the end of
    * line, whichever comes first.
-   *
-   * @param d A delimiter character.
-   *
+   * 
+   * @param d
+   *          A delimiter character.
+   * 
    * @return A string.
    */
   public String nextTo(char d)
@@ -299,11 +332,12 @@ public class JSONTokener
   }
 
   /**
-   * Get the text up but not including one of the specified delimeter
-   * characters or the end of line, which ever comes first.
-   *
-   * @param delimiters A set of delimiter characters.
-   *
+   * Get the text up but not including one of the specified delimeter characters
+   * or the end of line, which ever comes first.
+   * 
+   * @param delimiters
+   *          A set of delimiter characters.
+   * 
    * @return A string, trimmed.
    */
   public String nextTo(String delimiters)
@@ -313,8 +347,7 @@ public class JSONTokener
     while (true)
     {
       c = next();
-      if (delimiters.indexOf(c) >= 0 || c == 0 ||
-        c == '\n' || c == '\r')
+      if (delimiters.indexOf(c) >= 0 || c == 0 || c == '\n' || c == '\r')
       {
         if (c != 0)
         {
@@ -327,12 +360,13 @@ public class JSONTokener
   }
 
   /**
-   * Get the next value. The value can be a Boolean, Double, Integer,
-   * JSONArray, JSONObject, or String, or the JSONObject.NULL object.
-   *
+   * Get the next value. The value can be a Boolean, Double, Integer, JSONArray,
+   * JSONObject, or String, or the JSONObject.NULL object.
+   * 
    * @return An object.
-   *
-   * @throws ParseException The source conform to JSON syntax.
+   * 
+   * @throws ParseException
+   *           The source conform to JSON syntax.
    */
   public Object nextValue() throws ParseException
   {
@@ -355,8 +389,7 @@ public class JSONTokener
     }
     StringBuffer sb = new StringBuffer();
     char b = c;
-    while (c >= ' ' && c != ':' && c != ',' && c != ']' && c != '}' &&
-      c != '/')
+    while (c >= ' ' && c != ':' && c != ',' && c != ']' && c != '}' && c != '/')
     {
       sb.append(c);
       c = next();
@@ -383,6 +416,7 @@ public class JSONTokener
       }
       catch (Exception e)
       {
+        //Maybe it is a double
       }
       try
       {
@@ -390,6 +424,7 @@ public class JSONTokener
       }
       catch (Exception e)
       {
+        //Return it as a string
       }
     }
     if (s.equals(""))
@@ -400,38 +435,11 @@ public class JSONTokener
   }
 
   /**
-   * Skip characters until the next character is the requested character. If
-   * the requested character is not found, no characters are skipped.
-   *
-   * @param to A character to skip to.
-   *
-   * @return The requested character, or zero if the requested character is
-   *         not found.
-   */
-  public char skipTo(char to)
-  {
-    char c;
-    int index = myIndex;
-    do
-    {
-      c = next();
-      if (c == 0)
-      {
-        myIndex = index;
-        return c;
-      }
-    }
-    while (c != to);
-    back();
-    return c;
-  }
-
-
-  /**
-   * Skip characters until past the requested string. If it is not found, we
-   * are left at the end of the source.
-   *
-   * @param to A string to skip past.
+   * Skip characters until past the requested string. If it is not found, we are
+   * left at the end of the source.
+   * 
+   * @param to
+   *          A string to skip past.
    */
   public void skipPast(String to)
   {
@@ -447,10 +455,38 @@ public class JSONTokener
   }
 
   /**
+   * Skip characters until the next character is the requested character. If the
+   * requested character is not found, no characters are skipped.
+   * 
+   * @param to
+   *          A character to skip to.
+   * 
+   * @return The requested character, or zero if the requested character is not
+   *         found.
+   */
+  public char skipTo(char to)
+  {
+    char c;
+    int index = myIndex;
+    do
+    {
+      c = next();
+      if (c == 0)
+      {
+        myIndex = index;
+        return c;
+      }
+    } while (c != to);
+    back();
+    return c;
+  }
+
+  /**
    * Make a ParseException to signal a syntax error.
-   *
-   * @param message The error message.
-   *
+   * 
+   * @param message
+   *          The error message.
+   * 
    * @return A ParseException object, suitable for throwing
    */
   public ParseException syntaxError(String message)
@@ -460,7 +496,7 @@ public class JSONTokener
 
   /**
    * Make a printable string of this JSONTokener.
-   *
+   * 
    * @return " at character [myIndex] of [mySource]"
    */
   public String toString()
@@ -470,44 +506,11 @@ public class JSONTokener
 
   /**
    * Unescape the source text. Convert %hh sequences to single characters, and
-   * convert plus to space. There are Web transport systems that insist on
-   * doing unnecessary URL encoding. This provides a way to undo it.
+   * convert plus to space. There are Web transport systems that insist on doing
+   * unnecessary URL encoding. This provides a way to undo it.
    */
   public void unescape()
   {
     mySource = unescape(mySource);
-  }
-
-  /**
-   * Convert %hh sequences to single characters, and convert plus to space.
-   *
-   * @param s A string that may contain plus and %hh sequences.
-   *
-   * @return The unescaped string.
-   */
-  public static String unescape(String s)
-  {
-    int len = s.length();
-    StringBuffer b = new StringBuffer();
-    for (int i = 0; i < len; ++i)
-    {
-      char c = s.charAt(i);
-      if (c == '+')
-      {
-        c = ' ';
-      }
-      else if (c == '%' && i + 2 < len)
-      {
-        int d = dehexchar(s.charAt(i + 1));
-        int e = dehexchar(s.charAt(i + 2));
-        if (d >= 0 && e >= 0)
-        {
-          c = (char) (d * 16 + e);
-          i += 2;
-        }
-      }
-      b.append(c);
-    }
-    return b.toString();
   }
 }

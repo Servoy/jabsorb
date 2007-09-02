@@ -32,8 +32,19 @@ package org.jabsorb.localarg;
  */
 public class LocalArgResolveException extends Exception
 {
+  /**
+   * Unique serialisation id.
+   * 
+   * TODO: should this number be generated.
+   */
   private final static long serialVersionUID = 2;
 
+  /**
+   * Creates a new LocalArgResolveException
+   * 
+   * @param msg
+   *          The message to display
+   */
   public LocalArgResolveException(String msg)
   {
     super(msg);

@@ -27,20 +27,28 @@
 package org.jabsorb.serializer;
 
 /**
+ * <p>
  * This class is returned from the Serializer tryUnmarshall method to indicate
  * number of mismatched fields. This is used to handle ambiguities with
  * JavaScript's typeless objects combined with and Java's operator overloading.
- * <p/>
- * todo: wouldn't a better name for this class be ObjectMismatch as it's would
- * todo: be more descriptive.  The name ObjectMatch is a little confusing
- * todo: because it implies the opposite of what the class actually stores
- * todo: (ObjectMismatch) either that, or I'm not understanding something
- * todo: correctly...
+ * </p>
+ * TODO: wouldn't a better name for this class be ObjectMismatch as it's would
+ * TODO: be more descriptive. The name ObjectMatch is a little confusing TODO:
+ * because it implies the opposite of what the class actually stores TODO:
+ * (ObjectMismatch) either that, or I'm not understanding something TODO:
+ * correctly... [WB: I agree!]
  */
 public class ObjectMatch
 {
 
+  /**
+   * The objects match
+   */
   public final static ObjectMatch OKAY = new ObjectMatch(-1);
+
+  /**
+   * The objects do not match (?)
+   */
   public final static ObjectMatch NULL = new ObjectMatch(0);
 
   /**
@@ -49,9 +57,20 @@ public class ObjectMatch
   private int mismatch;
 
   /**
-   * Get the number of mismatched fields that occured on a tryUnmarshall
-   * call.
-   *
+   * Create a new ObjectMatch object with the given number of mismatches.
+   * 
+   * @param mismatch
+   *          the number of mismatched fields that occured on a tryUnmarshall
+   *          call.
+   */
+  public ObjectMatch(int mismatch)
+  {
+    this.mismatch = mismatch;
+  }
+
+  /**
+   * Get the number of mismatched fields that occured on a tryUnmarshall call.
+   * 
    * @return the number of mismatched fields that occured on a tryUnmarshall
    *         call.
    */
@@ -61,22 +80,12 @@ public class ObjectMatch
   }
 
   /**
-   * Create a new ObjectMatch object with the given number of mismatches.
-   *
-   * @param mismatch the number of mismatched fields that occured on a
-   *                 tryUnmarshall call.
-   */
-  public ObjectMatch(int mismatch)
-  {
-    this.mismatch = mismatch;
-  }
-
-  /**
    * Compare another ObjectMatch with this ObjectMatch and return the one that
    * has the most mismatches.
-   *
-   * @param m ObjectMatch to compare this ObjectMatch to.
-   *
+   * 
+   * @param m
+   *          ObjectMatch to compare this ObjectMatch to.
+   * 
    * @return this ObjectMatch if it has more mismatches, else the passed in
    *         ObjectMatch.
    */

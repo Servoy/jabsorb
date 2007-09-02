@@ -41,18 +41,36 @@ import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
 
+/**
+ * Serialises lists
+ * 
+ * TODO: if this serialises a superclass does it need to also specify the
+ * subclasses?
+ */
 public class ListSerializer extends AbstractSerializer
 {
+  /**
+   * Unique serialisation id.
+   * 
+   * TODO: should this number be generated?
+   */
   private final static long serialVersionUID = 2;
 
-  private static Class[] _serializableClasses = new Class[]{List.class,
-    ArrayList.class, LinkedList.class, Vector.class};
+  /**
+   * Classes that this can serialise.
+   */
+  private static Class[] _serializableClasses = new Class[] { List.class,
+      ArrayList.class, LinkedList.class, Vector.class };
 
-  private static Class[] _JSONClasses = new Class[]{JSONObject.class};
+  /**
+   * Classes that this can serialise to.
+   */
+  private static Class[] _JSONClasses = new Class[] { JSONObject.class };
 
-  public Class[] getSerializableClasses()
+  public boolean canSerialize(Class clazz, Class jsonClazz)
   {
-    return _serializableClasses;
+    return (super.canSerialize(clazz, jsonClazz) || ((jsonClazz == null || jsonClazz == JSONObject.class) && List.class
+        .isAssignableFrom(clazz)));
   }
 
   public Class[] getJSONClasses()
@@ -60,15 +78,41 @@ public class ListSerializer extends AbstractSerializer
     return _JSONClasses;
   }
 
-  public boolean canSerialize(Class clazz, Class jsonClazz)
+  public Class[] getSerializableClasses()
   {
-    return (super.canSerialize(clazz, jsonClazz) ||
-      ((jsonClazz == null || jsonClazz == JSONObject.class) &&
-        List.class.isAssignableFrom(clazz)));
+    return _serializableClasses;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
-                                   Object o) throws UnmarshallException
+  public Object marshall(SerializerState state, Object o)
+      throws MarshallException
+  {
+    List list = (List) o;
+    JSONObject obj = new JSONObject();
+    JSONArray arr = new JSONArray();
+    if (ser.getMarshallClassHints())
+    {
+      obj.put("javaClass", o.getClass().getName());
+    }
+    obj.put("list", arr);
+    int index = 0;
+    try
+    {
+      Iterator i = list.iterator();
+      while (i.hasNext())
+      {
+        arr.put(ser.marshall(state, i.next()));
+        index++;
+      }
+    }
+    catch (MarshallException e)
+    {
+      throw new MarshallException("element " + index + " " + e.getMessage());
+    }
+    return obj;
+  }
+
+  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object o)
+      throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
     String java_class = jso.getString("javaClass");
@@ -77,10 +121,10 @@ public class ListSerializer extends AbstractSerializer
       throw new UnmarshallException("no type hint");
     }
     if (!(java_class.equals("java.util.List")
-      || java_class.equals("java.util.AbstractList")
-      || java_class.equals("java.util.LinkedList")
-      || java_class.equals("java.util.ArrayList") || java_class
-      .equals("java.util.Vector")))
+        || java_class.equals("java.util.AbstractList")
+        || java_class.equals("java.util.LinkedList")
+        || java_class.equals("java.util.ArrayList") || java_class
+        .equals("java.util.Vector")))
     {
       throw new UnmarshallException("not a List");
     }
@@ -106,7 +150,7 @@ public class ListSerializer extends AbstractSerializer
   }
 
   public Object unmarshall(SerializerState state, Class clazz, Object o)
-    throws UnmarshallException
+      throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
     String java_class = jso.getString("javaClass");
@@ -116,8 +160,8 @@ public class ListSerializer extends AbstractSerializer
     }
     AbstractList al = null;
     if (java_class.equals("java.util.List")
-      || java_class.equals("java.util.AbstractList")
-      || java_class.equals("java.util.ArrayList"))
+        || java_class.equals("java.util.AbstractList")
+        || java_class.equals("java.util.ArrayList"))
     {
       al = new ArrayList();
     }
@@ -151,35 +195,6 @@ public class ListSerializer extends AbstractSerializer
       throw new UnmarshallException("element " + i + " " + e.getMessage());
     }
     return al;
-  }
-
-  public Object marshall(SerializerState state, Object o)
-    throws MarshallException
-  {
-    List list = (List) o;
-    JSONObject obj = new JSONObject();
-    JSONArray arr = new JSONArray();
-    if (ser.getMarshallClassHints())
-    {
-      obj.put("javaClass", o.getClass().getName());
-    }
-    obj.put("list", arr);
-    int index = 0;
-    try
-    {
-      Iterator i = list.iterator();
-      while (i.hasNext())
-      {
-        arr.put(ser.marshall(state, i.next()));
-        index++;
-      }
-    }
-    catch (MarshallException e)
-    {
-      throw new MarshallException("element " + index + " "
-        + e.getMessage());
-    }
-    return obj;
   }
 
 }

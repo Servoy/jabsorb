@@ -37,17 +37,53 @@ import org.jabsorb.localarg.LocalArgController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * A &quot;factory&quot; for producing ClassData information from Class objects.
  * Gathers the ClassData information via reflection and internally caches it.
  */
 public class ClassAnalyzer
 {
-  private final static Logger log = LoggerFactory.getLogger(ClassAnalyzer.class);
+  /**
+   * The logger for this class
+   * 
+   * TODO: should logging happen only when debug mode is set (need to add debug
+   * mode as well). If so we can get rid of this object.
+   */
+  private final static Logger log = LoggerFactory
+      .getLogger(ClassAnalyzer.class);
 
-  // key clazz, val ClassData
+  /**
+   * Classes that have been analysed
+   * 
+   * key: Clazz, val ClassData
+   */
   private static HashMap classCache = new HashMap();
+
+  /**
+   * Get ClassData containing information on public methods that can be invoked
+   * for a given class. <p/> The ClassData will be cached, and multiple calls to
+   * getClassData for the same class will return the same cached ClassData
+   * object (unless invalidateCache is called to clear the cache.)
+   * 
+   * @param clazz
+   *          class to get ClassData for.
+   * 
+   * @return ClassData object for the given class.
+   */
+  public static ClassData getClassData(Class clazz)
+  {
+    ClassData cd;
+    synchronized (classCache)
+    {
+      cd = (ClassData) classCache.get(clazz);
+      if (cd == null)
+      {
+        cd = analyzeClass(clazz);
+        classCache.put(clazz, cd);
+      }
+    }
+    return cd;
+  }
 
   /**
    * Empty the internal cache of ClassData information.
@@ -58,13 +94,14 @@ public class ClassAnalyzer
   }
 
   /**
-   * Analyze a class and create a ClassData object containing all of the
-   * public methods (both static and non-static) in the class.
-   *
-   * @param clazz class to be analyzed.
-   *
-   * @return a ClassData object containing all the public static and
-   *         non-static methods that can be invoked on the class.
+   * Analyze a class and create a ClassData object containing all of the public
+   * methods (both static and non-static) in the class.
+   * 
+   * @param clazz
+   *          class to be analyzed.
+   * 
+   * @return a ClassData object containing all the public static and non-static
+   *         methods that can be invoked on the class.
    */
   private static ClassData analyzeClass(Class clazz)
   {
@@ -151,33 +188,6 @@ public class ClassAnalyzer
       else
       {
         cd.staticMethodMap.put(mk, marr.toArray(new Method[0]));
-      }
-    }
-    return cd;
-  }
-
-  /**
-   * Get ClassData containing information on public methods that can be
-   * invoked for a given class.
-   * <p/>
-   * The ClassData will be cached, and multiple calls to getClassData for the
-   * same class will return the same cached ClassData object (unless
-   * invalidateCache is called to clear the cache.)
-   *
-   * @param clazz class to get ClassData for.
-   *
-   * @return ClassData object for the given class.
-   */
-  public static ClassData getClassData(Class clazz)
-  {
-    ClassData cd;
-    synchronized (classCache)
-    {
-      cd = (ClassData) classCache.get(clazz);
-      if (cd == null)
-      {
-        cd = analyzeClass(clazz);
-        classCache.put(clazz, cd);
       }
     }
     return cd;

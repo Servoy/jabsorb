@@ -32,8 +32,19 @@ package org.jabsorb.serializer;
  */
 public class MarshallException extends Exception
 {
+  /**
+   * Unique serialisation id.
+   * 
+   * TODO: should this number be generated?
+   */
   private final static long serialVersionUID = 2;
 
+  /**
+   * Creates a new MarshallException
+   * 
+   * @param msg
+   *          The message to be displayed.
+   */
   public MarshallException(String msg)
   {
     super(msg);

@@ -32,34 +32,54 @@ import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
 
+/**
+ * Serialiess Boolean values
+ */
 public class BooleanSerializer extends AbstractSerializer
 {
+  /**
+   * Unique serialisation id.
+   * 
+   * TODO: should this number be generated?
+   */
   private final static long serialVersionUID = 2;
 
-  private static Class[] _serializableClasses = new Class[]{boolean.class,
-    Boolean.class};
+  /**
+   * Classes that this can serialise.
+   */
+  private static Class[] _serializableClasses = new Class[] { boolean.class,
+      Boolean.class };
 
-  private static Class[] _JSONClasses = new Class[]{Boolean.class,
-    String.class};
-
-  public Class[] getSerializableClasses()
-  {
-    return _serializableClasses;
-  }
+  /**
+   * Classes that this can serialise to.
+   */
+  private static Class[] _JSONClasses = new Class[] { Boolean.class,
+      String.class };
 
   public Class[] getJSONClasses()
   {
     return _JSONClasses;
   }
 
+  public Class[] getSerializableClasses()
+  {
+    return _serializableClasses;
+  }
+
+  public Object marshall(SerializerState state, Object o)
+      throws MarshallException
+  {
+    return o;
+  }
+
   public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
-                                   Object jso) throws UnmarshallException
+      Object jso) throws UnmarshallException
   {
     return ObjectMatch.OKAY;
   }
 
   public Object unmarshall(SerializerState state, Class clazz, Object jso)
-    throws UnmarshallException
+      throws UnmarshallException
   {
     if (jso instanceof String)
     {
@@ -69,24 +89,16 @@ public class BooleanSerializer extends AbstractSerializer
       }
       catch (Exception e)
       {
-        throw new UnmarshallException("Cannot convert " + jso
-          + " to Boolean");
+        throw new UnmarshallException("Cannot convert " + jso + " to Boolean");
       }
     }
     if (clazz == boolean.class)
     {
       return new Boolean(((Boolean) jso).booleanValue());
     }
-    else
-    {
-      return jso;
-    }
-  }
 
-  public Object marshall(SerializerState state, Object o)
-    throws MarshallException
-  {
-    return o;
+    return jso;
+
   }
 
 }

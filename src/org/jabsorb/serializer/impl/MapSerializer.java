@@ -40,18 +40,36 @@ import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
 
+/**
+ * Serialises Maps
+ * 
+ * TODO: if this serialises a superclass does it need to also specify the
+ * subclasses?
+ */
 public class MapSerializer extends AbstractSerializer
 {
+  /**
+   * Unique serialisation id.
+   * 
+   * TODO: should this number be generated?
+   */
   private final static long serialVersionUID = 2;
 
-  private static Class[] _serializableClasses = new Class[]{Map.class,
-    HashMap.class, TreeMap.class, LinkedHashMap.class};
+  /**
+   * Classes that this can serialise.
+   */
+  private static Class[] _serializableClasses = new Class[] { Map.class,
+      HashMap.class, TreeMap.class, LinkedHashMap.class };
 
-  private static Class[] _JSONClasses = new Class[]{JSONObject.class};
+  /**
+   * Classes that this can serialise to.
+   */
+  private static Class[] _JSONClasses = new Class[] { JSONObject.class };
 
-  public Class[] getSerializableClasses()
+  public boolean canSerialize(Class clazz, Class jsonClazz)
   {
-    return _serializableClasses;
+    return (super.canSerialize(clazz, jsonClazz) || ((jsonClazz == null || jsonClazz == JSONObject.class) && Map.class
+        .isAssignableFrom(clazz)));
   }
 
   public Class[] getJSONClasses()
@@ -59,15 +77,45 @@ public class MapSerializer extends AbstractSerializer
     return _JSONClasses;
   }
 
-  public boolean canSerialize(Class clazz, Class jsonClazz)
+  public Class[] getSerializableClasses()
   {
-    return (super.canSerialize(clazz, jsonClazz) ||
-      ((jsonClazz == null || jsonClazz == JSONObject.class) &&
-        Map.class.isAssignableFrom(clazz)));
+    return _serializableClasses;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
-                                   Object o) throws UnmarshallException
+  public Object marshall(SerializerState state, Object o)
+      throws MarshallException
+  {
+    Map map = (Map) o;
+    JSONObject obj = new JSONObject();
+    JSONObject mapdata = new JSONObject();
+    if (ser.getMarshallClassHints())
+    {
+      obj.put("javaClass", o.getClass().getName());
+    }
+    obj.put("map", mapdata);
+    Object key = null;
+    Object val = null;
+    try
+    {
+      Iterator i = map.entrySet().iterator();
+      while (i.hasNext())
+      {
+        Map.Entry ent = (Map.Entry) i.next();
+        key = ent.getKey();
+        val = ent.getValue();
+        // only support String keys
+        mapdata.put(key.toString(), ser.marshall(state, val));
+      }
+    }
+    catch (MarshallException e)
+    {
+      throw new MarshallException("map key " + key + " " + e.getMessage());
+    }
+    return obj;
+  }
+
+  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object o)
+      throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
     String java_class = jso.getString("javaClass");
@@ -76,10 +124,10 @@ public class MapSerializer extends AbstractSerializer
       throw new UnmarshallException("no type hint");
     }
     if (!(java_class.equals("java.util.Map")
-      || java_class.equals("java.util.AbstractMap")
-      || java_class.equals("java.util.LinkedHashMap")
-      || java_class.equals("java.util.TreeMap") || java_class
-      .equals("java.util.HashMap")))
+        || java_class.equals("java.util.AbstractMap")
+        || java_class.equals("java.util.LinkedHashMap")
+        || java_class.equals("java.util.TreeMap") || java_class
+        .equals("java.util.HashMap")))
     {
       throw new UnmarshallException("not a Map");
     }
@@ -107,7 +155,7 @@ public class MapSerializer extends AbstractSerializer
   }
 
   public Object unmarshall(SerializerState state, Class clazz, Object o)
-    throws UnmarshallException
+      throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
     String java_class = jso.getString("javaClass");
@@ -117,8 +165,8 @@ public class MapSerializer extends AbstractSerializer
     }
     AbstractMap abmap = null;
     if (java_class.equals("java.util.Map")
-      || java_class.equals("java.util.AbstractMap")
-      || java_class.equals("java.util.HashMap"))
+        || java_class.equals("java.util.AbstractMap")
+        || java_class.equals("java.util.HashMap"))
     {
       abmap = new HashMap();
     }
@@ -154,38 +202,6 @@ public class MapSerializer extends AbstractSerializer
       throw new UnmarshallException("key " + key + " " + e.getMessage());
     }
     return abmap;
-  }
-
-  public Object marshall(SerializerState state, Object o)
-    throws MarshallException
-  {
-    Map map = (Map) o;
-    JSONObject obj = new JSONObject();
-    JSONObject mapdata = new JSONObject();
-    if (ser.getMarshallClassHints())
-    {
-      obj.put("javaClass", o.getClass().getName());
-    }
-    obj.put("map", mapdata);
-    Object key = null;
-    Object val = null;
-    try
-    {
-      Iterator i = map.entrySet().iterator();
-      while (i.hasNext())
-      {
-        Map.Entry ent = (Map.Entry) i.next();
-        key = ent.getKey();
-        val = ent.getValue();
-        // only support String keys
-        mapdata.put(key.toString(), ser.marshall(state, val));
-      }
-    }
-    catch (MarshallException e)
-    {
-      throw new MarshallException("map key " + key + " " + e.getMessage());
-    }
-    return obj;
   }
 
 }

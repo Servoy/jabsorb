@@ -33,40 +33,54 @@ import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
 
+/**
+ * Formats the Java JSONObject object.
+ */
 public class RawJSONObjectSerializer extends AbstractSerializer
 {
+  /**
+   * Unique serialisation id.
+   * 
+   * TODO: should this number be generated?
+   */
   private final static long serialVersionUID = 2;
 
-  private static Class[] _serializableClasses = new Class[]{JSONObject.class};
+  /**
+   * Classes that this can serialise.
+   */
+  private static Class[] _serializableClasses = new Class[] { JSONObject.class };
 
-  private static Class[] _JSONClasses = new Class[]{JSONObject.class};
-
-  public Class[] getSerializableClasses()
-  {
-    return _serializableClasses;
-  }
+  /**
+   * Classes that this can serialise to.
+   */
+  private static Class[] _JSONClasses = new Class[] { JSONObject.class };
 
   public Class[] getJSONClasses()
   {
     return _JSONClasses;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
-                                   Object jso) throws UnmarshallException
+  public Class[] getSerializableClasses()
+  {
+    return _serializableClasses;
+  }
+
+  public Object marshall(SerializerState state, Object o)
+      throws MarshallException
+  {
+    return o;
+  }
+
+  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object jso)
+      throws UnmarshallException
   {
     return ObjectMatch.OKAY;
   }
 
   public Object unmarshall(SerializerState state, Class clazz, Object jso)
-    throws UnmarshallException
+      throws UnmarshallException
   {
     return jso;
-  }
-
-  public Object marshall(SerializerState state, Object o)
-    throws MarshallException
-  {
-    return o;
   }
 
 }
