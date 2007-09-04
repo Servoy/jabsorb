@@ -46,10 +46,8 @@ public class MethodKey
    * Create a MethodKey for a given method name and the number of arguments that
    * that method takes.
    * 
-   * @param methodName
-   *          method name.
-   * @param numArgs
-   *          number of arguments the method takes.
+   * @param methodName Method name.
+   * @param numArgs The number of arguments the method takes.
    */
   public MethodKey(String methodName, int numArgs)
   {

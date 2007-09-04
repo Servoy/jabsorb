@@ -68,8 +68,7 @@ public class JSONArray
   /**
    * Construct a JSONArray from a Collection.
    * 
-   * @param collection
-   *          A Collection.
+   * @param collection A Collection.
    */
   public JSONArray(Collection collection)
   {
@@ -79,13 +78,10 @@ public class JSONArray
   /**
    * Construct a JSONArray from a JSONTokener.
    * 
-   * @param x
-   *          A JSONTokener
+   * @param x A JSONTokener
    * 
-   * @throws ParseException
-   *           A JSONArray must start with '['
-   * @throws ParseException
-   *           Expected a ',' or ']'
+   * @throws ParseException A JSONArray must start with '['
+   * @throws ParseException Expected a ',' or ']'
    */
   public JSONArray(JSONTokener x) throws ParseException
   {
@@ -122,11 +118,9 @@ public class JSONArray
   /**
    * Construct a JSONArray from a source string.
    * 
-   * @param string
-   *          A string that begins with '[' and ends with ']'.
+   * @param string A string that begins with '[' and ends with ']'.
    * 
-   * @throws ParseException
-   *           The string must conform to JSON syntax.
+   * @throws ParseException The string must conform to JSON syntax.
    */
   public JSONArray(String string) throws ParseException
   {
@@ -136,12 +130,11 @@ public class JSONArray
   /**
    * Get the object value associated with an index.
    * 
-   * @param index
-   *          subscript The index must be between 0 and length() - 1.
+   * @param index subscript The index must be between 0 and length() - 1.
    * 
    * @return An object value.
-   * @throws NoSuchElementException
-   *           If an element at the given index is not found
+   * @throws NoSuchElementException If an element at the given index is not
+   *           found
    */
   public Object get(int index) throws NoSuchElementException
   {
@@ -157,15 +150,13 @@ public class JSONArray
    * Get the boolean value associated with an index. The string values "true"
    * and "false" are converted to boolean.
    * 
-   * @param index
-   *          subscript
+   * @param index subscript
    * 
    * @return The truth.
    * 
-   * @throws ClassCastException
-   *           If the class of the element at index is not boolean
-   * @throws NoSuchElementException
-   *           if the index is not found
+   * @throws ClassCastException If the class of the element at index is not
+   *           boolean
+   * @throws NoSuchElementException if the index is not found
    */
   public boolean getBoolean(int index) throws ClassCastException,
       NoSuchElementException
@@ -185,15 +176,12 @@ public class JSONArray
   /**
    * Get the double value associated with an index.
    * 
-   * @param index
-   *          subscript
+   * @param index subscript
    * 
    * @return The value.
    * 
-   * @throws NoSuchElementException
-   *           if the key is not found
-   * @throws NumberFormatException
-   *           if the value cannot be converted to a number.
+   * @throws NoSuchElementException if the key is not found
+   * @throws NumberFormatException if the value cannot be converted to a number.
    */
   public double getDouble(int index) throws NoSuchElementException,
       NumberFormatException
@@ -214,15 +202,12 @@ public class JSONArray
   /**
    * Get the int value associated with an index.
    * 
-   * @param index
-   *          subscript
+   * @param index subscript
    * 
    * @return The value.
    * 
-   * @throws NoSuchElementException
-   *           if the key is not found
-   * @throws NumberFormatException
-   *           if the value cannot be converted to a number.
+   * @throws NoSuchElementException if the key is not found
+   * @throws NumberFormatException if the value cannot be converted to a number.
    */
   public int getInt(int index) throws NoSuchElementException,
       NumberFormatException
@@ -238,13 +223,12 @@ public class JSONArray
   /**
    * Get the JSONArray associated with an index.
    * 
-   * @param index
-   *          subscript
+   * @param index subscript
    * 
    * @return A JSONArray value.
    * 
-   * @throws NoSuchElementException
-   *           if the index is not found or if the value is not a JSONArray
+   * @throws NoSuchElementException if the index is not found or if the value is
+   *           not a JSONArray
    */
   public JSONArray getJSONArray(int index) throws NoSuchElementException
   {
@@ -260,13 +244,12 @@ public class JSONArray
   /**
    * Get the JSONObject associated with an index.
    * 
-   * @param index
-   *          subscript
+   * @param index subscript
    * 
    * @return A JSONObject value.
    * 
-   * @throws NoSuchElementException
-   *           if the index is not found or if the value is not a JSONObject
+   * @throws NoSuchElementException If the index is not found or if the value is
+   *           not a JSONObject
    */
   public JSONObject getJSONObject(int index) throws NoSuchElementException
   {
@@ -282,12 +265,10 @@ public class JSONArray
   /**
    * Get the string associated with an index.
    * 
-   * @param index
-   *          subscript
+   * @param index subscript
    * 
    * @return A string value.
-   * @throws NoSuchElementException
-   *           if the index is not found
+   * @throws NoSuchElementException if the index is not found
    */
   public String getString(int index) throws NoSuchElementException
   {
@@ -297,8 +278,7 @@ public class JSONArray
   /**
    * Determine if the value is null.
    * 
-   * @param index
-   *          subscript
+   * @param index subscript
    * 
    * @return true if the value at the index is null, or if there is no value.
    */
@@ -313,8 +293,7 @@ public class JSONArray
    * inserted between each element. Warning: This method assumes that the data
    * structure is acyclical.
    * 
-   * @param separator
-   *          A string that will be inserted between the elements.
+   * @param separator A string that will be inserted between the elements.
    * 
    * @return a string.
    */
@@ -363,8 +342,7 @@ public class JSONArray
   /**
    * Get the optional object value associated with an index.
    * 
-   * @param index
-   *          subscript
+   * @param index subscript
    * 
    * @return An object value, or null if there is no object at that index.
    */
@@ -382,8 +360,7 @@ public class JSONArray
    * if there is no value at that index, or if the value is not Boolean.TRUE or
    * the String "true".
    * 
-   * @param index
-   *          subscript
+   * @param index subscript
    * 
    * @return The truth.
    */
@@ -397,10 +374,8 @@ public class JSONArray
    * defaultValue if there is no value at that index or if it is not a Boolean
    * or the String "true" or "false".
    * 
-   * @param index
-   *          subscript
-   * @param defaultValue
-   *          A boolean default.
+   * @param index subscript
+   * @param defaultValue A boolean default.
    * 
    * @return The truth.
    */
@@ -426,8 +401,7 @@ public class JSONArray
    * the index is not found, or if the value is not a number and cannot be
    * converted to a number.
    * 
-   * @param index
-   *          subscript
+   * @param index subscript
    * 
    * @return The value.
    */
@@ -441,10 +415,8 @@ public class JSONArray
    * returned if the index is not found, or if the value is not a number and
    * cannot be converted to a number.
    * 
-   * @param index
-   *          subscript
-   * @param defaultValue
-   *          The default value.
+   * @param index subscript
+   * @param defaultValue The default value.
    * 
    * @return The value.
    */
@@ -474,8 +446,7 @@ public class JSONArray
    * the index is not found, or if the value is not a number and cannot be
    * converted to a number.
    * 
-   * @param index
-   *          subscript
+   * @param index subscript
    * 
    * @return The value.
    */
@@ -489,10 +460,8 @@ public class JSONArray
    * returned if the index is not found, or if the value is not a number and
    * cannot be converted to a number.
    * 
-   * @param index
-   *          subscript
-   * @param defaultValue
-   *          The default value.
+   * @param index subscript
+   * @param defaultValue The default value.
    * 
    * @return The value.
    */
@@ -520,8 +489,7 @@ public class JSONArray
   /**
    * Get the optional JSONArray associated with an index.
    * 
-   * @param index
-   *          subscript
+   * @param index subscript
    * 
    * @return A JSONArray value, or null if the index has no value, or if the
    *         value is not a JSONArray.
@@ -541,8 +509,7 @@ public class JSONArray
    * the key is not found, or null if the index has no value, or if the value is
    * not a JSONObject.
    * 
-   * @param index
-   *          subscript
+   * @param index subscript
    * 
    * @return A JSONObject value.
    */
@@ -561,8 +528,7 @@ public class JSONArray
    * string if there is no value at that index. If the value is not a string and
    * is not null, then it is coverted to a string.
    * 
-   * @param index
-   *          subscript
+   * @param index subscript
    * 
    * @return A String value.
    */
@@ -575,10 +541,8 @@ public class JSONArray
    * Get the optional string associated with an index. The defaultValue is
    * returned if the key is not found.
    * 
-   * @param index
-   *          subscript
-   * @param defaultValue
-   *          The default value.
+   * @param index subscript
+   * @param defaultValue The default value.
    * 
    * @return A String value.
    */
@@ -595,8 +559,7 @@ public class JSONArray
   /**
    * Append a boolean value.
    * 
-   * @param value
-   *          A boolean value.
+   * @param value A boolean value.
    * 
    * @return this.
    */
@@ -609,8 +572,7 @@ public class JSONArray
   /**
    * Append a double value.
    * 
-   * @param value
-   *          A double value.
+   * @param value A double value.
    * 
    * @return this.
    */
@@ -623,8 +585,7 @@ public class JSONArray
   /**
    * Append an int value.
    * 
-   * @param value
-   *          An int value.
+   * @param value An int value.
    * 
    * @return this.
    */
@@ -637,17 +598,14 @@ public class JSONArray
   /**
    * Put or replace a boolean value in the JSONArray.
    * 
-   * @param index
-   *          subscript The subscript. If the index is greater than the length
-   *          of the JSONArray, then null elements will be added as necessary to
-   *          pad it out.
-   * @param value
-   *          A boolean value.
+   * @param index subscript The subscript. If the index is greater than the
+   *          length of the JSONArray, then null elements will be added as
+   *          necessary to pad it out.
+   * @param value A boolean value.
    * 
    * @return this.
    * 
-   * @throws NoSuchElementException
-   *           The index must not be negative.
+   * @throws NoSuchElementException The index must not be negative.
    */
   public JSONArray put(int index, boolean value)
   {
@@ -658,15 +616,12 @@ public class JSONArray
   /**
    * Put or replace a double value.
    * 
-   * @param index
-   *          subscript The subscript. If the index is greater than the length
-   *          of the JSONArray, then null elements will be added as necessary to
-   *          pad it out.
-   * @param value
-   *          A double value. return this.
+   * @param index subscript The subscript. If the index is greater than the
+   *          length of the JSONArray, then null elements will be added as
+   *          necessary to pad it out.
+   * @param value A double value. return this.
    * 
-   * @throws NoSuchElementException
-   *           The index must not be negative.
+   * @throws NoSuchElementException The index must not be negative.
    * @return this.
    */
   public JSONArray put(int index, double value)
@@ -678,17 +633,14 @@ public class JSONArray
   /**
    * Put or replace an int value.
    * 
-   * @param index
-   *          subscript The subscript. If the index is greater than the length
-   *          of the JSONArray, then null elements will be added as necessary to
-   *          pad it out.
-   * @param value
-   *          An int value.
+   * @param index subscript The subscript. If the index is greater than the
+   *          length of the JSONArray, then null elements will be added as
+   *          necessary to pad it out.
+   * @param value An int value.
    * 
    * @return this.
    * 
-   * @throws NoSuchElementException
-   *           The index must not be negative.
+   * @throws NoSuchElementException The index must not be negative.
    */
   public JSONArray put(int index, int value)
   {
@@ -699,17 +651,13 @@ public class JSONArray
   /**
    * Put or replace an object value in the JSONArray.
    * 
-   * @param index
-   *          The subscript. If the index is greater than the length of the
+   * @param index The subscript. If the index is greater than the length of the
    *          JSONArray, then null elements will be added as necessary to pad it
    *          out.
-   * @param value
-   *          An object value. return this.
+   * @param value An object value. return this.
    * @return this.
-   * @throws NoSuchElementException
-   *           The index must not be negative.
-   * @throws NullPointerException
-   *           if value is null
+   * @throws NoSuchElementException The index must not be negative.
+   * @throws NullPointerException if value is null
    */
   public JSONArray put(int index, Object value) throws NoSuchElementException,
       NullPointerException
@@ -740,9 +688,9 @@ public class JSONArray
   /**
    * Append an object value.
    * 
-   * @param value
-   *          An object value. The value should be a Boolean, Double, Integer,
-   *          JSONArray, JSObject, or String, or the JSONObject.NULL object.
+   * @param value An object value. The value should be a Boolean, Double,
+   *          Integer, JSONArray, JSObject, or String, or the JSONObject.NULL
+   *          object.
    * 
    * @return this.
    */
@@ -756,9 +704,8 @@ public class JSONArray
    * Produce a JSONObject by combining a JSONArray of names with the values of
    * this JSONArray.
    * 
-   * @param names
-   *          A JSONArray containing a list of key strings. These will be paired
-   *          with the values.
+   * @param names A JSONArray containing a list of key strings. These will be
+   *          paired with the values.
    * 
    * @return A JSONObject, or null if there are no names or if this JSONArray
    *         has no values.
@@ -794,8 +741,8 @@ public class JSONArray
    * Make a prettyprinted JSON string of this JSONArray. Warning: This method
    * assumes that the data structure is non-cyclical.
    * 
-   * @param indentFactor
-   *          The number of spaces to add to each level of indentation.
+   * @param indentFactor The number of spaces to add to each level of
+   *          indentation.
    * 
    * @return a printable, displayable, transmittable representation of the
    *         object, beginning with '[' and ending with ']'.
@@ -823,10 +770,9 @@ public class JSONArray
    * 
    * TODO: should this have public visibility?
    * 
-   * @param indentFactor
-   *          The number of spaces to add to each level of indentation.
-   * @param indent
-   *          The indention of the top level.
+   * @param indentFactor The number of spaces to add to each level of
+   *          indentation.
+   * @param indent The indention of the top level.
    * 
    * @return a printable, displayable, transmittable representation of the
    *         array.

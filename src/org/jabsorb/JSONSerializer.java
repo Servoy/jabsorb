@@ -67,8 +67,6 @@ public class JSONSerializer implements Serializable
 {
   /**
    * Unique serialisation id.
-   * 
-   * TODO: should this number be generated?
    */
   private final static long serialVersionUID = 2;
 
@@ -115,12 +113,10 @@ public class JSONSerializer implements Serializable
   /**
    * Convert a string in JSON format into Java objects.
    * 
-   * @param jsonString
-   *          the JSON format string.
-   * @return an object (or tree of objects) representing the data in the JSON
+   * @param jsonString The JSON format string.
+   * @return An object (or tree of objects) representing the data in the JSON
    *         format string.
-   * @throws UnmarshallException
-   *           If unmarshalling fails
+   * @throws UnmarshallException If unmarshalling fails
    */
   public Object fromJSON(String jsonString) throws UnmarshallException
   {
@@ -183,15 +179,12 @@ public class JSONSerializer implements Serializable
    * into json. <p/> The Serializer will invoke this method recursively while
    * marshalling complex object graphs.
    * 
-   * @param state
-   *          can be used by the underlying Serializer objects to hold state
+   * @param state can be used by the underlying Serializer objects to hold state
    *          while marshalling.
-   * @param o
-   *          java object to convert into json.
+   * @param o java object to convert into json.
    * @return the JSONObject or JSONArray containing the json for the marshalled
    *         java object.
-   * @throws MarshallException
-   *           if there is a problem marshalling java to json.
+   * @throws MarshallException if there is a problem marshalling java to json.
    */
   public Object marshall(SerializerState state, Object o)
       throws MarshallException
@@ -219,8 +212,7 @@ public class JSONSerializer implements Serializable
   /**
    * Register all of the provided standard serializers.
    * 
-   * @throws Exception
-   *           If a serialiser has already been registered for a class.
+   * @throws Exception If a serialiser has already been registered for a class.
    * 
    * TODO: Should this be thrown: This can only happen if there is an internal
    * problem with the code
@@ -258,12 +250,10 @@ public class JSONSerializer implements Serializable
    * serializer, if it can't find the serializer by a direct match, it will
    * search for a serializer in the reverse order that they were registered.
    * 
-   * @param s
-   *          A class implementing the Serializer interface (usually derived
+   * @param s A class implementing the Serializer interface (usually derived
    *          from AbstractSerializer).
    * 
-   * @throws Exception
-   *           If a serialiser has already been registered for a class.
+   * @throws Exception If a serialiser has already been registered for a class.
    */
   public void registerSerializer(Serializer s) throws Exception
   {
@@ -304,8 +294,7 @@ public class JSONSerializer implements Serializable
   /**
    * Enable or disable debugging message from this serializer instance.
    * 
-   * @param debug
-   *          flag to enable or disable debugging messages
+   * @param debug flag to enable or disable debugging messages
    */
   public void setDebug(boolean debug)
   {
@@ -318,9 +307,8 @@ public class JSONSerializer implements Serializable
    * though if not needed can be left out in favor of increased performance and
    * smaller size of marshalled String. Default is true.
    * 
-   * @param marshallClassHints
-   *          flag to enable/disable inclusion of Java class hints in the
-   *          serialized JSON objects
+   * @param marshallClassHints flag to enable/disable inclusion of Java class
+   *          hints in the serialized JSON objects
    */
   public void setMarshallClassHints(boolean marshallClassHints)
   {
@@ -333,9 +321,8 @@ public class JSONSerializer implements Serializable
    * gains and small JSON serialized size. Useful because null and undefined for
    * JSON object attributes is virtually the same thing.
    * 
-   * @param marshallNullAttributes
-   *          flag to enable/disable marshalling of null attributes in the
-   *          serialized JSON objects
+   * @param marshallNullAttributes flag to enable/disable marshalling of null
+   *          attributes in the serialized JSON objects
    */
   public void setMarshallNullAttributes(boolean marshallNullAttributes)
   {
@@ -346,12 +333,10 @@ public class JSONSerializer implements Serializable
    * Convert a Java objects (or tree of Java objects) into a string in JSON
    * format
    * 
-   * @param obj
-   *          the object to be converted to JSON.
+   * @param obj the object to be converted to JSON.
    * @return the JSON format string representing the data in the the Java
    *         object.
-   * @throws MarshallException
-   *           If marshalling fails
+   * @throws MarshallException If marshalling fails
    */
   public String toJSON(Object obj) throws MarshallException
   {
@@ -363,15 +348,11 @@ public class JSONSerializer implements Serializable
   /**
    * Attempts to unmarshal an javascript object
    * 
-   * @param state
-   *          The state of the serialiser
-   * @param clazz
-   *          The class to unmarshall it to.
-   * @param json
-   *          The object to unmarsahl
+   * @param state The state of the serialiser
+   * @param clazz The class to unmarshall it to.
+   * @param json The object to unmarsahl
    * @return Whether the object matched the class
-   * @throws UnmarshallException
-   *           if getClassFromHint() fails
+   * @throws UnmarshallException if getClassFromHint() fails
    */
   public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
       Object json) throws UnmarshallException
@@ -420,17 +401,14 @@ public class JSONSerializer implements Serializable
    * unmarshall for us. This method will be invoked recursively as Serializers
    * unmarshall complex object graphs.
    * 
-   * @param state
-   *          can be used by the underlying Serializer objects to hold state
+   * @param state can be used by the underlying Serializer objects to hold state
    *          while unmarshalling.
-   * @param clazz
-   *          optional java class to unmarshall to- if set to null then it will
-   *          be looked for via the javaClass hinting mechanism.
-   * @param json
-   *          JSONObject or JSONArray that contains the json to unmarshall.
+   * @param clazz optional java class to unmarshall to- if set to null then it
+   *          will be looked for via the javaClass hinting mechanism.
+   * @param json JSONObject or JSONArray that contains the json to unmarshall.
    * @return the java object representing the json that was unmarshalled.
-   * @throws UnmarshallException
-   *           if there is a problem unmarshalling json to java.
+   * @throws UnmarshallException if there is a problem unmarshalling json to
+   *           java.
    */
   public Object unmarshall(SerializerState state, Class clazz, Object json)
       throws UnmarshallException
@@ -484,18 +462,16 @@ public class JSONSerializer implements Serializable
    * directly. (this implies a primitive type, such as String, Integer or
    * Boolean)
    * 
-   * @param o
-   *          a JSONObject or JSONArray object to get the Class type from the
+   * @param o a JSONObject or JSONArray object to get the Class type from the
    *          javaClass hint.
    * @return the Class of javaClass hint found, or null if the passed in Object
    *         is null, or the Class of the Object passed in, if that object is
    *         not a JSONArray or JSONObject.
-   * @throws UnmarshallException
-   *           if javaClass hint was not found (except for null case or
-   *           primitive object case), or the javaClass hint is not a valid java
-   *           class. <p/> todo: the name of this method is a bit misleading
-   *           because it doesn't actually get the class from todo: the
-   *           javaClass hint if the type of Object passed in is not
+   * @throws UnmarshallException if javaClass hint was not found (except for
+   *           null case or primitive object case), or the javaClass hint is not
+   *           a valid java class. <p/> todo: the name of this method is a bit
+   *           misleading because it doesn't actually get the class from todo:
+   *           the javaClass hint if the type of Object passed in is not
    *           JSONObject|JSONArray.
    */
   private Class getClassFromHint(Object o) throws UnmarshallException
@@ -549,11 +525,10 @@ public class JSONSerializer implements Serializable
   /**
    * Find the serializer for the given Java type and/or JSON type.
    * 
-   * @param clazz
-   *          The Java class to lookup.
-   * @param jsoClazz
-   *          The JSON class type to lookup (may be null in the marshalling case
-   *          in which case only the class is used to lookup the serializer).
+   * @param clazz The Java class to lookup.
+   * @param jsoClazz The JSON class type to lookup (may be null in the
+   *          marshalling case in which case only the class is used to lookup
+   *          the serializer).
    * @return The found Serializer for the types specified or null if none could
    *         be found.
    */
@@ -600,12 +575,10 @@ public class JSONSerializer implements Serializable
    * 
    * TODO: This is not used!
    * 
-   * @param in
-   *          The stream to take an object to serialise
-   * @throws java.io.IOException
-   *           if the object can't be read from the stream
-   * @throws ClassNotFoundException
-   *           If a class cannot be found for the object to be read
+   * @param in The stream to take an object to serialise
+   * @throws java.io.IOException if the object can't be read from the stream
+   * @throws ClassNotFoundException If a class cannot be found for the object to
+   *           be read
    */
   private void readObject(java.io.ObjectInputStream in)
       throws java.io.IOException, ClassNotFoundException

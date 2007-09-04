@@ -38,8 +38,7 @@ public interface ExceptionTransformer extends Serializable
    * Transform the exception to the format desired for transport to the client.
    * This method should not itself throw an exception.
    * 
-   * @param t
-   *          The exception to be transformed
+   * @param t The exception to be transformed
    * @return one of the JSON-compatible types (JSONObject, String, Boolean
    *         etc.), or a Throwable
    */

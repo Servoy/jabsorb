@@ -45,9 +45,6 @@ public class ClassAnalyzer
 {
   /**
    * The logger for this class
-   * 
-   * TODO: should logging happen only when debug mode is set (need to add debug
-   * mode as well). If so we can get rid of this object.
    */
   private final static Logger log = LoggerFactory
       .getLogger(ClassAnalyzer.class);
@@ -60,13 +57,17 @@ public class ClassAnalyzer
   private static HashMap classCache = new HashMap();
 
   /**
+   * <p>
    * Get ClassData containing information on public methods that can be invoked
-   * for a given class. <p/> The ClassData will be cached, and multiple calls to
-   * getClassData for the same class will return the same cached ClassData
-   * object (unless invalidateCache is called to clear the cache.)
+   * for a given class.
+   * </p>
+   * <p>
+   * The ClassData will be cached, and multiple calls to getClassData for the
+   * same class will return the same cached ClassData object (unless
+   * invalidateCache is called to clear the cache.)
+   * </p>
    * 
-   * @param clazz
-   *          class to get ClassData for.
+   * @param clazz class to get ClassData for.
    * 
    * @return ClassData object for the given class.
    */
@@ -97,8 +98,7 @@ public class ClassAnalyzer
    * Analyze a class and create a ClassData object containing all of the public
    * methods (both static and non-static) in the class.
    * 
-   * @param clazz
-   *          class to be analyzed.
+   * @param clazz class to be analyzed.
    * 
    * @return a ClassData object containing all the public static and non-static
    *         methods that can be invoked on the class.

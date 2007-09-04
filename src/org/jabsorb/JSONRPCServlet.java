@@ -100,8 +100,6 @@ public class JSONRPCServlet extends HttpServlet
 {
   /**
    * Unique serialisation id.
-   * 
-   * TODO: should this number be generated?
    */
   private final static long serialVersionUID = 2;
 
@@ -188,8 +186,7 @@ public class JSONRPCServlet extends HttpServlet
   /**
    * Find the JSONRPCBridge from the servlet request.
    * 
-   * @param request
-   *          The message received
+   * @param request The message received
    * @return the JSONRPCBridge to use for this request
    */
   protected JSONRPCBridge findBridge(HttpServletRequest request)

@@ -43,8 +43,6 @@ public class JSONRPCBridgeState implements Serializable
 {
   /**
    * Unique serialisation id.
-   * 
-   * TODO: should this number be generated?
    */
   private final static long serialVersionUID = 2;
 
@@ -92,8 +90,7 @@ public class JSONRPCBridgeState implements Serializable
   /**
    * Creates a new JSONRPCBridgeState
    * 
-   * @param bridge
-   *          The bridge this state is for
+   * @param bridge The bridge this state is for
    */
   public JSONRPCBridgeState(JSONRPCBridge bridge)
   {
@@ -113,8 +110,7 @@ public class JSONRPCBridgeState implements Serializable
   /**
    * Sets the internal callable reference set.
    * 
-   * @param callableReferenceSet
-   *          the set to set.
+   * @param callableReferenceSet the set to set.
    * 
    * TODO: Is this really good coding practice?
    */
@@ -136,8 +132,7 @@ public class JSONRPCBridgeState implements Serializable
   /**
    * Sets the class map
    * 
-   * @param classMap
-   *          The class map to set.
+   * @param classMap The class map to set.
    * 
    * TODO: Again, dodgy coding practice!
    */
@@ -159,8 +154,7 @@ public class JSONRPCBridgeState implements Serializable
   /**
    * Sets the object map
    * 
-   * @param objectMap
-   *          The object map to set.
+   * @param objectMap The object map to set.
    * 
    * TODO: Again, dodgy coding practice!
    */
@@ -182,8 +176,7 @@ public class JSONRPCBridgeState implements Serializable
   /**
    * Sets the reference map
    * 
-   * @param referenceMap
-   *          The reference map to set.
+   * @param referenceMap The reference map to set.
    * 
    * TODO: Again, dodgy coding practice!
    */
@@ -205,8 +198,7 @@ public class JSONRPCBridgeState implements Serializable
   /**
    * Sets the reference serialiser
    * 
-   * @param referenceSerializer
-   *          The referenceSerialiser to set.
+   * @param referenceSerializer The referenceSerialiser to set.
    * 
    * TODO: Again, dodgy coding practice!
    */
@@ -228,8 +220,7 @@ public class JSONRPCBridgeState implements Serializable
   /**
    * Sets the referenceset
    * 
-   * @param referenceSet
-   *          The reference set to set
+   * @param referenceSet The reference set to set
    * 
    * TODO: Again, dodgy coding practice!
    */
@@ -239,8 +230,10 @@ public class JSONRPCBridgeState implements Serializable
   }
 
   /**
+   * Allows references to be used on the bridge
    * 
-   * @throws Exception
+   * @throws Exception If a serialiser has already been registered for
+   *           CallableReferences
    */
   public synchronized void enableReferences() throws Exception
   {

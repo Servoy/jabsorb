@@ -94,16 +94,11 @@ public class BeanSerializer extends AbstractSerializer
 
   /**
    * Unique serialisation id.
-   * 
-   * TODO: should this number be generated?
    */
   private final static long serialVersionUID = 2;
 
   /**
    * The logger for this class
-   * 
-   * TODO: should logging happen only when debug mode is set (need to add debug
-   * mode as well). If so we can get rid of this object.
    */
   private final static Logger log = LoggerFactory
       .getLogger(BeanSerializer.class);
@@ -130,11 +125,10 @@ public class BeanSerializer extends AbstractSerializer
   /**
    * Analyses a bean, returning a BeanData with the data extracted from it.
    * 
-   * @param clazz
-   *          The class of the bean to analyse
+   * @param clazz The class of the bean to analyse
    * @return A populated BeanData
-   * @throws IntrospectionException
-   *           If a problem occurs during getting the bean info.
+   * @throws IntrospectionException If a problem occurs during getting the bean
+   *           info.
    */
   public static BeanData analyzeBean(Class clazz) throws IntrospectionException
   {
@@ -161,11 +155,10 @@ public class BeanSerializer extends AbstractSerializer
   /**
    * Gets the bean data from cache if possible, otherwise analyses the bean.
    * 
-   * @param clazz
-   *          The class of the bean to analyse
+   * @param clazz The class of the bean to analyse
    * @return A populated BeanData
-   * @throws IntrospectionException
-   *           If a problem occurs during getting the bean info.
+   * @throws IntrospectionException If a problem occurs during getting the bean
+   *           info.
    */
   public static BeanData getBeanData(Class clazz) throws IntrospectionException
   {

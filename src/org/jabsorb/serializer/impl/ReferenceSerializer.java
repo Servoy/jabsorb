@@ -44,16 +44,11 @@ public class ReferenceSerializer extends AbstractSerializer
 {
   /**
    * Unique serialisation id.
-   * 
-   * TODO: should this number be generated?
    */
   private final static long serialVersionUID = 2;
 
   /**
    * The logger for this class
-   * 
-   * TODO: should logging happen only when debug mode is set (need to add debug
-   * mode as well). If so we can get rid of this object.
    */
   private final static Logger log = LoggerFactory
       .getLogger(ReferenceSerializer.class);
@@ -76,8 +71,7 @@ public class ReferenceSerializer extends AbstractSerializer
   /**
    * Creates a new ReferenceSerializer
    * 
-   * @param bridge
-   *          The bridge to determine if a class is a reference.
+   * @param bridge The bridge to determine if a class is a reference.
    * 
    * TODO: Should reference detection be abstracted out into another class?
    */

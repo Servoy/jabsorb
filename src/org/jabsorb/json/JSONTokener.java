@@ -25,8 +25,7 @@ public class JSONTokener
   /**
    * Get the hex value of a character (base16).
    * 
-   * @param c
-   *          A character between '0' and '9' or between 'A' and 'F' or between
+   * @param c A character between '0' and '9' or between 'A' and 'F' or between
    *          'a' and 'f'.
    * 
    * @return An int between 0 and 15, or -1 if c was not a hex digit.
@@ -51,8 +50,7 @@ public class JSONTokener
   /**
    * Convert %hh sequences to single characters, and convert plus to space.
    * 
-   * @param s
-   *          A string that may contain plus and %hh sequences.
+   * @param s A string that may contain plus and %hh sequences.
    * 
    * @return The unescaped string.
    */
@@ -95,8 +93,7 @@ public class JSONTokener
   /**
    * Construct a JSONTokener from a string.
    * 
-   * @param s
-   *          A source string.
+   * @param s A source string.
    */
   public JSONTokener(String s)
   {
@@ -144,13 +141,11 @@ public class JSONTokener
    * Consume the next character, and check that it matches a specified
    * character.
    * 
-   * @param c
-   *          The character to match.
+   * @param c The character to match.
    * 
    * @return The character.
    * 
-   * @throws ParseException
-   *           if the character does not match.
+   * @throws ParseException if the character does not match.
    */
   public char next(char c) throws ParseException
   {
@@ -165,14 +160,12 @@ public class JSONTokener
   /**
    * Get the next n characters.
    * 
-   * @param n
-   *          The number of characters to take.
+   * @param n The number of characters to take.
    * 
    * @return A string of n characters.
    * 
-   * @throws ParseException
-   *           Substring bounds error if there are not n characters remaining in
-   *           the source string.
+   * @throws ParseException Substring bounds error if there are not n characters
+   *           remaining in the source string.
    */
   public String next(int n) throws ParseException
   {
@@ -191,8 +184,7 @@ public class JSONTokener
    * (slashslash and slashstar).
    * 
    * @return A character, or 0 if there are no more characters.
-   * @throws ParseException
-   *           If string is malformed
+   * @throws ParseException If string is malformed
    */
   public char nextClean() throws ParseException
   {
@@ -244,13 +236,11 @@ public class JSONTokener
    * processing is done. The formal JSON format does not allow strings in single
    * quotes, but an implementation is allowed to accept them.
    * 
-   * @param quote
-   *          The quoting character, either " or '
+   * @param quote The quoting character, either " or '
    * 
    * @return A String.
    * 
-   * @throws ParseException
-   *           Unterminated string.
+   * @throws ParseException Unterminated string.
    */
   public String nextString(char quote) throws ParseException
   {
@@ -308,8 +298,7 @@ public class JSONTokener
    * Get the text up but not including the specified character or the end of
    * line, whichever comes first.
    * 
-   * @param d
-   *          A delimiter character.
+   * @param d A delimiter character.
    * 
    * @return A string.
    */
@@ -335,8 +324,7 @@ public class JSONTokener
    * Get the text up but not including one of the specified delimeter characters
    * or the end of line, which ever comes first.
    * 
-   * @param delimiters
-   *          A set of delimiter characters.
+   * @param delimiters A set of delimiter characters.
    * 
    * @return A string, trimmed.
    */
@@ -365,8 +353,7 @@ public class JSONTokener
    * 
    * @return An object.
    * 
-   * @throws ParseException
-   *           The source conform to JSON syntax.
+   * @throws ParseException The source conform to JSON syntax.
    */
   public Object nextValue() throws ParseException
   {
@@ -416,7 +403,7 @@ public class JSONTokener
       }
       catch (Exception e)
       {
-        //Maybe it is a double
+        // Maybe it is a double
       }
       try
       {
@@ -424,7 +411,7 @@ public class JSONTokener
       }
       catch (Exception e)
       {
-        //Return it as a string
+        // Return it as a string
       }
     }
     if (s.equals(""))
@@ -438,8 +425,7 @@ public class JSONTokener
    * Skip characters until past the requested string. If it is not found, we are
    * left at the end of the source.
    * 
-   * @param to
-   *          A string to skip past.
+   * @param to A string to skip past.
    */
   public void skipPast(String to)
   {
@@ -458,8 +444,7 @@ public class JSONTokener
    * Skip characters until the next character is the requested character. If the
    * requested character is not found, no characters are skipped.
    * 
-   * @param to
-   *          A character to skip to.
+   * @param to A character to skip to.
    * 
    * @return The requested character, or zero if the requested character is not
    *         found.
@@ -484,8 +469,7 @@ public class JSONTokener
   /**
    * Make a ParseException to signal a syntax error.
    * 
-   * @param message
-   *          The error message.
+   * @param message The error message.
    * 
    * @return A ParseException object, suitable for throwing
    */

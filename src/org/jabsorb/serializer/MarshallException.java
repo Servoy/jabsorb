@@ -34,8 +34,6 @@ public class MarshallException extends Exception
 {
   /**
    * Unique serialisation id.
-   * 
-   * TODO: should this number be generated?
    */
   private final static long serialVersionUID = 2;
 

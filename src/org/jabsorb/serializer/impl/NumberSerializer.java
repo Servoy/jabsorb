@@ -41,8 +41,6 @@ public class NumberSerializer extends AbstractSerializer
 {
   /**
    * Unique serialisation id.
-   * 
-   * TODO: should this number be generated?
    */
   private final static long serialVersionUID = 2;
 
@@ -56,9 +54,9 @@ public class NumberSerializer extends AbstractSerializer
   /**
    * Classes that this can serialise to.
    */
-  private static Class[] _JSONClasses = new Class[] { Integer.class, Byte.class,
-      Short.class, Long.class, Float.class, Double.class, BigDecimal.class,
-      String.class };
+  private static Class[] _JSONClasses = new Class[] { Integer.class,
+      Byte.class, Short.class, Long.class, Float.class, Double.class,
+      BigDecimal.class, String.class };
 
   public Class[] getSerializableClasses()
   {
@@ -70,8 +68,8 @@ public class NumberSerializer extends AbstractSerializer
     return _JSONClasses;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object jso)
-      throws UnmarshallException
+  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
+      Object jso) throws UnmarshallException
   {
     try
     {
@@ -87,13 +85,11 @@ public class NumberSerializer extends AbstractSerializer
   /**
    * Converts a javascript object to a Java number
    * 
-   * @param clazz
-   *          The class of the Java object that it should be converted to
-   * @param jso
-   *          The javascript object
+   * @param clazz The class of the Java object that it should be converted to
+   * @param jso The javascript object
    * @return A Java primitive type in its java.lang wrapper.
-   * @throws NumberFormatException
-   *           If clazz is numeric and jso does not parse into a number.
+   * @throws NumberFormatException If clazz is numeric and jso does not parse
+   *           into a number.
    */
   public Object toNumber(Class clazz, Object jso) throws NumberFormatException
   {
@@ -172,8 +168,8 @@ public class NumberSerializer extends AbstractSerializer
     }
     catch (NumberFormatException nfe)
     {
-      throw new UnmarshallException("cannot convert object " + jso + " to type "
-          + clazz.getName());
+      throw new UnmarshallException("cannot convert object " + jso
+          + " to type " + clazz.getName());
     }
   }
 

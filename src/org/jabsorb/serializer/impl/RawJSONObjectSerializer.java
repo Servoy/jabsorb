@@ -40,8 +40,6 @@ public class RawJSONObjectSerializer extends AbstractSerializer
 {
   /**
    * Unique serialisation id.
-   * 
-   * TODO: should this number be generated?
    */
   private final static long serialVersionUID = 2;
 
@@ -71,8 +69,8 @@ public class RawJSONObjectSerializer extends AbstractSerializer
     return o;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object jso)
-      throws UnmarshallException
+  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
+      Object jso) throws UnmarshallException
   {
     return ObjectMatch.OKAY;
   }

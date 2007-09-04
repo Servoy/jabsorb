@@ -47,20 +47,17 @@ public class SerializerState
    * Instantiate (only if get hasn't been yet called for the requested type) or
    * get the previously instantiated instance of the specified type class.
    * 
-   * @param clazz
-   *          type to get/instatiate.
+   * @param clazz type to get/instatiate.
    * 
    * @return an instance of the given class. It will be instantiated if this is
    *         the first time the specified type is requested from the
    *         SerializerState, otherwise, the previously created instance will be
    *         returned.
    * 
-   * @throws InstantiationException
-   *           if an instance of the specified class type cannot be
-   *           instantiated.
-   * @throws IllegalAccessException
-   *           if an instance of the specified class type cannot be
-   *           instantiated.
+   * @throws InstantiationException if an instance of the specified class type
+   *           cannot be instantiated.
+   * @throws IllegalAccessException if an instance of the specified class type
+   *           cannot be instantiated.
    */
   public Object get(Class clazz) throws InstantiationException,
       IllegalAccessException

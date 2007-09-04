@@ -35,7 +35,9 @@ import java.io.Serializable;
 public class CallbackData implements Serializable
 {
   /**
-   * Generated version id. TODO: Should this be a more randomised number?
+   * Generated version id.
+   * 
+   * TODO: Should this be a more randomised number?
    */
   private final static long serialVersionUID = 2;
 
@@ -53,11 +55,10 @@ public class CallbackData implements Serializable
   /**
    * Creates a new Callback data holder
    * 
-   * @param cb
-   *          The object implementing the InvocationCallback Interface
-   * @param contextInterface
-   *          The type of transport Context interface the callback is interested
-   *          in eg. HttpServletRequest.class for the servlet transport.
+   * @param cb The object implementing the InvocationCallback Interface
+   * @param contextInterface The type of transport Context interface the
+   *          callback is interested in eg. HttpServletRequest.class for the
+   *          servlet transport.
    */
   public CallbackData(InvocationCallback cb, Class contextInterface)
   {
@@ -68,9 +69,8 @@ public class CallbackData implements Serializable
   /**
    * Whether two CallbackDatas are the same.
    * 
-   * @param o
-   *          The object to compare with this one.
-   * @return true if they share the same callback and contextInterface
+   * @param o The object to compare with this one.
+   * @return true If they share the same callback and contextInterface
    */
   public boolean equals(Object o)
   {
@@ -101,8 +101,7 @@ public class CallbackData implements Serializable
   /**
    * Whether the context for this object can be used with the given object
    * 
-   * @param context
-   *          The object to test
+   * @param context The object to test
    * @return Whether the context for this object is assignable from the given
    *         object.
    */

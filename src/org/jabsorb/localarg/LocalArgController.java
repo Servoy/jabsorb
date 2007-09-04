@@ -29,6 +29,7 @@ package org.jabsorb.localarg;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -50,92 +51,7 @@ import org.slf4j.LoggerFactory;
 public class LocalArgController
 {
   /**
-   * Data holder for this class.
-   * 
-   * TODO: if this is an inner class, shouldn't CallbackData be an inner class
-   * as well?
-   */
-  protected static class LocalArgResolverData
-  {
-    /**
-     * The user defined class that resolves the and returns the method argument
-     * using transport context information
-     */
-    private final LocalArgResolver argResolver;
-
-    /**
-     * The class to be resolved locally
-     */
-    private final Class argClazz;
-
-    /**
-     * The type of transport Context object the callback is interested in eg.
-     * HttpServletRequest.class for the servlet transport
-     */
-    private final Class contextInterface;
-
-    /**
-     * Create a new data holder
-     * 
-     * @param argResolver
-     *          The user defined class that resolves the and returns the method
-     *          argument using transport context information
-     * @param argClazz
-     *          The class to be resolved locally
-     * @param contextInterface
-     *          The type of transport Context object the callback is interested
-     *          in eg. HttpServletRequest.class for the servlet transport
-     */
-    public LocalArgResolverData(LocalArgResolver argResolver, Class argClazz,
-        Class contextInterface)
-    {
-      this.argResolver = argResolver;
-      this.argClazz = argClazz;
-      this.contextInterface = contextInterface;
-    }
-
-    public boolean equals(Object o)
-    {
-      LocalArgResolverData cmp = (LocalArgResolverData) o;
-      return (argResolver.equals(cmp.argResolver)
-          && argClazz.equals(cmp.argClazz) && contextInterface
-          .equals(cmp.contextInterface));
-    }
-
-    public int hashCode()
-    {
-      return argResolver.hashCode() * argClazz.hashCode()
-          * contextInterface.hashCode();
-    }
-
-    /**
-     * Whether this object's context can understand the given object
-     * 
-     * @param context
-     *          The object to test
-     * @return Whether the contextInterface isAssignableFrom the given object
-     */
-    public boolean understands(Object context)
-    {
-      return contextInterface.isAssignableFrom(context.getClass());
-    }
-
-    /**
-     * Gets the argResolver
-     * 
-     * @return LocalArgResolver
-     */
-    LocalArgResolver getArgResolver()
-    {
-      return argResolver;
-    }
-  }
-
-  /**
    * The logger for this class
-   * 
-   * TODO: should logging happen only when debug mode is set (need to add debug
-   * mode as well)
    */
   private final static Logger log = LoggerFactory
       .getLogger(LocalArgController.class);
@@ -143,10 +59,11 @@ public class LocalArgController
   /**
    * Key: argClazz (ie Class), Value: HashSet<LocalArgResolverData>
    */
-  private static HashMap localArgResolverMap = new HashMap();
+  private static Map localArgResolverMap=new HashMap();
 
   static
   {
+    //Make sure this doesn't happen until after the variables are assigned!
     LocalArgController.registerLocalArgResolver(HttpServletRequest.class,
         HttpServletRequest.class, new HttpServletRequestArgResolver());
     LocalArgController.registerLocalArgResolver(HttpServletResponse.class,

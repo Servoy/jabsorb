@@ -45,12 +45,10 @@ public abstract class AbstractSerializer implements Serializer
    * determine if the pair of classes can be serialized/deserialized from this
    * Serializer.
    * 
-   * @param clazz
-   *          java type to check if this Serializer can handle.
-   * @param jsonClazz
-   *          json type to check this Serializer can handle.
+   * @param clazz Java type to check if this Serializer can handle.
+   * @param jsonClazz JSON type to check this Serializer can handle.
    * 
-   * @return true if this Serializer can serialize/deserialize the given
+   * @return true If this Serializer can serialize/deserialize the given
    *         java,json pair.
    */
   public boolean canSerialize(Class clazz, Class jsonClazz)
@@ -88,8 +86,7 @@ public abstract class AbstractSerializer implements Serializer
   /**
    * Set the JSONSerialiser that spawned this object.
    * 
-   * @param ser
-   *          The parent serialiser.
+   * @param ser The parent serialiser.
    */
   public void setOwner(JSONSerializer ser)
   {

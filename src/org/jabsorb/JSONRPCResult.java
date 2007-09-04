@@ -96,12 +96,10 @@ public class JSONRPCResult
   /**
    * Creates a new JSONRPCResult
    * 
-   * @param errorCode
-   *          An error code if a problem occured (CODE_SUCCESS otherwise)
-   * @param id
-   *          The id of the response.
-   * @param o
-   *          The result of the call
+   * @param errorCode An error code if a problem occured (CODE_SUCCESS
+   *          otherwise)
+   * @param id The id of the response.
+   * @param o The result of the call
    */
   public JSONRPCResult(int errorCode, Object id, Object o)
   {

@@ -51,8 +51,6 @@ public class ListSerializer extends AbstractSerializer
 {
   /**
    * Unique serialisation id.
-   * 
-   * TODO: should this number be generated?
    */
   private final static long serialVersionUID = 2;
 
