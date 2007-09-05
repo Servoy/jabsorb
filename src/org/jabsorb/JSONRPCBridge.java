@@ -39,8 +39,6 @@ import java.util.StringTokenizer;
 
 import org.jabsorb.callback.CallbackController;
 import org.jabsorb.callback.InvocationCallback;
-import org.jabsorb.json.JSONArray;
-import org.jabsorb.json.JSONObject;
 import org.jabsorb.localarg.LocalArgController;
 import org.jabsorb.localarg.LocalArgResolver;
 import org.jabsorb.reflect.ClassAnalyzer;
@@ -51,6 +49,9 @@ import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.Serializer;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
+import org.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,8 +111,8 @@ public class JSONRPCBridge implements Serializable
 {
 
   /**
-   * Used to determine whether two methods match TODO: There ought to be a
-   * better way of doing this!
+   * Used to determine whether two methods match
+   * TODO: There ought to be a better way of doing this!
    */
   protected static class MethodCandidate
   {
@@ -339,7 +340,17 @@ public class JSONRPCBridge implements Serializable
       {
         buf.append(",");
       }
-      Object jso = arguments.get(i);
+      Object jso;
+
+      try
+      {
+        jso = arguments.get(i);
+      }
+      catch (JSONException e)
+      {
+        throw (NoSuchElementException)new NoSuchElementException(e.getMessage()).initCause(e);
+      }
+
       if (jso == null)
       {
         buf.append("java.lang.Object");
@@ -449,7 +460,7 @@ public class JSONRPCBridge implements Serializable
       arguments = jsonReq.getJSONArray("params");
       requestId = jsonReq.opt("id");
     }
-    catch (NoSuchElementException e)
+    catch (JSONException e)
     {
       log.error("no method or parameters in request");
       return new JSONRPCResult(JSONRPCResult.CODE_ERR_NOMETHOD, null,
@@ -1407,10 +1418,13 @@ public class JSONRPCBridge implements Serializable
         }
         else
         {
-          candidate.match[i] = ser.tryUnmarshall(serialiserState, param[i],
-              arguments.get(j++));
+          candidate.match[i] = ser.tryUnmarshall(serialiserState, param[i], arguments.get(j++));
         }
       }
+    }
+    catch (JSONException e)
+    {
+      throw (NoSuchElementException) new NoSuchElementException(e.getMessage()).initCause(e);
     }
     catch (UnmarshallException e)
     {
@@ -1452,15 +1466,20 @@ public class JSONRPCBridge implements Serializable
         }
         else
         {
-          javaArgs[i] = ser.unmarshall(serializerState, param[i], arguments
-              .get(j++));
+          javaArgs[i] = ser.unmarshall(serializerState, param[i],
+            arguments.get(j++));
         }
       }
     }
-    catch (UnmarshallException e)
+    catch (JSONException e)
     {
-      throw new UnmarshallException("arg " + (i + 1) + " " + e.getMessage());
+      throw (NoSuchElementException) new NoSuchElementException(e.getMessage()).initCause(e);
     }
+    catch (UnmarshallException f)
+    {
+      throw new UnmarshallException("arg " + (i + 1) + " " + f.getMessage());
+    }
+
     return javaArgs;
   }
 }

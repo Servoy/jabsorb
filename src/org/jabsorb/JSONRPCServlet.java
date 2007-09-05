@@ -32,7 +32,6 @@ import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.text.ParseException;
 import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.http.HttpServlet;
@@ -40,7 +39,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.jabsorb.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -195,7 +195,7 @@ public class JSONRPCServlet extends HttpServlet
       json_req = new JSONObject(data.toString());
       json_res = json_bridge.call(new Object[] { request, response }, json_req);
     }
-    catch (ParseException e)
+    catch (JSONException e)
     {
       log.error("can't parse call: " + data);
       json_res = new JSONRPCResult(JSONRPCResult.CODE_ERR_PARSE, null,

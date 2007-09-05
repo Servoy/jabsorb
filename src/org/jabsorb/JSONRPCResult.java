@@ -29,7 +29,8 @@ package org.jabsorb;
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 
-import org.jabsorb.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Container for a JSON-RPC result message. This includes successful results,
@@ -141,30 +142,39 @@ public class JSONRPCResult
   public String toString()
   {
     JSONObject o = new JSONObject();
-    if (errorCode == CODE_SUCCESS)
+
+    try
     {
-      o.put("id", id);
-      o.put("result", result);
+      if (errorCode == CODE_SUCCESS)
+      {
+        o.put("id", id);
+        o.put("result", result);
+      }
+      else if (errorCode == CODE_REMOTE_EXCEPTION)
+      {
+        Throwable e = (Throwable) result;
+        CharArrayWriter caw = new CharArrayWriter();
+        e.printStackTrace(new PrintWriter(caw));
+        JSONObject err = new JSONObject();
+        err.put("code", new Integer(errorCode));
+        err.put("msg", e.getMessage());
+        err.put("trace", caw.toString());
+        o.put("id", id);
+        o.put("error", err);
+      }
+      else
+      {
+        JSONObject err = new JSONObject();
+        err.put("code", new Integer(errorCode));
+        err.put("msg", result);
+        o.put("id", id);
+        o.put("error", err);
+      }
     }
-    else if (errorCode == CODE_REMOTE_EXCEPTION)
+    catch (JSONException e)
     {
-      Throwable e = (Throwable) result;
-      CharArrayWriter caw = new CharArrayWriter();
-      e.printStackTrace(new PrintWriter(caw));
-      JSONObject err = new JSONObject();
-      err.put("code", new Integer(errorCode));
-      err.put("msg", e.getMessage());
-      err.put("trace", caw.toString());
-      o.put("id", id);
-      o.put("error", err);
-    }
-    else
-    {
-      JSONObject err = new JSONObject();
-      err.put("code", new Integer(errorCode));
-      err.put("msg", result);
-      o.put("id", id);
-      o.put("error", err);
+      // this would have been a null pointer exception in the previous json.org library.
+      throw (RuntimeException) new RuntimeException(e.getMessage()).initCause(e);
     }
     return o.toString();
   }

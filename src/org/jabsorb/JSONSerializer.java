@@ -27,16 +27,12 @@
 package org.jabsorb;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.jabsorb.json.JSONArray;
-import org.jabsorb.json.JSONObject;
-import org.jabsorb.json.JSONTokener;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.Serializer;
@@ -55,6 +51,10 @@ import org.jabsorb.serializer.impl.RawJSONArraySerializer;
 import org.jabsorb.serializer.impl.RawJSONObjectSerializer;
 import org.jabsorb.serializer.impl.SetSerializer;
 import org.jabsorb.serializer.impl.StringSerializer;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,7 +126,7 @@ public class JSONSerializer implements Serializable
     {
       json = tok.nextValue();
     }
-    catch (ParseException e)
+    catch (JSONException e)
     {
       throw new UnmarshallException("couldn't parse JSON");
     }
@@ -488,10 +488,6 @@ public class JSONSerializer implements Serializable
         Class clazz = Class.forName(class_name);
         return clazz;
       }
-      catch (NoSuchElementException e)
-      {
-        // TODO: what happens here?
-      }
       catch (Exception e)
       {
         throw new UnmarshallException("class in hint not found");
@@ -505,7 +501,15 @@ public class JSONSerializer implements Serializable
         throw new UnmarshallException("no type for empty array");
       }
       // return type of first element
-      Class compClazz = getClassFromHint(arr.get(0));
+      Class compClazz;
+      try
+      {
+        compClazz = getClassFromHint(arr.get(0));
+      }
+      catch (JSONException e)
+      {
+        throw (NoSuchElementException) new NoSuchElementException(e.getMessage()).initCause(e);
+      }
       try
       {
         if (compClazz.isArray())
