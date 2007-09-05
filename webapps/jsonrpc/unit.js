@@ -146,12 +146,15 @@ function displayTests()
     var row = testTableBody.insertRow(testTableBody.rows.length);
     var ccell = row.insertCell(row.cells.length);
     var rcell = row.insertCell(row.cells.length);
+    var ecell = row.insertCell(row.cells.length);
     var pcell = row.insertCell(row.cells.length);
     ccell.innerHTML = "<div class=\"code_cell\"><a href=\"javascript:runTest(" +
                       i + ")\">" + tests[i].code + "</a></div>";
     ccell.className = "test_td";
     rcell.id = "result." + i;
     rcell.className = "test_td";
+    ecell.id = "expected." + i;
+    ecell.className = "test_td";
     pcell.id = "pass." + i;
     pcell.className = "test_td";
   }
@@ -160,8 +163,10 @@ function displayTests()
 function clearResult(i)
 {
   var resultsNode = document.getElementById("result." + i);
+  var expectedNode = document.getElementById("expected." + i);
   var passNode = document.getElementById("pass." + i);
   resultsNode.innerHTML = "<div class=\"result_cell\"></div>";
+  expectedNode.innerHTML = "<div class=\"result_cell\"></div>";
   passNode.innerHTML = "<div class=\"pass_cell\"></div>";
 }
 
@@ -174,6 +179,7 @@ function clearAllResults()
 function postResults(i, result, e, profile)
 {
   var resultsNode = document.getElementById("result." + i);
+  var expectedNode = document.getElementById("expected." + i);
   var passNode = document.getElementById("pass." + i);
   var resultText;
   var pass = false;
@@ -218,6 +224,8 @@ function postResults(i, result, e, profile)
     resultsNode.innerHTML = "<div class=\"result_cell\">" +
                             resultText + "</div>";
   }
+  expectedNode.innerHTML="<div class=\"result_cell\">" +
+                            tests[i].test + "</div>";
   if (pass) passNode.innerHTML = "<div class=\"pass_cell\">pass</div>";
   else passNode.innerHTML = "<div class=\"fail_cell\">fail</pass>";
 }

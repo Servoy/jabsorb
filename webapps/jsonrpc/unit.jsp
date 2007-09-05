@@ -47,7 +47,8 @@ page import="org.jabsorb.test.Test"
       <thead>
        <tr>
         <th class="test_th" width="260"><div class="code_heading">Code</div></th>
-        <th class="test_th" width="100%"><div class="result_heading">Result</div></th>
+        <th class="test_th" width="50%"><div class="result_heading">Result</div></th>
+        <th class="test_th" width="50%"><div class="expected_heading">Expected Result</div></th>
         <th class="test_th" width="32"><div class="pass_heading">Pass</div></th>
        </tr>
       </thead>
