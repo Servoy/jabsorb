@@ -50,12 +50,9 @@
     </path>
     <path id="tomcatClasspath" description="This is used for targets that use Jasper">
       <path refid="jarClasspath" />
-      <pathelement path="${jasper-el}" />
-      <pathelement path="${jsp-api}" />
-      <pathelement path="${el-api}" />
-      <pathelement path="${commons-daemon}" />
-      <pathelement path="${tomcat-juli}" />
-      <pathelement path="${jasper}" />
+      <fileset dir="${tomcat.lib}">
+        <include name="**/*.jar"/>
+      </fileset>
     </path>
   </target>
 
