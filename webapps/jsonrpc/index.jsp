@@ -1,5 +1,5 @@
 <%!
-  String title = "JSON-RPC-Java Demos";
+  String title = "jabsorb Demos";
   String head = "";
   String onLoad = null;
 %>
@@ -12,7 +12,7 @@
   implementation in the <a href="http://jan.kollhof.net/projects/js/jsolait/">JavaScript&nbsp;o&nbsp;lait</a>
   library by <a href="http://jan.kollhof.net/">Jan-Klaas&nbsp;Kollhof</a> (the
   author of the <a href="http://json-rpc.org/specs.xhtml">JSON-RPC&nbsp;specification</a>).
-  The lightweight JSON-RPC JavaScript client and the JSON-RPC-Java example code
+  The lightweight JSON-RPC JavaScript client and the jabsorb example code
   are included in the source distribution.</p>
 
 <h3><a href="browser.jsp">Browser Compatibility Database</a></h3>
@@ -25,8 +25,8 @@
 
 <h3><a href="hello.jsp">Hello</a></h3>
 
-<p>The JSON-RPC-Java <em>Hello World</em> application. See the simplest
-  JSON-RPC-Java application in action.</p>
+<p>The jabsorb <em>Hello World</em> application. See the simplest
+  jabsorb application in action.</p>
 <ul>
   <li>Demo source: <a href="Hello.java.txt">Hello.java</a>,
     <a href="hello.jsp.txt">hello.jsp</a> and
@@ -57,7 +57,7 @@
 <p>Dictionary lookup demo using JSON-RPC. This demo implements a simple server
   side Java <a href="http://www.dict.org">DICT</a> protocol (<a
   href="http://www.dict.org/rfc2229.txt">RFC2229</a>) client that can make
-  queries against a local dict server, and exposes its API via JSON-RPC-Java to
+  queries against a local dict server, and exposes its API via jabsorb to
   a JavaScript/DHTML dictionary lookup GUI.</p>
 
 <p>To run the demo on your own machine, you'll need to run <a

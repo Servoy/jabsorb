@@ -11,7 +11,7 @@
    //JSONRPCBridge.setDebug(true);
    JSONRPCBridge.registerObject("unicode", unicode);
 %>
-<%!String title = "JSON-RPC-Java Unicode Tests";
+<%!String title = "jabsorb Unicode Tests";
   String head =
     "    <link rel=\"stylesheet\" type=\"text/css\" href=\"css/unicode.css\">\n" +
     "    <script type=\"text/javascript\" src=\"jsonrpc.js\"></script>\n" +
@@ -19,7 +19,7 @@
   String onLoad = "onLoad()";%>
 <%@ include file="header.jspinc" %>
 
-    <h2>JSON-RPC-Java Unicode Tests</h2>
+    <h2>jabsorb Unicode Tests</h2>
 
     <p>The tests run automatically when you load the page. It may take a second or so to run the tests and display the table.</p>
 

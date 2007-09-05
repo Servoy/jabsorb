@@ -40,7 +40,7 @@
   {
     onLoad = "decodeUserAgents()";
   }
-  String title = "JSON-RPC-Java Browser Compatibility";
+  String title = "jabsorb Browser Compatibility";
   String head =
     "    <link rel=\"stylesheet\" type=\"text/css\" href=\"css/browser.css\">\n" +
       "    <script type=\"text/javascript\" src=\"jsonrpc.js\"></script>\n" +
@@ -48,14 +48,14 @@
 %>
 <%@ include file="header.jspinc" %>
 
-    <h2>JSON-RPC-Java Browser Compatibility</h2>
+    <h2>jabsorb Browser Compatibility</h2>
 
 <% if(testCookies == null && browser.gotSession == false) { %>
     <p>Testing to see if you have cookies enabled...</p>
 <% } else if(testCookies != null && browser.gotSession == false) { %>
     <p>Cookies not enabled. Feed me, Feed me, I want cookies!</p>
 <% } else if(browser.firstRun) { %>
-    <p>Testing JSON-RPC-Java. The page will reload in one moment...</p>
+    <p>Testing jabsorb. The page will reload in one moment...</p>
     <p><em>Note:</em> You need a recent browser (post year 2000) with an ECMAScript 3rd Edition (ECMA-262) interpreter to run this page ie. Netscape JavaScript 1.5, Microsoft JScript 5.0 or any other conforming implementations.</p>
     <p>If your browser does not support this scripting standard, it will not be entered in the browser compatibility database (and this page will not reload).</p>
 <% } else { %>

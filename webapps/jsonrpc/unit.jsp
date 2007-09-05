@@ -12,7 +12,7 @@ page import="org.jabsorb.test.Test"
    JSONRPCBridge.setDebug(true);
    JSONRPCBridge.registerObject("test", testObject);
 %>
-<%!String title = "JSON-RPC-Java Unit Tests";
+<%!String title = "jabsorb Unit Tests";
   String head =
     "    <link rel=\"stylesheet\" type=\"text/css\" href=\"css/unit.css\">\n" +
     "    <script type=\"text/javascript\" src=\"jsonrpc.js\"></script>\n" +
@@ -20,7 +20,7 @@ page import="org.jabsorb.test.Test"
   String onLoad = "onLoad()";%>
 <%@ include file="header.jspinc" %>
 
-    <h2>JSON-RPC-Java Unit Tests</h2>
+    <h2>jabsorb Unit Tests</h2>
 
     <table cellpadding="0" cellspacing="0" border="0" width="100%">
       <tr>

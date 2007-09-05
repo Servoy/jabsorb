@@ -12,13 +12,13 @@ page import="org.jabsorb.test.Test"
    JSONRPCBridge.registerReference(Test.RefTest.class);
    JSONRPCBridge.registerCallableReference(Test.CallableRefTest.class);
 %>
-<%!String title = "JSON-RPC-Java Tests";
+<%!String title = "jabsorb Tests";
 String head = "    <script type=\"text/javascript\" src=\"jsonrpc.js\"></script>" +
               "    <script type=\"text/javascript\" src=\"test.js\"></script>";
 String onLoad = "onLoad()";%>
 <%@ include file="header.jspinc" %>
 
-    <h2>JSON-RPC-Java Tests</h2>
+    <h2>jabsorb Tests</h2>
 
     <h3>Test Output</h3>
     <table cellpadding="4" cellspacing="0" width="100%" style="border: 1px solid #c0c0c0; border-collapse: collapse;">

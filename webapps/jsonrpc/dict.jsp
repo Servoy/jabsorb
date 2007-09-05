@@ -12,7 +12,7 @@ page import="org.jabsorb.dict.DictClient"
    //JSONRPCBridge.setDebug(true);
    JSONRPCBridge.registerObject("dict", dict);
 %>
-<%!String title = "JSON-RPC-Java Dictionary Demo";
+<%!String title = "jabsorb Dictionary Demo";
   String head =
     "    <link rel=\"stylesheet\" type=\"text/css\" href=\"css/dict.css\">\n" +
     "    <script type=\"text/javascript\" src=\"jsonrpc.js\"></script>\n" +
@@ -20,7 +20,7 @@ page import="org.jabsorb.dict.DictClient"
   String onLoad = "onLoad()";%>
 <%@ include file="header.jspinc" %>
 
-    <h2>JSON-RPC-Java Dictionary Client</h2>
+    <h2>jabsorb Dictionary Client</h2>
 
     <p>
       <strong>Word:</strong>

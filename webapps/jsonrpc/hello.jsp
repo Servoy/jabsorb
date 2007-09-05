@@ -9,12 +9,12 @@
 <head>
   <script type="text/javascript" src="jsonrpc.js"></script>
   <script type="text/javascript" src="hello.js"></script>
-  <title>JSON-RPC-Java Hello</title>
+  <title>jabsorb Hello</title>
 </head>
 <body bgcolor="#ffffff" onLoad="onLoad()">
-<h2>JSON-RPC-Java Hello</h2>
+<h2>jabsorb Hello</h2>
 
-<p>The JSON-RPC-Java <em>Hello World</em> application.</p>
+<p>The jabsorb <em>Hello World</em> application.</p>
 
 <p>
   <strong>Who:</strong>

@@ -1,13 +1,13 @@
 <%!
-  String title = "JSON-RPC-Java Manual";
+  String title = "jabsorb Manual";
   String head = "";
   String onLoad = null;
 %>
 <%@ include file="header.jspinc" %>
 
-    <h2>JSON-RPC-Java Manual</h2>
+    <h2>jabsorb Manual</h2>
 
-    <p>This manual covers the architecture and implementation details of JSON-RPC-Java and contains a reference guide to the various components and interfaces. Please start with the <a href="tutorial.html">tutorial</a> if want to get started quickly.</p>
+    <p>This manual covers the architecture and implementation details of jabsorb and contains a reference guide to the various components and interfaces. Please start with the <a href="tutorial.html">tutorial</a> if want to get started quickly.</p>
 
     <h2>Table of Contents</h2>
 
@@ -42,7 +42,7 @@
     </ul>
 
     <h2><a name="architecture">Architecture</a></h2>
-    <p>JSON-RPC-Java consists of two main user visible components, the JSONRPCBridge and the JSONRPCServlet.</p>
+    <p>jabsorb consists of two main user visible components, the JSONRPCBridge and the JSONRPCServlet.</p>
 
     <h3><a name="jsonrpcbridge">JSONRPCBridge</a></h3>
     <p>The JSONRPCBridge holds references to classes and objects that are
@@ -95,7 +95,7 @@ if(bridge == null) {
     <pre>JSONRPCBridge.getGlobalBridge().registerClass("MyClass", com.example.MyClass.class);</pre>
     <p><em>See the <a href="docs/com/metaparadigm/jsonrpc/JSONRPCBridge.html">JSONRPCBridge Javadocs</a> for more info.</em></p>
     <h3><a name="jsonrpcservlet">JSONRPCServlet</a></h3>
-    <p>This servlet, the transport part of JSON-RPC-Java, handles JSON-RPC
+    <p>This servlet, the transport part of jabsorb, handles JSON-RPC
     requests over HTTP and dispatches them to a JSONRPCBridge instance
     registered in the HttpSession if one exists (without creating a session
     if there isn't one already), or otherwise the global bridge.</p>
@@ -111,14 +111,14 @@ if(bridge == null) {
     <p><em>See the <a href="docs/com/metaparadigm/jsonrpc/JSONRPCServlet.html">JSONRPCServlet Javadocs</a> for more info.</em></p>
 
     <h2><a name="type-mapping">Type mapping</a></h2>
-    <p>To allow JSON-RPC-Java to transparently unmarshall complex nested objects and with that, the usage of Java's container classes, JSON-RPC needs a mechanism to preserve type information.</p>
-    <p>This comes from the combination of the JavaScript's typeless nature and the method that Java container classes gain their genericity (through the usage of a single base class 'Object', rather than using parameterized types such as C++ templates. <em>Note: Java 5.0 however supports these parameterized collection types but support is not yet included in JSON-RPC-Java for this</em>).<</p>
+    <p>To allow jabsorb to transparently unmarshall complex nested objects and with that, the usage of Java's container classes, JSON-RPC needs a mechanism to preserve type information.</p>
+    <p>This comes from the combination of the JavaScript's typeless nature and the method that Java container classes gain their genericity (through the usage of a single base class 'Object', rather than using parameterized types such as C++ templates. <em>Note: Java 5.0 however supports these parameterized collection types but support is not yet included in jabsorb for this</em>).<</p>
     <p>In the case of unmarshalling a JavaScript object into a Java method argument with a generic container interface (such as List, Map, Set, or their concrete counterparts), the need for additional type information is apparant. We have no type information on either side to work out the mapping from the contained type of JavaScript array to the contained type of the Java container class.</p>
     <p>With normal array method arguments ie. a Java method argument of class <code>Foo[]</code>, we know the items in the JavaScript array must (or should) be all be <code>class Foo</code>.</p>
     <p>With a Java method argument of class <code>ArrayList</code>, we only have <code>Object</code> as the contained type and no type information with a regular JavaScript object.</p>
-    <p>This leads to the method that JSON-RPC-Java maintains it's transparent mapping - <em>'class hinting'</em>.</p>
+    <p>This leads to the method that jabsorb maintains it's transparent mapping - <em>'class hinting'</em>.</p>
     <h3><a name="class-hinting">Class Hinting</a></h3>
-    <p>In the case of regular Java Beans an extra field <code>javaClass</code> is added that maps the typeless JavaScript object back to the Java class. The is used on the Java side during unmarshalling to ease the transparent mapping of the object back to it's Java Class when it is sent back to the server (although JSON-RPC-Java can in some cases map the objects without the additional type information if the mapping is unambiguos ie. if the object is not inside of a generic container class, then the method class signature can be used).</p>
+    <p>In the case of regular Java Beans an extra field <code>javaClass</code> is added that maps the typeless JavaScript object back to the Java class. The is used on the Java side during unmarshalling to ease the transparent mapping of the object back to it's Java Class when it is sent back to the server (although jabsorb can in some cases map the objects without the additional type information if the mapping is unambiguos ie. if the object is not inside of a generic container class, then the method class signature can be used).</p>
     <p>For Java container classes such as the <code>List</code>,  we can't map them to a JavaScript native array as we would have nowhere to store the type hint. So Java container classes have a special type mapping from Java to JavaScript described here:</p>
 
     <h4>Bean</h4>
@@ -212,7 +212,7 @@ if(bridge == null) {
     </ul>
 
     <h2><a name="references">References</a></h2>
-    <p>JSON-RPC-Java has some basic ORB (Object Request Broker) functionality with the ability to pass objects by reference and keep these references in the user's session.</p>
+    <p>jabsorb has some basic ORB (Object Request Broker) functionality with the ability to pass objects by reference and keep these references in the user's session.</p>
     <p>Two types of references are handled: opaque references and callable references.</p>
 
     <h3><a name="opaque-references">Opaque References</a></h3>
