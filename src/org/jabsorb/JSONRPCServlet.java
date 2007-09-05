@@ -27,11 +27,13 @@
 package org.jabsorb;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.text.ParseException;
+import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -114,6 +116,36 @@ public class JSONRPCServlet extends HttpServlet
    */
   private final static int buf_size = 4096;
 
+  /**
+   * The GZIP_THRESHOLD indicates the response size at which the servlet will attempt to gzip the response
+   * if it can.  Gzipping smaller responses is counter productive for 2 reasons:
+   *
+   * 1.  if the response is really small, the gzipped output can actually be larger than the non-compressed original.
+   * because of the gzip header and the general overhead of the gzipping.
+   * This is a lose-lose situation, so the original should always be sent in this case.
+   *
+   * 2.  gzipping imposes a small performance penality in that it takes a little more time to gzip the content.
+   * There is also a corresponding penality on the browser side when the content has to be uncompressed.
+   *
+   * This penalty is really small, and is normally more than outweighed by the bandwidth savings provided
+   * by gzip (the response is typically 1/10th the size when gzipped!  Especially for json data which tends to
+   * have a lot of repetition.
+   *
+   * So, the GZIP_THRESHOLD should be tuned to a size that is optimal for your application.  If your application is
+   * always served from a high speed network, you might want to set this to a very high number--
+   * (or even -1 to turn it off) for slower networks where it's more important to conserve bandwidth, 
+   * set this to a lower number (but not too low!)
+   *
+   * Set this to zero if you want to always attempt to gzip the output when the browser can accept gzip encoded responses.
+   * This is useful for analyzing what a good gzip setting should be for potential responses from your application.
+   *
+   * You can set this to -1 if you want to turn off gzip encoding for some reason.
+   *
+   * todo: make this parameter settable through a servlet parameter
+   * todo: -1 to turn gzip off, 0 to attempt to gzip everything, higher number for a threshold
+   */
+  private static int GZIP_THRESHOLD = 200;
+
   public void service(HttpServletRequest request, HttpServletResponse response)
       throws IOException, ClassCastException
   {
@@ -156,8 +188,8 @@ public class JSONRPCServlet extends HttpServlet
     }
 
     // Process the request
-    JSONObject json_req = null;
-    JSONRPCResult json_res = null;
+    JSONObject json_req;
+    JSONRPCResult json_res;
     try
     {
       json_req = new JSONObject(data.toString());
@@ -175,7 +207,50 @@ public class JSONRPCServlet extends HttpServlet
     {
       log.trace("send: " + json_res.toString());
     }
+
     byte[] bout = json_res.toString().getBytes("UTF-8");
+
+    // handle gzipping of the response if it is turned on
+    if (GZIP_THRESHOLD != -1)
+    {
+      // if the request header says that the browser can take gzip compressed output, then gzip the output
+      // but only if the response is large enough to warrant it and if the resultant compressed output is
+      // actually smaller.
+      if (acceptsGzip(request))
+      {
+        if (bout.length > GZIP_THRESHOLD)
+        {
+          byte[] gzippedOut = gzip(bout);
+          log.debug("gzipping! original size =  " + bout.length + "  gzipped size = " + gzippedOut.length);
+
+          // if gzip didn't actually help, abort
+          if (bout.length <= gzippedOut.length)
+          {
+            log.warn("gzipping resulted in a larger output size!  " +
+              "aborting (sending non-gzipped response)... " +
+              "you may want to increase the gzip threshold if this happens a lot!" +
+              " original size = " + bout.length + "  gzipped size = " + gzippedOut.length);
+          }
+          else
+          {
+            // go with the gzipped output
+            bout = gzippedOut;
+            response.addHeader("Content-Encoding", "gzip");
+          }
+        }
+        else
+        {
+          log.debug("not gzipping because size is " + bout.length +
+            " (less than the GZIP_THRESHOLD of " + GZIP_THRESHOLD + " bytes)");
+        }
+      }
+      else
+      {
+        // this should be rare with modern user agents
+        log.debug("not gzipping because user agent doesn't accept gzip encoding...");
+      }
+    }
+
     response.setIntHeader("Content-Length", bout.length);
 
     out.write(bout);
@@ -209,5 +284,50 @@ public class JSONRPCServlet extends HttpServlet
       }
     }
     return json_bridge;
+  }
+
+  /**
+   * Can browser accept gzip encoding?
+   *
+   * @param request browser request object.
+   * @return true if gzip encoding accepted.
+   */
+  private boolean acceptsGzip(HttpServletRequest request)
+  {
+    // can browser accept gzip encoding?
+    String ae = request.getHeader("accept-encoding");
+    return ae != null && ae.indexOf("gzip") != -1;
+  }
+
+  /**
+   * Gzip something.
+   *
+   * @param in original content
+   * @return size gzipped content
+   */
+  private byte[] gzip(byte[] in)
+  {
+    if (in != null && in.length > 0)
+    {
+      long tstart = System.currentTimeMillis();
+      ByteArrayOutputStream bout = new ByteArrayOutputStream();
+      try
+      {
+        GZIPOutputStream gout = new GZIPOutputStream(bout);
+        gout.write(in);
+        gout.flush();
+        gout.close();
+        if (log.isDebugEnabled())
+        {
+          log.debug("gzipping took " + (System.currentTimeMillis() - tstart) + " msec");
+        }
+        return bout.toByteArray();
+      }
+      catch (IOException io)
+      {
+        log.error("io exception gzipping byte array", io);
+      }
+    }
+    return new byte[0];
   }
 }
