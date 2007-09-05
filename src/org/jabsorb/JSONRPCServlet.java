@@ -184,7 +184,7 @@ public class JSONRPCServlet extends HttpServlet
     }
     if (json_bridge.isDebug())
     {
-      log.trace("recieve: " + data.toString());
+      log.debug("receive: " + prettyPrintJson(data.toString()));
     }
 
     // Process the request
@@ -205,7 +205,7 @@ public class JSONRPCServlet extends HttpServlet
     // Write the response
     if (json_bridge.isDebug())
     {
-      log.trace("send: " + json_res.toString());
+      log.debug("send: " + prettyPrintJson(json_res.toString()));
     }
 
     byte[] bout = json_res.toString().getBytes("UTF-8");
@@ -284,6 +284,31 @@ public class JSONRPCServlet extends HttpServlet
       }
     }
     return json_bridge;
+  }
+
+  /**
+   * Format (pretty print) json nicely for debugging output.
+   * If the pretty printing fails for any reason (this is not expected)
+   * then the original, unformatted json will be returned.
+   *
+   * @param unformattedJSON a json string.
+   *
+   * @return a String containing the formatted json text for the passed in json object.
+   */
+  private String prettyPrintJson(String unformattedJSON)
+  {
+    if (unformattedJSON == null || "".equals(unformattedJSON))
+    {
+      return unformattedJSON;
+    }
+    try
+    {
+      return new JSONObject(unformattedJSON).toString(2);
+    }
+    catch (JSONException je)
+    {
+      return unformattedJSON; // fall back to unformatted json, if pretty print fails...
+    }
   }
 
   /**
