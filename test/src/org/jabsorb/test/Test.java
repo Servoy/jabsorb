@@ -41,7 +41,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.jabsorb.JSONRPCBridge;
 import org.jabsorb.callback.InvocationCallback;
-import org.jabsorb.json.JSONObject;
+import org.json.JSONObject;
 
 public class Test implements Serializable
 {

@@ -33,12 +33,13 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.jabsorb.json.JSONObject;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Serialises Sets
@@ -89,9 +90,23 @@ public class SetSerializer extends AbstractSerializer
     JSONObject setdata = new JSONObject();
     if (ser.getMarshallClassHints())
     {
-      obj.put("javaClass", o.getClass().getName());
+      try
+      {
+        obj.put("javaClass", o.getClass().getName());
+      }
+      catch (JSONException e)
+      {
+        throw new MarshallException("javaClass not found!");
+      }
     }
-    obj.put("set", setdata);
+    try
+    {
+      obj.put("set", setdata);
+    }
+    catch (JSONException e)
+    {
+      throw new MarshallException("Could not set 'set': " + e.getMessage());
+    }
     Object key = null;
     Iterator i = set.iterator();
 
@@ -108,6 +123,10 @@ public class SetSerializer extends AbstractSerializer
     {
       throw new MarshallException("set key " + key + e.getMessage());
     }
+    catch (JSONException e)
+    {
+      throw new MarshallException("set key " + key + e.getMessage());
+    }
     return obj;
   }
 
@@ -115,7 +134,15 @@ public class SetSerializer extends AbstractSerializer
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
-    String java_class = jso.getString("javaClass");
+    String java_class;
+    try
+    {
+      java_class = jso.getString("javaClass");
+    }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("Could not read javaClass");
+    }
     if (java_class == null)
     {
       throw new UnmarshallException("no type hint");
@@ -128,7 +155,16 @@ public class SetSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("not a Set");
     }
-    JSONObject jsonset = jso.getJSONObject("set");
+    JSONObject jsonset;
+    try
+    {
+      jsonset = jso.getJSONObject("set");
+    }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("set missing");
+    }
+
     if (jsonset == null)
     {
       throw new UnmarshallException("set missing");
@@ -151,6 +187,10 @@ public class SetSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("key " + key + " " + e.getMessage());
     }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("key " + key + " " + e.getMessage());
+    }
     return m;
   }
 
@@ -158,7 +198,15 @@ public class SetSerializer extends AbstractSerializer
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
-    String java_class = jso.getString("javaClass");
+    String java_class;
+    try
+    {
+      java_class = jso.getString("javaClass");
+    }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("Could not read javaClass");
+    }
     if (java_class == null)
     {
       throw new UnmarshallException("no type hint");
@@ -182,7 +230,15 @@ public class SetSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("not a Set");
     }
-    JSONObject jsonset = jso.getJSONObject("set");
+    JSONObject jsonset;
+    try
+    {
+      jsonset = jso.getJSONObject("set");
+    }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("set missing");
+    }
 
     if (jsonset == null)
     {
@@ -204,6 +260,10 @@ public class SetSerializer extends AbstractSerializer
     catch (UnmarshallException e)
     {
       throw new UnmarshallException("key " + i + e.getMessage());
+    }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("key " + key + " " + e.getMessage());
     }
     return abset;
   }

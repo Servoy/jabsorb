@@ -33,13 +33,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
-import org.jabsorb.json.JSONArray;
-import org.jabsorb.json.JSONObject;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Serialises lists
@@ -87,11 +88,27 @@ public class ListSerializer extends AbstractSerializer
     List list = (List) o;
     JSONObject obj = new JSONObject();
     JSONArray arr = new JSONArray();
+    // TODO: this same block is done everywhere.
+    // Have a single function to do it.
     if (ser.getMarshallClassHints())
     {
-      obj.put("javaClass", o.getClass().getName());
+      try
+      {
+        obj.put("javaClass", o.getClass().getName());
+      }
+      catch (JSONException e)
+      {
+        throw new MarshallException("javaClass not found!");
+      }
     }
-    obj.put("list", arr);
+    try
+    {
+      obj.put("list", arr);
+    }
+    catch (JSONException e)
+    {
+      throw new MarshallException("Error setting list: " + e);
+    }
     int index = 0;
     try
     {
@@ -109,11 +126,23 @@ public class ListSerializer extends AbstractSerializer
     return obj;
   }
 
+  // TODO: try unMarshall and unMarshall share 90% code. Put in into an
+  // intermediate function.
+  // TODO: Also cache the result somehow so that an unmarshall
+  // following a tryUnmarshall doesn't do the same work twice!
   public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object o)
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
-    String java_class = jso.getString("javaClass");
+    String java_class;
+    try
+    {
+      java_class = jso.getString("javaClass");
+    }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("Could not read javaClass");
+    }
     if (java_class == null)
     {
       throw new UnmarshallException("no type hint");
@@ -126,7 +155,15 @@ public class ListSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("not a List");
     }
-    JSONArray jsonlist = jso.getJSONArray("list");
+    JSONArray jsonlist;
+    try
+    {
+      jsonlist = jso.getJSONArray("list");
+    }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("Could not read list: " + e.getMessage());
+    }
     if (jsonlist == null)
     {
       throw new UnmarshallException("list missing");
@@ -144,6 +181,10 @@ public class ListSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("element " + i + " " + e.getMessage());
     }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("element " + i + " " + e.getMessage());
+    }
     return m;
   }
 
@@ -151,7 +192,15 @@ public class ListSerializer extends AbstractSerializer
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
-    String java_class = jso.getString("javaClass");
+    String java_class;
+    try
+    {
+      java_class = jso.getString("javaClass");
+    }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("Could not read javaClass");
+    }
     if (java_class == null)
     {
       throw new UnmarshallException("no type hint");
@@ -175,7 +224,15 @@ public class ListSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("not a List");
     }
-    JSONArray jsonlist = jso.getJSONArray("list");
+    JSONArray jsonlist;
+    try
+    {
+      jsonlist = jso.getJSONArray("list");
+    }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("Could not read list: " + e.getMessage());
+    }
     if (jsonlist == null)
     {
       throw new UnmarshallException("list missing");
@@ -189,6 +246,10 @@ public class ListSerializer extends AbstractSerializer
       }
     }
     catch (UnmarshallException e)
+    {
+      throw new UnmarshallException("element " + i + " " + e.getMessage());
+    }
+    catch (JSONException e)
     {
       throw new UnmarshallException("element " + i + " " + e.getMessage());
     }

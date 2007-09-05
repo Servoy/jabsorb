@@ -31,12 +31,13 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import org.jabsorb.json.JSONObject;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Serialises Hashtables
@@ -82,11 +83,18 @@ public class DictionarySerializer extends AbstractSerializer
     Dictionary ht = (Dictionary) o;
     JSONObject obj = new JSONObject();
     JSONObject mapdata = new JSONObject();
-    if (ser.getMarshallClassHints())
+    try
     {
-      obj.put("javaClass", o.getClass().getName());
+      if (ser.getMarshallClassHints())
+      {
+        obj.put("javaClass", o.getClass().getName());
+      }
+      obj.put("map", mapdata);
     }
-    obj.put("map", mapdata);
+    catch (JSONException e)
+    {
+      throw new MarshallException("Could add data: " + e.getMessage());
+    }
     Object key = null;
     Object val = null;
     try
@@ -104,14 +112,30 @@ public class DictionarySerializer extends AbstractSerializer
     {
       throw new MarshallException("map key " + key + " " + e.getMessage());
     }
+    catch (JSONException e)
+    {
+      throw new MarshallException("map key " + key + " " + e.getMessage());
+    }
     return obj;
   }
 
+  // TODO: try unMarshall and unMarshall share 90% code. Put in into an
+  // intermediate function.
+  // TODO: Also cache the result somehow so that an unmarshall
+  // following a tryUnmarshall doesn't do the same work twice!
   public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object o)
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
-    String java_class = jso.getString("javaClass");
+    String java_class;
+    try
+    {
+      java_class = jso.getString("javaClass");
+    }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("Could not read javaClass");
+    }
     if (java_class == null)
     {
       throw new UnmarshallException("no type hint");
@@ -121,7 +145,15 @@ public class DictionarySerializer extends AbstractSerializer
     {
       throw new UnmarshallException("not a Dictionary");
     }
-    JSONObject jsonmap = jso.getJSONObject("map");
+    JSONObject jsonmap;
+    try
+    {
+      jsonmap = jso.getJSONObject("map");
+    }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("map missing");
+    }
     if (jsonmap == null)
     {
       throw new UnmarshallException("map missing");
@@ -141,6 +173,11 @@ public class DictionarySerializer extends AbstractSerializer
     {
       throw new UnmarshallException("key " + key + " " + e.getMessage());
     }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("key " + key + " " + e.getMessage());
+    }
+
     return m;
   }
 
@@ -148,7 +185,15 @@ public class DictionarySerializer extends AbstractSerializer
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
-    String java_class = jso.getString("javaClass");
+    String java_class;
+    try
+    {
+      java_class = jso.getString("javaClass");
+    }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("Could not read javaClass");
+    }
     if (java_class == null)
     {
       throw new UnmarshallException("no type hint");
@@ -163,7 +208,15 @@ public class DictionarySerializer extends AbstractSerializer
     {
       throw new UnmarshallException("not a Dictionary");
     }
-    JSONObject jsonmap = jso.getJSONObject("map");
+    JSONObject jsonmap;
+    try
+    {
+      jsonmap = jso.getJSONObject("map");
+    }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("map missing");
+    }
     if (jsonmap == null)
     {
       throw new UnmarshallException("map missing");
@@ -179,6 +232,10 @@ public class DictionarySerializer extends AbstractSerializer
       }
     }
     catch (UnmarshallException e)
+    {
+      throw new UnmarshallException("key " + key + " " + e.getMessage());
+    }
+    catch (JSONException e)
     {
       throw new UnmarshallException("key " + key + " " + e.getMessage());
     }

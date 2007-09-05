@@ -37,12 +37,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.jabsorb.json.JSONObject;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -223,7 +224,15 @@ public class BeanSerializer extends AbstractSerializer
     JSONObject val = new JSONObject();
     if (ser.getMarshallClassHints())
     {
-      val.put("javaClass", o.getClass().getName());
+      try
+      {
+        val.put("javaClass", o.getClass().getName());
+
+      }
+      catch (JSONException e)
+      {
+        throw new MarshallException("JSONException: " + e.getMessage());
+      }
     }
     Iterator i = bd.readableProps.entrySet().iterator();
     Object args[] = new Object[0];
@@ -254,7 +263,14 @@ public class BeanSerializer extends AbstractSerializer
       {
         if (result != null || ser.getMarshallNullAttributes())
         {
-          val.put(prop, ser.marshall(state, result));
+          try
+          {
+            val.put(prop, ser.marshall(state, result));
+          }
+          catch (JSONException e)
+          {
+            throw new MarshallException("JSONException: " + e.getMessage());
+          }
         }
       }
       catch (MarshallException e)
@@ -335,6 +351,11 @@ public class BeanSerializer extends AbstractSerializer
           throw new UnmarshallException("bean " + clazz.getName() + " "
               + e.getMessage());
         }
+        catch (JSONException e)
+        {
+          throw new UnmarshallException("bean " + clazz.getName() + " "
+              + e.getMessage());
+        }
       }
       else
       {
@@ -390,6 +411,11 @@ public class BeanSerializer extends AbstractSerializer
           fieldVal = ser.unmarshall(state, param[0], jso.get(field));
         }
         catch (UnmarshallException e)
+        {
+          throw new UnmarshallException("bean " + clazz.getName() + " "
+              + e.getMessage());
+        }
+        catch (JSONException e)
         {
           throw new UnmarshallException("bean " + clazz.getName() + " "
               + e.getMessage());

@@ -26,12 +26,12 @@
 
 package org.jabsorb.serializer.impl;
 
-import org.jabsorb.json.JSONObject;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
+import org.json.JSONObject;
 
 /**
  * Formats the Java JSONObject object.

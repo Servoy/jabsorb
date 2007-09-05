@@ -28,12 +28,13 @@ package org.jabsorb.serializer.impl;
 
 import java.lang.reflect.Array;
 
-import org.jabsorb.json.JSONArray;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 /**
  * Responsible for serialising Java arrays
@@ -92,6 +93,11 @@ public class ArraySerializer extends AbstractSerializer
     catch (UnmarshallException e)
     {
       throw new UnmarshallException("element " + i + " " + e.getMessage());
+    }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("element " + i + " " + e.getMessage()
+          + " not found in json object");
     }
     return m;
   }
@@ -196,85 +202,98 @@ public class ArraySerializer extends AbstractSerializer
     {
       throw new UnmarshallException("element " + i + " " + e.getMessage());
     }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("element " + i + " " + e.getMessage()
+          + " not found in json object");
+    }
   }
 
   public Object marshall(SerializerState state, Object o)
       throws MarshallException
   {
-    JSONArray arr = new JSONArray();
-    if (o instanceof int[])
+    try
     {
-      int a[] = (int[]) o;
-      for (int i = 0; i < a.length; i++)
+      JSONArray arr = new JSONArray();
+      if (o instanceof int[])
       {
-        arr.put(a[i]);
+        int a[] = (int[]) o;
+        for (int i = 0; i < a.length; i++)
+        {
+          arr.put(a[i]);
+        }
       }
-    }
-    else if (o instanceof long[])
-    {
-      long a[] = (long[]) o;
-      for (int i = 0; i < a.length; i++)
+      else if (o instanceof long[])
       {
-        arr.put(a[i]);
+        long a[] = (long[]) o;
+        for (int i = 0; i < a.length; i++)
+        {
+          arr.put(a[i]);
+        }
       }
-    }
-    else if (o instanceof short[])
-    {
-      short a[] = (short[]) o;
-      for (int i = 0; i < a.length; i++)
+      else if (o instanceof short[])
       {
-        arr.put(a[i]);
+        short a[] = (short[]) o;
+        for (int i = 0; i < a.length; i++)
+        {
+          arr.put(a[i]);
+        }
       }
-    }
-    else if (o instanceof byte[])
-    {
-      byte a[] = (byte[]) o;
-      for (int i = 0; i < a.length; i++)
+      else if (o instanceof byte[])
       {
-        arr.put(a[i]);
+        byte a[] = (byte[]) o;
+        for (int i = 0; i < a.length; i++)
+        {
+          arr.put(a[i]);
+        }
       }
-    }
-    else if (o instanceof float[])
-    {
-      float a[] = (float[]) o;
-      for (int i = 0; i < a.length; i++)
+      else if (o instanceof float[])
       {
-        arr.put(a[i]);
+        float a[] = (float[]) o;
+        for (int i = 0; i < a.length; i++)
+        {
+          arr.put(a[i]);
+        }
       }
-    }
-    else if (o instanceof double[])
-    {
-      double a[] = (double[]) o;
-      for (int i = 0; i < a.length; i++)
+      else if (o instanceof double[])
       {
-        arr.put(a[i]);
+        double a[] = (double[]) o;
+        for (int i = 0; i < a.length; i++)
+        {
+          arr.put(a[i]);
+        }
       }
-    }
-    else if (o instanceof char[])
-    {
-      char a[] = (char[]) o;
-      for (int i = 0; i < a.length; i++)
+      else if (o instanceof char[])
       {
-        arr.put(a[i]);
+        char a[] = (char[]) o;
+        for (int i = 0; i < a.length; i++)
+        {
+          arr.put(a[i]);
+        }
       }
-    }
-    else if (o instanceof boolean[])
-    {
-      boolean a[] = (boolean[]) o;
-      for (int i = 0; i < a.length; i++)
+      else if (o instanceof boolean[])
       {
-        arr.put(a[i]);
+        boolean a[] = (boolean[]) o;
+        for (int i = 0; i < a.length; i++)
+        {
+          arr.put(a[i]);
+        }
       }
-    }
-    else if (o instanceof Object[])
-    {
-      Object a[] = (Object[]) o;
-      for (int i = 0; i < a.length; i++)
+      else if (o instanceof Object[])
       {
-        arr.put(ser.marshall(state, a[i]));
+        Object a[] = (Object[]) o;
+        for (int i = 0; i < a.length; i++)
+        {
+          arr.put(ser.marshall(state, a[i]));
+        }
       }
-    }
-    return arr;
-  }
+      return arr;
 
+    }
+    catch (JSONException e)
+    {
+      throw new MarshallException(e.getMessage() + " threw json exception");
+    }
+
+  }
 }

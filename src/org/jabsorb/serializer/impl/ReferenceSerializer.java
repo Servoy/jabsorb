@@ -27,12 +27,13 @@
 package org.jabsorb.serializer.impl;
 
 import org.jabsorb.JSONRPCBridge;
-import org.jabsorb.json.JSONObject;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,9 +114,16 @@ public class ReferenceSerializer extends AbstractSerializer
         bridge.getReferenceMap().put(identity, o);
       }
       JSONObject jso = new JSONObject();
-      jso.put("JSONRPCType", "Reference");
-      jso.put("javaClass", clazz.getName());
-      jso.put("objectID", identity);
+      try
+      {
+        jso.put("JSONRPCType", "Reference");
+        jso.put("javaClass", clazz.getName());
+        jso.put("objectID", identity);
+      }
+      catch (JSONException e)
+      {
+        throw new MarshallException(e.getMessage());
+      }
       return jso;
     }
     else if (bridge.isCallableReference(clazz))
@@ -127,9 +135,17 @@ public class ReferenceSerializer extends AbstractSerializer
       }
       bridge.registerObject(identity, o);
       JSONObject jso = new JSONObject();
-      jso.put("JSONRPCType", "CallableReference");
-      jso.put("javaClass", clazz.getName());
-      jso.put("objectID", identity);
+      try
+      {
+        jso.put("JSONRPCType", "CallableReference");
+        jso.put("javaClass", clazz.getName());
+        jso.put("objectID", identity);
+      }
+      catch (JSONException e)
+      {
+        throw new MarshallException(e.getMessage());
+      }
+
       return jso;
     }
     return null;
@@ -146,8 +162,17 @@ public class ReferenceSerializer extends AbstractSerializer
   {
     JSONObject jso = (JSONObject) o;
     Object ref = null;
-    String json_type = jso.getString("JSONRPCType");
-    int object_id = jso.getInt("objectID");
+    String json_type;
+    int object_id;
+    try
+    {
+      json_type = jso.getString("JSONRPCType");
+      object_id = jso.getInt("objectID");
+    }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException(e.getMessage());
+    }
     if (json_type != null && json_type.equals("Reference"))
     {
       synchronized (bridge.getBridgeState())

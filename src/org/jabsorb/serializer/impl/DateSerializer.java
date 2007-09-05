@@ -29,12 +29,13 @@ package org.jabsorb.serializer.impl;
 import java.sql.Timestamp;
 import java.util.Date;
 
-import org.jabsorb.json.JSONObject;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Serialises date and time values
@@ -81,11 +82,18 @@ public class DateSerializer extends AbstractSerializer
           + o.getClass());
     }
     JSONObject obj = new JSONObject();
-    if (ser.getMarshallClassHints())
+    try
     {
-      obj.put("javaClass", o.getClass().getName());
+      if (ser.getMarshallClassHints())
+      {
+        obj.put("javaClass", o.getClass().getName());
+      }
+      obj.put("time", time);
     }
-    obj.put("time", time);
+    catch (JSONException e)
+    {
+      return new MarshallException(e.getMessage());
+    }
     return obj;
   }
 
@@ -93,7 +101,15 @@ public class DateSerializer extends AbstractSerializer
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
-    String java_class = jso.getString("javaClass");
+    String java_class;
+    try
+    {
+      java_class = jso.getString("javaClass");
+    }
+    catch (JSONException e)
+    {
+      throw new UnmarshallException("no type hint");
+    }
     if (java_class == null)
     {
       throw new UnmarshallException("no type hint");
@@ -109,7 +125,14 @@ public class DateSerializer extends AbstractSerializer
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
-    long time = jso.getLong("time");
+    long time;
+    try{
+      time= jso.getLong("time");
+    }
+    catch(JSONException e)
+    {
+      throw new UnmarshallException("Could not get the time in date serialiser");
+    }
     if (jso.has("javaClass"))
     {
       try
@@ -119,6 +142,10 @@ public class DateSerializer extends AbstractSerializer
       catch (ClassNotFoundException cnfe)
       {
         throw new UnmarshallException(cnfe.getMessage());
+      }
+      catch(JSONException e)
+      {
+        throw new UnmarshallException("Could not find javaClass");
       }
     }
     if (Date.class.equals(clazz))
