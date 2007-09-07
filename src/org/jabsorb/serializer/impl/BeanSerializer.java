@@ -242,9 +242,9 @@ public class BeanSerializer extends AbstractSerializer
       Map.Entry ent = (Map.Entry) i.next();
       String prop = (String) ent.getKey();
       Method getMethod = (Method) ent.getValue();
-      if (ser.isDebug())
+      if (log.isDebugEnabled())
       {
-        log.trace("invoking " + getMethod.getName() + "()");
+        log.debug("invoking " + getMethod.getName() + "()");
       }
       try
       {
@@ -382,9 +382,9 @@ public class BeanSerializer extends AbstractSerializer
     {
       throw new UnmarshallException(clazz.getName() + " is not a bean");
     }
-    if (ser.isDebug())
+    if (log.isDebugEnabled())
     {
-      log.trace("instantiating " + clazz.getName());
+      log.debug("instantiating " + clazz.getName());
     }
     Object instance = null;
     try
@@ -420,9 +420,9 @@ public class BeanSerializer extends AbstractSerializer
           throw new UnmarshallException("bean " + clazz.getName() + " "
               + e.getMessage());
         }
-        if (ser.isDebug())
+        if (log.isDebugEnabled())
         {
-          log.trace("invoking " + setMethod.getName() + "(" + fieldVal + ")");
+          log.debug("invoking " + setMethod.getName() + "(" + fieldVal + ")");
         }
         invokeArgs[0] = fieldVal;
         try

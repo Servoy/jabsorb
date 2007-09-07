@@ -77,11 +77,6 @@ public class JSONSerializer implements Serializable
       .getLogger(JSONSerializer.class);
 
   /**
-   * Whether debugging is enabled on this serializer.
-   */
-  private boolean debug = false;
-
-  /**
    * Key: Serializer
    */
   private HashSet serializerSet = new HashSet();
@@ -163,16 +158,6 @@ public class JSONSerializer implements Serializable
   }
 
   /**
-   * Are debugging messages enabled on this serializer instance.
-   * 
-   * @return true or false depending on whether debugging messages are enabled.
-   */
-  public boolean isDebug()
-  {
-    return debug;
-  }
-
-  /**
    * Marshall java into an equivalent json representation (JSONObject or
    * JSONArray.) <p/> This involves finding the correct Serializer for the class
    * of the given java object and then invoking it to marshall the java object
@@ -191,15 +176,15 @@ public class JSONSerializer implements Serializable
   {
     if (o == null)
     {
-      if (isDebug())
+      if (log.isDebugEnabled())
       {
-        log.trace("marshall null");
+        log.debug("marshall null");
       }
       return JSONObject.NULL;
     }
-    if (isDebug())
+    if (log.isDebugEnabled())
     {
-      log.trace("marshall class " + o.getClass().getName());
+      log.debug("marshall class " + o.getClass().getName());
     }
     Serializer s = getSerializer(o.getClass(), null);
     if (s != null)
@@ -276,9 +261,9 @@ public class JSONSerializer implements Serializable
       }
       if (!serializerSet.contains(s))
       {
-        if (isDebug())
+        if (log.isDebugEnabled())
         {
-          log.info("registered serializer " + s.getClass().getName());
+          log.debug("registered serializer " + s.getClass().getName());
         }
         s.setOwner(this);
         serializerSet.add(s);
@@ -289,16 +274,6 @@ public class JSONSerializer implements Serializable
         }
       }
     }
-  }
-
-  /**
-   * Enable or disable debugging message from this serializer instance.
-   * 
-   * @param debug flag to enable or disable debugging messages
-   */
-  public void setDebug(boolean debug)
-  {
-    this.debug = debug;
   }
 
   /**
@@ -538,22 +513,21 @@ public class JSONSerializer implements Serializable
    */
   private Serializer getSerializer(Class clazz, Class jsoClazz)
   {
-    if (isDebug())
+    if (log.isDebugEnabled())
     {
-      log.trace("looking for serializer - java:"
+      log.debug("looking for serializer - java:"
           + (clazz == null ? "null" : clazz.getName()) + " json:"
           + (jsoClazz == null ? "null" : jsoClazz.getName()));
     }
 
-    Serializer s = null;
     synchronized (serializerSet)
     {
-      s = (Serializer) serializableMap.get(clazz);
+      Serializer s = (Serializer) serializableMap.get(clazz);
       if (s != null && s.canSerialize(clazz, jsoClazz))
       {
-        if (isDebug())
+        if (log.isDebugEnabled())
         {
-          log.trace("direct match serializer " + s.getClass().getName());
+          log.debug("direct match serializer " + s.getClass().getName());
         }
         return s;
       }
@@ -563,9 +537,9 @@ public class JSONSerializer implements Serializable
         s = (Serializer) i.next();
         if (s.canSerialize(clazz, jsoClazz))
         {
-          if (isDebug())
+          if (log.isDebugEnabled())
           {
-            log.trace("search found serializer " + s.getClass().getName());
+            log.debug("search found serializer " + s.getClass().getName());
           }
           return s;
         }

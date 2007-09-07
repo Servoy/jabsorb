@@ -33,13 +33,10 @@ String onLoad = "onLoad()";%>
         <a href="javascript:doReferenceTests();">Reference Tests</a><br>
         <a href="javascript:doContainerTests();">Container Tests</a><br>
         <a href="javascript:doExceptionTest();">Exception Test</a></p>
-        <h3>Debug</h3>
-        <p><a href="javascript:setDebug(true);">Debug On</a><br>
-        <a href="javascript:setDebug(false);">Debug Off</a></p>
         <h3>Callbacks</h3>
         <p><a href="javascript:setCallback(true);">Callback On</a><br>
         <a href="javascript:setCallback(false);">Callback Off</a></p>
-          <p><em><strong>Note:</strong> the debug and callback controls only affect debug output on the server side.</em></p>
+          <p><em><strong>Note:</strong> the callback control only affects the debug output in the server side logs.</em></p>
        </td>
       </tr>
     </table>

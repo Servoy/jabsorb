@@ -104,9 +104,9 @@ public class ReferenceSerializer extends AbstractSerializer
     Integer identity = new Integer(System.identityHashCode(o));
     if (bridge.isReference(clazz))
     {
-      if (ser.isDebug())
+      if (log.isDebugEnabled())
       {
-        log.trace("marshalling reference to object " + identity + " of class "
+        log.debug("marshalling reference to object " + identity + " of class "
             + clazz.getName());
       }
       synchronized (bridge.getBridgeState())
@@ -128,9 +128,9 @@ public class ReferenceSerializer extends AbstractSerializer
     }
     else if (bridge.isCallableReference(clazz))
     {
-      if (ser.isDebug())
+      if (log.isDebugEnabled())
       {
-        log.trace("marshalling callable reference to object " + identity
+        log.debug("marshalling callable reference to object " + identity
             + " of class " + clazz.getName());
       }
       bridge.registerObject(identity, o);

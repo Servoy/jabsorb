@@ -182,7 +182,7 @@ public class JSONRPCServlet extends HttpServlet
     {
       data.write(buf, 0, ret);
     }
-    if (json_bridge.isDebug())
+    if (log.isDebugEnabled())
     {
       log.debug("receive: " + prettyPrintJson(data.toString()));
     }
@@ -203,7 +203,7 @@ public class JSONRPCServlet extends HttpServlet
     }
 
     // Write the response
-    if (json_bridge.isDebug())
+    if (log.isDebugEnabled())
     {
       log.debug("send: " + prettyPrintJson(json_res.toString()));
     }
@@ -211,14 +211,14 @@ public class JSONRPCServlet extends HttpServlet
     byte[] bout = json_res.toString().getBytes("UTF-8");
 
     // handle gzipping of the response if it is turned on
-    if (GZIP_THRESHOLD != -1)
+    if (JSONRPCServlet.GZIP_THRESHOLD != -1)
     {
       // if the request header says that the browser can take gzip compressed output, then gzip the output
       // but only if the response is large enough to warrant it and if the resultant compressed output is
       // actually smaller.
       if (acceptsGzip(request))
       {
-        if (bout.length > GZIP_THRESHOLD)
+        if (bout.length > JSONRPCServlet.GZIP_THRESHOLD)
         {
           byte[] gzippedOut = gzip(bout);
           log.debug("gzipping! original size =  " + bout.length + "  gzipped size = " + gzippedOut.length);
@@ -241,7 +241,7 @@ public class JSONRPCServlet extends HttpServlet
         else
         {
           log.debug("not gzipping because size is " + bout.length +
-            " (less than the GZIP_THRESHOLD of " + GZIP_THRESHOLD + " bytes)");
+            " (less than the GZIP_THRESHOLD of " + JSONRPCServlet.GZIP_THRESHOLD + " bytes)");
         }
       }
       else
@@ -278,9 +278,9 @@ public class JSONRPCServlet extends HttpServlet
     {
       // Use the global bridge if we can't find a bridge in the session.
       json_bridge = JSONRPCBridge.getGlobalBridge();
-      if (json_bridge.isDebug())
+      if (log.isDebugEnabled())
       {
-        log.info("Using global bridge.");
+        log.debug("Using global bridge.");
       }
     }
     return json_bridge;

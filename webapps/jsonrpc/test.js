@@ -224,20 +224,6 @@ function doExceptionTest()
   }
 }
 
-function setDebug(flag)
-{
-  clrscr();
-  try
-  {
-    print("test.setDebug(" + flag + ")\n\n");
-    jsonrpc.test.setDebug(flag);
-  }
-  catch(e)
-  {
-    print("Exception: \n\n" + e);
-  }
-}
-
 function setCallback(flag)
 {
   clrscr();

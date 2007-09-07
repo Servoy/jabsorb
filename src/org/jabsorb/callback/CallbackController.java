@@ -57,37 +57,11 @@ public class CallbackController implements Serializable
   private HashSet callbackSet;
 
   /**
-   * Whether debugging is enabled.
-   */
-  private boolean debug;
-
-  /**
    * Default constructor.
    */
   public CallbackController()
   {
     callbackSet = new HashSet();
-    debug = false;
-  }
-
-  /**
-   * Enable or disable debugging message from this callback controllerinstance.
-   * 
-   * @param debug flag to enable or disable debugging messages
-   */
-  public void setDebug(boolean debug)
-  {
-    this.debug = debug;
-  }
-
-  /**
-   * Are debugging messages enabled on this callback controller instance.
-   * 
-   * @return true or false depending on whether debugging messages are enabled.
-   */
-  protected boolean isDebug()
-  {
-    return debug;
   }
 
   /**
@@ -106,9 +80,9 @@ public class CallbackController implements Serializable
     {
       callbackSet.add(new CallbackData(callback, contextInterface));
     }
-    if (debug)
+    if (log.isDebugEnabled())
     {
-      log.info("registered callback " + callback.getClass().getName()
+      log.debug("registered callback " + callback.getClass().getName()
           + " with context interface " + contextInterface.getName());
     }
   }
@@ -128,9 +102,9 @@ public class CallbackController implements Serializable
     {
       callbackSet.remove(new CallbackData(callback, contextInterface));
     }
-    if (debug)
+    if (log.isDebugEnabled())
     {
-      log.info("unregistered callback " + callback.getClass().getName()
+      log.debug("unregistered callback " + callback.getClass().getName()
           + " with context " + contextInterface.getName());
     }
   }

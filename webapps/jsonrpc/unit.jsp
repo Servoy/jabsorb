@@ -1,14 +1,13 @@
 <%@
 page contentType="text/html; charset=UTF-8" %><%@
 page language="java" %><%@
-page import="java.util.logging.Level, java.util.logging.Logger, org.slf4j.LoggerFactory" %>
+page import="org.slf4j.LoggerFactory" %>
 <jsp:useBean id="JSONRPCBridge" scope="session"
      class="org.jabsorb.JSONRPCBridge"
 /><jsp:useBean id="testObject" scope="session"
      class="org.jabsorb.test.Test"
 /><%
    response.setDateHeader ("Expires", 0);
-   JSONRPCBridge.setDebug(true);
    JSONRPCBridge.registerObject("test", testObject);
 %>
 <%!

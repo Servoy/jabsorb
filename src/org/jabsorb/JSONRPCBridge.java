@@ -418,11 +418,6 @@ public class JSONRPCBridge implements Serializable
   }
 
   /**
-   * Whether debugging enabled on this bridge
-   */
-  private boolean debug = false;
-
-  /**
    * The functor used to convert exceptions
    */
   private ExceptionTransformer exceptionTransformer = IDENTITY_EXCEPTION_TRANSFORMER;
@@ -467,9 +462,9 @@ public class JSONRPCBridge implements Serializable
           JSONRPCResult.MSG_ERR_NOMETHOD);
     }
 
-    if (isDebug())
+    if (log.isDebugEnabled())
     {
-      log.trace("call " + encodedMethod + "(" + arguments + ")"
+      log.debug("call " + encodedMethod + "(" + arguments + ")"
           + ", requestId=" + requestId);
     }
 
@@ -596,9 +591,9 @@ public class JSONRPCBridge implements Serializable
     // Call the method
     try
     {
-      if (debug)
+      if (log.isDebugEnabled())
       {
-        log.trace("invoking " + method.getReturnType().getName() + " "
+        log.debug("invoking " + method.getReturnType().getName() + " "
             + method.getName() + "(" + argSignature(method) + ")");
       }
 
@@ -835,9 +830,9 @@ public class JSONRPCBridge implements Serializable
       }
       state.getCallableReferenceSet().add(clazz);
     }
-    if (debug)
+    if (log.isDebugEnabled())
     {
-      log.info("registered callable reference " + clazz.getName());
+      log.debug("registered callable reference " + clazz.getName());
     }
   }
 
@@ -855,7 +850,6 @@ public class JSONRPCBridge implements Serializable
     if (cbc == null)
     {
       cbc = new CallbackController();
-      cbc.setDebug(isDebug());
     }
     cbc.registerCallback(callback, contextInterface);
   }
@@ -886,9 +880,9 @@ public class JSONRPCBridge implements Serializable
         classMap.put(name, clazz);
       }
     }
-    if (debug)
+    if (log.isDebugEnabled())
     {
-      log.info("registered class " + clazz.getName() + " as " + name);
+      log.debug("registered class " + clazz.getName() + " as " + name);
     }
   }
 
@@ -912,9 +906,9 @@ public class JSONRPCBridge implements Serializable
       HashMap objectMap = state.getObjectMap();
       objectMap.put(key, oi);
     }
-    if (debug)
+    if (log.isDebugEnabled())
     {
-      log.info("registered object " + o.hashCode() + " of class "
+      log.debug("registered object " + o.hashCode() + " of class "
           + o.getClass().getName() + " as " + key);
     }
   }
@@ -940,9 +934,9 @@ public class JSONRPCBridge implements Serializable
       HashMap objectMap = state.getObjectMap();
       objectMap.put(key, oi);
     }
-    if (debug)
+    if (log.isDebugEnabled())
     {
-      log.info("registered object " + o.hashCode() + " of class "
+      log.debug("registered object " + o.hashCode() + " of class "
           + interfaceClass.getName() + " as " + key);
     }
   }
@@ -977,9 +971,9 @@ public class JSONRPCBridge implements Serializable
       }
       state.getReferenceSet().add(clazz);
     }
-    if (debug)
+    if (log.isDebugEnabled())
     {
-      log.info("registered reference " + clazz.getName());
+      log.debug("registered reference " + clazz.getName());
     }
   }
 
@@ -1014,21 +1008,6 @@ public class JSONRPCBridge implements Serializable
   public void setCallbackController(CallbackController cbc)
   {
     this.cbc = cbc;
-  }
-
-  /**
-   * Enable or disable debugging message from this bridge instance.
-   * 
-   * @param debug flag to enable or disable debugging messages
-   */
-  public void setDebug(boolean debug)
-  {
-    this.debug = debug;
-    ser.setDebug(isDebug());
-    if (cbc != null)
-    {
-      cbc.setDebug(isDebug());
-    }
   }
 
   /**
@@ -1074,9 +1053,9 @@ public class JSONRPCBridge implements Serializable
       if (clazz != null)
       {
         classMap.remove(name);
-        if (debug)
+        if (log.isDebugEnabled())
         {
-          log.info("unregistered class " + clazz.getName() + " from " + name);
+          log.debug("unregistered class " + clazz.getName() + " from " + name);
         }
       }
     }
@@ -1098,23 +1077,13 @@ public class JSONRPCBridge implements Serializable
       if (oi.o != null)
       {
         objectMap.remove(key);
-        if (debug)
+        if (log.isDebugEnabled())
         {
-          log.info("unregistered object " + oi.o.hashCode() + " of class "
+          log.debug("unregistered object " + oi.o.hashCode() + " of class "
               + oi.clazz.getName() + " from " + key);
         }
       }
     }
-  }
-
-  /**
-   * Are debugging messages enabled on this bridge instance.
-   * 
-   * @return true or false depending on whether debugging messages are enabled.
-   */
-  protected boolean isDebug()
-  {
-    return debug || (this != globalBridge && globalBridge.isDebug());
   }
 
   /**
@@ -1232,9 +1201,9 @@ public class JSONRPCBridge implements Serializable
 
     if (cd != null)
     {
-      if (debug)
+      if (log.isDebugEnabled())
       {
-        log.trace("found class " + cd.getClazz().getName() + " named "
+        log.debug("found class " + cd.getClazz().getName() + " named "
             + className);
       }
       return cd;
@@ -1280,9 +1249,9 @@ public class JSONRPCBridge implements Serializable
     if (o instanceof Method)
     {
       Method m = (Method) o;
-      if (debug)
+      if (log.isDebugEnabled())
       {
-        log.trace("found method " + methodName + "(" + argSignature(m) + ")");
+        log.debug("found method " + methodName + "(" + argSignature(m) + ")");
       }
       return m;
     }
@@ -1302,9 +1271,9 @@ public class JSONRPCBridge implements Serializable
     // try and unmarshall the arguments against each candidate method
     // to determine which one matches the best
     ArrayList candidate = new ArrayList();
-    if (debug)
+    if (log.isDebugEnabled())
     {
-      log.trace("looking for method " + methodName + "("
+      log.debug("looking for method " + methodName + "("
           + argSignature(arguments) + ")");
     }
     for (int i = 0; i < method.length; i++)
@@ -1312,17 +1281,17 @@ public class JSONRPCBridge implements Serializable
       try
       {
         candidate.add(tryUnmarshallArgs(method[i], arguments));
-        if (debug)
+        if (log.isDebugEnabled())
         {
-          log.trace("+++ possible match with method " + methodName + "("
+          log.debug("+++ possible match with method " + methodName + "("
               + argSignature(method[i]) + ")");
         }
       }
       catch (Exception e)
       {
-        if (debug)
+        if (log.isDebugEnabled())
         {
-          log.trace("xxx " + e.getMessage() + " in " + methodName + "("
+          log.debug("xxx " + e.getMessage() + " in " + methodName + "("
               + argSignature(method[i]) + ")");
         }
       }
@@ -1353,9 +1322,9 @@ public class JSONRPCBridge implements Serializable
     if (best != null)
     {
       Method m = best.method;
-      if (debug)
+      if (log.isDebugEnabled())
       {
-        log.trace("found method " + methodName + "(" + argSignature(m) + ")");
+        log.debug("found method " + methodName + "(" + argSignature(m) + ")");
       }
       return m;
     }
@@ -1381,9 +1350,9 @@ public class JSONRPCBridge implements Serializable
       HashMap objectMap = state.getObjectMap();
       oi = (ObjectInstance) objectMap.get(key);
     }
-    if (debug && oi != null)
+    if (log.isDebugEnabled() && oi != null)
     {
-      log.trace("found object " + oi.o.hashCode() + " of class "
+      log.debug("found object " + oi.o.hashCode() + " of class "
           + oi.clazz.getName() + " with key " + key);
     }
     if (oi == null && this != globalBridge)

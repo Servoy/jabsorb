@@ -43,6 +43,8 @@ import org.jabsorb.JSONRPCBridge;
 import org.jabsorb.callback.InvocationCallback;
 import org.json.JSONObject;
 
+//todo:  javadoc!
+
 public class Test implements Serializable
 {
   private final static long serialVersionUID = 2;
@@ -456,13 +458,6 @@ public class Test implements Serializable
   public CallableRefTest getCallableRef()
   {
     return callableRef;
-  }
-
-  // Debug control
-
-  public void setDebug(JSONRPCBridge bridge, boolean flag)
-  {
-    bridge.setDebug(flag);
   }
 
   // Callback tests
