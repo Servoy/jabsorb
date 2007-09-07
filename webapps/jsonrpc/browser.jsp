@@ -40,7 +40,7 @@
   {
     onLoad = "decodeUserAgents()";
   }
-  String title = "jabsorb Browser Compatibility";
+  String title = "Browser Compatibility";
   String head =
     "    <link rel=\"stylesheet\" type=\"text/css\" href=\"css/browser.css\">\n" +
       "    <script type=\"text/javascript\" src=\"jsonrpc.js\"></script>\n" +
@@ -48,14 +48,14 @@
 %>
 <%@ include file="header.jspinc" %>
 
-    <h2>jabsorb Browser Compatibility</h2>
+    <h2><%=appName%> <%=title%></h2>
 
 <% if(testCookies == null && browser.gotSession == false) { %>
     <p>Testing to see if you have cookies enabled...</p>
 <% } else if(testCookies != null && browser.gotSession == false) { %>
     <p>Cookies not enabled. Feed me, Feed me, I want cookies!</p>
 <% } else if(browser.firstRun) { %>
-    <p>Testing jabsorb. The page will reload in one moment...</p>
+    <p>Testing <%=appName%>. The page will reload in one moment...</p>
     <p><em>Note:</em> You need a recent browser (post year 2000) with an ECMAScript 3rd Edition (ECMA-262) interpreter to run this page ie. Netscape JavaScript 1.5, Microsoft JScript 5.0 or any other conforming implementations.</p>
     <p>If your browser does not support this scripting standard, it will not be entered in the browser compatibility database (and this page will not reload).</p>
 <% } else { %>
@@ -90,11 +90,13 @@
 <%
   Iterator i;
   i = browser.getPassedUserAgents().iterator();
+    int j=0;
   while (i.hasNext())
   {
+    j++;
     String userAgent = (String) i.next();
 %>
-<tr>
+<tr class="tr<%=(j%2)%>">
  <td class="br_td"><div class="br_cell">&nbsp;</div></td>
  <td class="br_td"><div class="plat_cell">&nbsp;</div></td>
  <% if(browser.userAgent != null && browser.userAgent.equals(userAgent)) { %>
@@ -121,11 +123,13 @@
       <tbody id="bad-browsers">
 <%
   i = browser.getFailedUserAgents().iterator();
+
   while (i.hasNext())
   {
+    j++;
     String userAgent = (String) i.next();
 %>
-<tr>
+<tr class="tr<%=(j%2)%>">
  <td class="br_td"><div class="br_cell">&nbsp;</div></td>
  <td class="br_td"><div class="plat_cell">&nbsp;</div></td>
  <% if(browser.userAgent != null && browser.userAgent.equals(userAgent)) { %>

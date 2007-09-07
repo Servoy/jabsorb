@@ -1,25 +1,31 @@
 .br_table {
     width: 100%;
-    border: 1px solid #e8e8e8;
-    border-collapse: collapse;
+    border:1px solid navy;
+    border-collapse:collapse;
+    background-color:white;
 }
 
 .br_th {
-    background: #e8e8e8;
-    color: #000000;
+    border:1px solid navy;
+    color: navy;
+    background-color: #ffffcc;
     font-family: Arial, Helvetica, sans-serif;
     font-size: 12px;
     font-weight: bold;
     text-align: left;
+    padding: 2px;
 }
 
 .br_td {
-    border: 1px solid #e8e8e8;
+    border-right:1px solid navy;
+    border-left:1px solid navy;
     vertical-align: text-top;
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 12px;
+    font-size: 10px;
     text-align: left;
+    padding: 2px;
 }
+
 
 .br_heading {
     width: 110px;
@@ -49,4 +55,13 @@
 .ua_cell {
     overflow: hidden;
     height: 14px;
+}
+
+.tr0
+{
+    background-color:#efefef;
+}
+.tr1
+{
+    background-color:white;
 }

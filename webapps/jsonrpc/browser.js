@@ -1,11 +1,22 @@
+var jsonrpc;
+
 function redirectSelf(f)
 {
   var loc = location.href;
   var qind = loc.indexOf("?");
-  if (qind > 0) loc = loc.substring(0, qind);
+  if (qind > 0)
+  {
+    loc = loc.substring(0, qind);
+  }
   var hind = loc.indexOf("#");
-  if (hind > 0) loc = loc.substring(0, hind);
-  if (f) loc = loc.concat("?", f);
+  if (hind > 0)
+  {
+    loc = loc.substring(0, hind);
+  }
+  if (f)
+  {
+    loc = loc.concat("?", f);
+  }
   location.href = loc;
   return false;
 }

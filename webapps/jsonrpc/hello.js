@@ -1,3 +1,5 @@
+var jsonrpc;
+
 function onLoad()
 {
   jsonrpc = new JSONRpcClient("JSON-RPC");

@@ -1,9 +1,8 @@
 <%@
 page contentType="text/html; charset=UTF-8" %><%@
 page language="java" %><%@
-page import="org.jabsorb.JSONRPCBridge" %><%@
-page import="org.jabsorb.test.Test"
-%><jsp:useBean id="JSONRPCBridge" scope="session"
+page import="java.util.logging.Level, java.util.logging.Logger, org.slf4j.LoggerFactory" %>
+<jsp:useBean id="JSONRPCBridge" scope="session"
      class="org.jabsorb.JSONRPCBridge"
 /><jsp:useBean id="testObject" scope="session"
      class="org.jabsorb.test.Test"
@@ -12,7 +11,8 @@ page import="org.jabsorb.test.Test"
    JSONRPCBridge.setDebug(true);
    JSONRPCBridge.registerObject("test", testObject);
 %>
-<%!String title = "jabsorb Unit Tests";
+<%!
+  String title = "Unit Tests";
   String head =
     "    <link rel=\"stylesheet\" type=\"text/css\" href=\"css/unit.css\">\n" +
     "    <script type=\"text/javascript\" src=\"jsonrpc.js\"></script>\n" +
@@ -20,7 +20,7 @@ page import="org.jabsorb.test.Test"
   String onLoad = "onLoad()";%>
 <%@ include file="header.jspinc" %>
 
-    <h2>jabsorb Unit Tests</h2>
+    <h2><%=appName%> <%=title%></h2>
 
     <table cellpadding="0" cellspacing="0" border="0" width="100%">
       <tr>
@@ -43,7 +43,7 @@ page import="org.jabsorb.test.Test"
 
     <p></p>
 
-    <table class="test_table" cellspacing="0">
+    <table class="test_table">
       <thead>
        <tr>
         <th class="test_th" width="260"><div class="code_heading">Code</div></th>

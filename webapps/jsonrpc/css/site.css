@@ -1,10 +1,8 @@
 body { 
-  margin-top: 0px;
-  margin-bottom: 0px;
-  margin-left: 0px;
-  margin-right: 0px; 
+  margin: 0;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 12px;
+  background-color:#f4f5f5;
 }
 
 hr {
@@ -18,7 +16,7 @@ p {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 12px;
   text-align: justify;
-  margin-top: 0px;
+  margin-top: 0;
   margin-bottom: 8px;
 }
 
@@ -73,14 +71,14 @@ em {
 }
 
 pre { 
-  border: 1px solid black;
+  border: 1px solid navy;
   margin-top: 16px;
   margin-bottom: 16px;
   margin-left: 24px;
   margin-right: 24px; 
   padding: 12px;
-  background: #e8e8e8;
-  font-family: Courier;
+  background-color: #fff;
+  font-family: Courier, monospace;
   font-size: 12px;
 }
 
@@ -107,8 +105,8 @@ pre {
   padding-top: 4px;
   padding-bottom: 4px;
   padding-right: 24px;
-  padding-left: 0px;
-  background: #fff8d8;
+  padding-left: 0;
+  background-color: #fff8d8;
 }
 
 .code-block { 
@@ -118,8 +116,8 @@ pre {
   margin-left: 24px;
   margin-right: 24px; 
   padding: 12px;
-  background: #e8e8e8;
-  font-family: Courier;
+  background-color: #e8e8e8;
+  font-family: Courier, monospace;
   font-size: 12px;
 }
 
@@ -132,11 +130,11 @@ pre {
 
 .browser-table {
   border-collapse: collapse;
-  margin: 0px;
+  margin: 0;
 }
 
 .browser-cell-title {
-  background: #fff8d8;
+  background-color: #fff8d8;
   border: 1px solid black;
   padding: 6px;
   font-family: Arial, Helvetica, sans-serif;
@@ -145,7 +143,7 @@ pre {
 }
 
 .browser-cell {
-  background: #e8e8e8;
+  background-color: #e8e8e8;
   border: 1px solid black;
   padding: 6px;
   font-family: Arial, Helvetica, sans-serif;

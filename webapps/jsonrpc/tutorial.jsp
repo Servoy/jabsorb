@@ -1,19 +1,19 @@
 <%!
-  String title = "jabsorb Tutorial";
+  String title = "Tutorial";
   String head = "";
   String onLoad = null;
 %>
 <%@ include file="header.jspinc" %>
 
-    <h2>jabsorb Tutorial</h2>
+    <h2><%=appName%> <%=title%></h2>
 
-    <p>This tutorial briefly describes how to build jabsorb and then get your JavaScript client code to call methods in a Java server application using jabsorb and the included JavaScript JSON-RPC client.</p>
+    <p>This tutorial briefly describes how to build <%=appName%> and then get your JavaScript client code to call methods in a Java server application using <%=appName%> and the included JavaScript JSON-RPC client.</p>
 
     <h2>Table Of Contents</h2>
     <ul>
       <li><a href="#requirements">Requirements</a></li>
-      <li><a href="#building">Building jabsorb</a></li>
-      <li><a href="#demos">Building and installing jabsorb Demos</a></li>
+      <li><a href="#building">Building <%=appName%></a></li>
+      <li><a href="#demos">Building and installing <%=appName%> Demos</a></li>
       <li><a href="#jsonrpcservlet">The JSONRPCServlet</a></li>
       <li><a href="#webxml">Adding the JSONRPCServlet to your web.xml</a></li>
       <li><a href="#jsonrpcbridge">The JSONRPCBridge</a></li>
@@ -28,17 +28,17 @@
       <li>A Java Servlet container (such Apache Tomcat, the Tomcat service in JBoss, etc.).</li>
     </ul>
 
-    <h2><a name="building">Building jabsorb</a></h2>
+    <h2><a name="building">Building <%=appName%></a></h2>
 
-    <p>Edit <code>build.xml</code> in the top directory of the unpacked jabsorb distribution and set the location of your tomcat installation. eg.</p>
+    <p>Edit <code>build.xml</code> in the top directory of the unpacked <%=appName%> distribution and set the location of your tomcat installation. eg.</p>
     <pre>&lt;property name="tomcat" location="/opt/jakarta-tomcat-5.5.7"/&gt;</pre>
 
-    <p>Then build <code>jabsorb.jar</code> by running ant in the same directory.</p>
+    <p>Then build <code><%=appName%>-<%=version%>.jar</code> by running ant in the same directory.</p>
     <pre>ant</pre>
 
-    <p>This will build <code>jabsorb.jar</code> which contains the JSONRPCServlet (recieves the JSON-RPC requests; see section on adding this to your <code>web.xml</code>) and the JSONRPCBridge bean (decodes and dispatches the requests to your Java code; see sections on adding this to your JSP or servlet).</p>
+    <p>This will build <code><%=appName%>-<%=version%>.jar</code> which contains the JSONRPCServlet (receives the JSON-RPC requests; see section on adding this to your <code>web.xml</code>) and the JSONRPCBridge bean (decodes and dispatches the requests to your Java code; see sections on adding this to your JSP or servlet).</p>
 
-    <h2><a name="demos">Building and installing jabsorb Demos</a></h2>
+    <h2><a name="demos">Building and installing <%=appName%> Demos</a></h2>
 
     <p>To build the demo WAR file (Web Application Archive) <code>jsonrpc.war</code>:</p>
     <pre>ant test.dist</pre>
@@ -49,7 +49,7 @@
     <p>You should now be able to access your the demos on your local machine by pointing your browser at: <code>http://localhost:8080/jsonrpc/</code></p>
 
     <h2><a name="jsonrpcservlet">The JSONRPCServlet</a></h2>
-    <p>This servlet, the transport part of jabsorb, handles JSON-RPC requests over HTTP and dispatches them to a JSONRPCBridge instance registered in the HttpSession object.</p>
+    <p>This servlet, the transport part of <%=appName%>, handles JSON-RPC requests over HTTP and dispatches them to a JSONRPCBridge instance registered in the HttpSession object.</p>
 
     <h2><a name="webxml">Adding the JSONRPCServlet to your web.xml</a></h2>
     <p>Use the following web.xml (or add the servlet and servlet-mapping to your existing one):</p>
