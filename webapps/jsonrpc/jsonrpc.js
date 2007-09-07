@@ -28,19 +28,72 @@
 escapeJSONChar =
 function escapeJSONChar(c)
 {
-  if (c == "\"" || c == "\\") return "\\" + c;
-  else if (c == "\b") return "\\b";
-  else if (c == "\f") return "\\f";
-  else if (c == "\n") return "\\n";
-  else if (c == "\r") return "\\r";
-  else if (c == "\t") return "\\t";
-  var hex = c.charCodeAt(0).toString(16);
-  if (hex.length == 1) return "\\u000" + hex;
-  else if (hex.length == 2) return "\\u00" + hex;
-  else if (hex.length == 3) return "\\u0" + hex;
-  else return "\\u" + hex;
+  /*
+   * http://www.devguru.com/Technologies/ecmascript/QuickRef/escape.html
+   *
+   * To make a string portable, characters other than the following 69 ASCII 
+   * characters must be encoded:
+   *
+   *  ABCDEFGHIJKLMNOPQRSTUVWXYZ (65-90)
+   *  abcdefghijklmnopqrstuvwxyz (97-112)
+   *  1234567890 (48-57)
+   *  @*-_+./ (64,42,45,95,43,46,47)
+   *
+   */
+  var code =c.charCodeAt(0);
+  if(
+      (code>=65&&code<=90)||
+      (code>=97&&code<=112)||
+      (code>=48&&code>=57)||
+      (code==64)||(code==42)||(code==45)||(code==95)||
+      (code==43)||(code==46)||(code==47)
+    )
+  {
+    return c;
+  }
+  
+  if (c == "\"" || c == "\\")
+  { 
+    return "\\" + c;
+  }
+  else if (c == "\b")
+  {
+    return "\\b";
+  }
+  else if (c == "\f")
+  {
+    return "\\f";
+  }
+  else if (c == "\n")
+  {
+    return "\\n";
+  }
+  else if (c == "\r")
+  {
+    return "\\r";
+  }
+  else if (c == "\t")
+  {
+    return "\\t";
+  }
+  var hex = code.toString(16);
+  if (hex.length == 1)
+  {
+    return "\\u000" + hex;
+  }
+  else if (hex.length == 2)
+  {
+    return "\\u00" + hex;
+  }
+  else if (hex.length == 3)
+  {
+    return "\\u0" + hex;
+  }
+  else
+  {
+    return "\\u" + hex;
+  }
 };
-
 
 /* encode a string into JSON format */
 
@@ -57,14 +110,11 @@ function escapeJSONString(s)
   var parts = s.split("");
   for (var i = 0; i < parts.length; i++)
   {
-    var c = parts[i];
-    if (c == '"' || c == '\\' ||
-        c.charCodeAt(0) < 32 ||
-        c.charCodeAt(0) >= 128)
-      parts[i] = escapeJSONChar(parts[i]);
+    parts[i] = escapeJSONChar(parts[i]);
   }
   return "\"" + parts.join("") + "\"";
 };
+
 
 
 /* Marshall objects to JSON format */
