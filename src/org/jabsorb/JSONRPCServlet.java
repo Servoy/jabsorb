@@ -182,9 +182,13 @@ public class JSONRPCServlet extends HttpServlet
     {
       data.write(buf, 0, ret);
     }
+
+    String receiveString = data.toString();
+
     if (log.isDebugEnabled())
     {
-      log.debug("receive: " + prettyPrintJson(data.toString()));
+      log.debug("receive: " + receiveString);
+      log.debug("receive: " + prettyPrintJson(receiveString));
     }
 
     // Process the request
@@ -192,23 +196,27 @@ public class JSONRPCServlet extends HttpServlet
     JSONRPCResult json_res;
     try
     {
-      json_req = new JSONObject(data.toString());
+      json_req = new JSONObject(receiveString);
       json_res = json_bridge.call(new Object[] { request, response }, json_req);
     }
     catch (JSONException e)
     {
-      log.error("can't parse call: " + data);
+      log.error("can't parse call" + data, e);
       json_res = new JSONRPCResult(JSONRPCResult.CODE_ERR_PARSE, null,
           JSONRPCResult.MSG_ERR_PARSE);
     }
 
-    // Write the response
+    String sendString = json_res.toString();
+    
+    // dump the received string
     if (log.isDebugEnabled())
     {
-      log.debug("send: " + prettyPrintJson(json_res.toString()));
+      log.debug("send: " + sendString);
+      log.debug("send: " + prettyPrintJson(sendString));
     }
 
-    byte[] bout = json_res.toString().getBytes("UTF-8");
+    // Write the response
+    byte[] bout = sendString.getBytes("UTF-8");
 
     // handle gzipping of the response if it is turned on
     if (JSONRPCServlet.GZIP_THRESHOLD != -1)
