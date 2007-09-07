@@ -28,32 +28,8 @@
 escapeJSONChar =
 function escapeJSONChar(c)
 {
-  /*
-   * http://www.devguru.com/Technologies/ecmascript/QuickRef/escape.html
-   *
-   * To make a string portable, characters other than the following 69 ASCII 
-   * characters must be encoded:
-   *
-   *  ABCDEFGHIJKLMNOPQRSTUVWXYZ (65-90)
-   *  abcdefghijklmnopqrstuvwxyz (97-112)
-   *  1234567890 (48-57)
-   *  @*-_+./ (64,42,45,95,43,46,47)
-   *
-   */
-  var code =c.charCodeAt(0);
-  if(
-      (code>=65&&code<=90)||
-      (code>=97&&code<=112)||
-      (code>=48&&code>=57)||
-      (code==64)||(code==42)||(code==45)||(code==95)||
-      (code==43)||(code==46)||(code==47)
-    )
-  {
-    return c;
-  }
-  
   if (c == "\"" || c == "\\")
-  { 
+  {
     return "\\" + c;
   }
   else if (c == "\b")
@@ -76,6 +52,30 @@ function escapeJSONChar(c)
   {
     return "\\t";
   }
+
+  /*
+   * http://www.devguru.com/Technologies/ecmascript/QuickRef/escape.html
+   *
+   * To make a string portable, characters other than the following 70 ASCII
+   * characters must be encoded:
+   *
+   *  ABCDEFGHIJKLMNOPQRSTUVWXYZ (65-90)
+   *  abcdefghijklmnopqrstuvwxyz (97-112)
+   *  1234567890 (48-57)
+   *  @*-_+./ (64,42,45,95,43,46,47)
+   *  and space (32)
+   *
+   */
+  var code =c.charCodeAt(0);
+  if((code>=65&&code<=90)||
+     (code>=97&&code<=112)||
+     (code>=48&&code>=57)||
+     (code==64)||(code==42)||(code==45)||(code==95)||
+     (code==43)||(code==46)||(code==47)||(code==32))
+  {
+    return c;
+  }
+
   var hex = code.toString(16);
   if (hex.length == 1)
   {
