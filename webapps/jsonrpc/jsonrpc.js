@@ -3,11 +3,12 @@
  * http://www.jabsorb.org
  *
  * Copyright 2007 Arthur Blake and William Becker
- * Copyright (c) 2003-2004 Jan-Klaas Kollhof
  * Copyright (c) 2005 Michael Clark, Metaparadigm Pte Ltd
+ * Copyright (c) 2003-2004 Jan-Klaas Kollhof
  *
  * This code is based on original code from the json-rpc-java library
- * which is based on Jan-Klaas' JavaScript o lait library (jsolait).
+ * which was originally based on Jan-Klaas' JavaScript o lait library
+ * (jsolait).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,31 +26,63 @@
 
 /* escape a character */
 
-escapeJSONChar=function ()
+function escapeJSONChar(c)
 {
-  var escapeChars = ["\b","\t","\n","\f","\r"];
-  var actualEval= function(c){
-    //Need to do these first as their ascii values are > 32 (34 & 92)
-    if(c=="\""||c=="\\")
-    {
-      return "\\"+c;
-    }
-    //Otherwise it doesn't need escaping
-    if(c.charCodeAt(0)>=32)
-    {
-      return c;
-    }
-    //Otherwise it is has a code < 32 and may need escaping.
-    for(var i=0;i<escapeChars.length;i++)
-    {
-      if(c==escapeChars[i])
-      {
-        return "\\" + c;
-      }
-    }
+  if (c == "\"" || c == "\\")
+  {
+    return "\\" + c;
   }
-  return actualEval;
-}();
+  else if (c == "\b")
+  {
+    return "\\b";
+  }
+  else if (c == "\f")
+  {
+    return "\\f";
+  }
+  else if (c == "\n")
+  {
+    return "\\n";
+  }
+  else if (c == "\r")
+  {
+    return "\\r";
+  }
+  else if (c == "\t")
+  {
+    return "\\t";
+  }
+
+  /*
+   * return any characters that are obviously printable
+   */
+  var code = c.charCodeAt(0);
+  if( (code>31&&code<127))
+  {
+    return c;
+  }
+
+  /*
+   * unicode escape the rest
+   */
+  var hex = code.toString(16);
+  if (hex.length == 1)
+  {
+    return "\\u000" + hex;
+  }
+  else if (hex.length == 2)
+  {
+    return "\\u00" + hex;
+  }
+  else if (hex.length == 3)
+  {
+    return "\\u0" + hex;
+  }
+  else
+  {
+    return "\\u" + hex;
+  }
+}
 
 /* encode a string into JSON format */
 
@@ -71,58 +104,281 @@ function escapeJSONString(s)
 }
 
 
-/* Marshall objects to JSON format */
-
-function toJSON(o)
+/**
+ * Marshall an object to JSON format.
+ * Circular references can be handled if the client parameter
+ * JSONRpcClient.fixupCircRefs is true.  An exception will be thrown if this
+ * is false, and a circular reference is detected.
+ *
+ * if the client parameter, JSONRpcClient.fixupDuplicates is true then
+ * duplicate objects in the object graph are also combined except for Strings
+ *
+ * (todo: it wouldn't be too hard to optimize strings as well, but probably a threshold
+ *  should be provided, so that only strings over a certain length would be optimized)
+ * this would be worth doing on the upload (on the download it's not so important, because
+ * gzip handles this)
+ * if it's false, then duplicate objects are "re-serialized"
+ * 
+ *
+ * @param o       the object being converted to json
+ *
+ * @param rootRef the optional "root" reference name for the object being converted to json
+ *                (used in the fixUps) 'result' is used if this is omitted.
+ *
+ * @return an object, { 'json': jsonString, 'fixUps': fixupString }
+ */
+function toJSON(o, rootRef)
 {
-  var v = [];
-  if (o === null || o === undefined)
+  // to detect circular references and duplicate objects, each object has a special marker
+  // added to it as we go along.
+
+  // therefore we know if the object is either a duplicate or circular ref if the object
+  // already has this marker in it before we process it.
+
+  // the marker object itself contains two pointers-- one to the last object processed
+  // and another to the parent object
+  // therefore we can rapidly detect if an object is a circular reference
+  // by following the chain of parent pointer objects to see if we find the same object again.
+
+  // if we don't find the same object again in the parent recursively, then we know that it's a
+  // duplicate instead of a circular reference
+
+  // the pointer to the last object processed is used to link all processed objects together
+  // so that the marker objects can be removed when the operation is complete
+
+  // once all objects are processed, we can traverse the linked list, removing all the markers
+
+  // the special name for the marker object
+  // try to pick a name that would never be used for any other purpose, so
+  // it won't conflict with anything else
+  var marker="$_$jabsorbed$813492";
+
+  // the head of the marker object chain
+  var markerHead;
+
+  // fixups detected as we go along , both for circular references and duplicates
+  var fixUps = [];
+
+  // unlink the whole chain of marker objects that were added to objects when processing
+  function removeMarkers()
   {
-    return "null";
-  }
-  else if (o.constructor == String)
-  {
-    return escapeJSONString(o);
-  }
-  else if (o.constructor == Number)
-  {
-    return o.toString();
-  }
-  else if (o.constructor == Boolean)
-  {
-    return o.toString();
-  }
-  else if (o.constructor == Date)
-  {
-    return '{javaClass: "java.util.Date", time: ' + o.valueOf() + '}';
-  }
-  else if (o.constructor == Array)
-  {
-    for (var i = 0; i < o.length; i++)
+    var next;
+    while (markerHead)
     {
-      v.push(toJSON(o[i]));
+      next = markerHead[marker].prev;
+      delete markerHead[marker];
+      markerHead = next;
     }
-    return "[" + v.join(", ") + "]";
   }
-  else
+
+  // create a compound object reference from a simple list of reference keys
+  function reference(list)
   {
-    for (var attr in o)
+    if (list&&list.length)
     {
-      if (!o[attr])
+      for (var i=1; i<list.length; i++)
       {
-        v.push("\"" + attr + "\": null");
+        if (typeof list[i] === 'number')
+        {
+          list[i] = "[" + list[i] + "]";
+        }
+        else
+        {
+          //todo: if list[i] is a legal javascript variable,
+          //todo: we can use the more compact dot notation here
+          //todo: need to write a function to do this test
+          //todo: i think there is really good one in the JSLint code
+
+          //todo: on the other hand, leaving it like this makes parsing it easier and because it's
+          //todo: more consistent (less cases to worry about)
+          list[i] = "[" + escapeJSONString(list[i]) + "]";
+        }
       }
-      else if (typeof o[attr] == "function")
+    }
+    return list.join("");
+  }
+
+  // special object used to indicate that an object should be omitted
+  // because it was found to be a circular reference or duplicate
+  var omitCircRefOrDuplicate = {};
+
+  // temp variable to hold json while processing
+  var json;
+
+  // do the work of converting an individual "sub" object to JSON
+  // p is the parent of the object being processed, it will be null if it's the root object
+  // ref is the "reference" of the object in the parent that is being converted
+  // such that p[ref] === o
+  // each object that is processed has a special marker object attached to it, to quickly detect
+  // if it has already been processed, and thus handle circular references and duplicates
+  function subObjToJSON(o,p,ref)
+  {
+    var v = [];
+    if (o === null || o === undefined)
+    {
+      return "null";  // it's null or undefined, so serialize it as null
+    }
+    else if (typeof o === 'string')
+    {
+      //todo: handle duplicate strings!  but only if they are over a certain threshold size...
+      return escapeJSONString(o);
+    }
+    else if (typeof o === 'number')
+    {
+      return o.toString();
+    }
+    else if (typeof o === 'boolean')
+    {
+      return o.toString();
+    }
+    else
+    {
+      // must be an object type
+
+      // look for an already existing marker which would mean this object has already been processed
+      // at least once and therefore either a circular ref or dup has been found!!
+      if (o[marker])
       {
-         /* skip */
+        // determine if it's a circular reference
+
+        // list of references to get to the fixup entry
+        var fixup = [ref];
+
+        // list of reference to get to the original location
+        var original;
+
+        var parent = p;
+
+        var circRef;
+
+        // walk up the parent chain till we find null
+        while (parent)
+        {
+          // if a circular reference was found somewhere along the way,
+          // calculate the path to it as we are going
+          if (original)
+          {
+            original.unshift (parent[marker].ref);
+          }
+
+          // if we find ourself, then we found a circular reference!
+          if (parent===o)
+          {
+            circRef=parent;
+            original = [circRef[marker].ref];
+          }
+
+          fixup.unshift(parent[marker].ref);
+          parent = parent[marker].parent;
+        }
+
+        // if we found ourselves in the parent chain then this is a circular reference
+        if (circRef)
+        {
+          //either save off the circular reference or throw an exception, depending on the client setting
+          if (JSONRpcClient.fixupCircRefs)
+          {
+            //todo: (LATER) if multiple fixups go to the same original, this could be optimized somewhat
+            fixUps.push(reference(fixup) + "=" + reference(original));
+            return omitCircRefOrDuplicate;
+          }
+          else
+          {
+            removeMarkers();
+            throw new Error("circular reference detected!");
+          }
+        }
+        else
+        {
+          // otherwise it's a dup!
+          if (JSONRpcClient.fixupDuplicates)
+          {
+            // find the original path of the dup
+            original = [o[marker].ref];
+            parent = o[marker].parent;
+            while (parent)
+            {
+              original.unshift(parent[marker].ref);
+              parent = parent[marker].parent;
+            }
+            //todo: (LATER) if multiple fixups go to the same original, this could be optimized somewhat
+            fixUps.push(reference(fixup) + "=" + reference(original));
+            return omitCircRefOrDuplicate;
+          }
+        }
       }
       else
       {
-        v.push(escapeJSONString(attr) + ": " + toJSON(o[attr]));
+        // mark this object as visited/processed and set up the parent link and prev link
+        o[marker] = {parent:p, prev:markerHead, ref:ref};
+
+        // adjust the "marker" head pointer so the prev pointer on the next object processed can be set
+        markerHead = o;
+      }
+
+      if (o.constructor === Date)
+      {
+        return '{javaClass: "java.util.Date", time: ' + o.valueOf() + '}';
+      }
+      else if (o.constructor === Array)
+      {
+        for (var i = 0; i < o.length; i++)
+        {
+          json = subObjToJSON(o[i], o, i);
+
+          // if it's a dup/circ ref, put a slot where the object would have been
+          // otherwise, put the json data here
+          v.push(json===omitCircRefOrDuplicate?null:json);
+
+/*
+          if (json !== omitCircRefOrDuplicate)
+          {
+            v.push(json);
+          }
+          else
+          {
+            // put a slot where the object would have been
+            // so the array will still be indexed properly after the fixups are applied
+            v.push(null);
+          }
+*/
+        }
+        return "[" + v.join(", ") + "]";
+      }
+      else
+      {
+        for (var attr in o)
+        {
+          if (attr === marker)
+          {
+             /* skip */
+          }
+          else if (!o[attr])
+          {
+            v.push("\"" + attr + "\": null");
+          }
+          else if (typeof o[attr] == "function")
+          {
+             /* skip */
+          }
+          else
+          {
+            json = subObjToJSON(o[attr], o, attr);
+            if (json !== omitCircRefOrDuplicate)
+            {
+              v.push(escapeJSONString(attr) + ": " + json);
+            }
+          }
+        }
+        return "{" + v.join(", ") + "}";
       }
     }
-    return "{" + v.join(", ") + "}";
   }
+
+  json = subObjToJSON(o, null, rootRef?rootRef:"result");
+
+  removeMarkers();
+  return {"json": json, "fixUps": fixUps.join("; ")};
 }
 
 
@@ -256,6 +512,14 @@ JSONRpcClient.profile_async = false;
 JSONRpcClient.max_req_active = 1;
 JSONRpcClient.requestId = 1;
 
+// if this is true, circular references in the object graph are fixed up
+// if this is false, circular references cause an exception to be thrown
+JSONRpcClient.fixupCircRefs = true;
+
+// if this is true, duplicate objects in the object graph are optimized
+// if it's false, then duplicate objects are "re-serialized"
+JSONRpcClient.fixupDuplicates = true;
+
 /**
  * Used to bind the this of the serverMethodCaller() (see below) which is to be
  * bound to the right object. This is needed as the serverMethodCaller is 
@@ -377,9 +641,7 @@ JSONRpcClient._getCharsetFromHeaders = function (http)
   catch (e)
   {
   }
-
-  return "UTF-8";
-  /* default */
+  return "UTF-8"; // default
 };
 
 /* Async queue globals */
@@ -477,17 +739,16 @@ JSONRpcClient.prototype._makeRequest = function (methodName, args, cb)
   req.client = this;
   req.requestId = JSONRpcClient.requestId++;
 
-  var obj = {};
-  obj.id = req.requestId;
+  var obj = "{\"id\":"+req.requestId+",\"method\":";
+
   if (this.objectID)
   {
-    obj.method = ".obj#" + this.objectID + "." + methodName;
+    obj += "\".obj#" + this.objectID + "." + methodName +"\"";
   }
   else
   {
-    obj.method = methodName;
+    obj += "\"" + methodName + "\"";
   }
-  obj.params = args;
 
   if (cb)
   {
@@ -497,7 +758,20 @@ JSONRpcClient.prototype._makeRequest = function (methodName, args, cb)
   {
     req.profile = { "submit": new Date() };
   }
-  req.data = toJSON(obj);
+
+  // use p as an alias for params to save space in the fixups
+  var j= toJSON(args,"p");
+
+  obj += ",\"params\":" + j.json;
+
+  // only attach duplicates/fixups if they are found
+  // this is to provide graceful backwards compatibility to the json-rpc spec.
+  if (j.fixUps)
+  {
+    obj += ",\"fixups\":" + escapeJSONString(j.fixUps);
+  }
+
+  req.data = obj + "}";
 
   return req;
 };
@@ -631,16 +905,21 @@ JSONRpcClient.prototype._handleResponse = function (http)
   {
     throw new JSONRpcClient.Exception (obj.error.code, obj.error.msg, obj.error.trace);
   }
-  var res = obj.result;
+  var r = obj.result;
 
-  /* Handle CallableProxy */
-  if (res && res.objectID && res.JSONRPCType == "CallableReference")
+  // look for circular reference/duplicates fixups and execute them if they are there
+  if (obj.fixups)
   {
-    return new JSONRpcClient(this.serverURL, this.user, this.pass, 
-      res.objectID,res.javaClass,res.JSONRPCType);
+    eval(obj.fixups);
   }
 
-  return res;
+  /* Handle CallableProxy */
+  if (r && r.objectID && r.JSONRPCType == "CallableReference")
+  {
+    return new JSONRpcClient(this.serverURL, this.user, this.pass, r.objectID);
+  }
+
+  return r;
 };
 
 /* XMLHttpRequest wrapper code */

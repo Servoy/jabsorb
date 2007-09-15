@@ -46,12 +46,13 @@ public class ObjectMatch
   public final static ObjectMatch OKAY = new ObjectMatch(-1);
 
   /**
-   * The objects do not match (?)
+   * The object was null, and therefore matches any object,
+   * (because any object reference could be null)
    */
   public final static ObjectMatch NULL = new ObjectMatch(0);
 
   /**
-   * The number of mismatched fields that occured on a tryUnmarshall call.
+   * The number of mismatched fields that occurred on a tryUnmarshall call.
    */
   private int mismatch;
 

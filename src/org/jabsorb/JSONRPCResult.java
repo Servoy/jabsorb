@@ -28,7 +28,10 @@ package org.jabsorb;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.List;
 
+import org.jabsorb.serializer.FixUp;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -82,12 +85,18 @@ public class JSONRPCResult
   /**
    * The result of the call
    */
-  private Object result = null;
+  private Object result;
 
   /**
    * The id of the response.
    */
-  private Object id = null;
+  private Object id;
+
+  /**
+   * Optional fixups entries to run against the result in order to reconstitute duplicate and / or circular references
+   * that were detected.
+   */
+  private List fixUps;
 
   /**
    * An error code if a problem occured (CODE_SUCCESS otherwise)
@@ -95,8 +104,8 @@ public class JSONRPCResult
   private int errorCode;
 
   /**
-   * Creates a new JSONRPCResult
-   * 
+   * Creates a new JSONRPCResult without fixups (for backward compatibility to json-rpc and json-rpc-java.
+   *
    * @param errorCode An error code if a problem occured (CODE_SUCCESS
    *          otherwise)
    * @param id The id of the response.
@@ -107,6 +116,23 @@ public class JSONRPCResult
     this.errorCode = errorCode;
     this.id = id;
     this.result = o;
+  }
+
+  /**
+   * Creates a new JSONRPCResult with fixUps.
+   * 
+   * @param errorCode An error code if a problem occured (CODE_SUCCESS
+   *          otherwise)
+   * @param id The id of the response.
+   * @param o The result of the call
+   * @param fixUps optional list of FixUp objects needed to resolve circular refs and duplicates.
+   */
+  public JSONRPCResult(int errorCode, Object id, Object o, List fixUps)
+  {
+    this.errorCode = errorCode;
+    this.id = id;
+    this.result = o;
+    this.fixUps = fixUps;
   }
 
   /**
@@ -149,6 +175,17 @@ public class JSONRPCResult
       {
         o.put("id", id);
         o.put("result", result);
+        if (fixUps != null && fixUps.size()>0)
+        {
+          StringBuffer fixups = new StringBuffer();
+          for (Iterator i=fixUps.iterator(); i.hasNext();)
+          {
+            FixUp fixup = (FixUp) i.next();
+            fixups.append(fixup);
+            fixups.append(";");
+          }
+          o.put("fixups",fixups.toString());
+        }
       }
       else if (errorCode == CODE_REMOTE_EXCEPTION)
       {

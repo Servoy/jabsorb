@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
@@ -49,9 +50,9 @@ import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.Serializer;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
-import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -622,9 +623,10 @@ public class JSONRPCBridge implements Serializable
       }
 
       // Marshall the result
-      SerializerState serialiserState = new SerializerState();
-      result = new JSONRPCResult(JSONRPCResult.CODE_SUCCESS, requestId, ser
-          .marshall(serialiserState, returnObj));
+      SerializerState serializerState = new SerializerState();
+      Object json = ser.marshall(serializerState, null, returnObj, "r");
+      result = new JSONRPCResult(JSONRPCResult.CODE_SUCCESS, requestId, 
+        json, serializerState.getFixUps());
 
       // Handle exceptions creating exception results and
       // calling error callbacks
@@ -1270,7 +1272,7 @@ public class JSONRPCBridge implements Serializable
 
     // try and unmarshall the arguments against each candidate method
     // to determine which one matches the best
-    ArrayList candidate = new ArrayList();
+    List candidate = new ArrayList();
     if (log.isDebugEnabled())
     {
       log.debug("looking for method " + methodName + "("
@@ -1365,9 +1367,9 @@ public class JSONRPCBridge implements Serializable
   /**
    * Tries to unmarshall the arguments to a method
    * 
-   * @param method The method to unmarshall the arguements for.
+   * @param method The method to unmarshall the arguments for.
    * @param arguments The arguments to unmarshall
-   * @return The methodCandidate that should suit the arguements and method.
+   * @return The MethodCandidate that should suit the arguements and method.
    * @throws UnmarshallException If one of the arguments cannot be unmarshalled
    */
   private MethodCandidate tryUnmarshallArgs(Method method, JSONArray arguments)

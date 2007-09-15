@@ -68,7 +68,7 @@ public class DateSerializer extends AbstractSerializer
     return _serializableClasses;
   }
 
-  public Object marshall(SerializerState state, Object o)
+  public Object marshall(SerializerState state, Object p, Object o)
       throws MarshallException
   {
     long time;
@@ -92,7 +92,7 @@ public class DateSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      return new MarshallException(e.getMessage());
+      throw (MarshallException) new MarshallException(e.getMessage()).initCause(e);
     }
     return obj;
   }
@@ -126,7 +126,8 @@ public class DateSerializer extends AbstractSerializer
   {
     JSONObject jso = (JSONObject) o;
     long time;
-    try{
+    try
+    {
       time= jso.getLong("time");
     }
     catch(JSONException e)

@@ -33,6 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
+import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
@@ -82,12 +83,13 @@ public class ListSerializer extends AbstractSerializer
     return _serializableClasses;
   }
 
-  public Object marshall(SerializerState state, Object o)
+  public Object marshall(SerializerState state, Object p, Object o)
       throws MarshallException
   {
     List list = (List) o;
     JSONObject obj = new JSONObject();
     JSONArray arr = new JSONArray();
+
     // TODO: this same block is done everywhere.
     // Have a single function to do it.
     if (ser.getMarshallClassHints())
@@ -104,6 +106,7 @@ public class ListSerializer extends AbstractSerializer
     try
     {
       obj.put("list", arr);
+      state.push(o, arr, "list");
     }
     catch (JSONException e)
     {
@@ -115,13 +118,26 @@ public class ListSerializer extends AbstractSerializer
       Iterator i = list.iterator();
       while (i.hasNext())
       {
-        arr.put(ser.marshall(state, i.next()));
+        Object json = ser.marshall(state, arr, i.next(), new Integer(index));
+        if (JSONSerializer.CIRC_REF_OR_DUPLICATE != json)
+        {
+          arr.put(json);
+        }
+        else
+        {
+          // put a slot where the object would go, so it can be fixed up properly in the fix up phase
+          arr.put(JSONObject.NULL);
+        }
         index++;
       }
     }
     catch (MarshallException e)
     {
-      throw new MarshallException("element " + index + " " + e.getMessage());
+      throw (MarshallException) new MarshallException("element " + index).initCause(e);
+    }
+    finally
+    {
+      state.pop();
     }
     return obj;
   }

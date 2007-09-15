@@ -38,6 +38,7 @@ import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
+import org.jabsorb.JSONSerializer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -81,7 +82,7 @@ public class SetSerializer extends AbstractSerializer
     return _serializableClasses;
   }
 
-  public Object marshall(SerializerState state, Object o)
+  public Object marshall(SerializerState state, Object p, Object o)
       throws MarshallException
   {
     Set set = (Set) o;
@@ -102,6 +103,7 @@ public class SetSerializer extends AbstractSerializer
     try
     {
       obj.put("set", setdata);
+      state.push(o, setdata,"set");
     }
     catch (JSONException e)
     {
@@ -115,17 +117,28 @@ public class SetSerializer extends AbstractSerializer
       while (i.hasNext())
       {
         key = i.next();
-        // only support String keys
-        setdata.put(key.toString(), ser.marshall(state, key));
+        String keyString = key.toString();  // only support String keys
+        Object json = ser.marshall(state, setdata, key, keyString);
+
+        // omit the object entirely if it's a circular reference or duplicate
+        // it will be regenerated in the fixups phase
+        if (JSONSerializer.CIRC_REF_OR_DUPLICATE != json)
+        {
+          setdata.put(keyString, json);
+        }
       }
     }
     catch (MarshallException e)
     {
-      throw new MarshallException("set key " + key + e.getMessage());
+      throw (MarshallException) new MarshallException("set key " + key + e.getMessage()).initCause(e);
     }
     catch (JSONException e)
     {
-      throw new MarshallException("set key " + key + e.getMessage());
+      throw (MarshallException) new MarshallException("set key " + key + e.getMessage()).initCause(e);
+    }
+    finally
+    {
+      state.pop();
     }
     return obj;
   }

@@ -33,7 +33,7 @@ import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
 
 /**
- * Serialises privitive Java values
+ * Serializes primitive Java values
  */
 public class PrimitiveSerializer extends AbstractSerializer
 {
@@ -63,20 +63,6 @@ public class PrimitiveSerializer extends AbstractSerializer
   public Class[] getJSONClasses()
   {
     return _JSONClasses;
-  }
-
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
-      Object jso) throws UnmarshallException
-  {
-    try
-    {
-      toPrimitive(clazz, jso);
-    }
-    catch (NumberFormatException e)
-    {
-      throw new UnmarshallException("not a primitive");
-    }
-    return ObjectMatch.OKAY;
   }
 
   /**
@@ -143,6 +129,20 @@ public class PrimitiveSerializer extends AbstractSerializer
     return null;
   }
 
+  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
+      Object jso) throws UnmarshallException
+  {
+    try
+    {
+      toPrimitive(clazz, jso);
+    }
+    catch (NumberFormatException e)
+    {
+      throw new UnmarshallException("not a primitive");
+    }
+    return ObjectMatch.OKAY;
+  }
+
   public Object unmarshall(SerializerState state, Class clazz, Object jso)
       throws UnmarshallException
   {
@@ -157,7 +157,7 @@ public class PrimitiveSerializer extends AbstractSerializer
     }
   }
 
-  public Object marshall(SerializerState state, Object o)
+  public Object marshall(SerializerState state, Object p, Object o)
       throws MarshallException
   {
     return o;

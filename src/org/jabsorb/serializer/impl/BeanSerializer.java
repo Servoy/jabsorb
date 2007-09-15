@@ -33,10 +33,10 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
@@ -53,23 +53,6 @@ import org.slf4j.LoggerFactory;
 public class BeanSerializer extends AbstractSerializer
 {
   /**
-   * Used to check for circular reference detection.
-   * 
-   * TODO: Why not just use a HashSet?
-   */
-  public static class BeanSerializerState
-  {
-    // TODO: Legacy comment. WTF?
-    // in absence of getters and setters, these fields are
-    // public to allow subclasses to access.
-
-    /**
-     * Used for Circular reference detection
-     */
-    public HashSet beanSet = new HashSet();
-  }
-
-  /**
    * Stores the readable and writable properties for the Bean.
    */
   protected static class BeanData
@@ -85,12 +68,12 @@ public class BeanSerializer extends AbstractSerializer
     /**
      * The readable properties of the bean.
      */
-    public HashMap readableProps;
+    public Map readableProps;
 
     /**
      * The writable properties of the bean.
      */
-    public HashMap writableProps;
+    public Map writableProps;
   }
 
   /**
@@ -191,34 +174,18 @@ public class BeanSerializer extends AbstractSerializer
     return _serializableClasses;
   }
 
-  public Object marshall(SerializerState state, Object o)
+  public Object marshall(SerializerState state, Object p, Object o)
       throws MarshallException
   {
-    BeanSerializerState beanState;
-    try
-    {
-      beanState = (BeanSerializerState) state.get(BeanSerializerState.class);
-    }
-    catch (Exception e)
-    {
-      e.printStackTrace();
-      throw new MarshallException("bean serializer internal error");
-    }
-    Integer identity = new Integer(System.identityHashCode(o));
-    if (beanState.beanSet.contains(identity))
-    {
-      throw new MarshallException("circular reference");
-    }
-    beanState.beanSet.add(identity);
-
-    BeanData bd = null;
+    BeanData bd;
     try
     {
       bd = getBeanData(o.getClass());
     }
     catch (IntrospectionException e)
     {
-      throw new MarshallException(o.getClass().getName() + " is not a bean");
+      throw (MarshallException) new MarshallException(o.getClass().getName() +
+        " is not a bean").initCause(e);
     }
 
     JSONObject val = new JSONObject();
@@ -227,16 +194,16 @@ public class BeanSerializer extends AbstractSerializer
       try
       {
         val.put("javaClass", o.getClass().getName());
-
       }
       catch (JSONException e)
       {
-        throw new MarshallException("JSONException: " + e.getMessage());
+        throw (MarshallException) new MarshallException(
+          "JSONException: " + e.getMessage()).initCause(e);
       }
     }
     Iterator i = bd.readableProps.entrySet().iterator();
     Object args[] = new Object[0];
-    Object result = null;
+    Object result;
     while (i.hasNext())
     {
       Map.Entry ent = (Map.Entry) i.next();
@@ -265,22 +232,29 @@ public class BeanSerializer extends AbstractSerializer
         {
           try
           {
-            val.put(prop, ser.marshall(state, result));
+            Object json = ser.marshall(state, o, result, prop);
+
+            // omit the object entirely if it's a circular reference or duplicate
+            // it will be regenerated in the fixups phase
+            if (JSONSerializer.CIRC_REF_OR_DUPLICATE != json)
+            {
+              val.put(prop, json);
+            }
           }
           catch (JSONException e)
           {
-            throw new MarshallException("JSONException: " + e.getMessage());
+            throw (MarshallException) new MarshallException(
+              "JSONException: " + e.getMessage()).initCause(e);
           }
         }
       }
       catch (MarshallException e)
       {
-        throw new MarshallException("bean " + o.getClass().getName() + " "
-            + e.getMessage());
+        throw (MarshallException) new MarshallException("bean " + o.getClass().getName() + " "
+            + e.getMessage()).initCause(e);
       }
     }
 
-    beanState.beanSet.remove(identity);
     return val;
   }
 

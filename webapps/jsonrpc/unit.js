@@ -4,7 +4,116 @@ var jsonrpc = null;
 var cb;
 var tests_start;
 
+// the simplest circular reference case
+var circRef1 = {};
+circRef1.circRef1 = circRef1;
+
+// another simple circular reference
+var a = {};
+var b = {};
+a.b=b;
+b.a=a;
+
+// a circular reference in an array
+var circ3 = {};
+circ3.arr=[3,1,4,1,circ3,9,2,6,5,3,5,8,9,7,9];
+
+var circ3ArrLen = circ3.arr.length;
+
+// an example of an object that has a lot of duplicates
+var dup1 = {};
+
+dup1.usa = {
+  name:'USA',
+  description:'United States of America',
+  states:50
+};
+
+dup1.diana = {};
+dup1.donald = {};
+dup1.arthur = {};
+
+dup1.diana.son = dup1.arthur;
+dup1.diana.country = dup1.usa;
+dup1.donald.son = dup1.arthur;
+dup1.donald.country = dup1.usa;
+dup1.arthur.mother = dup1.diana;
+dup1.arthur.father = dup1.donald;
+dup1.arthur.country = dup1.usa;
+
+// an example of an object that has a lot of duplicates and circular references both
+var dup2 = {};
+
+dup2.usa = {
+  name:'USA',
+  description:'United States of America',
+  states:50
+};
+
+dup2.diana = {};
+dup2.donald = {};
+dup2.arthur = {};
+dup2.paula = {};
+dup2.larry = {};
+
+dup2.diana.son = dup1.arthur;
+dup2.diana.country = dup1.usa;
+dup2.donald.son = dup1.arthur;
+dup2.donald.country = dup1.usa;
+dup2.arthur.mother = dup1.diana;
+dup2.arthur.father = dup1.donald;
+dup2.arthur.country = dup1.usa;
+dup2.arthur.spouse = dup2.paula;
+dup2.paula.spouse = dup2.arthur;
+dup2.donald.spouse=dup2.diana;
+dup2.diana.spouse=dup2.donald;
+dup2.larry.friends=[dup2.arthur,dup2.paula,dup2.diana,dup2.donald,dup2.larry];
+dup2.paula.friends=[dup2.arthur,dup2.larry,dup2.paula];
+
+
 var tests = [
+
+// circular reference from server
+{ code: 'jsonrpc.test.aBean()',
+  test: 'result != null'
+},
+
+//server circ ref test of a Map  
+{ code: 'jsonrpc.test.aCircRefMap()',
+  test: 'result.map.me===result'},
+
+// circular references 1
+{ code: 'jsonrpc.test.echoRawJSON({"field1": circRef1})',
+  test: 'result.field1.circRef1 === result.field1'},
+
+// circular references 2
+{ code: 'jsonrpc.test.echoRawJSON({"field1": a})',
+  test: 'result.field1.a.b.a===result.field1.a'},
+
+// circular references 3
+{ code: 'jsonrpc.test.echoRawJSON({"field1": circ3})',
+  test: 'result.field1.arr[4]===result.field1 && circ3ArrLen === result.field1.arr.length'},
+
+//duplicates test
+{ code: 'jsonrpc.test.echoRawJSON({"field1": dup1})',
+test: 'result.field1.arthur.mother==result.field1.diana&&result.field1.diana.son===result.field1.arthur'},
+
+//duplicates and circular references
+{ code: 'jsonrpc.test.echoRawJSON({"field1": dup2})',
+test: 'result.field1.arthur.mother==result.field1.diana&&result.field1.diana.son===result.field1.arthur'},
+
+{ code: 'jsonrpc.test.echoRawJSON({ "field1": "+plus+and%percent%" })',
+  test: 'result.field1 == "+plus+and%percent%"'},
+
+{ code: 'jsonrpc.test.echoRawJSON({ "field1": "+plus+and%percent%" })',
+  test: 'result.field1 == "+plus+and%percent%"'},
+
+{ code: 'jsonrpc.test.echoRawJSON({ "field1": "+" })',
+  test: 'result.field1 == "+"'},
+
+{ code: 'jsonrpc.test.echoRawJSON({ "field1": "%" })',
+  test: 'result.field1 == "%"'},
+
 { code: 'jsonrpc.test.voidFunction()',
   test: 'result == undefined'
 },
@@ -120,9 +229,6 @@ var tests = [
 { code: 'jsonrpc.test.aSet()',
   test: 'result.set.constructor == Object'
 },
-{ code: 'jsonrpc.test.aBean()',
-  test: 'result != null'
-},
 { code: 'jsonrpc.test.aHashtable()',
   test: 'result.map.constructor == Object'
 },
@@ -135,7 +241,7 @@ var tests = [
 { code: 'jsonrpc.test.echoRawJSON({ "field1": "test" })',
   test: 'result.field1 == "test"'
 }
-];
+  ];
 
 // some variables to hold stuff
 var tbody,asyncNode,profileNode,maxRequestNode;
