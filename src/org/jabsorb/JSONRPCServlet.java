@@ -26,14 +26,11 @@
 
 package org.jabsorb;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.CharArrayWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.zip.GZIPOutputStream;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -140,11 +137,56 @@ public class JSONRPCServlet extends HttpServlet
    * This is useful for analyzing what a good gzip setting should be for potential responses from your application.
    *
    * You can set this to -1 if you want to turn off gzip encoding for some reason.
-   *
-   * todo: make this parameter settable through a servlet parameter
-   * todo: -1 to turn gzip off, 0 to attempt to gzip everything, higher number for a threshold
    */
   private static int GZIP_THRESHOLD = 200;
+
+
+  /**
+   * Called by the container when the servlet is initialized.
+   * Check for optional configuration parameters.
+   *
+   * At this time, only gzip_threshold is looked for.
+   *
+   * If it is found, and is a valid Integer is
+   * specified, then that is used for the GZIP_THRESHOLD.  If an invalid Integer is specified,
+   * then the GZIP_THRESHOLD is set to -1 which disbaled GZIP compression.
+   *
+   * @param config ServletConfig from container.
+   * @throws ServletException if something goes wrong during initialization.
+   */
+  public void init(ServletConfig config) throws ServletException
+  {
+    super.init(config);
+
+    String gzipThresh = config.getInitParameter("gzip_threshold");
+    if (gzipThresh!=null && gzipThresh.length()>0)
+    {
+      try
+      {
+        JSONRPCServlet.GZIP_THRESHOLD = Integer.parseInt(gzipThresh);
+      }
+      catch (NumberFormatException n)
+      {
+        log.debug("could not parse " + gzipThresh + " as an integer... defaulting to -1 (gzip compression off)");
+        JSONRPCServlet.GZIP_THRESHOLD = -1;
+      }
+    }
+
+    log.debug("GZIP_THRESHOLD is " + JSONRPCServlet.GZIP_THRESHOLD);
+
+    if (JSONRPCServlet.GZIP_THRESHOLD == -1)
+    {
+      log.debug("Gzipping is turned OFF.  No attempts will be made to gzip content from this servlet.");
+    }
+    else if (JSONRPCServlet.GZIP_THRESHOLD == 0)
+    {
+      log.debug("All responses will be Gzipped when gzipping results in a smaller response size.");
+    }
+    else
+    {
+      log.debug("Responses over this size will be Gzipped when gzipping results in a smaller response size.");
+    }
+  }
 
   public void service(HttpServletRequest request, HttpServletResponse response)
       throws IOException, ClassCastException

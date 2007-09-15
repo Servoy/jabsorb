@@ -1,5 +1,18 @@
 CHANGES log
 
+2007-09-15 jabsorb 1.1 release
+
+new features:
+
+* JSONRpcServlet can now gzip responses.
+  See web.xml for detailed documentation;
+  the gzip_threshold setting can turn this off if desired.
+
+* JSONRpcServlet for debug output of json, now shows the output
+  pretty printed (as well as non pretty printed also) to greatly
+  aid in the debugging process
+
+
 2007-08-31
 * jabsorb library created as a fork based on the json-rpc-java trunk
   reformatted code to new style guidelines
