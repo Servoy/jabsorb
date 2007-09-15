@@ -56,6 +56,11 @@ import org.slf4j.LoggerFactory;
  * &lt;servlet&gt;
  *   &lt;servlet-name&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-name&gt;
  *   &lt;servlet-class&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-class&gt;
+ *   &lt;!-- optional gzip threshold control --&gt;
+ *   &lt;init-param&gt;
+ *     &lt;param-name&gt;gzip_threshold&lt;/param-name&gt;
+ *     &lt;param-value>200&lt;/param-value&gt;
+ *   &lt;/init-param&gt;
  * &lt;/servlet&gt;
  * &lt;servlet-mapping&gt;
  *   &lt;servlet-name&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-name&gt;
@@ -140,17 +145,34 @@ public class JSONRPCServlet extends HttpServlet
    */
   private static int GZIP_THRESHOLD = 200;
 
-
   /**
    * Called by the container when the servlet is initialized.
    * Check for optional configuration parameters.
-   *
+   * <p>
    * At this time, only gzip_threshold is looked for.
-   *
-   * If it is found, and is a valid Integer is
-   * specified, then that is used for the GZIP_THRESHOLD.  If an invalid Integer is specified,
-   * then the GZIP_THRESHOLD is set to -1 which disbaled GZIP compression.
-   *
+   * </p><p>
+   * If it is found, and a valid Integer is specified, then that is used
+   * for the GZIP_THRESHOLD.
+   * </p><p>
+   * If an invalid Integer is specified,
+   * then the GZIP_THRESHOLD is set to -1 which disables GZIP compression.
+   * </p><p>
+   * The gzip_threshold indicates the response size at which the servlet will attempt to gzip the response
+   * if it can.
+   * </p><p>
+   * Set this to -1 if you want to disable gzip compression for some reason,
+   * or if you have another filter or other mechanism to handle gzipping for you.
+   * </p><p>
+   * Set this to 0 to attempt to gzip all responses from this servlet.
+   * otherwise, set it to the minimum response size at which gzip compression is attempted.
+   * </p><p>
+   * <b>NOTE:</b>  if the browser making the request does not accept gzip compressed content,
+   * or the result of gzipping would cause the response size to be larger (this could happen
+   * with very small responses) then the content will be returned without gzipping, regardless.
+   * </p><p>
+   * of this setting, so it is very reasonable idea to set this to 0 for maximum bandwidth
+   * savings, at the (very minor) expense of having the server attempt to gzip all responses.
+   * </p>
    * @param config ServletConfig from container.
    * @throws ServletException if something goes wrong during initialization.
    */
@@ -188,10 +210,20 @@ public class JSONRPCServlet extends HttpServlet
     }
   }
 
+  /**
+   * Called when a JSON-RPC requests comes in.
+   * Looks in the session for a JSONRPCBridge and if not found there,
+   * uses the global bridge; then passes off the
+   * JSON-PRC call to be handled by the JSONRPCBridge found.
+   *
+   * @param request servlet request from browser.
+   * @param response servlet response to browser.
+   *
+   * @throws IOException if an IOException occurs during processing.
+   */
   public void service(HttpServletRequest request, HttpServletResponse response)
-      throws IOException, ClassCastException
+    throws IOException
   {
-
     // Use protected method in case someone wants to override it
     JSONRPCBridge json_bridge = findBridge(request);
 
@@ -309,7 +341,9 @@ public class JSONRPCServlet extends HttpServlet
   }
 
   /**
-   * Find the JSONRPCBridge from the servlet request.
+   * Find the JSONRPCBridge from the current session.
+   * If it can't be found in the session, or there is no session,
+   * then return the global bridge.
    * 
    * @param request The message received
    * @return the JSONRPCBridge to use for this request
