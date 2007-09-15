@@ -5,119 +5,137 @@ var cb;
 var tests_start;
 
 var tests = [
-{ 'code': 'jsonrpc.test.voidFunction()',
-  'test': 'result == undefined'
+{ code: 'jsonrpc.test.voidFunction()',
+  test: 'result == undefined'
 },
-{ 'code': 'jsonrpc.test.throwException()',
-  'test': 'e == "java.lang.Exception: test exception"',
-  'exception': true
+{ code: 'jsonrpc.test.throwException()',
+  test: 'e == "java.lang.Exception: test exception"',
+  exception: true
 },
-{ 'code': 'jsonrpc.test.echo("hello")',
-  'test': 'result == "hello"'
+{ code: 'jsonrpc.test.echo("hello")',
+  test: 'result == "hello"'
 },
-{ 'code': 'jsonrpc.test.echo("quote \\" backslash \\\\ ctrl \\t\\n")',
-  'test': 'result == "quote \\" backslash \\\\ ctrl \\t\\n"'
+{ code: 'jsonrpc.test.echo("\\"")',
+  test: 'result ==         "\\""'
 },
-{ 'code': 'jsonrpc.test.echo(1234)',
-  'test': 'result == 1234'
+{ code: 'jsonrpc.test.echo("\\\\")',
+  test: 'result ==         "\\\\"'
 },
-{ 'code': 'jsonrpc.test.echo([1,2,3])',
-  'test': 'result.length == 3 && result[0] == 1 && result[1] == 2 && result[2] == 3'
+{ code: 'jsonrpc.test.echo("\\b")',
+  test: 'result ==         "\\b"'
 },
-{ 'code': 'jsonrpc.test.echo(["foo", "bar", "baz"])',
-  'test': 'result.length == 3 && result[0] == "foo" && result[1] == "bar" && result[2] == "baz"'
+{ code: 'jsonrpc.test.echo("\\t")',
+  test: 'result ==         "\\t"'
 },
-{ 'code': 'jsonrpc.test.echo(["foo", null, "baz"])',
-  'test': 'result.length == 3 && result[0] == "foo" && result[1] == null && result[2] == "baz"'
+{ code: 'jsonrpc.test.echo("\\n")',
+  test: 'result ==         "\\n"'
 },
-{ 'code': 'jsonrpc.test.echo({ bang: "foo", baz: 9 })',
-  'test': 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9'
+{ code: 'jsonrpc.test.echo("\\f")',
+  test: 'result ==         "\\f"'
 },
-{ 'code': 'jsonrpc.test.echo({ bang: "foo", baz: 9, bork: 5 })',
-  'test': 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9'
+{ code: 'jsonrpc.test.echo("\\r")',
+  test: 'result ==         "\\r"'
 },
-{ 'code': 'jsonrpc.test.echo({ bang: "foo", baz: 9, bork: null })',
-  'test': 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9'
+{ code: 'jsonrpc.test.echo(1234)',
+  test: 'result == 1234'
 },
-{ 'code': 'jsonrpc.test.echo({ foo: "bang", bar: 11 })',
-  'test': 'result.javaClass == "org.jabsorb.test.Test$Wiggle" && result.foo =="bang" && result.bar == 11'
+{ code: 'jsonrpc.test.echo([1,2,3])',
+  test: 'result.length == 3 && result[0] == 1 && result[1] == 2 && result[2] == 3'
 },
-{ 'code': 'jsonrpc.test.echoChar("c")',
-  'test': 'result == "c"'
+{ code: 'jsonrpc.test.echo(["foo", "bar", "baz"])',
+  test: 'result.length == 3 && result[0] == "foo" && result[1] == "bar" && result[2] == "baz"'
 },
-{ 'code': 'jsonrpc.test.echoIntegerArray([1234, 5678])',
-  'test': 'result[0] == 1234 && result[1] == 5678'
+{ code: 'jsonrpc.test.echo(["foo", null, "baz"])',
+  test: 'result.length == 3 && result[0] == "foo" && result[1] == null && result[2] == "baz"'
 },
-{ 'code': 'jsonrpc.test.echoIntegerObject(1234567890)',
-  'test': 'result == 1234567890'
+{ code: 'jsonrpc.test.echo({ bang: "foo", baz: 9 })',
+  test: 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9'
 },
-{ 'code': 'jsonrpc.test.echoLongObject(1099511627776)',
-  'test': 'result == 1099511627776'
+{ code: 'jsonrpc.test.echo({ bang: "foo", baz: 9, bork: 5 })',
+  test: 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9'
 },
-{ 'code': 'jsonrpc.test.echoFloatObject(3.3)',
-  'test': 'result == 3.3'
+{ code: 'jsonrpc.test.echo({ bang: "foo", baz: 9, bork: null })',
+  test: 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9'
 },
-{ 'code': 'jsonrpc.test.echoDoubleObject(9.9)',
-  'test': 'result == 9.9'
+{ code: 'jsonrpc.test.echo({ foo: "bang", bar: 11 })',
+  test: 'result.javaClass == "org.jabsorb.test.Test$Wiggle" && result.foo =="bang" && result.bar == 11'
 },
-{ 'code': 'jsonrpc.test.echoDateObject(new Date(1121689294000))',
-  'test': 'result.javaClass == "java.util.Date" && result.time == 1121689294000'
+{ code: 'jsonrpc.test.echoChar("c")',
+  test: 'result == "c"'
 },
-{ 'code': 'jsonrpc.test.echoBoolean(true)',
-  'test': 'result == true'
+{ code: 'jsonrpc.test.echoIntegerArray([1234, 5678])',
+  test: 'result[0] == 1234 && result[1] == 5678'
 },
-{ 'code': 'jsonrpc.test.echoBoolean(false)',
-  'test': 'result == false'
+{ code: 'jsonrpc.test.echoIntegerObject(1234567890)',
+  test: 'result == 1234567890'
 },
-{ 'code': 'jsonrpc.test.echoByteArray("testing 123")',
-  'test': 'result == "testing 123"'
+{ code: 'jsonrpc.test.echoLongObject(1099511627776)',
+  test: 'result == 1099511627776'
 },
-{ 'code': 'jsonrpc.test.echoCharArray("testing 456")',
-  'test': 'result == "testing 456"'
+{ code: 'jsonrpc.test.echoFloatObject(3.3)',
+  test: 'result == 3.3'
 },
-{ 'code': 'jsonrpc.test.echoBooleanArray([true,false,true])',
-  'test': 'result.length == 3 && result[0] == true && result[1] == false && result[2] == true'
+{ code: 'jsonrpc.test.echoDoubleObject(9.9)',
+  test: 'result == 9.9'
 },
-{ 'code': 'jsonrpc.test.echoList({"list":[20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "javaClass":"java.util.Vector"})',
-  'test': 'result.list.constructor == Array'
+{ code: 'jsonrpc.test.echoDateObject(new Date(1121689294000))',
+  test: 'result.javaClass == "java.util.Date" && result.time == 1121689294000'
 },
-{ 'code': 'jsonrpc.test.echoList({"list":[null, null, null], "javaClass":"java.util.Vector"})',
-  'test': 'result.list.constructor == Array'
+{ code: 'jsonrpc.test.echoBoolean(true)',
+  test: 'result == true'
 },
-{ 'code': 'jsonrpc.test.concat("a","b")',
-  'test': 'result == "a and b"'
+{ code: 'jsonrpc.test.echoBoolean(false)',
+  test: 'result == false'
 },
-{ 'code': 'jsonrpc.test.anArray()',
-  'test': 'result.constructor == Array'
+{ code: 'jsonrpc.test.echoByteArray("testing 123")',
+  test: 'result == "testing 123"'
 },
-{ 'code': 'jsonrpc.test.anArrayList()',
-  'test': 'result.list.constructor == Array'
+{ code: 'jsonrpc.test.echoCharArray("testing 456")',
+  test: 'result == "testing 456"'
 },
-{ 'code': 'jsonrpc.test.aVector()',
-  'test': 'result.list.constructor == Array'
+{ code: 'jsonrpc.test.echoBooleanArray([true,false,true])',
+  test: 'result.length == 3 && result[0] == true && result[1] == false && result[2] == true'
 },
-{ 'code': 'jsonrpc.test.aList()',
-  'test': 'result.list.constructor == Array'
+{ code: 'jsonrpc.test.echoList({"list":[20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "javaClass":"java.util.Vector"})',
+  test: 'result.list.constructor == Array'
 },
-{ 'code': 'jsonrpc.test.aSet()',
-  'test': 'result.set.constructor == Object'
+{ code: 'jsonrpc.test.echoList({"list":[null, null, null], "javaClass":"java.util.Vector"})',
+  test: 'result.list.constructor == Array'
 },
-{ 'code': 'jsonrpc.test.aBean()',
-  'test': 'result != null'
+{ code: 'jsonrpc.test.concat("a","b")',
+  test: 'result == "a and b"'
 },
-{ 'code': 'jsonrpc.test.aHashtable()',
-  'test': 'result.map.constructor == Object'
+{ code: 'jsonrpc.test.anArray()',
+  test: 'result.constructor == Array'
 },
-{ 'code': 'jsonrpc.test.echoObject({ "javaClass": "org.jabsorb.test.Test$Waggle", "bang": "foo", "baz": 9, "bork": 5 })',
-  'test': 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9 && result.bork == 5'
+{ code: 'jsonrpc.test.anArrayList()',
+  test: 'result.list.constructor == Array'
 },
-{ 'code': 'jsonrpc.test.echoObjectArray([{ "javaClass": "org.jabsorb.test.Test$Waggle", "bang": "foo", "baz": 9, "bork": 5 }])',
-  'test': 'result[0].javaClass == "org.jabsorb.test.Test$Waggle" && result[0].bang =="foo" && result[0].baz == 9 && result[0].bork == 5'
+{ code: 'jsonrpc.test.aVector()',
+  test: 'result.list.constructor == Array'
 },
-{ 'code': 'jsonrpc.test.echoRawJSON({ "field1": "test" })',
-  'test': 'result.field1 == "test"'
+{ code: 'jsonrpc.test.aList()',
+  test: 'result.list.constructor == Array'
+},
+{ code: 'jsonrpc.test.aSet()',
+  test: 'result.set.constructor == Object'
+},
+{ code: 'jsonrpc.test.aBean()',
+  test: 'result != null'
+},
+{ code: 'jsonrpc.test.aHashtable()',
+  test: 'result.map.constructor == Object'
+},
+{ code: 'jsonrpc.test.echoObject({ "javaClass": "org.jabsorb.test.Test$Waggle", "bang": "foo", "baz": 9, "bork": 5 })',
+  test: 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9 && result.bork == 5'
+},
+{ code: 'jsonrpc.test.echoObjectArray([{ "javaClass": "org.jabsorb.test.Test$Waggle", "bang": "foo", "baz": 9, "bork": 5 }])',
+  test: 'result[0].javaClass == "org.jabsorb.test.Test$Waggle" && result[0].bang =="foo" && result[0].baz == 9 && result[0].bork == 5'
+},
+{ code: 'jsonrpc.test.echoRawJSON({ "field1": "test" })',
+  test: 'result.field1 == "test"'
 }
-  ];
+];
 
 // some variables to hold stuff
 var tbody,asyncNode,profileNode,maxRequestNode;
@@ -129,18 +147,8 @@ function onLoad()
   profileNode = document.getElementById("profile");
   maxRequestNode = document.getElementById("max_requests");
 
-  try
-  {
-    jsonrpc = new JSONRpcClient(jsonurl);
-  }
-  catch(e)
-  {
-    if (e.message)
-    {
-      alert(e.message);
-    }
-    else alert(e);
-  }
+  jsonrpc = new JSONRpcClient(jsonurl);
+
   displayTests();
   clearAllResults();
 }
@@ -164,7 +172,7 @@ function displayTests()
     ecell = document.createElement("td");
     pcell = document.createElement("td");
 
-    ccell.innerHTML = "<div class=\"code_cell\"><a href=\"javascript:runTest(" +
+    ccell.innerHTML = "<div class=\"code_cell\"><a href=\"#\" onclick=\"runTest(" +
                       i + ")\">" + tests[i].code + "</a></div>";
 
     ccell.className = "test_td";
@@ -283,11 +291,12 @@ function testAsyncCB(i)
 
 function runTestAsync(i)
 {
+  var cb,code,str;
   try
   {
     // insert post results callback into first argument and submit test
-    var cb = testAsyncCB(i);
-    var code = tests[i].code;
+    cb = testAsyncCB(i);
+    code = tests[i].code;
     code = code.replace(/\(([^\)])/, "(cb, $1");
     code = code.replace(/\(\)/, "(cb)");
 
@@ -296,6 +305,12 @@ function runTestAsync(i)
   }
   catch (e)
   {
+    str="";
+    for (var a in e)
+    {
+      str+=a+" "+e[a]+"\n";
+    }
+    alert(str);
   }
 }
 
