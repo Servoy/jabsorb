@@ -949,15 +949,17 @@ JSONRpcClient.poolReturnHTTPRequest = function (http)
   }
 };
 
-JSONRpcClient.msxmlNames = [ "MSXML2.XMLHTTP.5.0",
-  "MSXML2.XMLHTTP.4.0",
+JSONRpcClient.msxmlNames = [
+  "MSXML2.XMLHTTP.6.0",
   "MSXML2.XMLHTTP.3.0",
   "MSXML2.XMLHTTP",
+  "MSXML2.XMLHTTP.5.0",
+  "MSXML2.XMLHTTP.4.0",
   "Microsoft.XMLHTTP" ];
 
 JSONRpcClient.getHTTPRequest = function ()
 {
-  /* Mozilla XMLHttpRequest */
+  /* Look for a browser native XMLHttpRequest implementation (Mozilla/IE7/Opera/Safari, etc.) */
   try
   {
     JSONRpcClient.httpObjectName = "XMLHttpRequest";
@@ -967,7 +969,7 @@ JSONRpcClient.getHTTPRequest = function ()
   {
   }
 
-  /* Microsoft MSXML ActiveX */
+  /* Microsoft MSXML ActiveX for IE versions < 7 */
   for (var i = 0; i < JSONRpcClient.msxmlNames.length; i++)
   {
     try
