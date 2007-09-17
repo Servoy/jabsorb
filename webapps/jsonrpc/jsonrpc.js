@@ -329,19 +329,6 @@ function toJSON(o, rootRef)
           // if it's a dup/circ ref, put a slot where the object would have been
           // otherwise, put the json data here
           v.push(json===omitCircRefOrDuplicate?null:json);
-
-/*
-          if (json !== omitCircRefOrDuplicate)
-          {
-            v.push(json);
-          }
-          else
-          {
-            // put a slot where the object would have been
-            // so the array will still be indexed properly after the fixups are applied
-            v.push(null);
-          }
-*/
         }
         return "[" + v.join(", ") + "]";
       }

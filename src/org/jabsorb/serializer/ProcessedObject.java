@@ -123,7 +123,7 @@ public class ProcessedObject
     //todo: this original location could potentially be cached here for performance.
     //todo: (but only do if it becomes necessary)
     //todo: It should always be generated on demand at least the first time around, because
-    //todo: in many cases it's not needed! (it's only needed to cover circulare reference and duplicate objects)
+    //todo: in many cases it's not needed! (it's only needed to cover circular reference and duplicate objects)
 
     return path;
   }

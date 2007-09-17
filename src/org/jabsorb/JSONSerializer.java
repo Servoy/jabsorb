@@ -27,10 +27,31 @@
 package org.jabsorb;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
-import org.jabsorb.serializer.*;
-import org.jabsorb.serializer.impl.*;
+import org.jabsorb.serializer.MarshallException;
+import org.jabsorb.serializer.ObjectMatch;
+import org.jabsorb.serializer.ProcessedObject;
+import org.jabsorb.serializer.Serializer;
+import org.jabsorb.serializer.SerializerState;
+import org.jabsorb.serializer.UnmarshallException;
+import org.jabsorb.serializer.impl.ArraySerializer;
+import org.jabsorb.serializer.impl.BeanSerializer;
+import org.jabsorb.serializer.impl.BooleanSerializer;
+import org.jabsorb.serializer.impl.DateSerializer;
+import org.jabsorb.serializer.impl.DictionarySerializer;
+import org.jabsorb.serializer.impl.ListSerializer;
+import org.jabsorb.serializer.impl.MapSerializer;
+import org.jabsorb.serializer.impl.NumberSerializer;
+import org.jabsorb.serializer.impl.PrimitiveSerializer;
+import org.jabsorb.serializer.impl.RawJSONArraySerializer;
+import org.jabsorb.serializer.impl.RawJSONObjectSerializer;
+import org.jabsorb.serializer.impl.SetSerializer;
+import org.jabsorb.serializer.impl.StringSerializer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -84,6 +105,65 @@ public class JSONSerializer implements Serializable
    * object.
    */
   private boolean marshallNullAttributes = true;
+
+  /**
+   * Are FixUps are generated to handle circular references found during
+   * marshalling?  If false, an exception is thrown if a circular reference
+   * is found during serialization.
+   */
+  private boolean fixupCircRefs = true;
+
+  /**
+   * Are FixUps are generated for duplicate objects found during marshalling?
+   * If false, the duplicates are re-serialized.
+   */
+  private boolean fixupDuplicates = true;
+
+  /**
+   * Get the fixupCircRefs flag.  If true, FixUps are generated to handle circular
+   * references found during marshalling.  If false, an exception is thrown if a
+   * circular reference is found during serialization.
+   *
+   * @return the fixupCircRefs flag.
+   */
+  public boolean getFixupCircRefs()
+  {
+    return fixupCircRefs;
+  }
+
+  /**
+   * Set the fixupCircRefs flag.  If true, FixUps are generated to handle circular
+   * references found during marshalling.  If false, an exception is thrown if a
+   * circular reference is found during serialization.
+   *
+   * @param fixupCircRefs  the fixupCircRefs flag.
+   */
+  public void setFixupCircRefs(boolean fixupCircRefs)
+  {
+    this.fixupCircRefs = fixupCircRefs;
+  }
+
+  /**
+   * Get the fixupDuplicates flag.  If true, FixUps are generated for duplicate
+   * objects found during marshalling. If false, the duplicates are re-serialized.
+   *
+   * @return the fixupDuplicates flag.
+   */
+  public boolean getFixupDuplicates()
+  {
+    return fixupDuplicates;
+  }
+
+  /**
+   * Set the fixupDuplicates flag.  If true, FixUps are generated for duplicate
+   * objects found during marshalling. If false, the duplicates are re-serialized.
+   *
+   * @param fixupDuplicates the fixupDuplicates flag.
+   */
+  public void setFixupDuplicates(boolean fixupDuplicates)
+  {
+    this.fixupDuplicates = fixupDuplicates;
+  }
 
   /**
    * Convert a string in JSON format into Java objects.
@@ -182,11 +262,31 @@ public class JSONSerializer implements Serializable
     }
     else
     {
-      //todo: handle throwing of circular reference exception and/or serializing duplicates, depending
-      //todo: on the options set in the serializer!
+      //todo: make test cases to explicitly handle all 4 combinations of the 2 option
+      //todo: settings (both on the client and server)
 
-      state.addFixUp(p.getLocation(), ref);
-      return CIRC_REF_OR_DUPLICATE;
+      // handle throwing of circular reference exception and/or serializing duplicates, depending
+      // on the options set in the serializer!
+      boolean foundCircRef = state.isAncestor(p, parent);
+
+      // throw an exception if a circular reference found, and the
+      // serializer option is not set to fixup these circular references
+      if (!fixupCircRefs && foundCircRef)
+      {
+        throw new MarshallException("Circular Reference");
+      }
+
+      // if its a duplicate only, and we aren't fixing up duplicates, re-serialize the object into the json
+      if (!fixupDuplicates && !foundCircRef)
+      {
+        state.push(parent, o, ref);
+      }
+      else
+      {
+        // generate a fix up entry for the duplicate/circular reference
+        state.addFixUp(p.getLocation(), ref);
+        return CIRC_REF_OR_DUPLICATE;
+      }
     }
 
     try
