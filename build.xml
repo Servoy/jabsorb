@@ -160,6 +160,10 @@
     <delete file="${webapp}/hello.jsp.txt" />
     <delete file="${webapp}/hello.js.txt" />
     <delete file="${webapp}/jsonrpc.js.txt" />
+    
+    <delete file="${webapp}/jsonrpc.js.gz" />
+    <delete file="${webapp}/jsonrpc-min.js.gz" />
+
     <delete>
       <fileset dir="." defaultexcludes="no">
         <include name="**/*~" />
@@ -172,6 +176,7 @@
       <fileset dir="${test.classes}" />
       <fileset dir="${jsp.out}" />
     </delete>
+    
     <echo message="Done with clean!" />
   </target>
 
@@ -192,6 +197,12 @@
     <delete file="${webapp}/hello.jsp.txt" />
     <delete file="${webapp}/hello.js.txt" />
     <delete file="${webapp}/jsonrpc.js.txt" />
+
+<!--
+    <delete file="${webapp}/jsonrpc.js.gz" />
+    <delete file="${webapp}/jsonrpc-min.js.gz" />
+-->
+
     <delete>
       <fileset dir="." defaultexcludes="no">
         <include name="**/*~" />
@@ -207,31 +218,60 @@
     <echo message="Done with release-prep-clean!" />
   </target>
 
+  <!-- some web/app servers (such as jetty) automatically scan for gzipped static content with
+       a .gz extension create these .gz versions as part of the build -->
+  <target name="compress-web-content">
+  
+    <!-- todo: -min version needs to be created as part of build process using the yui compressor 
+         (currently it's manually created) -->
 
-  <target name="cleanrelease-win">
-    <delete file="${release}/${app-prefix}.zip"/>
+    <gzip destfile="${webapp}/jsonrpc.js.gz" src="${webapp}/jsonrpc.js"/>
+    <gzip destfile="${webapp}/jsonrpc-min.js.gz" src="${webapp}/jsonrpc-min.js"/>
   </target>
 
-  <target name="release-win" depends="clean,docs,test.dist,release-prep-clean,cleanrelease-win"
-          description="make a complete release distribution for windows">
+  <target name="cleanrelease" depends="init" description="clean up release build files">
+    <delete file="${release}/${app-prefix}.zip"/>
+    <delete file="${release}/${app-prefix}-minimal.zip"/>
+    <delete file="${release}/${app-prefix}.tar.gz"/>
+    <delete file="${release}/${app-prefix}-minimal.tar.gz"/>
+  </target>
+
+  <target name="release" depends="init,cleanrelease,clean,docs,compress-web-content,test.dist,release-prep-clean"
+          description="make complete release distributions for unix and windows">
+          
     <zip destfile="${release}/${app-prefix}.zip">
       <zipfileset dir="." prefix="${app-prefix}"
-          excludes="*.zip,*.tar.gz,*,iml,*.ipr,*.iws,**/.svn/**,"/>
+          excludes="*.zip,*.tar.gz,*.iml,*.ipr,*.iws,**/.svn/**"/>
     </zip>
-  </target>
+    
+    <zip destfile="${release}/${app-prefix}-minimal.zip">
+      <zipfileset dir="." prefix="${app-prefix}">
+        <include name="${app-jar}"/>
+      </zipfileset>
+      <zipfileset dir="${webapp}" prefix="${app-prefix}">
+        <include name="jsonrpc*.js*"/>
+      </zipfileset>
+    </zip>
 
-  <target name="cleanrelease-unix">
-    <delete file="${release}/${app-prefix}.tar.gz"/>
-  </target>
-
-  <target name="release-unix" depends="clean,docs,test.dist,release-prep-clean,cleanrelease-unix"
-          description="make a complete release distribution for unix">
     <tar destfile="${release}/${app-prefix}.tar">
       <tarfileset dir="." prefix="${app-prefix}"
-          excludes="*.zip,*.tar.gz,*,iml,*.ipr,*.iws,**/.svn/**,"/>
+          excludes="*.zip,*.tar.gz,*.iml,*.ipr,*.iws,**/.svn/**"/>
     </tar>
     <gzip destfile="${release}/${app-prefix}.tar.gz" src="${release}/${app-prefix}.tar"/>
     <delete file="${release}/${app-prefix}.tar"/>
+
+    <tar destfile="${release}/${app-prefix}-minimal.tar">
+      <tarfileset dir="." prefix="${app-prefix}">
+        <include name="${app-jar}"/>
+      </tarfileset>
+      <tarfileset dir="${webapp}" prefix="${app-prefix}">
+        <include name="jsonrpc*.js*"/>
+      </tarfileset>
+
+    </tar>
+    <gzip destfile="${release}/${app-prefix}-minimal.tar.gz" src="${release}/${app-prefix}-minimal.tar"/>
+    <delete file="${release}/${app-prefix}-minimal.tar"/>
+    
   </target>
 
 </project>
