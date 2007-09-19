@@ -230,7 +230,7 @@
       <tarfileset dir="." prefix="${app-prefix}"
           excludes="*.zip,*.tar.gz,*,iml,*.ipr,*.iws,**/.svn/**,"/>
     </tar>
-    <gzip destfile="${release}/${app-prefix}.tar.gz" src="${release}/${product}-${version}.tar"/>
+    <gzip destfile="${release}/${app-prefix}.tar.gz" src="${release}/${app-prefix}.tar"/>
     <delete file="${release}/${app-prefix}.tar"/>
   </target>
 
