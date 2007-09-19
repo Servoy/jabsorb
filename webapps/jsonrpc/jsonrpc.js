@@ -28,9 +28,10 @@
 escapeJSONChar=function ()
 {
   var escapeChars = ["\b","\t","\n","\f","\r"];
-  var actualEval= function(c){
-    //Need to do these first as their ascii values are > 32 (34 & 92)
-    if(c=="\""||c=="\\")
+
+  return function(c){
+    // Need to do these first as their ascii values are > 32 (34 & 92)
+    if(c == "\"" || c == "\\")
     {
       return "\\"+c;
     }
@@ -39,7 +40,7 @@ escapeJSONChar=function ()
     {
       return c;
     }
-    //Otherwise it is has a code < 32 and may need escaping.
+    // Otherwise it is has a code < 32 and may need escaping.
     for(var i=0;i<escapeChars.length;i++)
     {
       if(c==escapeChars[i])
@@ -47,8 +48,9 @@ escapeJSONChar=function ()
         return "\\" + c;
       }
     }
-  }
-  return actualEval;
+    // it was a character from 0-31 that wasn't one of the escape chars
+    return c;  
+  };
 }();
 
 /* encode a string into JSON format */

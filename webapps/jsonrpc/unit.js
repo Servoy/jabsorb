@@ -121,7 +121,8 @@ var tests = [
   test: 'result.set.constructor == Object'
 },
 { code: 'jsonrpc.test.aBean()',
-  test: 'result != null'
+  test: 'e.message.indexOf("circular reference") >= 0',
+  exception: true
 },
 { code: 'jsonrpc.test.aHashtable()',
   test: 'result.map.constructor == Object'

@@ -34,7 +34,6 @@
     <tstamp />
     <property file="libraries.properties" />
     <property file="build.properties" />
-    <mkdir dir="${build}" />
 
     <path id="default-classpath" description="This is used for building the jar">
       <fileset dir="${lib}">
@@ -55,14 +54,18 @@
       </fileset>
     </path>
   </target>
+  
+  <target name="init-build">
+    <mkdir dir="${build}" />
+  </target>
 
-  <target name="compile" depends="init" description="Compiles the source into the build directory">
+  <target name="compile" depends="init,init-build" description="Compiles the source into the build directory">
     <javac debug="true" source="1.4" srcdir="${src}" destdir="${build}">
       <classpath refid="default-classpath" />
     </javac>
   </target>
 
-  <target name="dist" depends="compile" description="Puts the compiled source into a jar">
+  <target name="dist" depends="compile,init-build" description="Puts the compiled source into a jar">
     <jar destfile="${app-jar}" basedir="${build}" excludes="*~" />
   </target>
 
@@ -169,7 +172,66 @@
       <fileset dir="${test.classes}" />
       <fileset dir="${jsp.out}" />
     </delete>
-    <echo message="Done delete!" />
+    <echo message="Done with clean!" />
+  </target>
+
+  <!-- targets to make building of release distribution files easier -->
+
+  <!-- like clean, but only deletes files not essential for a release bundle -->
+  <target name="release-prep-clean" depends="init" description="Cleans all files (not needed in a release) produced by ant">
+<!--
+    <delete file="${app-war}" />
+    <delete file="${app-jar}" />
+-->
+    <delete file="${webapp}/WEB-INF/web.xml.out" />
+    <delete file="${webapp}/WEB-INF/web.xml.generated" />
+    <delete file="${webapp}/Test.java.txt" />
+    <delete file="${webapp}/test.jsp.txt" />
+    <delete file="${webapp}/test.js.txt" />
+    <delete file="${webapp}/Hello.java.txt" />
+    <delete file="${webapp}/hello.jsp.txt" />
+    <delete file="${webapp}/hello.js.txt" />
+    <delete file="${webapp}/jsonrpc.js.txt" />
+    <delete>
+      <fileset dir="." defaultexcludes="no">
+        <include name="**/*~" />
+      </fileset>
+    </delete>
+    <delete includeEmptyDirs="true" quiet="false" failonerror="false">
+      <fileset dir="${build}" />
+<!--      <fileset dir="${webapp}/docs" /> -->
+      <fileset dir="${test.lib}" />
+      <fileset dir="${test.classes}" />
+      <fileset dir="${jsp.out}" />
+    </delete>
+    <echo message="Done with release-prep-clean!" />
+  </target>
+
+
+  <target name="cleanrelease-win">
+    <delete file="${release}/${app-prefix}.zip"/>
+  </target>
+
+  <target name="release-win" depends="clean,docs,test.dist,release-prep-clean,cleanrelease-win"
+          description="make a complete release distribution for windows">
+    <zip destfile="${release}/${app-prefix}.zip">
+      <zipfileset dir="." prefix="${app-prefix}"
+          excludes="*.zip,*.tar.gz,*,iml,*.ipr,*.iws,**/.svn/**,"/>
+    </zip>
+  </target>
+
+  <target name="cleanrelease-unix">
+    <delete file="${release}/${app-prefix}.tar.gz"/>
+  </target>
+
+  <target name="release-unix" depends="clean,docs,test.dist,release-prep-clean,cleanrelease-unix"
+          description="make a complete release distribution for unix">
+    <tar destfile="${release}/${app-prefix}.tar">
+      <tarfileset dir="." prefix="${app-prefix}"
+          excludes="*.zip,*.tar.gz,*,iml,*.ipr,*.iws,**/.svn/**,"/>
+    </tar>
+    <gzip destfile="${release}/${app-prefix}.tar.gz" src="${release}/${product}-${version}.tar"/>
+    <delete file="${release}/${app-prefix}.tar"/>
   </target>
 
 </project>
