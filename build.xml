@@ -52,6 +52,9 @@
       <fileset dir="${tomcat.lib}">
         <include name="**/*.jar"/>
       </fileset>
+      <fileset dir="${tomcat.binlib}"> 
+        <include name="**/*.jar"/>
+      </fileset>
     </path>
   </target>
   
