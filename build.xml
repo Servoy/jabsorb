@@ -245,20 +245,34 @@
   </target>
 
   <target name="cleanrelease" depends="init" description="clean up release build files">
-    <delete file="${release}/${app-prefix}.zip"/>
+    <delete file="${release}/${app-prefix}-src.zip"/>
+    <delete file="${release}/${app-prefix}-src.tar.gz"/>
+    <delete file="${release}/${app-prefix}-full.zip"/>
+    <delete file="${release}/${app-prefix}-full.tar.gz"/>
     <delete file="${release}/${app-prefix}-minimal.zip"/>
-    <delete file="${release}/${app-prefix}.tar.gz"/>
     <delete file="${release}/${app-prefix}-minimal.tar.gz"/>
+    <delete file="${release}/${app-prefix}-javadoc.zip"/>
+    <delete file="${release}/${app-prefix}-javadoc.tar.gz"/>
   </target>
 
-  <target name="release" depends="init,cleanrelease,clean,docs,compress-web-content,test.dist,release-prep-clean"
+  <target name="release" depends="init,cleanrelease,clean,release-src,docs,compress-web-content,test.dist,release-prep-clean"
           description="make complete release distributions for unix and windows">
           
-    <zip destfile="${release}/${app-prefix}.zip">
+    <!-- build FULL release which contains the completely built javadoc, war and .jar
+         along with the source code -->
+
+    <zip destfile="${release}/${app-prefix}-full.zip">
       <zipfileset dir="." prefix="${app-prefix}"
           excludes="*.zip,*.tar.gz,*.iml,*.ipr,*.iws,**/.svn/**"/>
     </zip>
+    <tar destfile="${release}/${app-prefix}-full.tar">
+      <tarfileset dir="." prefix="${app-prefix}"
+          excludes="*.zip,*.tar.gz,*.iml,*.ipr,*.iws,**/.svn/**"/>
+    </tar>
+    <gzip destfile="${release}/${app-prefix}-full.tar.gz" src="${release}/${app-prefix}-full.tar"/>
+    <delete file="${release}/${app-prefix}-full.tar"/>
     
+    <!-- build the minimal release which just has the .jar and the .js needed -->
     <zip destfile="${release}/${app-prefix}-minimal.zip">
       <zipfileset dir="." prefix="${app-prefix}">
         <include name="${app-jar}"/>
@@ -267,14 +281,6 @@
         <include name="jsonrpc*.js*"/>
       </zipfileset>
     </zip>
-
-    <tar destfile="${release}/${app-prefix}.tar">
-      <tarfileset dir="." prefix="${app-prefix}"
-          excludes="*.zip,*.tar.gz,*.iml,*.ipr,*.iws,**/.svn/**"/>
-    </tar>
-    <gzip destfile="${release}/${app-prefix}.tar.gz" src="${release}/${app-prefix}.tar"/>
-    <delete file="${release}/${app-prefix}.tar"/>
-
     <tar destfile="${release}/${app-prefix}-minimal.tar">
       <tarfileset dir="." prefix="${app-prefix}">
         <include name="${app-jar}"/>
@@ -282,11 +288,34 @@
       <tarfileset dir="${webapp}" prefix="${app-prefix}">
         <include name="jsonrpc*.js*"/>
       </tarfileset>
-
     </tar>
     <gzip destfile="${release}/${app-prefix}-minimal.tar.gz" src="${release}/${app-prefix}-minimal.tar"/>
     <delete file="${release}/${app-prefix}-minimal.tar"/>
     
+    <!-- build a javadoc only download -->
+    <zip destfile="${release}/${app-prefix}-javadoc.zip">
+      <zipfileset dir="${webapp}/docs" prefix="javadoc/${app-prefix}"/>
+    </zip>
+    <tar destfile="${release}/${app-prefix}-javadoc.tar">
+      <tarfileset dir="${webapp}/docs" prefix="javadoc/${app-prefix}"/>
+    </tar>
+    <gzip destfile="${release}/${app-prefix}-javadoc.tar.gz" src="${release}/${app-prefix}-javadoc.tar"/>
+    <delete file="${release}/${app-prefix}-javadoc.tar"/>
+
+  </target>
+
+  <!-- create src release -->
+  <target name="release-src">
+    <zip destfile="${release}/${app-prefix}-src.zip">
+      <zipfileset dir="." prefix="${app-prefix}"
+          excludes="*.zip,*.tar.gz,*.iml,*.ipr,*.iws,**/.svn/**"/>
+    </zip>
+    <tar destfile="${release}/${app-prefix}-src.tar">
+      <tarfileset dir="." prefix="${app-prefix}"
+          excludes="*.zip,*.tar.gz,*.iml,*.ipr,*.iws,**/.svn/**"/>
+    </tar>
+    <gzip destfile="${release}/${app-prefix}-src.tar.gz" src="${release}/${app-prefix}-src.tar"/>
+    <delete file="${release}/${app-prefix}-src.tar"/>
   </target>
 
 </project>
