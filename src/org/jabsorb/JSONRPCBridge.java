@@ -2,7 +2,7 @@
  * jabsorb - a Java to JavaScript Advanced Object Request Broker
  * http://www.jabsorb.org
  *
- * Copyright 2007 Arthur Blake and William Becker
+ * Copyright 2007 The jabsorb team
  *
  * based on original code from
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
@@ -326,11 +326,10 @@ public class JSONRPCBridge implements Serializable
   }
 
   /**
-   * Creates a signature for an array of arguements
+   * Creates a signature for an array of arguments
    * 
    * @param arguments The argumnts
-   * @return A comma seperated string listing the arguments TODO: Arthur: Do you
-   *         need to add your list/map things here? - WB
+   * @return A comma seperated string listing the arguments
    */
   private static String argSignature(JSONArray arguments)
   {
