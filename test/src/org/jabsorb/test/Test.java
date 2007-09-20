@@ -43,8 +43,9 @@ import org.jabsorb.JSONRPCBridge;
 import org.jabsorb.callback.InvocationCallback;
 import org.json.JSONObject;
 
-//todo:  javadoc!
-
+/**
+ * Server side unit tests, used by unit.jsp / unit.js.
+ */
 public class Test implements Serializable
 {
   private final static long serialVersionUID = 2;
