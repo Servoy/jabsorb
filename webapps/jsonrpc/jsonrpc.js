@@ -2,7 +2,7 @@
  * jabsorb - a Java to JavaScript Advanced Object Request Broker
  * http://www.jabsorb.org
  *
- * Copyright 2007 Arthur Blake and William Becker
+ * Copyright 2007 The jabsorb team
  * Copyright (c) 2003-2004 Jan-Klaas Kollhof
  * Copyright (c) 2005 Michael Clark, Metaparadigm Pte Ltd
  *
