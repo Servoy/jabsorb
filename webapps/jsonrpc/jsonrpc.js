@@ -517,7 +517,7 @@ JSONRpcClient.prototype._sendRequest = function (req)
   JSONRpcClient.num_req_active++;
 
   /* Send the request */
-  http.open("POST", this.serverURL, req.cb, this.user, this.pass);
+  http.open("POST", this.serverURL, !!req.cb, this.user, this.pass);
 
   /* setRequestHeader is missing in Opera 8 Beta */
   try
@@ -606,6 +606,14 @@ JSONRpcClient.prototype._handleResponse = function (http)
   }
   catch(e)
   {
+/*
+    todo:   don't throw away the original error information here!!
+    todo:   and everywhere else, as well!
+    if (e instanceof Error)
+    {
+      alert (e.name + ": " + e.message);
+    }
+*/
     JSONRpcClient.poolReturnHTTPRequest(http);
     JSONRpcClient.num_req_active--;
     JSONRpcClient.kick_async();
@@ -673,15 +681,19 @@ JSONRpcClient.poolReturnHTTPRequest = function (http)
   }
 };
 
-JSONRpcClient.msxmlNames = [ "MSXML2.XMLHTTP.5.0",
-  "MSXML2.XMLHTTP.4.0",
+/* the search order here may seem strange, but it's
+   actually what Microsoft recommends */
+JSONRpcClient.msxmlNames = [
+  "MSXML2.XMLHTTP.6.0",
   "MSXML2.XMLHTTP.3.0",
   "MSXML2.XMLHTTP",
+  "MSXML2.XMLHTTP.5.0",
+  "MSXML2.XMLHTTP.4.0",
   "Microsoft.XMLHTTP" ];
 
 JSONRpcClient.getHTTPRequest = function ()
 {
-  /* Mozilla XMLHttpRequest */
+  /* Look for a browser native XMLHttpRequest implementation (Mozilla/IE7/Opera/Safari, etc.) */
   try
   {
     JSONRpcClient.httpObjectName = "XMLHttpRequest";
@@ -691,7 +703,7 @@ JSONRpcClient.getHTTPRequest = function ()
   {
   }
 
-  /* Microsoft MSXML ActiveX */
+  /* Microsoft MSXML ActiveX for IE versions < 7 */
   for (var i = 0; i < JSONRpcClient.msxmlNames.length; i++)
   {
     try
