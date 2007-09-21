@@ -1,17 +1,35 @@
 CHANGES log
 
-2007-09-15 jabsorb 1.1 release
+2007-09-20 jabsorb 1.1 release
 
 new features:
 
-* JSONRpcServlet can now gzip responses.
-  See web.xml for detailed documentation;
-  the gzip_threshold setting can turn this off if desired.
+* SLF4J logging - makes it easy to integrate into other java frameworks or 
+  web applications that may use a different server side logging system.
 
-* JSONRpcServlet for debug output of json, now shows the output
-  pretty printed (as well as non pretty printed also) to greatly
-  aid in the debugging process
-
+* GZIP compression to transparently compress the JsonRpcServlet response-- 
+  we are seeing compression results that are easily 1/10th the size for 
+  typical json responses.  This is useful for small applications that may 
+  not be already utilizing a filter or some other means of compressing 
+  dynamic responses.  It can easily be turned off if it's not needed for 
+  some reason.
+    
+* The JavaScript client code, jsonrpc.js is also now distributed in an extra 
+  alternative, "minified" version that was created with the YUI Compressor.  
+  Gzipped versions of jsonrpc.js are also included for web servers that can 
+  take advantage of this.
+  
+* More extensive javadoc and more manual sections (Custom Serializers are now 
+  documented.)
+  
+* Upgraded to json.org library version 2.0 which has bug fixes and many 
+  additional general purpose JSON utilities.
+  
+* Pretty printing of the send and receive JSON in the server log when debug 
+  is on (this makes debugging much easier.)
+  
+* Optimized JSON escaping, and added method caching for callable references 
+  to improve performance.
 
 2007-08-31
 * jabsorb library created as a fork based on the json-rpc-java trunk
