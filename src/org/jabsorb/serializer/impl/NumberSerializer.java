@@ -68,20 +68,6 @@ public class NumberSerializer extends AbstractSerializer
     return _JSONClasses;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
-      Object jso) throws UnmarshallException
-  {
-    try
-    {
-      toNumber(clazz, jso);
-    }
-    catch (NumberFormatException e)
-    {
-      throw new UnmarshallException("not a number");
-    }
-    return ObjectMatch.OKAY;
-  }
-
   /**
    * Converts a javascript object to a Java number
    * 
@@ -155,6 +141,20 @@ public class NumberSerializer extends AbstractSerializer
     return null;
   }
 
+  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
+      Object jso) throws UnmarshallException
+  {
+    try
+    {
+      toNumber(clazz, jso);
+    }
+    catch (NumberFormatException e)
+    {
+      throw new UnmarshallException("not a number");
+    }
+    return ObjectMatch.OKAY;
+  }
+
   public Object unmarshall(SerializerState state, Class clazz, Object jso)
       throws UnmarshallException
   {
@@ -173,7 +173,7 @@ public class NumberSerializer extends AbstractSerializer
     }
   }
 
-  public Object marshall(SerializerState state, Object o)
+  public Object marshall(SerializerState state, Object p, Object o)
       throws MarshallException
   {
     return o;

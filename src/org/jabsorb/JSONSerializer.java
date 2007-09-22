@@ -35,6 +35,7 @@ import java.util.NoSuchElementException;
 
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
+import org.jabsorb.serializer.ProcessedObject;
 import org.jabsorb.serializer.Serializer;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
@@ -106,6 +107,65 @@ public class JSONSerializer implements Serializable
   private boolean marshallNullAttributes = true;
 
   /**
+   * Are FixUps are generated to handle circular references found during
+   * marshalling?  If false, an exception is thrown if a circular reference
+   * is found during serialization.
+   */
+  private boolean fixupCircRefs = true;
+
+  /**
+   * Are FixUps are generated for duplicate objects found during marshalling?
+   * If false, the duplicates are re-serialized.
+   */
+  private boolean fixupDuplicates = true;
+
+  /**
+   * Get the fixupCircRefs flag.  If true, FixUps are generated to handle circular
+   * references found during marshalling.  If false, an exception is thrown if a
+   * circular reference is found during serialization.
+   *
+   * @return the fixupCircRefs flag.
+   */
+  public boolean getFixupCircRefs()
+  {
+    return fixupCircRefs;
+  }
+
+  /**
+   * Set the fixupCircRefs flag.  If true, FixUps are generated to handle circular
+   * references found during marshalling.  If false, an exception is thrown if a
+   * circular reference is found during serialization.
+   *
+   * @param fixupCircRefs  the fixupCircRefs flag.
+   */
+  public void setFixupCircRefs(boolean fixupCircRefs)
+  {
+    this.fixupCircRefs = fixupCircRefs;
+  }
+
+  /**
+   * Get the fixupDuplicates flag.  If true, FixUps are generated for duplicate
+   * objects found during marshalling. If false, the duplicates are re-serialized.
+   *
+   * @return the fixupDuplicates flag.
+   */
+  public boolean getFixupDuplicates()
+  {
+    return fixupDuplicates;
+  }
+
+  /**
+   * Set the fixupDuplicates flag.  If true, FixUps are generated for duplicate
+   * objects found during marshalling. If false, the duplicates are re-serialized.
+   *
+   * @param fixupDuplicates the fixupDuplicates flag.
+   */
+  public void setFixupDuplicates(boolean fixupDuplicates)
+  {
+    this.fixupDuplicates = fixupDuplicates;
+  }
+
+  /**
    * Convert a string in JSON format into Java objects.
    * 
    * @param jsonString The JSON format string.
@@ -158,6 +218,13 @@ public class JSONSerializer implements Serializable
   }
 
   /**
+   * Special token Object to indicate the fact that the given object being
+   * marshalled is a duplicate or circular reference and so it should not
+   * be placed into the json stream.
+   */
+  public static final Object CIRC_REF_OR_DUPLICATE = new Object();
+
+  /**
    * Marshall java into an equivalent json representation (JSONObject or
    * JSONArray.) <p/> This involves finding the correct Serializer for the class
    * of the given java object and then invoking it to marshall the java object
@@ -166,32 +233,87 @@ public class JSONSerializer implements Serializable
    * 
    * @param state can be used by the underlying Serializer objects to hold state
    *          while marshalling.
+   *
+   * @param parent parent object of the object being converted.  this can be null if
+   *               it's the root object being converted.
    * @param o java object to convert into json.
-   * @return the JSONObject or JSONArray containing the json for the marshalled
-   *         java object.
+   *
+   * @param ref reference within the parent's point of view of the object being serialized.
+   *            this will be a String for JSONObjects and an Integer for JSONArrays.
+   *
+   * @return the JSONObject or JSONArray (or primitive object) containing the json
+   *         for the marshalled java object or the special token Object,
+   *         JSONSerializer.CIRC_REF_OR_DUP to indicate to the caller that the
+   *         given Object has already been serialized and so therefore the result
+   *         should be ignored.
+   *
    * @throws MarshallException if there is a problem marshalling java to json.
    */
-  public Object marshall(SerializerState state, Object o)
+  public Object marshall(SerializerState state, Object parent, Object o, Object ref)
       throws MarshallException
   {
-    if (o == null)
+    // check for duplicate objects or circular references
+    ProcessedObject p = state.getProcessedObject(o);
+
+    // if this object hasn't been seen before, mark it as seen and continue forth
+    if (p == null)
     {
+      state.push(parent, o, ref);
+    }
+    else
+    {
+      //todo: make test cases to explicitly handle all 4 combinations of the 2 option
+      //todo: settings (both on the client and server)
+
+      // handle throwing of circular reference exception and/or serializing duplicates, depending
+      // on the options set in the serializer!
+      boolean foundCircRef = state.isAncestor(p, parent);
+
+      // throw an exception if a circular reference found, and the
+      // serializer option is not set to fixup these circular references
+      if (!fixupCircRefs && foundCircRef)
+      {
+        throw new MarshallException("Circular Reference");
+      }
+
+      // if its a duplicate only, and we aren't fixing up duplicates, re-serialize the object into the json
+      if (!fixupDuplicates && !foundCircRef)
+      {
+        state.push(parent, o, ref);
+      }
+      else
+      {
+        // generate a fix up entry for the duplicate/circular reference
+        state.addFixUp(p.getLocation(), ref);
+        return CIRC_REF_OR_DUPLICATE;
+      }
+    }
+
+    try
+    {
+      if (o == null)
+      {
+        if (log.isDebugEnabled())
+        {
+          log.debug("marshall null");
+        }
+        return JSONObject.NULL;
+      }
       if (log.isDebugEnabled())
       {
-        log.debug("marshall null");
+        log.debug("marshall class " + o.getClass().getName());
       }
-      return JSONObject.NULL;
+      Serializer s = getSerializer(o.getClass(), null);
+      if (s != null)
+      {
+        return s.marshall(state, parent, o);
+      }
+      throw new MarshallException("can't marshall " + o.getClass().getName());
     }
-    if (log.isDebugEnabled())
+    finally
     {
-      log.debug("marshall class " + o.getClass().getName());
+      state.pop();
     }
-    Serializer s = getSerializer(o.getClass(), null);
-    if (s != null)
-    {
-      return s.marshall(state, o);
-    }
-    throw new MarshallException("can't marshall " + o.getClass().getName());
   }
 
   /**
@@ -316,17 +438,28 @@ public class JSONSerializer implements Serializable
   public String toJSON(Object obj) throws MarshallException
   {
     SerializerState state = new SerializerState();
-    Object json = marshall(state, obj);
+
+    // todo: what do we do about fix ups here?
+    Object json = marshall(state, null, obj, "result");
     return json.toString();
   }
 
   /**
-   * Attempts to unmarshal an javascript object
-   * 
+   * <p>
+   * Determine if a given JSON object matches a given class type, and to what
+   * degree it matches.  An ObjectMatch instance is returned which contains a
+   * number indicating the number of fields that did not match.  Therefore when a given
+   * parameter could potentially match in more that one way, this is a metric
+   * to compare these ObjectMatches to determine which one matches more closely.
+   * </p><p>
+   * This is only used when there are overloaded method names that are being called
+   * from JSON-RPC to determine which call signature the method call matches most
+   * closely and therefore which method is the intended target method to call.
+   * </p> 
    * @param state The state of the serialiser
    * @param clazz The class to unmarshall it to.
-   * @param json The object to unmarsahl
-   * @return Whether the object matched the class
+   * @param json The object to unmarshall
+   * @return an ObjectMatch indicating the degree to which the object matched the class,
    * @throws UnmarshallException if getClassFromHint() fails
    */
   public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,

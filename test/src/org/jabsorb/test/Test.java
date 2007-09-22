@@ -30,10 +30,12 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -214,6 +216,21 @@ public class Test implements Serializable
     return s;
   }
 
+  public Hashtable aHashtable()
+  {
+    Hashtable ht = new Hashtable();
+    for (int i = 0; i < 3; i++)
+    {
+      Wiggle w = new Wiggle();
+      w.setFoo("foo " + i);
+      w.setBar(i);
+      ht.put(new Integer(i), w);
+    }
+    return ht;
+  }
+
+  // circular reference tests
+
   public BeanA aBean()
   {
     BeanA beanA = new BeanA();
@@ -227,17 +244,11 @@ public class Test implements Serializable
     return beanA;
   }
 
-  public Hashtable aHashtable()
+  public Map aCircRefMap()
   {
-    Hashtable ht = new Hashtable();
-    for (int i = 0; i < 3; i++)
-    {
-      Wiggle w = new Wiggle();
-      w.setFoo("foo " + i);
-      w.setBar(i);
-      ht.put(new Integer(i), w);
-    }
-    return ht;
+    Map m = new HashMap();
+    m.put("me",m);
+    return m;
   }
 
   // Misc tests

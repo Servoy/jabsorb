@@ -36,6 +36,7 @@ import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
+import org.jabsorb.JSONSerializer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -77,12 +78,13 @@ public class DictionarySerializer extends AbstractSerializer
     return _serializableClasses;
   }
 
-  public Object marshall(SerializerState state, Object o)
+  public Object marshall(SerializerState state, Object p, Object o)
       throws MarshallException
   {
     Dictionary ht = (Dictionary) o;
     JSONObject obj = new JSONObject();
     JSONObject mapdata = new JSONObject();
+
     try
     {
       if (ser.getMarshallClassHints())
@@ -90,31 +92,44 @@ public class DictionarySerializer extends AbstractSerializer
         obj.put("javaClass", o.getClass().getName());
       }
       obj.put("map", mapdata);
+      state.push(o,mapdata,"map");
     }
     catch (JSONException e)
     {
-      throw new MarshallException("Could add data: " + e.getMessage());
+      throw (MarshallException) new MarshallException("Could not put data"+ e.getMessage()).initCause(e);
     }
     Object key = null;
-    Object val = null;
+
     try
     {
       Enumeration en = ht.keys();
       while (en.hasMoreElements())
       {
         key = en.nextElement();
-        val = ht.get(key);
-        // only support String keys
-        mapdata.put(key.toString(), ser.marshall(state, val));
+        String keyString = key.toString();  // only support String keys
+
+        Object json = ser.marshall(state, mapdata, ht.get(key), keyString);
+
+        // omit the object entirely if it's a circular reference or duplicate
+        // it will be regenerated in the fixups phase
+        if (JSONSerializer.CIRC_REF_OR_DUPLICATE != json)
+        {
+          mapdata.put(keyString,json );
+        }
+
       }
     }
     catch (MarshallException e)
     {
-      throw new MarshallException("map key " + key + " " + e.getMessage());
+      throw (MarshallException) new MarshallException("map key " + key + " " + e.getMessage()).initCause(e);
     }
     catch (JSONException e)
     {
-      throw new MarshallException("map key " + key + " " + e.getMessage());
+      throw (MarshallException) new MarshallException("map key " + key + " " + e.getMessage()).initCause(e);
+    }
+    finally
+    {
+      state.pop();
     }
     return obj;
   }
@@ -171,11 +186,11 @@ public class DictionarySerializer extends AbstractSerializer
     }
     catch (UnmarshallException e)
     {
-      throw new UnmarshallException("key " + key + " " + e.getMessage());
+      throw (UnmarshallException) new UnmarshallException("key " + key + " " + e.getMessage()).initCause(e);
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("key " + key + " " + e.getMessage());
+      throw (UnmarshallException)new UnmarshallException("key " + key + " " + e.getMessage()).initCause(e);
     }
 
     return m;
@@ -233,13 +248,12 @@ public class DictionarySerializer extends AbstractSerializer
     }
     catch (UnmarshallException e)
     {
-      throw new UnmarshallException("key " + key + " " + e.getMessage());
+      throw (UnmarshallException) new UnmarshallException("key " + key + " " + e.getMessage()).initCause(e);
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("key " + key + " " + e.getMessage());
+      throw (UnmarshallException)new UnmarshallException("key " + key + " " + e.getMessage()).initCause(e);
     }
     return ht;
   }
-
 }

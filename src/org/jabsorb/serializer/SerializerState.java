@@ -26,7 +26,11 @@
 
 package org.jabsorb.serializer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class is used by Serializers to hold state during marshalling and
@@ -37,42 +41,132 @@ import java.util.HashMap;
  */
 public class SerializerState
 {
+  /**
+   * The key is the identity hash code of a processed object wrapped in an Integer object.
+   * The value is a ProcessedObject instance which contains both the object that was processed, and
+   * other information about the object.
+   */
+  private Map processedObjects = new HashMap();
 
   /**
-   * Maps classes to an instance of the class
+   * A List of FixUp objects that are generated during processing for circular references
+   * and/or duplicate references.
    */
-  private HashMap stateMap = null;
+  private List fixups = new ArrayList();
 
   /**
-   * Instantiate (only if get hasn't been yet called for the requested type) or
-   * get the previously instantiated instance of the specified type class.
-   * 
-   * @param clazz type to get/instatiate.
-   * 
-   * @return an instance of the given class. It will be instantiated if this is
-   *         the first time the specified type is requested from the
-   *         SerializerState, otherwise, the previously created instance will be
-   *         returned.
-   * 
-   * @throws InstantiationException if an instance of the specified class type
-   *           cannot be instantiated.
-   * @throws IllegalAccessException if an instance of the specified class type
-   *           cannot be instantiated.
+   * If the given object has already been processed, return the ProcessedObject wrapper for
+   * that object which will indicate the original location from where that Object was processed from.
+   *
+   * @param  object Object to check.
+   * @return ProcessedObject wrapper for the given object or null if the object hasn't been processed yet
+   *         in this SerializerState.
    */
-  public Object get(Class clazz) throws InstantiationException,
-      IllegalAccessException
+  public ProcessedObject getProcessedObject(Object object)
   {
-    Object o;
-    if (stateMap == null)
+    // get unique key for this object
+    // this is the basis for determining if we have already processed the object or not.
+    return (ProcessedObject) processedObjects.get(new Integer(System.identityHashCode(object)));
+  }
+
+  /**
+   * Represents the current json location that we are at during processing.
+   * Each time we go one layer deeper in processing, the reference is pushed onto the stack
+   * And each time we recurse out of that layer, it is popped off the stack.
+   */
+  private LinkedList currentLocation = new LinkedList();
+
+  /**
+   * Pop off one level from the scope stack of the current location during processing.
+   */
+  public void pop()
+  {
+    currentLocation.removeLast();
+  }
+
+  /**
+   * Record the given object as a ProcessedObject and push into onto the scope stack.
+   *
+   * @param parent parent of object to process.  Can be null if it's the root object being processed.
+   *               it should be an object that was already processed via a previous call to processObject.
+   *
+   * @param obj    object being processed
+   * @param ref    reference to object within parent-- should be a String if parent is an object, and Integer
+   *               if parent is an array.
+   */
+  public void push(Object parent, Object obj, Object ref)
+  {
+    ProcessedObject parentProcessedObject = null;
+
+    if (parent!=null)
     {
-      stateMap = new HashMap();
+      parentProcessedObject = getProcessedObject(parent);
+
+      if (parentProcessedObject==null)
+      {
+        // this is a sanity check-- it should never occur
+        throw new IllegalArgumentException("attempt to process an object with an unprocessed parent");
+      }
     }
-    else if ((o = stateMap.get(clazz)) != null)
+
+    ProcessedObject p = new ProcessedObject();
+    p.setParent(parentProcessedObject);
+    p.setObject(obj);
+    p.setRef(ref);
+
+    processedObjects.put(p.getUniqueId(),p);
+
+    currentLocation.add(ref);
+  }
+
+  /**
+   * Get the List of all FixUp objects created during processing.
+   * @return List of FixUps to circular references and duplicates found during processing.
+   */
+  public List getFixUps()
+  {
+    return fixups;
+  }
+
+  /**
+   * Add a fixup entry.  Assumes that the SerializerState is in the correct scope for the
+   * fix up location.
+   *
+   * @param originalLocation original json path location where the object was first encountered.
+   * @param ref additional reference (String|Integer) to add on to the scope's current location.
+   */
+  public void addFixUp(List originalLocation, Object ref)
+  {
+    currentLocation.add(ref);
+    fixups.add(new FixUp(currentLocation, originalLocation));
+    pop();
+  }
+
+  /**
+   * Determine if a duplicate child object of the given parentis a circular reference with the
+   * given ProcessedObject.  We know it's a circular reference if we can walk up the parent
+   * chain and find the ProcessedObject.  If instead we find null, then it's a duplicate
+   * instead of a circular ref.
+   *
+   * @param dup the duplicate object that might also be the original reference in a circular reference.
+   * @param parent the parent of an object that might be a circular reference.
+   *
+   * @return true if the duplicate is a circular reference or false if it's a duplicate only.
+   */
+  public boolean isAncestor(ProcessedObject dup, Object parent)
+  {
+    // walk up the ancestry chain until we either find the duplicate
+    // (which would mean it's a circular ref)
+    // or we find null (the end of the chain) which would mean it's a duplicate only.
+    ProcessedObject ancestor = getProcessedObject(parent);
+    while (ancestor != null)
     {
-      return o;
+      if (dup == ancestor)
+      {
+        return true;
+      }
+      ancestor = ancestor.getParent();
     }
-    o = clazz.newInstance();
-    stateMap.put(clazz, o);
-    return o;
+    return false;
   }
 }
