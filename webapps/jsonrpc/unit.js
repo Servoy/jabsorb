@@ -1,222 +1,610 @@
 var jsonurl = "JSON-RPC";
+
+//bridge reference
 var jsonrpc = null;
 
+//callback function
 var cb;
+
+//when the tests started
 var tests_start;
 
-var tests = [
-{ code: 'jsonrpc.test.voidFunction()',
-  test: 'result == undefined'
-},
-{ code: 'jsonrpc.test.throwException()',
-  test: 'e == "java.lang.Exception: test exception"',
-  exception: true
-},
-{ code: 'jsonrpc.test.echo("hello")',
-  test: 'result == "hello"'
-},
-{ code: 'jsonrpc.test.echo("\\"")',
-  test: 'result ==         "\\""'
-},
-{ code: 'jsonrpc.test.echo("\\\\")',
-  test: 'result ==         "\\\\"'
-},
-{ code: 'jsonrpc.test.echo("\\b")',
-  test: 'result ==         "\\b"'
-},
-{ code: 'jsonrpc.test.echo("\\t")',
-  test: 'result ==         "\\t"'
-},
-{ code: 'jsonrpc.test.echo("\\n")',
-  test: 'result ==         "\\n"'
-},
-{ code: 'jsonrpc.test.echo("\\f")',
-  test: 'result ==         "\\f"'
-},
-{ code: 'jsonrpc.test.echo("\\r")',
-  test: 'result ==         "\\r"'
-},
-{ code: 'jsonrpc.test.echo(1234)',
-  test: 'result == 1234'
-},
-{ code: 'jsonrpc.test.echo([1,2,3])',
-  test: 'result.length == 3 && result[0] == 1 && result[1] == 2 && result[2] == 3'
-},
-{ code: 'jsonrpc.test.echo(["foo", "bar", "baz"])',
-  test: 'result.length == 3 && result[0] == "foo" && result[1] == "bar" && result[2] == "baz"'
-},
-{ code: 'jsonrpc.test.echo(["foo", null, "baz"])',
-  test: 'result.length == 3 && result[0] == "foo" && result[1] == null && result[2] == "baz"'
-},
-{ code: 'jsonrpc.test.echo({ bang: "foo", baz: 9 })',
-  test: 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9'
-},
-{ code: 'jsonrpc.test.echo({ bang: "foo", baz: 9, bork: 5 })',
-  test: 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9'
-},
-{ code: 'jsonrpc.test.echo({ bang: "foo", baz: 9, bork: null })',
-  test: 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9'
-},
-{ code: 'jsonrpc.test.echo({ foo: "bang", bar: 11 })',
-  test: 'result.javaClass == "org.jabsorb.test.Test$Wiggle" && result.foo =="bang" && result.bar == 11'
-},
-{ code: 'jsonrpc.test.echoChar("c")',
-  test: 'result == "c"'
-},
-{ code: 'jsonrpc.test.echoIntegerArray([1234, 5678])',
-  test: 'result[0] == 1234 && result[1] == 5678'
-},
-{ code: 'jsonrpc.test.echoIntegerObject(1234567890)',
-  test: 'result == 1234567890'
-},
-{ code: 'jsonrpc.test.echoLongObject(1099511627776)',
-  test: 'result == 1099511627776'
-},
-{ code: 'jsonrpc.test.echoFloatObject(3.3)',
-  test: 'result == 3.3'
-},
-{ code: 'jsonrpc.test.echoDoubleObject(9.9)',
-  test: 'result == 9.9'
-},
-{ code: 'jsonrpc.test.echoDateObject(new Date(1121689294000))',
-  test: 'result.javaClass == "java.util.Date" && result.time == 1121689294000'
-},
-{ code: 'jsonrpc.test.echoBoolean(true)',
-  test: 'result == true'
-},
-{ code: 'jsonrpc.test.echoBoolean(false)',
-  test: 'result == false'
-},
-{ code: 'jsonrpc.test.echoByteArray("testing 123")',
-  test: 'result == "testing 123"'
-},
-{ code: 'jsonrpc.test.echoCharArray("testing 456")',
-  test: 'result == "testing 456"'
-},
-{ code: 'jsonrpc.test.echoBooleanArray([true,false,true])',
-  test: 'result.length == 3 && result[0] == true && result[1] == false && result[2] == true'
-},
-{ code: 'jsonrpc.test.echoList({"list":[20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "javaClass":"java.util.Vector"})',
-  test: 'result.list.constructor == Array'
-},
-{ code: 'jsonrpc.test.echoList({"list":[null, null, null], "javaClass":"java.util.Vector"})',
-  test: 'result.list.constructor == Array'
-},
-{ code: 'jsonrpc.test.concat("a","b")',
-  test: 'result == "a and b"'
-},
-{ code: 'jsonrpc.test.anArray()',
-  test: 'result.constructor == Array'
-},
-{ code: 'jsonrpc.test.anArrayList()',
-  test: 'result.list.constructor == Array'
-},
-{ code: 'jsonrpc.test.aVector()',
-  test: 'result.list.constructor == Array'
-},
-{ code: 'jsonrpc.test.aList()',
-  test: 'result.list.constructor == Array'
-},
-{ code: 'jsonrpc.test.aSet()',
-  test: 'result.set.constructor == Object'
-},
-{ code: 'jsonrpc.test.aBean()',
-  test: 'e.message.indexOf("circular reference") >= 0',
-  exception: true
-},
-{ code: 'jsonrpc.test.aHashtable()',
-  test: 'result.map.constructor == Object'
-},
-{ code: 'jsonrpc.test.echoObject({ "javaClass": "org.jabsorb.test.Test$Waggle", "bang": "foo", "baz": 9, "bork": 5 })',
-  test: 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9 && result.bork == 5'
-},
-{ code: 'jsonrpc.test.echoObjectArray([{ "javaClass": "org.jabsorb.test.Test$Waggle", "bang": "foo", "baz": 9, "bork": 5 }])',
-  test: 'result[0].javaClass == "org.jabsorb.test.Test$Waggle" && result[0].bang =="foo" && result[0].baz == 9 && result[0].bork == 5'
-},
-{ code: 'jsonrpc.test.echoRawJSON({ "field1": "test" })',
-  test: 'result.field1 == "test"'
+//The difference of the width of detail tables vs the main table
+var innerTableWidthDifference=30;
+
+//from prototype.js
+var $A = function(iterable) {
+  var results,i;
+  if (!iterable) {return [];}
+  if (iterable.toArray) {
+    return iterable.toArray();
+  } else {
+    results = [];
+    for (i = 0, length = iterable.length; i < length; i++){
+      results.push(iterable[i]);
+    }
+    return results;
+  }
+};
+
+//from prototype.js
+Function.prototype.bind = function() {
+  var __method = this, args = $A(arguments), object = args.shift();
+  return function() {
+    __method.apply(object, args.concat($A(arguments)));
+    return false;
+  };
+};
+
+//from prototype.js
+Function.prototype.bindAsEventListener = function(object) {
+  var __method = this, args = $A(arguments), object = args.shift();
+  return function(event) {
+    __method.apply(object, [event || window.event].concat(args));
+    return false;
+  };
+};
+
+//shorthand to save typing
+function $n(nodeType)
+{
+  return document.createElement(nodeType);
 }
-];
+//removes all elements of the array "name", from an object
+function clearChildren(node,name)
+{
+  if(!node)
+  {
+    return;
+  }
+  if(!name)
+  {
+    return;  
+  }
+  while(node[name].length>0)
+  {
+    node.removeChild(node[name][0]);
+  }
+}
 
 // some variables to hold stuff
-var tbody,asyncNode,profileNode,maxRequestNode;
+var tbody,asyncNode,profileNode,maxRequestNode,showSuccessesNode,hideUnrunNode;
 
+//loads page
 function onLoad()
 {
-  tbody = document.getElementById("tests");
   asyncNode = document.getElementById("async");
   profileNode = document.getElementById("profile");
   maxRequestNode = document.getElementById("max_requests");
-
+  showSuccessesNode = document.getElementById("showSuccesses");
+  hideUnrunNode = document.getElementById("hideUnrun");
+  showSuccessesNode.onclick=updateAllTestsVisibility;
+  hideUnrunNode.onclick=updateAllTestsVisibility;
+  
   jsonrpc = new JSONRpcClient(jsonurl);
 
-  displayTests();
-  clearAllResults();
+  //add the tests table
+  var displayTable = createShowTestsTable(); 
+  document.getElementById("results").appendChild(displayTable);
 }
 
-function displayTests()
+function updateAllTestsVisibility()
 {
-  var i,
+  var name;
+  for(name in unitTests)
+  { 
+    updateTestSetVisibility(name);
+  }
+}
+function updateTestSetVisibility(name)
+{
+  var i,row,viewableCounter=0;
+  for (i = 0; i < unitTests[name].tests.length; i++)
+  {
+    row = document.getElementById(name+"result." + i).parentNode;
+    if(unitTests[name].tests[i].completed)
+    {
+      //if showing successes show the row
+      if(showSuccessesNode.checked)
+      {
+        showTableRow(row);
+        viewableCounter++;
+      }
+      //if it passed and we're hiding successes don't show the row
+      else if(unitTests[name].tests[i].pass)
+      {
+        hideTableRow(row);
+      }
+      //if it failed show it.
+      else
+      {
+        showTableRow(row);
+        viewableCounter++;
+      }
+    }
+    else if(hideUnrunNode.checked)
+    {
+      hideTableRow(row);
+    }
+    else
+    {
+      showTableRow(row);
+      viewableCounter++;
+    }
+  }
+  if((viewableCounter>0)&&(unitTests[name].tableExpanded))
+  {
+    displayTests(name);
+  }
+  else
+  {
+    hideTests(name);
+  }
+  unitTests[name].tableViewable=viewableCounter>0;
+
+}
+
+function showTableRow(row)
+{
+  setTableRowVisiblity(row,"table-row");
+}
+function hideTableRow(row)
+{
+  setTableRowVisiblity(row,"none");
+}
+function expandAllResults()
+{
+  for(var name in unitTests)
+  {
+    expandTestSet(name);
+  }
+}
+function collapseAllResults()
+{
+  for(var name in unitTests)
+  {
+    collapseTestSet(name);
+  }
+}
+function expandTestSet(name)
+{
+  unitTests[name].expandIcon.childNodes[0].textContent="\u25b2";
+  //this.childNodes[0].src="images/red-collapse.gif";
+  unitTests[name].expandIcon.title="collapse";
+  unitTests[name].tableExpanded=true;
+  updateTestSetVisibility(name);
+
+}
+function collapseTestSet(name)
+{
+  unitTests[name].expandIcon.childNodes[0].textContent="\u25bc";
+  //this.childNodes[0].src="images/red-expand.gif";
+  unitTests[name].expandIcon.title="expand";
+  unitTests[name].tableExpanded=false;
+  hideTests(name);
+}
+
+function setTableRowVisiblity(row,value)
+{
+  if(!value)
+  {
+    value = (row.style.display=="none")?"table-row":"none";
+  }
+  row.style.display=value;
+}
+
+
+var tableWidth=700;
+
+//This shows the summary of all tests
+function createShowTestsTable()
+{
+  var table=$n("table"),
+      thead,
+      headerRow,
+      i,
+      unitTestGroupName,
+      cell,
+      widths,
+      headingTexts,
+      tableCellIds,
+      tests,
+      tbody,
+      summaryRow,
+      detailedRow,
+      textVal,
+      href,
+      downArrowDiv;
+  
+  widths=["25%","25%","25%","25%"];
+  headingTexts=["Test Set","Tests","Successes","Failures"];
+  tableCellIds=["testName","testCount","successCount","failCount"];
+  
+  
+  table.className="test_table";
+  table.style.width=tableWidth+"px";
+
+  //create the header
+  thead = table.tHead = $n("thead");
+  headerRow = $n("tr");
+  thead.appendChild(headerRow);
+  for(i=0;i<widths.length;i++)
+  {
+    cell = $n("th");
+    cell.className="test_th";
+    cell.width=widths[i];
+    cell.appendChild(document.createTextNode(headingTexts[i]));
+    headerRow.appendChild(cell);
+  }
+  
+  //creates the body
+  for(unitTestGroupName in unitTests)
+  {
+    tests = unitTests[unitTestGroupName].tests;
+    tbody = $n("tbody");
+    table.appendChild(tbody);
+  
+    //create the summary
+    summaryRow = tbody.insertRow(-1);
+    //TODO: do this on the tbody instead
+    summaryRow.className = "tr" + table.tBodies.length%2;
+    
+    //create each cell in a row
+    for(i=0;i<widths.length;i++)
+    {
+      cell = summaryRow.insertCell(-1);
+      cell.className = "test_td";
+      //The first one's text value is the group name
+      if(i===0)
+      {
+        textVal=unitTestGroupName;
+      }
+      //The second is the number of tests
+      else if(i===1)
+      {
+        textVal=tests.length;
+      }
+      //All others are -s
+      else
+      {
+        textVal="-";
+      }
+      text = document.createTextNode(textVal);
+      //The first one needs the expand/collapse thing and the title,
+      //The others are all simple
+      if(i===0)
+      {
+        //var downArrow = $n("img");
+        //downArrow.src="images/red-expand.gif"
+        
+        downArrowDiv = $n("span");
+        downArrowDiv.title="expand";
+        downArrowDiv.style.fontSize="12px";
+        downArrowDiv.style.color="navy";
+        downArrowDiv.style.fontWeight="bold";
+        downArrowDiv.appendChild(document.createTextNode("\u25bc"));
+        downArrowDiv.down=true;
+        downArrowDiv.onclick=function(e,name)
+        {
+          if(this.down)
+          {
+            expandTestSet(name);
+          }
+          else
+          {
+            collapseTestSet(name);
+          }          
+          this.down=!this.down;
+        }.bindAsEventListener(downArrowDiv,unitTestGroupName);
+        downArrowDiv.style.cursor="alias";
+        unitTests[unitTestGroupName].tableExpanded=false;
+        unitTests[unitTestGroupName].expandIcon=downArrowDiv;
+        cell.appendChild(downArrowDiv);
+        
+        href = $n("a");
+        href.href="#";
+        href.className="testSetRunner";
+        href.onclick=runTestSet.bind(this,unitTestGroupName);
+        href.appendChild(text);
+        cell.appendChild(href);
+      }
+      else
+      {
+        div = $n("span");
+        div.id=unitTestGroupName+tableCellIds[i];
+        div.appendChild(text);
+        cell.appendChild(div);
+      }
+    }
+    
+    //create the detailed display
+    detailedRow = tbody.insertRow(-1);
+    cell = detailedRow.insertCell(-1);
+    cell.style.paddingTop="0px";
+    cell.style.paddingBottom="0px";
+    cell.style.paddingLeft=(innerTableWidthDifference/2)+"px";
+    cell.colSpan=4;
+    div = $n("div");
+    unitTests[unitTestGroupName].viewer = 
+      createDisplayTestSetTable(unitTestGroupName);
+    div.appendChild(unitTests[unitTestGroupName].viewer);
+    unitTests[unitTestGroupName].viewer.style.display="none";
+    cell.appendChild(div);
+  }
+  return table;
+}
+
+//Creates the detailed analysis of each test case
+function createDisplayTestSetTable(name)
+{
+  var table,
+      classes,
+      innerTexts,
+      widths,
+      i,j,
       row,
-      ccell,
-      rcell,
-      ecell,
-      pcell;
-
-  for (i = 0; i < tests.length; i++)
+      cell,
+      div,text,href,
+      lastColWidth=11,
+      passFailColWidth=34;
+  
+  table=$n("table");  
+  table.className="test_table";
+  table.style.width=(tableWidth-innerTableWidthDifference)+"px";
+  table.style.tableLayout="fixed";
+  widths=[
+     Math.floor((tableWidth-innerTableWidthDifference-lastColWidth-passFailColWidth)/3)+"px",
+     Math.floor((tableWidth-innerTableWidthDifference-lastColWidth-passFailColWidth)/3)+"px",
+     Math.floor((tableWidth-innerTableWidthDifference-lastColWidth-passFailColWidth)/3)+"px",
+     passFailColWidth+"px",
+     lastColWidth+"px"];
+  classes=["code_heading","result_heading","expected_heading","pass_heading",""];
+  innerTexts=["Code","Result","Expected","Pass",""];
+  
+  for(i=0;i<widths.length;i++)
   {
-    row = document.createElement("tr");
+   cell = $n("col");
+   cell.width=widths[i];
+   table.appendChild(cell);
+  }
+  
+  table.tHead = $n("thead");
+  
+  row =table.tHead.insertRow(-1);
+  for(i=0;i<widths.length;i++)
+  {
+    cell = $n("th");
+    cell.className="test_th";
+    cell.style.width=widths[i];
+    div = $n("div");
+    div.className=classes[i];
+    text = document.createTextNode(innerTexts[i]);
+    div.appendChild(text);
+    cell.appendChild(div);
+    row.appendChild(cell);
+  }
 
+  var tBody = $n("tbody");
+  //If there are a great deal of tests, make sure the box doesn't get too big
+  if(unitTests[name].tests.length>12)
+  {
+    tBody.style.overflowY="scroll";
+    tBody.style.overflowX="hidden";
+    tBody.style.height="200px"; 
+  }
+  table.appendChild(tBody);
+  
+  var ids=["code.","result.","expected.","pass."];
+    
+  for (i = 0; i < unitTests[name].tests.length; i++)
+  {
+    //if this row has not yet been created
+    if(tBody.rows.length<=i)
+    {
+      row = tBody.insertRow(-1);
+    }
+    else
+    {
+      row = tBody.rows[i+1];
+    }
+    clearChildren(row,"childNodes");
     row.className = "tr" + i%2;
-    ccell = document.createElement("td");
-    rcell = document.createElement("td");
-    ecell = document.createElement("td");
-    pcell = document.createElement("td");
-
-    ccell.innerHTML = "<div class=\"code_cell\"><a href=\"#\" onclick=\"runTest(" +
-                      i + ")\">" + tests[i].code + "</a></div>";
-
-    ccell.className = "test_td";
-    rcell.id = "result." + i;
-    rcell.className = "test_td";
-    ecell.id = "expected." + i;
-    ecell.className = "test_td";
-    pcell.id = "pass." + i;
-    pcell.className = "test_td";
-
-    row.appendChild(ccell);
-    row.appendChild(rcell);
-    row.appendChild(ecell);
-    row.appendChild(pcell);
-    tbody.appendChild(row);
+    for(j=0;j<ids.length;j++)
+    {
+      cell = row.insertCell(-1);
+      cell.className = "test_td";
+      //Don't change this line without changing the id in postResults()
+      cell.id = name+ids[j]+i;
+      if(j===0)
+      {
+        div = $n("div");
+        div.className ="code_cell";
+        href = $n("a");
+        href.href="#";
+        href.onclick=runTest.bind(this,name,i);
+        text = document.createTextNode(unitTests[name].tests[i].code);
+        href.appendChild(text);
+        div.appendChild(href);
+        cell.appendChild(div);
+      }
+      row.appendChild(cell);
+    }
   }
+
+  return table;
 }
 
-function clearResult(i)
+//Show a detail table
+function displayTests(name)
 {
-  var resultsNode = document.getElementById("result." + i);
-  var expectedNode = document.getElementById("expected." + i);
-  var passNode = document.getElementById("pass." + i);
-  resultsNode.innerHTML = "<div class=\"result_cell\"></div>";
-  expectedNode.innerHTML = "<div class=\"result_cell\"></div>";
-  passNode.innerHTML = "<div class=\"pass_cell\"></div>";
+  unitTests[name].viewer.style.display="block";
 }
 
-function clearAllResults()
+//Hide a detail table
+function hideTests(name)
 {
-  for (var i = 0; i < tests.length; i++)
+  unitTests[name].viewer.style.display="none";
+}
+
+
+//Runs all the tests
+function runAllTests()
+{
+  for(var name in unitTests)
   {
-    clearResult(i);
+    runTestSet(name);
   }
 }
 
-function postResults(i, result, e, profile)
+//Runs all the tests for a specific set
+function runTestSet(name)
 {
-  var resultsNode = document.getElementById("result." + i);
-  var expectedNode = document.getElementById("expected." + i);
-  var passNode = document.getElementById("pass." + i);
-  var resultText;
-  var pass = false;
+  var i;
+  if (maxRequestNode.value < 1 || maxRequestNode.value > 99)
+  {
+    alert("Max requests should be between 1 and 99");
+    return;
+  }
+  JSONRpcClient.max_req_active = maxRequestNode.value;
+
+  clearResultSet(name);
+  if (profileNode.checked)
+  {
+    tests_start = new Date();
+  }
+  if (asyncNode.checked)
+  {
+    JSONRpcClient.profile_async = profileNode.checked;
+    cb = [];
+    for (i = 0; i < unitTests[name].tests.length; i++)
+    {
+      runTestAsync(name,i);
+    }
+  }
+  else
+  {
+    for (i = 0; i < unitTests[name].tests.length; i++)
+    {
+      runTestSync(name,i);
+    }
+  }
+}
+
+
+//Runs a test and determines which mode (sync/async) to run it in.
+//Also looks after profiling
+function runTest(name,i)
+{
+  clearResult(name,i);
+  if (profileNode.checked)
+  {
+    //Global
+    tests_start = new Date();
+  }
+  unitTests[name].tests[i].pass=false;
+  unitTests[name].tests[i].completed=false;
+  unitTests[name].tests[i].running=true;
+  if (asyncNode.checked)
+  {
+    JSONRpcClient.profile_async = profileNode.checked;
+    cb = [];
+    runTestAsync(name,i);
+  }
+  else
+  {
+    runTestSync(name,i);
+  }
+}
+
+//This is the callback function used with async tests
+function testAsyncCB(name,i)
+{
+  return function (result, e, profile)
+  {
+    postResults(name,i, result, e, profile);
+  };
+}
+
+//Run a test in async mode
+function runTestAsync(name,i)
+{
+  var cb,code,str;
+  try
+  {
+    // insert post results callback into first argument and submit test
+    cb = testAsyncCB(name,i);
+    //If it contains specific code to do the async calls then use this
+    if(unitTests[name].tests[i].asyncCode)
+    {
+      code=unitTests[name].tests[i].asyncCode;
+    }
+    //Otherwise find every method call, ie: "()" and put cb in it.
+    else
+    {
+      code = unitTests[name].tests[i].code;
+      code = code.replace(/\(([^\)])/, "(cb, $1");
+      code = code.replace(/\(\)/, "(cb)");
+    }
+    // run the test
+    eval(code);
+  }
+  catch (e)
+  {
+    str="";
+    for (var a in e)
+    {
+      str+=a+" "+e[a]+"\n";
+    }
+    alert(str);
+  }
+}
+
+//Runs a test in sync mode
+function runTestSync(name,i)
+{
+  var result;
+  var exception;
+  var profile;
+  if (profileNode.checked)
+  {
+    profile = {};
+    profile.submit = profile.start = new Date();
+  }
+  try
+  {
+    eval("result = " + unitTests[name].tests[i].code);
+  }
+  catch (e)
+  {
+    exception = e;
+  }
+  if (profileNode.checked)
+  {
+    profile.end = profile.dispatch = new Date();
+  }
+  postResults(name,i, result, exception, profile);
+}
+
+/**
+ * Displays the result of a test. Pass or Fail is calculated here.
+ *
+ * @param name the name of the test set
+ * @param i the index of the test within the test set
+ * @param result the string containing the result of the test
+ * @param e any exception thrown when making the result
+ * @param profile boolean saying whether profiling data should be shown
+ */ 
+function postResults(name,i, result, e, profile)
+{
+  var nodes=[
+       document.getElementById(name+"result." + i),
+       document.getElementById(name+"expected." + i),
+       document.getElementById(name+"pass." + i)
+      ],
+      resultText,
+      pass = false,
+      actualResultText;
+  
   if (e)
   {
     if (e.message)
@@ -227,11 +615,11 @@ function postResults(i, result, e, profile)
     {
       resultText = e.toString();
     }
-    if (tests[i].exception)
+    if (unitTests[name].tests[i].exception)
     {
       try
       {
-        eval("pass = " + tests[i].test);
+        eval("pass = " + unitTests[name].tests[i].test);
       }
       catch(e)
       {
@@ -250,7 +638,7 @@ function postResults(i, result, e, profile)
     }
     try
     {
-      eval("pass = " + tests[i].test);
+      eval("pass = " + unitTests[name].tests[i].test);
     }
     catch(e)
     {
@@ -258,136 +646,108 @@ function postResults(i, result, e, profile)
   }
   if (profile)
   {
-    resultsNode.innerHTML = "<div class=\"result_cell\">" +
-                            "submit=" + (profile.submit - tests_start) +
-                            ", start=" + (profile.start - tests_start) +
-                            ", end=" + (profile.end - tests_start) +
-                            ", dispatch=" + (profile.dispatch - tests_start) +
-                            " (rtt=" + (profile.end - profile.start) + ")</div>";
+    actualResultText="submit=" + (profile.submit - tests_start) +
+               ", start=" + (profile.start - tests_start) +
+               ", end=" + (profile.end - tests_start) +
+               ", dispatch=" + (profile.dispatch - tests_start) +
+               " (rtt=" + (profile.end - profile.start)+")";
   }
   else
   {
-    resultsNode.innerHTML = "<div class=\"result_cell\">" +
-                            resultText + "</div>";
+    actualResultText=resultText;
   }
-  expectedNode.innerHTML="<div class=\"result_cell\">" +
-                            tests[i].test + "</div>";
-  if (pass)
-  {
-    passNode.innerHTML = "<div class=\"pass_cell\">pass</div>";
-  }
-  else
-  {
-    passNode.innerHTML = "<div class=\"fail_cell\">FAIL!</pass>";
-  }
-}
+  var testValues = [actualResultText,unitTests[name].tests[i].test,(pass?"pass":"FAIL")];
+  var classes = ["result_cell","result_cell",(pass?"pass_cell":"fail_cell")];
 
-function testAsyncCB(i)
-{
-  return function (result, e, profile)
-  {
-    postResults(i, result, e, profile);
-  };
-}
+  
+  unitTests[name].tests[i].pass=pass;
+  unitTests[name].tests[i].completed=true;
+  unitTests[name].tests[i].running=false;
 
-function runTestAsync(i)
-{
-  var cb,code,str;
-  try
-  {
-    // insert post results callback into first argument and submit test
-    cb = testAsyncCB(i);
-    code = tests[i].code;
-    code = code.replace(/\(([^\)])/, "(cb, $1");
-    code = code.replace(/\(\)/, "(cb)");
+  updateTestSetVisibility(name);
 
-    // run the test
-    eval(code);
+  for(var j=0;j<nodes.length;j++)
+  {
+    clearChildren(nodes[j],"childNodes");
+    nodes[j].style.display="table-cell";
+    var div = $n("div");
+    div.className = classes[j];
+    div.appendChild(document.createTextNode(testValues[j]));
+    nodes[j].appendChild(div);
+    //nodes[j].appendChild(document.createTextNode(testValues[j]));
   }
-  catch (e)
+  
+  
+  //Update the global success/fail count for this test set
+  var successCount=0;
+  var failCount=0;
+  for(j=0;j<unitTests[name].tests.length;j++)
   {
-    str="";
-    for (var a in e)
+    //Only count it if the test is not running and has been completed
+    if(
+        (!unitTests[name].tests[j].running)&&
+        (unitTests[name].tests[j].completed)
+      )
     {
-      str+=a+" "+e[a]+"\n";
-    }
-    alert(str);
-  }
-}
-
-function runTestSync(i)
-{
-  var result;
-  var exception;
-  var profile;
-  if (profileNode.checked)
-  {
-    profile = {};
-    profile.submit = profile.start = new Date();
-  }
-  try
-  {
-    eval("result = " + tests[i].code);
-  }
-  catch (e)
-  {
-    exception = e;
-  }
-  if (profileNode.checked)
-  {
-    profile.end = profile.dispatch = new Date();
-  }
-  postResults(i, result, exception, profile);
-}
-
-function runTest(i)
-{
-  clearResult(i);
-  if (profileNode.checked)
-  {
-    tests_start = new Date();
-  }
-  if (asyncNode.checked)
-  {
-    JSONRpcClient.profile_async = profileNode.checked;
-    cb = [];
-    runTestAsync(i);
-  }
-  else
-  {
-    runTestSync(i);
-  }
-}
-
-function runAllTests()
-{
-  var i;
-  if (maxRequestNode.value < 1 || maxRequestNode.value > 99)
-  {
-    alert("Max requests should be between 1 and 99");
-    return;
-  }
-  JSONRpcClient.max_req_active = maxRequestNode.value;
-
-  clearAllResults();
-  if (profileNode.checked)
-  {
-    tests_start = new Date();
-  }
-  if (asyncNode.checked)
-  {
-    JSONRpcClient.profile_async = profileNode.checked;
-    cb = [];
-    for (i = 0; i < tests.length; i++)
-    {
-      runTestAsync(i);
+      if(unitTests[name].tests[j].pass)
+      {
+        successCount++;
+      }
+      else
+      {
+        failCount++;
+      }
     }
   }
-  else
+  
+  var successDiv=document.getElementById(name+"successCount");
+  clearChildren(successDiv,"childNodes");
+  successDiv.appendChild(document.createTextNode(successCount));
+  var failDiv=document.getElementById(name+"failCount");
+  clearChildren(failDiv,"childNodes");
+  failDiv.appendChild(document.createTextNode(failCount));
+}
+
+//Clears all displayed test results
+function clearAllResults()
+{
+  var tests=[];
+  for(var name in unitTests)
   {
-    for (i = 0; i < tests.length; i++)
-    {
-      runTestSync(i);
-    }
+    clearResultSet(name);
+  }
+  updateAllTestsVisibility();
+}
+
+//clears all the posted results for a set of tests
+function clearResultSet(name)
+{  
+  var successDiv=document.getElementById(name+"successCount");
+  clearChildren(successDiv,"childNodes");
+  successDiv.appendChild(document.createTextNode("-"));
+  var failDiv=document.getElementById(name+"failCount");
+  clearChildren(failDiv,"childNodes");
+  failDiv.appendChild(document.createTextNode("-"));
+  for(var i =0;i< unitTests[name].tests.length;i++)
+  {
+    clearResult(name,i);
+  }
+}
+
+//Clear the result for the ith test in the test set given by name
+function clearResult(name,i)
+{
+  var j,nodes = [
+    document.getElementById(name+"result." + i),
+    document.getElementById(name+"expected." + i),
+    document.getElementById(name+"pass." + i)
+  ];
+  
+  unitTests[name].tests[i].completed=false;
+  unitTests[name].tests[i].running=false;
+
+  for(j=0;j<nodes.length;j++)
+  {
+    clearChildren(nodes[j],"childNodes");
   }
 }
