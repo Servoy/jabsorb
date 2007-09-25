@@ -135,6 +135,15 @@ var tests = [
 },
 { code: 'jsonrpc.test.echoRawJSON({ "field1": "test" })',
   test: 'result.field1 == "test"'
+},
+{ code: 'jsonrpc.test.echoRawJSON({ a: false})',
+  test: 'result.a === false '
+},
+{ code: 'jsonrpc.test.echoRawJSON({ a: ""})',
+  test: 'result.a === "" '
+},
+{ code: 'jsonrpc.test.echoRawJSON({ a: 0})',
+  test: 'result.a === 0 '
 }
 ];
 
