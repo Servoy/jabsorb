@@ -111,7 +111,7 @@ function toJSON(o)
   {
     for (var attr in o)
     {
-      if (!o[attr])
+      if (o[attr] === null || o[attr] === undefined)
       {
         v.push("\"" + attr + "\": null");
       }
@@ -168,7 +168,7 @@ function JSONRpcClient()
   {
     //If we are here, it is either the first time an object of this type has 
     //been created or the bridge
-    var req;
+
     // If it is an object list the methods for it
     if(this.objectID) 
     {
@@ -269,8 +269,8 @@ JSONRpcClient.bind=function(functionName,context)
 {
   return function() {
     return functionName.apply(context, arguments);
-  }
-}
+  };
+};
 
 /* 
  * This creates a method that points to the serverMethodCaller and binds it 
