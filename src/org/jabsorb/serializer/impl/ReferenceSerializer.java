@@ -154,6 +154,7 @@ public class ReferenceSerializer extends AbstractSerializer
   public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object o)
       throws UnmarshallException
   {
+    state.setSerialized(o, ObjectMatch.OKAY);
     return ObjectMatch.OKAY;
   }
 
@@ -180,6 +181,7 @@ public class ReferenceSerializer extends AbstractSerializer
         ref = bridge.getReferenceMap().get(new Integer(object_id));
       }
     }
+    state.setSerialized(o, ref);
     return ref;
   }
 

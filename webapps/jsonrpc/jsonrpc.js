@@ -73,12 +73,11 @@ function escapeJSONString(s)
   return "\"" + parts.join("") + "\"";
 }
 
-
 /**
  * Marshall an object to JSON format.
  * Circular references can be handled if the client parameter
- * JSONRpcClient.fixupCircRefs is true.  An exception will be thrown if this
- * is false, and a circular reference is detected.
+ * JSONRpcClient.fixupCircRefs is true.  If this parameter is false,
+ * an exception will be thrown if a circular reference is detected.
  *
  * if the client parameter, JSONRpcClient.fixupDuplicates is true then
  * duplicate objects in the object graph are also combined except for Strings
@@ -88,7 +87,6 @@ function escapeJSONString(s)
  * this would be worth doing on the upload (on the download it's not so important, because
  * gzip handles this)
  * if it's false, then duplicate objects are "re-serialized"
- *
  *
  * @param o       the object being converted to json
  *
@@ -126,7 +124,7 @@ function toJSON(o, rootRef)
   // the head of the marker object chain
   var markerHead;
 
-  // fixups detected as we go along , both for circular references and duplicates
+  // fixups detected as we go along, both for circular references and duplicates
   var fixUps = [];
 
   // unlink the whole chain of marker objects that were added to objects when processing
@@ -144,28 +142,16 @@ function toJSON(o, rootRef)
   // create a compound object reference from a simple list of reference keys
   function reference(list)
   {
-    if (list&&list.length)
+    //  duplicate the incoming list, but without the first element
+    var copy = [];
+    if (list && list.length)
     {
       for (var i=1; i<list.length; i++)
       {
-        if (typeof list[i] === 'number')
-        {
-          list[i] = "[" + list[i] + "]";
-        }
-        else
-        {
-          //todo: if list[i] is a legal javascript variable,
-          //todo: we can use the more compact dot notation here
-          //todo: need to write a function to do this test
-          //todo: i think there is really good one in the JSLint code
-
-          //todo: on the other hand, leaving it like this makes parsing it easier and because it's
-          //todo: more consistent (less cases to worry about)
-          list[i] = "[" + escapeJSONString(list[i]) + "]";
-        }
+        copy.push(list[i]);
       }
     }
-    return list.join("");
+    return copy;
   }
 
   // special object used to indicate that an object should be omitted
@@ -249,7 +235,7 @@ function toJSON(o, rootRef)
           if (JSONRpcClient.fixupCircRefs)
           {
             //todo: (LATER) if multiple fixups go to the same original, this could be optimized somewhat
-            fixUps.push(reference(fixup) + "=" + reference(original));
+            fixUps.push([reference(fixup), reference(original)]);
             return omitCircRefOrDuplicate;
           }
           else
@@ -272,7 +258,7 @@ function toJSON(o, rootRef)
               parent = parent[marker].parent;
             }
             //todo: (LATER) if multiple fixups go to the same original, this could be optimized somewhat
-            fixUps.push(reference(fixup) + "=" + reference(original));
+            fixUps.push([reference(fixup), reference(original)]);
             return omitCircRefOrDuplicate;
           }
         }
@@ -310,7 +296,7 @@ function toJSON(o, rootRef)
           {
              /* skip */
           }
-          else if (!o[attr])
+          else if (o[attr] === null || o[attr] === undefined)
           {
             v.push("\"" + attr + "\": null");
           }
@@ -335,7 +321,7 @@ function toJSON(o, rootRef)
   json = subObjToJSON(o, null, rootRef?rootRef:"result");
 
   removeMarkers();
-  return {"json": json, "fixUps": fixUps.join("; ")};
+  return {"json": json, "fixUps": fixUps};
 }
 
 
@@ -353,7 +339,7 @@ function JSONRpcClient()
     arg_shift++;
   }
   //The next 3 args are passed to the http request
-  this.serverURL = arguments[arg_shift + 0];
+  this.serverURL = arguments[arg_shift];
   this.user = arguments[arg_shift + 1];
   this.pass = arguments[arg_shift + 2];
   //A unique identifier which the identity hashcode of the object on the server, if this is a reference type
@@ -724,7 +710,10 @@ JSONRpcClient.prototype._makeRequest = function (methodName, args, cb)
   // this is to provide graceful backwards compatibility to the json-rpc spec.
   if (j.fixUps)
   {
-    obj += ",\"fixups\":" + escapeJSONString(j.fixUps);
+    // todo: the call to toJSON here to turn the fixups into json is a bit 
+    // inefficient, since there will never be fixups in the fixups... but
+    // it saves us from writing some additional code at this point...
+    obj += ",\"fixups\":" + toJSON(j.fixUps).json;  
   }
 
   req.data = obj + "}";
@@ -817,6 +806,38 @@ JSONRpcClient.prototype._sendRequest = function (req)
 
 JSONRpcClient.prototype._handleResponse = function (http)
 {
+  /**
+   * Apply fixups.
+   * @param obj root object to apply fixups against.
+   * @param fixups array of fixups to apply.  each element of this array is a 2 element array, containing
+   *        the array with the fixup location followed by an array with the original location to fix up into the fixup
+   *        location.
+   */
+  function applyFixups(obj, fixups)
+  {
+    function findOriginal(ob, original)
+    {
+      for (var i=0,j=original.length;i<j;i++)
+      {
+        ob = ob[original[i]];
+      }
+      return ob;
+    }
+    function applyFixup(ob, fixups, value)
+    {
+      var j=fixups.length-1;
+      for (var i=0;i<j;i++)
+      {
+        ob = ob[fixups[i]];
+      }
+      ob[fixups[j]] = value;
+    }
+    for (var i = 0,j = fixups.length; i < j; i++)
+    {
+      applyFixup(obj,fixups[i][0],findOriginal(obj,fixups[i][1]))
+    }
+  };
+
   /* Get the charset */
   if (!this.charset)
   {
@@ -874,7 +895,7 @@ JSONRpcClient.prototype._handleResponse = function (http)
   // look for circular reference/duplicates fixups and execute them if they are there
   if (obj.fixups)
   {
-    eval(obj.fixups);
+    applyFixups(r,obj.fixups);
   }
 
   /* Handle CallableProxy */

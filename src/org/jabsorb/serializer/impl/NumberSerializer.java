@@ -152,6 +152,7 @@ public class NumberSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("not a number");
     }
+    state.setSerialized(jso, ObjectMatch.OKAY);
     return ObjectMatch.OKAY;
   }
 
@@ -164,7 +165,9 @@ public class NumberSerializer extends AbstractSerializer
       {
         return null;
       }
-      return toNumber(clazz, jso);
+      Object num = toNumber(clazz, jso);
+      state.setSerialized(jso, num);
+      return num;
     }
     catch (NumberFormatException nfe)
     {

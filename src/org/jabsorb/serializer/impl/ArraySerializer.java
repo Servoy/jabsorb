@@ -85,11 +85,12 @@ public class ArraySerializer extends AbstractSerializer
     Class cc = clazz.getComponentType();
     int i = 0;
     ObjectMatch m = new ObjectMatch(-1);
+    state.setSerialized(o, m);
     try
     {
       for (; i < jso.length(); i++)
       {
-        m = ser.tryUnmarshall(state, cc, jso.get(i)).max(m);
+        m.setMismatch(ser.tryUnmarshall(state, cc, jso.get(i)).max(m).getMismatch());
       }
     }
     catch (UnmarshallException e)
@@ -116,6 +117,7 @@ public class ArraySerializer extends AbstractSerializer
       if (clazz == int[].class)
       {
         int arr[] = new int[jso.length()];
+        state.setSerialized(o, arr);
         for (; i < jso.length(); i++)
         {
           arr[i] = ((Number) ser.unmarshall(state, cc, jso.get(i))).intValue();
@@ -125,6 +127,7 @@ public class ArraySerializer extends AbstractSerializer
       else if (clazz == byte[].class)
       {
         byte arr[] = new byte[jso.length()];
+        state.setSerialized(o, arr);
         for (; i < jso.length(); i++)
         {
           arr[i] = ((Number) ser.unmarshall(state, cc, jso.get(i))).byteValue();
@@ -134,6 +137,7 @@ public class ArraySerializer extends AbstractSerializer
       else if (clazz == short[].class)
       {
         short arr[] = new short[jso.length()];
+        state.setSerialized(o, arr);
         for (; i < jso.length(); i++)
         {
           arr[i] = ((Number) ser.unmarshall(state, cc, jso.get(i)))
@@ -144,6 +148,7 @@ public class ArraySerializer extends AbstractSerializer
       else if (clazz == long[].class)
       {
         long arr[] = new long[jso.length()];
+        state.setSerialized(o, arr);
         for (; i < jso.length(); i++)
         {
           arr[i] = ((Number) ser.unmarshall(state, cc, jso.get(i))).longValue();
@@ -153,6 +158,7 @@ public class ArraySerializer extends AbstractSerializer
       else if (clazz == float[].class)
       {
         float arr[] = new float[jso.length()];
+        state.setSerialized(o, arr);
         for (; i < jso.length(); i++)
         {
           arr[i] = ((Number) ser.unmarshall(state, cc, jso.get(i)))
@@ -163,6 +169,7 @@ public class ArraySerializer extends AbstractSerializer
       else if (clazz == double[].class)
       {
         double arr[] = new double[jso.length()];
+        state.setSerialized(o, arr);
         for (; i < jso.length(); i++)
         {
           arr[i] = ((Number) ser.unmarshall(state, cc, jso.get(i)))
@@ -182,6 +189,7 @@ public class ArraySerializer extends AbstractSerializer
       else if (clazz == boolean[].class)
       {
         boolean arr[] = new boolean[jso.length()];
+        state.setSerialized(o, arr);
         for (; i < jso.length(); i++)
         {
           arr[i] = ((Boolean) ser.unmarshall(state, cc, jso.get(i)))
@@ -193,6 +201,7 @@ public class ArraySerializer extends AbstractSerializer
       {
         Object arr[] = (Object[]) Array.newInstance(clazz.getComponentType(),
             jso.length());
+        state.setSerialized(o, arr);
         for (; i < jso.length(); i++)
         {
           arr[i] = ser.unmarshall(state, cc, jso.get(i));

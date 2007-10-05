@@ -262,7 +262,7 @@ public class BeanSerializer extends AbstractSerializer
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
-    BeanData bd = null;
+    BeanData bd;
     try
     {
       bd = getBeanData(clazz);
@@ -293,8 +293,12 @@ public class BeanSerializer extends AbstractSerializer
       throw new UnmarshallException("bean has no matches");
     }
 
+    // create a concrete ObjectMatch that is always returned in order to satisfy circular reference requirements
+    ObjectMatch returnValue = new ObjectMatch(-1);
+    state.setSerialized(o, returnValue);
+
     ObjectMatch m = null;
-    ObjectMatch tmp = null;
+    ObjectMatch tmp;
     i = jso.keys();
     while (i.hasNext())
     {
@@ -338,16 +342,20 @@ public class BeanSerializer extends AbstractSerializer
     }
     if (m != null)
     {
-      return m.max(new ObjectMatch(mismatch));
+      returnValue.setMismatch(m.max(new ObjectMatch(mismatch)).getMismatch());
     }
-    return new ObjectMatch(mismatch);
+    else
+    {
+      returnValue.setMismatch(mismatch);
+    }
+    return returnValue;
   }
 
   public Object unmarshall(SerializerState state, Class clazz, Object o)
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
-    BeanData bd = null;
+    BeanData bd;
     try
     {
       bd = getBeanData(clazz);
@@ -360,7 +368,7 @@ public class BeanSerializer extends AbstractSerializer
     {
       log.debug("instantiating " + clazz.getName());
     }
-    Object instance = null;
+    Object instance;
     try
     {
       instance = clazz.newInstance();
@@ -370,6 +378,7 @@ public class BeanSerializer extends AbstractSerializer
       throw new UnmarshallException("can't instantiate bean " + clazz.getName()
           + ": " + e.getMessage());
     }
+    state.setSerialized(o, instance);
     Object invokeArgs[] = new Object[1];
     Object fieldVal;
     Iterator i = jso.keys();

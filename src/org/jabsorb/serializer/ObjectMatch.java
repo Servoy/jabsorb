@@ -79,6 +79,19 @@ public class ObjectMatch
   }
 
   /**
+   * Set the mismatch on this ObjectMatch.
+   * The ObjectMatch cannot be immutable anymore (at least in the current design--
+   * because the same mismatch object must be maintained through recursive processing
+   * to properly handle circular references detection)
+   *
+   * @param mismatch the mismatch value to set for this ObjectMatch.
+   */
+  public void setMismatch(int mismatch)
+  {
+    this.mismatch = mismatch;
+  }
+
+  /**
    * Compare another ObjectMatch with this ObjectMatch and return the one that
    * has the most mismatches.
    * 

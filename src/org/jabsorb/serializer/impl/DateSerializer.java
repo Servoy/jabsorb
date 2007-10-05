@@ -118,6 +118,7 @@ public class DateSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("not a Date");
     }
+    state.setSerialized(o, ObjectMatch.OKAY);
     return ObjectMatch.OKAY;
   }
 
@@ -128,7 +129,7 @@ public class DateSerializer extends AbstractSerializer
     long time;
     try
     {
-      time= jso.getLong("time");
+      time = jso.getLong("time");
     }
     catch(JSONException e)
     {
@@ -149,19 +150,28 @@ public class DateSerializer extends AbstractSerializer
         throw new UnmarshallException("Could not find javaClass");
       }
     }
+    Object returnValue = null;
     if (Date.class.equals(clazz))
     {
-      return new Date(time);
+      returnValue = new Date(time);
     }
     else if (Timestamp.class.equals(clazz))
     {
-      return new Timestamp(time);
+      returnValue = new Timestamp(time);
     }
     else if (java.sql.Date.class.equals(clazz))
     {
-      return new java.sql.Date(time);
+      returnValue = new java.sql.Date(time);
     }
-    throw new UnmarshallException("invalid class " + clazz);
+    if (returnValue == null)
+    {
+      throw new UnmarshallException("invalid class " + clazz);
+    }
+    else
+    {
+      state.setSerialized(o, returnValue);
+      return returnValue;
+    }
   }
 
 }

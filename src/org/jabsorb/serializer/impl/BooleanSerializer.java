@@ -73,30 +73,33 @@ public class BooleanSerializer extends AbstractSerializer
   public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
       Object jso) throws UnmarshallException
   {
+    ObjectMatch returnValue = ObjectMatch.OKAY;
+    state.setSerialized(jso, returnValue);
     return ObjectMatch.OKAY;
   }
 
   public Object unmarshall(SerializerState state, Class clazz, Object jso)
       throws UnmarshallException
   {
+    Boolean returnValue = Boolean.FALSE;
     if (jso instanceof String)
     {
       try
       {
-        jso = new Boolean((String) jso);
+        returnValue = new Boolean((String) jso);
       }
       catch (Exception e)
       {
         throw new UnmarshallException("Cannot convert " + jso + " to Boolean");
       }
     }
-    if (clazz == boolean.class)
+    else if (clazz == boolean.class)
     {
-      return new Boolean(((Boolean) jso).booleanValue());
+      returnValue = (Boolean) jso;
     }
 
-    return jso;
-
+    state.setSerialized(jso, returnValue);
+    return returnValue;
   }
 
 }

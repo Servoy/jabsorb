@@ -37,6 +37,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
@@ -249,6 +250,91 @@ public class Test implements Serializable
     Map m = new HashMap();
     m.put("me",m);
     return m;
+  }
+  
+  public List aCircRefList()
+  {
+    ArrayList list = new ArrayList();
+    list.add(new Integer(0));
+    Integer one = new Integer(1);
+    list.add(one);
+    Integer two = new Integer(2);
+    list.add(two);
+
+    Map m = new HashMap();
+    m.put(new Integer(0), "zero");
+    m.put(one, "one");
+    m.put(two, "two");
+    m.put("buckle_my_shoe",list);
+
+
+    BeanA beanA = new BeanA();
+    BeanB beanB = new BeanB();
+    beanB.setBeanA(beanA);
+    beanA.setBeanB(beanB);
+
+    m.put("aBean",beanA);
+
+    list.add(beanB);
+    list.add(m);
+    return list;
+  }
+
+  /**
+   * Test more than one duplicate, to make sure the fixups they generate
+   * all refer to the same object 
+   * @return a List with some duplicates.
+   */
+  public List aDupDupTest()
+  {
+    List list = new ArrayList();
+
+
+    BeanA a = new BeanA();
+    BeanB b = new BeanB();
+
+    BeanA c = new BeanA();
+    BeanB d = new BeanB();
+
+    a.setBeanB(d);
+    b.setBeanA(c);
+
+    list.add(a);
+    list.add(b);
+    list.add(c);
+    list.add(d);
+
+    return list;
+  }
+
+  /**
+   * Another duplicate with substantial savings to be gained by fixing it up
+   * @return aList with duplicates.
+   */
+  public List aDupDupDupTest()
+  {
+    Map m = new HashMap();
+    m.put("drink","soda");
+    m.put("tree","oak");
+    m.put("planet","jupiter");
+    m.put("art","painting");
+    m.put("animal","tiger");
+    List list = new ArrayList();
+
+    list.add(m);
+    list.add(m);
+    list.add(m);
+    list.add(m);
+
+    Map m2 = new TreeMap();
+    m2.put("map",m);
+    m2.put("dup",m);
+    m2.put("copy",m);
+    m2.put("ditto",m);
+    m2.put("extra",m);
+
+    list.add(m2);
+    return list;
   }
 
   // Misc tests

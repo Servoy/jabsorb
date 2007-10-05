@@ -140,6 +140,7 @@ public class PrimitiveSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("not a primitive");
     }
+    state.setSerialized(jso, ObjectMatch.OKAY);
     return ObjectMatch.OKAY;
   }
 
@@ -148,7 +149,9 @@ public class PrimitiveSerializer extends AbstractSerializer
   {
     try
     {
-      return toPrimitive(clazz, jso);
+      Object primitive = toPrimitive(clazz, jso);
+      state.setSerialized(jso, primitive);
+      return primitive;
     }
     catch (NumberFormatException nfe)
     {

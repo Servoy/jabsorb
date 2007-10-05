@@ -184,7 +184,7 @@ public class SetSerializer extends AbstractSerializer
     }
 
     ObjectMatch m = new ObjectMatch(-1);
-
+    state.setSerialized(o, m);
     Iterator i = jsonset.keys();
     String key = null;
 
@@ -193,7 +193,7 @@ public class SetSerializer extends AbstractSerializer
       while (i.hasNext())
       {
         key = (String) i.next();
-        m = ser.tryUnmarshall(state, null, jsonset.get(key)).max(m);
+        m.setMismatch(ser.tryUnmarshall(state, null, jsonset.get(key)).max(m).getMismatch());
       }
     }
     catch (UnmarshallException e)
@@ -260,7 +260,7 @@ public class SetSerializer extends AbstractSerializer
 
     Iterator i = jsonset.keys();
     String key = null;
-
+    state.setSerialized(o, abset);
     try
     {
       while (i.hasNext())

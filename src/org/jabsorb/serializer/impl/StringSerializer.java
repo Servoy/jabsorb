@@ -88,29 +88,33 @@ public class StringSerializer extends AbstractSerializer
   public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
       Object jso) throws UnmarshallException
   {
+    state.setSerialized(jso, ObjectMatch.OKAY);
     return ObjectMatch.OKAY;
   }
 
   public Object unmarshall(SerializerState state, Class clazz, Object jso)
       throws UnmarshallException
   {
+    Object returnValue;
     String val = jso instanceof String ? (String) jso : jso.toString();
     if (clazz == char.class)
     {
-      return new Character(val.charAt(0));
+      returnValue = new Character(val.charAt(0));
     }
     else if (clazz == byte[].class)
     {
-      return val.getBytes();
+      returnValue = val.getBytes();
     }
     else if (clazz == char[].class)
     {
-      return val.toCharArray();
+      returnValue = val.toCharArray();
     }
     else
     {
-      return val;
+      returnValue = val;
     }
+    state.setSerialized(jso, returnValue);
+    return returnValue;
   }
 
 }

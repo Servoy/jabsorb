@@ -26,12 +26,16 @@
 
 package org.jabsorb.serializer.impl;
 
+import java.util.Iterator;
+
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
+import org.jabsorb.JSONSerializer;
 import org.json.JSONObject;
+import org.json.JSONException;
 
 /**
  * Formats the Java JSONObject object.
@@ -66,18 +70,49 @@ public class RawJSONObjectSerializer extends AbstractSerializer
   public Object marshall(SerializerState state, Object p, Object o)
       throws MarshallException
   {
-    return o;
+    // reprocess the raw json in order to fixup circular references and duplicates
+    JSONObject jsonIn = (JSONObject) o;
+    JSONObject jsonOut = new JSONObject();
+    String key = null;
+    try
+    {
+      Iterator i = jsonIn.keys();
+      while (i.hasNext())
+      {
+        key = (String) i.next();
+
+        Object j = ser.marshall(state, o, jsonIn.get(key), key);
+
+        // omit the object entirely if it's a circular reference or duplicate
+        // it will be regenerated in the fixups phase
+        if (JSONSerializer.CIRC_REF_OR_DUPLICATE != j)
+        {
+          jsonOut.put(key, j);
+        }
+      }
+    }
+    catch (MarshallException e)
+    {
+      throw (MarshallException) new MarshallException("JSONObject key " + key + " " + e.getMessage()).initCause(e);
+    }
+    catch (JSONException e)
+    {
+      throw (MarshallException) new MarshallException("JSONObject key " + key + " " + e.getMessage()).initCause(e);
+    }
+    return jsonOut;
   }
 
   public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
       Object jso) throws UnmarshallException
   {
+    state.setSerialized(jso, ObjectMatch.OKAY);
     return ObjectMatch.OKAY;
   }
 
   public Object unmarshall(SerializerState state, Class clazz, Object jso)
       throws UnmarshallException
   {
+    state.setSerialized(jso, jso);
     return jso;
   }
 

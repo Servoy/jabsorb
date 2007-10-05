@@ -54,8 +54,8 @@ import org.slf4j.LoggerFactory;
  * 
  * <pre>
  * &lt;servlet&gt;
- *   &lt;servlet-name&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-name&gt;
- *   &lt;servlet-class&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-class&gt;
+ *   &lt;servlet-name&gt;org.jabsorb.JSONRPCServlet&lt;/servlet-name&gt;
+ *   &lt;servlet-class&gt;org.jabsorb.JSONRPCServlet&lt;/servlet-class&gt;
  *   &lt;!-- optional gzip threshold control --&gt;
  *   &lt;init-param&gt;
  *     &lt;param-name&gt;gzip_threshold&lt;/param-name&gt;
@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
  *   &lt;/init-param&gt;
  * &lt;/servlet&gt;
  * &lt;servlet-mapping&gt;
- *   &lt;servlet-name&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-name&gt;
+ *   &lt;servlet-name&gt;org.jabsorb.JSONRPCServlet&lt;/servlet-name&gt;
  *   &lt;url-pattern&gt;/JSON-RPC&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
  * </pre>
@@ -85,7 +85,7 @@ import org.slf4j.LoggerFactory;
  * </p>
  * <code>
  * &lt;jsp:useBean id="JSONRPCBridge" scope="session"
- *   class="com.metaparadigm.jsonrpc.JSONRPCBridge"/&gt;
+ *   class="org.jabsorb.JSONRPCBridge"/&gt;
  * </code>
  * <p>
  * An example in Java (i.e. in another Servlet):
@@ -224,6 +224,8 @@ public class JSONRPCServlet extends HttpServlet
   public void service(HttpServletRequest request, HttpServletResponse response)
     throws IOException
   {
+try
+{
     // Use protected method in case someone wants to override it
     JSONRPCBridge json_bridge = findBridge(request);
 
@@ -338,6 +340,12 @@ public class JSONRPCServlet extends HttpServlet
     out.write(bout);
     out.flush();
     out.close();
+} catch (Error e)
+{
+  e.printStackTrace();
+  log.error("got error ",e);
+  throw e;
+}
   }
 
   /**

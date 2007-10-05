@@ -81,7 +81,7 @@ import org.slf4j.LoggerFactory;
  * You can create a HttpSession specific bridge in JSP with the usebean tag:
  * </p>
  * <code>&lt;jsp:useBean id="JSONRPCBridge" scope="session"
- * class="com.metaparadigm.jsonrpc.JSONRPCBridge" /&gt;</code>
+ * class="org.jabsorb.JSONRPCBridge" /&gt;</code>
  * <p>
  * Then export an object for your JSON-RPC client to call methods on:
  * </p>
@@ -443,10 +443,10 @@ public class JSONRPCBridge implements Serializable
    */
   public JSONRPCResult call(Object context[], JSONObject jsonReq)
   {
-    JSONRPCResult result = null;
-    String encodedMethod = null;
-    Object requestId = null;
-    JSONArray arguments = null;
+    String encodedMethod;
+    Object requestId;
+    JSONArray arguments;
+    JSONArray fixups;
 
     try
     {
@@ -454,6 +454,7 @@ public class JSONRPCBridge implements Serializable
       encodedMethod = jsonReq.getString("method");
       arguments = jsonReq.getJSONArray("params");
       requestId = jsonReq.opt("id");
+      fixups = jsonReq.optJSONArray("fixups");
     }
     catch (JSONException e)
     {
@@ -464,8 +465,42 @@ public class JSONRPCBridge implements Serializable
 
     if (log.isDebugEnabled())
     {
-      log.debug("call " + encodedMethod + "(" + arguments + ")"
-          + ", requestId=" + requestId);
+      if (fixups != null)
+      {
+        log.debug("call " + encodedMethod + "(" + arguments + ")"
+            + ", requestId=" + requestId);
+      }
+      else
+      {
+        log.debug("call " + encodedMethod + "(" + arguments + ")"
+            + ", fixups=" + fixups + ", requestId=" + requestId);
+      }
+    }
+
+    // apply the fixups (if any) to the parameters.  This will result
+    // in a JSONArray that might have circular references-- so
+    // the toString method (or anything that internally tries to traverse
+    // the JSON (without being aware of this) should not be called after this point
+
+    if (fixups != null)
+    {
+      try
+      {
+        for (int i=0; i < fixups.length(); i++)
+        {
+          JSONArray assignment = fixups.getJSONArray(i);
+          JSONArray fixup = assignment.getJSONArray(0);
+          JSONArray original = assignment.getJSONArray(1);
+          applyFixup(arguments, fixup, original);
+        }
+      }
+      catch (JSONException e)
+      {
+        log.error("error applying fixups",e);
+
+        return new JSONRPCResult(JSONRPCResult.CODE_ERR_FIXUP, requestId,
+            JSONRPCResult.MSG_ERR_FIXUP + ": " + e.getMessage()) ;
+      }
     }
 
     String className = null;
@@ -588,6 +623,8 @@ public class JSONRPCBridge implements Serializable
           JSONRPCResult.MSG_ERR_NOMETHOD);
     }
 
+    JSONRPCResult result;
+
     // Call the method
     try
     {
@@ -639,6 +676,7 @@ public class JSONRPCBridge implements Serializable
           cbc.errorCallback(context[i], itsThis, method, e);
         }
       }
+      log.error("exception occured",e);
       result = new JSONRPCResult(JSONRPCResult.CODE_ERR_UNMARSHALL, requestId,
           e.getMessage());
     }
@@ -651,6 +689,7 @@ public class JSONRPCBridge implements Serializable
           cbc.errorCallback(context[i], itsThis, method, e);
         }
       }
+      log.error("exception occured",e);
       result = new JSONRPCResult(JSONRPCResult.CODE_ERR_MARSHALL, requestId, e
           .getMessage());
     }
@@ -667,6 +706,7 @@ public class JSONRPCBridge implements Serializable
           cbc.errorCallback(context[i], itsThis, method, e);
         }
       }
+      log.error("exception occured",e);
       result = new JSONRPCResult(JSONRPCResult.CODE_REMOTE_EXCEPTION,
           requestId, exceptionTransformer.transform(e));
     }
@@ -809,7 +849,7 @@ public class JSONRPCBridge implements Serializable
    * <p>
    * A Callable Reference in JSON format looks like this:
    * </p>
-   * <code>{ "javaClass":"com.metaparadigm.test.Bar",<br />
+   * <code>{ "javaClass":"org.jabsorb.test.Bar",<br />
    * "objectID":4827452,<br /> "JSONRPCType":"CallableReference" }</code>
    * 
    * @param clazz The class object that should be marshalled as a callable
@@ -951,7 +991,7 @@ public class JSONRPCBridge implements Serializable
    * that contain security information or complex types that are not required in
    * the Javascript client but need to be passed as a reference in methods of
    * exported objects. <p/> A Reference in JSON format looks like this: <p/>
-   * <code>{ "javaClass":"com.metaparadigm.test.Foo",<br />
+   * <code>{ "javaClass":"org.jabsorb.test.Foo",<br />
    * "objectID":5535614,<br /> "JSONRPCType":"Reference" }</code>
    * 
    * @param clazz The class object that should be marshalled as a reference.
@@ -1139,6 +1179,171 @@ public class JSONRPCBridge implements Serializable
   }
 
   /**
+   * Apply one fixup assigment to the incoming json arguments.
+   *
+   * WARNING:  the resultant "fixed up" arguments may contain circular references
+   * after this operation.  That is the whole point of course-- but the JSONArray and JSONObject's
+   * themselves aren't aware of circular references when certain methods are called (e.g. toString)
+   * so be careful when handling these circular referenced json objects. 
+   *
+   * @param arguments the json arguments for the incoming json call.
+   * @param fixup the fixup entry.
+   * @param original the original value to assign to the fixup.
+   * @throws org.json.JSONException if invalid or unexpected fixup data is encountered.
+   */
+  private void applyFixup(JSONArray arguments, JSONArray fixup, JSONArray original) throws JSONException
+  {
+    int last = fixup.length()-1;
+
+    if (last<0)
+    {
+      throw new JSONException("fixup path must contain at least 1 reference");
+    }
+
+    Object originalObject = traverse(arguments, original, false);
+    Object fixupParent = traverse(arguments, fixup, true);
+
+    // the last ref in the fixup needs to be created
+    // it will be either a string or number depending on if the fixupParent is a JSONObject or JSONArray
+
+    if (fixupParent instanceof JSONObject)
+    {
+      String objRef = fixup.optString(last,null);
+      if (objRef == null)
+      {
+        throw new JSONException("last fixup reference not a string");
+      }
+      ((JSONObject)fixupParent).put(objRef, originalObject);
+    }
+    else
+    {
+      int arrRef = fixup.optInt(last,-1);
+      if (arrRef==-1)
+      {
+        throw new JSONException("last fixup reference not a valid array index");
+      }
+      ((JSONArray)fixupParent).put(arrRef, originalObject);
+    }
+  }
+
+  /**
+   * Traverse a list of references to find the target reference in an original or fixup list.
+   *
+   * @param origin origin JSONArray (arguments) to begin traversing at.
+   * @param refs JSONArray containing array integer references and or String object references.
+   * @param fixup if true, stop one short of the traversal chain to return the parent of the fixup
+   *        rather than the fixup itself (which will be non-existant)
+   * @return either a JSONObject or JSONArray for the Object found at the end of the traversal.
+   * @throws JSONException if something unexpected is found in the data
+   */
+  private Object traverse(JSONArray origin, JSONArray refs, boolean fixup) throws JSONException
+  {
+    try
+    {
+      JSONArray arr = origin;
+      JSONObject obj = null;
+
+      // where to stop when traversing
+      int stop = refs.length();
+
+      // if looking for the fixup, stop short by one to find the parent of the fixup instead.
+      // because the fixup won't exist yet and needs to be created
+      if (fixup)
+      {
+        stop--;
+      }
+
+      // find the target object by traversing the list of references
+      for (int i=0; i < stop; i++)
+      {
+        Object next;
+        if (arr == null)
+        {
+          next = next(obj,refs.optString(i,null));
+        }
+        else
+        {
+          next = next(arr,refs.optInt(i, -1));
+        }
+        if (next instanceof JSONObject)
+        {
+          obj = (JSONObject) next;
+          arr = null;
+        }
+        else
+        {
+          obj = null;
+          arr = (JSONArray) next;
+        }
+      }
+      if (arr==null)
+      {
+        return obj;
+      }
+      else
+      {
+        return arr;
+      }
+    }
+    catch (Exception e)
+    {
+      log.error("unexpected exception",e);
+      throw new JSONException("unexpected exception");
+    }
+  }
+
+  /**
+   * Given a previous json object, find the next object under the given index.
+   *
+   * @param prev object to find subobject of.
+   * @param idx index of sub object to find.
+   * @return the next object in a fixup reference chain (prev[idx])
+   *
+   * @throws JSONException if something goes wrong.
+   */
+  private Object next(Object prev, int idx) throws JSONException
+  {
+    if (prev==null)
+    {
+      throw new JSONException("cannot traverse- missing object encountered");
+    }
+
+    if (prev instanceof JSONArray)
+    {
+      return ((JSONArray)prev).get(idx);
+    }
+    else
+    {
+      throw new JSONException("not an array");
+    }
+  }
+
+  /**
+   * Given a previous json object, find the next object under the given ref.
+   *
+   * @param prev object to find subobject of.
+   * @param ref reference of sub object to find.
+   * @return the next object in a fixup reference chain (prev[ref])
+   *
+   * @throws JSONException if something goes wrong.
+   */
+  private Object next(Object prev, String ref) throws JSONException
+  {
+    if (prev==null)
+    {
+      throw new JSONException("cannot traverse- missing object encountered");
+    }
+    if (prev instanceof JSONObject)
+    {
+      return ((JSONObject)prev).get(ref);
+    }
+    else
+    {
+      throw new JSONException("not an object");
+    }
+  }
+
+  /**
    * Returns the more fit of the two method candidates
    * 
    * @param methodCandidate One of the methodCandidates to compare
@@ -1186,7 +1391,7 @@ public class JSONRPCBridge implements Serializable
    */
   private ClassData resolveClass(String className)
   {
-    Class clazz = null;
+    Class clazz;
     ClassData cd = null;
 
     synchronized (state)
@@ -1238,7 +1443,7 @@ public class JSONRPCBridge implements Serializable
   private Method resolveMethod(HashMap methodMap, String methodName,
       JSONArray arguments)
   {
-    Method method[] = null;
+    Method method[];
 
     // first, match soley by the method name and number of arguments passed in
     // if there is a single match, return the single match
@@ -1345,7 +1550,7 @@ public class JSONRPCBridge implements Serializable
    */
   private ObjectInstance resolveObject(Object key)
   {
-    ObjectInstance oi = null;
+    ObjectInstance oi;
     synchronized (state)
     {
       HashMap objectMap = state.getObjectMap();

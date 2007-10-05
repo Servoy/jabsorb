@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.jabsorb.serializer.FixUp;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -73,6 +74,11 @@ public class JSONRPCResult
   public final static int CODE_ERR_MARSHALL = 593;
 
   /**
+   * Denotes that an error occured while applying the fixup data for circular references/duplicates.
+   */
+  public final static int CODE_ERR_FIXUP = 594;
+
+  /**
    * The error method shown when an error occured while parsing the request.
    */
   public final static String MSG_ERR_PARSE = "couldn't parse request arguments";
@@ -81,6 +87,11 @@ public class JSONRPCResult
    * The error method shown when no method was found with the given name.
    */
   public final static String MSG_ERR_NOMETHOD = "method not found (session may have timed out)";
+
+  /**
+   * The error method shown when something in the fixups was amiss.
+   */
+  public final static String MSG_ERR_FIXUP = "invalid or unexpected data in fixups";
 
   /**
    * The result of the call
@@ -93,8 +104,10 @@ public class JSONRPCResult
   private Object id;
 
   /**
-   * Optional fixups entries to run against the result in order to reconstitute duplicate and / or circular references
+   * Optional fixup entries to run against the result in order to reconstitute duplicate and / or circular references
    * that were detected.
+   * This is a List of FixUp objects.
+   * @see FixUp
    */
   private List fixUps;
 
@@ -177,14 +190,13 @@ public class JSONRPCResult
         o.put("result", result);
         if (fixUps != null && fixUps.size()>0)
         {
-          StringBuffer fixups = new StringBuffer();
+          JSONArray fixups = new JSONArray();
           for (Iterator i=fixUps.iterator(); i.hasNext();)
           {
             FixUp fixup = (FixUp) i.next();
-            fixups.append(fixup);
-            fixups.append(";");
+            fixups.put(fixup.toJSONArray());
           }
-          o.put("fixups",fixups.toString());
+          o.put("fixups",fixups);
         }
       }
       else if (errorCode == CODE_REMOTE_EXCEPTION)

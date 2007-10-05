@@ -74,7 +74,7 @@
        it will default to invoking against the global bridge.</p>
     <p>An example or creating a session specific bridge in JSP is as follows:</p>
     <pre>&lt;jsp:useBean id="JSONRPCBridge" scope="session"
-           class="com.metaparadigm.jsonrpc.JSONRPCBridge"/&gt;</pre>
+           class="org.jabsorb.JSONRPCBridge"/&gt;</pre>
     <p>An example in Java (i.e. in a Servlet):</p>
     <pre>HttpSession session = request.getSession();
 JSONRPCBridge bridge = (JSONRPCBridge) session.getAttribute("JSONRPCBridge");
@@ -93,7 +93,7 @@ if(bridge == null) {
     <pre>JSONRPCBridge.getGlobalBridge().registerObject("myObject", myObject);</pre>
     <p>To export all static methods of a class to <b>all</b> clients:</p>
     <pre>JSONRPCBridge.getGlobalBridge().registerClass("MyClass", com.example.MyClass.class);</pre>
-    <p><em>See the <a href="docs/com/metaparadigm/jsonrpc/JSONRPCBridge.html">JSONRPCBridge Javadocs</a> for more info.</em></p>
+    <p><em>See the <a href="docs/org/jabsorb/JSONRPCBridge.html">JSONRPCBridge Javadocs</a> for more info.</em></p>
     <h3><a name="jsonrpcservlet">JSONRPCServlet</a></h3>
     <p>This servlet, the transport part of <%=appName%>, handles JSON-RPC
     requests over HTTP and dispatches them to a JSONRPCBridge instance
@@ -101,14 +101,14 @@ if(bridge == null) {
     if there isn't one already), or otherwise the global bridge.</p>
     <p>The following would be used in your web.xml to export the servlet under the URI <code>"/JSON-RPC"</code> (this is the standard location):</p>
 <pre>&lt;servlet&gt;
-  &lt;servlet-name&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-name&gt;
-  &lt;servlet-class&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-class&gt;
+  &lt;servlet-name&gt;org.jabsorb.JSONRPCServlet&lt;/servlet-name&gt;
+  &lt;servlet-class&gt;org.jabsorb.JSONRPCServlet&lt;/servlet-class&gt;
 &lt;/servlet&gt;
 &lt;servlet-mapping&gt;
-  &lt;servlet-name&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-name&gt;
+  &lt;servlet-name&gt;org.jabsorb.JSONRPCServlet&lt;/servlet-name&gt;
   &lt;url-pattern&gt;/JSON-RPC&lt;/url-pattern&gt;</pre>pre>
     <p><em>Please note:</em> due to relative mapping of URIs in your web container. You may need to set the URL in your client to: <code>"/&lt;web-app-name&gt;/JSON-RPC"</code>.
-    <p><em>See the <a href="docs/com/metaparadigm/jsonrpc/JSONRPCServlet.html">JSONRPCServlet Javadocs</a> for more info.</em></p>
+    <p><em>See the <a href="docs/org/jabsorb/JSONRPCServlet.html">JSONRPCServlet Javadocs</a> for more info.</em></p>
 
     <h2><a name="type-mapping">Type mapping</a></h2>
     <p>To allow <%=appName%> to transparently unmarshall complex nested objects and with that, the usage of Java's container classes, JSON-RPC needs a mechanism to preserve type information.</p>
@@ -218,9 +218,9 @@ if(bridge == null) {
     <h3><a name="opaque-references">Opaque References</a></h3>
     <p>Objects of classes registered as References will be returned as opaque reference objects to JavaScript instead of passed by value which is the default behaviour. When these opaque reference objects are passed to succussive Java method calls will then be reassociated back to the original Java object (great for security sensitive objects).</p>
     <p>A class can be registered as an opaque reference on the JSONRPCBridge as follows:</p>
-    <pre>bridge.registerReference(com.metaparadigm.test.Foo.class)</pre>
+    <pre>bridge.registerReference(org.jabsorb.test.Foo.class)</pre>
     <p>A reference in JSON format looks like this:</p>
-    <pre>{ "javaClass":"com.metaparadigm.test.Foo",
+    <pre>{ "javaClass":"org.jabsorb.test.Foo",
   "objectID":5535614,
   "JSONRPCType":"Reference" }</pre>
     <p>References could should be used for privileged objects that contain information that needs to be kept secure or complex types that are not required in the Javascript client but need to be passed as a reference in methods of exported objects.</p>
@@ -228,9 +228,9 @@ if(bridge == null) {
     <h3><a name="callable-references">Callable References</a></h3>
     <p>Objects of classes registered as Callable References will return dynamic proxies to allow invocation on the particular object instance in the server-side Java. There are extensions to the JSON-RPC protocol in the provided JSON-RPC JavaScript client for dynamic proxy creation support.</p>
     <p>A class can be registered as a callable reference on the JSONRPCBridge as follows:</p>
-    <pre>bridge.registerCallableReference(com.metaparadigm.test.Bar)</pre>
+    <pre>bridge.registerCallableReference(org.jabsorb.test.Bar)</pre>
     <p>A callable reference in JSON format looks list this:</p>
-    <pre>{ "javaClass":"com.metaparadigm.test.Bar",
+    <pre>{ "javaClass":"org.jabsorb.test.Bar",
   "objectID":4827452,
   "JSONRPCType":"CallableReference" }</pre>
     <p>CallableReferences can be registered for classes that for instance are returned from factory classes as a convenient way to avoid having to manually export these objects returned from these factory methods.</p>

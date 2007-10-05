@@ -186,11 +186,12 @@ public class ListSerializer extends AbstractSerializer
     }
     int i = 0;
     ObjectMatch m = new ObjectMatch(-1);
+    state.setSerialized(o, m);
     try
     {
       for (; i < jsonlist.length(); i++)
       {
-        m = ser.tryUnmarshall(state, null, jsonlist.get(i)).max(m);
+        m.setMismatch(ser.tryUnmarshall(state, null, jsonlist.get(i)).max(m).getMismatch());
       }
     }
     catch (UnmarshallException e)
@@ -221,7 +222,7 @@ public class ListSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("no type hint");
     }
-    AbstractList al = null;
+    AbstractList al;
     if (java_class.equals("java.util.List")
         || java_class.equals("java.util.AbstractList")
         || java_class.equals("java.util.ArrayList"))
@@ -240,6 +241,7 @@ public class ListSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("not a List");
     }
+
     JSONArray jsonlist;
     try
     {
@@ -253,6 +255,7 @@ public class ListSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("list missing");
     }
+    state.setSerialized(o, al);
     int i = 0;
     try
     {

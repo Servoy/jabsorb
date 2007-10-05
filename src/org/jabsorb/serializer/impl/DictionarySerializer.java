@@ -174,6 +174,8 @@ public class DictionarySerializer extends AbstractSerializer
       throw new UnmarshallException("map missing");
     }
     ObjectMatch m = new ObjectMatch(-1);
+    state.setSerialized(o, m);
+
     Iterator i = jsonmap.keys();
     String key = null;
     try
@@ -181,7 +183,7 @@ public class DictionarySerializer extends AbstractSerializer
       while (i.hasNext())
       {
         key = (String) i.next();
-        m = ser.tryUnmarshall(state, null, jsonmap.get(key)).max(m);
+        m.setMismatch(ser.tryUnmarshall(state, null, jsonmap.get(key)).max(m).getMismatch());
       }
     }
     catch (UnmarshallException e)
@@ -213,7 +215,7 @@ public class DictionarySerializer extends AbstractSerializer
     {
       throw new UnmarshallException("no type hint");
     }
-    Hashtable ht = null;
+    Hashtable ht;
     if (java_class.equals("java.util.Dictionary")
         || java_class.equals("java.util.Hashtable"))
     {
@@ -236,6 +238,9 @@ public class DictionarySerializer extends AbstractSerializer
     {
       throw new UnmarshallException("map missing");
     }
+
+    state.setSerialized(o, ht);
+
     Iterator i = jsonmap.keys();
     String key = null;
     try

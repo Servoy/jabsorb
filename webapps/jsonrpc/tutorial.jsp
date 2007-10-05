@@ -58,11 +58,11 @@
   "http://java.sun.com/dtd/web-app_2_3.dtd"&gt;
 &lt;web-app&gt;
   &lt;servlet&gt;
-    &lt;servlet-name&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-name&gt;
-    &lt;servlet-class&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-class&gt;
+    &lt;servlet-name&gt;org.jabsorb.JSONRPCServlet&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;org.jabsorb.JSONRPCServlet&lt;/servlet-class&gt;
   &lt;/servlet&gt;
   &lt;servlet-mapping&gt;
-    &lt;servlet-name&gt;com.metaparadigm.jsonrpc.JSONRPCServlet&lt;/servlet-name&gt;
+    &lt;servlet-name&gt;org.jabsorb.JSONRPCServlet&lt;/servlet-name&gt;
     &lt;url-pattern&gt;/JSON-RPC&lt;/url-pattern&gt;
   &lt;/servlet-mapping&gt;
 &lt;/web-app&gt;</pre>
@@ -77,7 +77,7 @@
 <p>Put a session scoped instance of the bridge into the HttpSession. eg.</p>
 <pre>...
 &lt;jsp:useBean id="JSONRPCBridge" scope="session"
-   class="com.metaparadigm.jsonrpc.JSONRPCBridge" /&gt;
+   class="org.jabsorb.JSONRPCBridge" /&gt;
 ...</pre>
 <p>Then export the object you wish to call methods on. eg.</p>
 <pre>...

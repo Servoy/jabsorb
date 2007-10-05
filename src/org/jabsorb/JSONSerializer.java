@@ -236,7 +236,7 @@ public class JSONSerializer implements Serializable
    *
    * @param parent parent object of the object being converted.  this can be null if
    *               it's the root object being converted.
-   * @param o java object to convert into json.
+   * @param java java object to convert into json.
    *
    * @param ref reference within the parent's point of view of the object being serialized.
    *            this will be a String for JSONObjects and an Integer for JSONArrays.
@@ -249,16 +249,16 @@ public class JSONSerializer implements Serializable
    *
    * @throws MarshallException if there is a problem marshalling java to json.
    */
-  public Object marshall(SerializerState state, Object parent, Object o, Object ref)
+  public Object marshall(SerializerState state, Object parent, Object java, Object ref)
       throws MarshallException
   {
     // check for duplicate objects or circular references
-    ProcessedObject p = state.getProcessedObject(o);
+    ProcessedObject p = state.getProcessedObject(java);
 
     // if this object hasn't been seen before, mark it as seen and continue forth
     if (p == null)
     {
-      state.push(parent, o, ref);
+      state.push(parent, java, ref);
     }
     else
     {
@@ -279,7 +279,11 @@ public class JSONSerializer implements Serializable
       // if its a duplicate only, and we aren't fixing up duplicates, re-serialize the object into the json
       if (!fixupDuplicates && !foundCircRef)
       {
-        state.push(parent, o, ref);
+        //todo: if a duplicate is being reserialized... it will overwrite the original location of the
+        //todo: first one found... need to think about the ramifications of this -- optimally, circ refs found
+        //todo: underneath duplicates need to point to the "original" one found, but they also need to be fixed
+        //todo: up to the correct location, of course.
+        state.push(parent, java, ref);
       }
       else
       {
@@ -291,7 +295,7 @@ public class JSONSerializer implements Serializable
 
     try
     {
-      if (o == null)
+      if (java == null)
       {
         if (log.isDebugEnabled())
         {
@@ -301,14 +305,14 @@ public class JSONSerializer implements Serializable
       }
       if (log.isDebugEnabled())
       {
-        log.debug("marshall class " + o.getClass().getName());
+        log.debug("marshall class " + java.getClass().getName());
       }
-      Serializer s = getSerializer(o.getClass(), null);
+      Serializer s = getSerializer(java.getClass(), null);
       if (s != null)
       {
-        return s.marshall(state, parent, o);
+        return s.marshall(state, parent, java);
       }
-      throw new MarshallException("can't marshall " + o.getClass().getName());
+      throw new MarshallException("can't marshall " + java.getClass().getName());
     }
     finally
     {
@@ -428,12 +432,16 @@ public class JSONSerializer implements Serializable
 
   /**
    * Convert a Java objects (or tree of Java objects) into a string in JSON
-   * format
-   * 
+   * format.  Note that this method will remove any circular references / duplicates
+   * and not handle the potential fixups that could be generated.  (unless duplicates/circular
+   * references are turned off.
+   *
+   * todo: have some way to transmit the fixups back to the caller of this method.
+   *
    * @param obj the object to be converted to JSON.
    * @return the JSON format string representing the data in the the Java
    *         object.
-   * @throws MarshallException If marshalling fails
+   * @throws MarshallException If marshalling fails.
    */
   public String toJSON(Object obj) throws MarshallException
   {
@@ -441,6 +449,8 @@ public class JSONSerializer implements Serializable
 
     // todo: what do we do about fix ups here?
     Object json = marshall(state, null, obj, "result");
+
+    // todo: fixups will be in state.getFixUps() if someone wants to do something with them...
     return json.toString();
   }
 
@@ -456,15 +466,36 @@ public class JSONSerializer implements Serializable
    * from JSON-RPC to determine which call signature the method call matches most
    * closely and therefore which method is the intended target method to call.
    * </p> 
-   * @param state The state of the serialiser
-   * @param clazz The class to unmarshall it to.
-   * @param json The object to unmarshall
+   * @param state used by the underlying Serializer objects to hold state
+   *          while unmarshalling for detecting circular references and duplicates.
+   *
+   * @param clazz optional java class to unmarshall to- if set to null then it
+   *        will be looked for via the javaClass hinting mechanism.
+   *
+   * @param json JSONObject or JSONArray or primitive Object wrapper that contains the json to unmarshall.
+   *
    * @return an ObjectMatch indicating the degree to which the object matched the class,
    * @throws UnmarshallException if getClassFromHint() fails
    */
   public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
       Object json) throws UnmarshallException
   {
+    // check for duplicate objects or circular references
+    ProcessedObject p = state.getProcessedObject(json);
+
+    // if this object hasn't been seen before, mark it as seen and continue forth
+
+    if (p == null)
+    {
+      p = state.store(json);
+    }
+    else
+    {
+      // get original serialized version
+      // to recreate circular reference / duplicate object on the java side
+      return (ObjectMatch) p.getSerialized();
+    }
+
     /*
      * If we have a JSON object class hint that is a sub class of the signature
      * 'clazz', then override 'clazz' with the hint class.
@@ -509,18 +540,37 @@ public class JSONSerializer implements Serializable
    * unmarshall for us. This method will be invoked recursively as Serializers
    * unmarshall complex object graphs.
    * 
-   * @param state can be used by the underlying Serializer objects to hold state
-   *          while unmarshalling.
+   * @param state used by the underlying Serializer objects to hold state
+   *          while unmarshalling for detecting circular references and duplicates.
+   *
    * @param clazz optional java class to unmarshall to- if set to null then it
    *          will be looked for via the javaClass hinting mechanism.
-   * @param json JSONObject or JSONArray that contains the json to unmarshall.
+   *
+   * @param json JSONObject or JSONArray or primitive Object wrapper that contains the json to unmarshall.
+   *
    * @return the java object representing the json that was unmarshalled.
+   *
    * @throws UnmarshallException if there is a problem unmarshalling json to
    *           java.
    */
   public Object unmarshall(SerializerState state, Class clazz, Object json)
       throws UnmarshallException
   {
+    // check for duplicate objects or circular references
+    ProcessedObject p = state.getProcessedObject(json);
+
+    // if this object hasn't been seen before, mark it as seen and continue forth
+
+    if (p == null)
+    {
+      p = state.store(json);
+    }
+    else
+    {
+      // get original serialized version
+      // to recreate circular reference / duplicate object on the java side
+      return p.getSerialized();
+    }
 
     // If we have a JSON object class hint that is a sub class of the
     // signature 'clazz', then override 'clazz' with the hint class.

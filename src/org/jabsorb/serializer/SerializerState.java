@@ -33,18 +33,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class is used by Serializers to hold state during marshalling and
- * unmarshalling. At this time, the BeanSerializer is the only standard
- * Serializer that makes use of SerializerState, but any custom Serializer could
- * use this to store and retrieve state while processing through recursive
- * levels.
+ * Used by Serializers to hold state during marshalling and
+ * unmarshalling.  It keeps track of all Objects encountered
+ * during processing for the purpose of detecting circular
+ * references and/or duplicates.
  */
 public class SerializerState
 {
   /**
    * The key is the identity hash code of a processed object wrapped in an Integer object.
    * The value is a ProcessedObject instance which contains both the object that was processed, and
-   * other information about the object.
+   * other information about the object used for generating fixups when marshalling.
    */
   private Map processedObjects = new HashMap();
 
@@ -78,21 +77,28 @@ public class SerializerState
 
   /**
    * Pop off one level from the scope stack of the current location during processing.
+   * If we are already at the lowest level of scope, then this has no action.
    */
-  public void pop()
+  public void pop() throws MarshallException
   {
+    if (currentLocation.size()==0)
+    {
+      // this is a sanity check
+      throw new MarshallException("scope error, attempt to pop too much off the scope stack.");
+    }
     currentLocation.removeLast();
   }
 
   /**
-   * Record the given object as a ProcessedObject and push into onto the scope stack.
+   * Record the given object as a ProcessedObject and push into onto the scope stack.  This is only
+   * used for marshalling.  The store method should be used for unmarshalling.
    *
    * @param parent parent of object to process.  Can be null if it's the root object being processed.
    *               it should be an object that was already processed via a previous call to processObject.
    *
    * @param obj    object being processed
    * @param ref    reference to object within parent-- should be a String if parent is an object, and Integer
-   *               if parent is an array.
+   *               if parent is an array.  Can be null if this is the root object that is being pushed/processed.
    */
   public void push(Object parent, Object obj, Object ref)
   {
@@ -112,11 +118,56 @@ public class SerializerState
     ProcessedObject p = new ProcessedObject();
     p.setParent(parentProcessedObject);
     p.setObject(obj);
-    p.setRef(ref);
 
     processedObjects.put(p.getUniqueId(),p);
+    if (ref != null)
+    {
+      p.setRef(ref);
+      currentLocation.add(ref);
+    }
+  }
 
-    currentLocation.add(ref);
+  /**
+   * Much simpler version of push to just account for the fact that an object has been processed
+   * (used for unmarshalling where we just need to re-hook up circ refs and duplicates
+   * and not generate fixups.)
+   *
+   * @param obj Object to account for as being processed.
+   * @return ProcessedObject wrapper for the accounted for object.
+   */
+  public ProcessedObject store(Object obj)
+  {
+    ProcessedObject p = new ProcessedObject();
+    p.setObject(obj);
+
+    processedObjects.put(p.getUniqueId(),p);
+    return p;
+  }
+
+  /**
+   * Associate the incoming source object being serialized to it's serialized representation.
+   * Currently only used within tryUnmarshall and unmarshall.  This MUST be called before a given unmarshall
+   * or tryUnmarshall recurses into child objects to unmarshall them.
+   * The purpose is to stop the recursion that can take place when circular references/duplicates are in the
+   * input json being unmarshalled.
+   *
+   * @param source source object being unmarshalled.
+   * @param target target serialized representation of the object that the source object is being unmarshalled to.
+   * @throws UnmarshallException if the source object is null, or is not already stored within a ProcessedObject.
+   */
+  public void setSerialized(Object source, Object target) throws UnmarshallException
+  {
+    if (source==null)
+    {
+      throw new UnmarshallException("source object may not be null");
+    }
+    ProcessedObject p = getProcessedObject(source);
+    if (p == null)
+    {
+      // this should normally never happen- it's a sanity check.
+      throw new UnmarshallException("source object must be already registered as a ProcessedObject " + source);
+    }
+    p.setSerialized(target);
   }
 
   /**
@@ -134,8 +185,9 @@ public class SerializerState
    *
    * @param originalLocation original json path location where the object was first encountered.
    * @param ref additional reference (String|Integer) to add on to the scope's current location.
+   * @throws MarshallException if a scope error occurs (this won't normally occur.
    */
-  public void addFixUp(List originalLocation, Object ref)
+  public void addFixUp(List originalLocation, Object ref) throws MarshallException
   {
     currentLocation.add(ref);
     fixups.add(new FixUp(currentLocation, originalLocation));

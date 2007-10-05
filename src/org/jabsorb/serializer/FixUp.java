@@ -1,16 +1,45 @@
+/*
+ * jabsorb - a Java to JavaScript Advanced Object Request Broker
+ * http://www.jabsorb.org
+ *
+ * Copyright 2007 The jabsorb team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package org.jabsorb.serializer;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Encapsulates a single fix up entry for a circular
- * reference or duplicate detected during processing.
+ * reference or duplicate detected during processing
+ * of Java into JSON (aka marshalling.)
  */
 public class FixUp
 {
+  private final Logger log = LoggerFactory.getLogger(FixUp.class);
+  private List fixupLocation;
+  private List originalLocation;
+
+
   /**
    * Create a FixUp for a duplicate or circular reference.
    *
@@ -22,59 +51,38 @@ public class FixUp
    */
   public FixUp(List fixupLocation, List originalLocation)
   {
-    jsExpression = makeJsReferencePath(fixupLocation) + "=" + makeJsReferencePath(originalLocation);
+    this.fixupLocation = new ArrayList(fixupLocation);
+    // pop root object that won't be used in the fixup off the stack
+    if (this.fixupLocation.size()>0)
+    {
+      this.fixupLocation.remove(0);
+    }
+    this.originalLocation = new ArrayList(originalLocation);
+    // pop root object that won't be used in the fixup off the stack
+    if (this.originalLocation.size()>0)
+    {
+      this.originalLocation.remove(0);
+    }
+
   }
 
   /**
-   * JavaScript expression representing the assignment statement needed to apply this
-   * fixup to the JSON that accompanies it.
-   */
-  private String jsExpression;
-
-  /**
-   * Generate a String representation of this FixUp entry, which is suitable
-   * for use as an assignment statement in a JavaScript expression.
-   * @return a String representation of this FixUp entry.
-   */
-  public String toString()
-  {
-    return jsExpression;
-  }
-
-  /**
-   * Return a javascript "path" expression to the object reference for the given list of
-   * references.
+   * Convert this FixUp to a JSONArray for transmission over JSON-RPC.
+   * The JSONArray will contain two sub JSONArrays, the first one representing the fixup location
+   * and the 2nd one representing the original location.
    *
-   * @param parts List of Integer and String objects representing the reference to an object.
-   * @return equivalent JavaScript expression to find that object.
+   * @return the FixUp represented as a JSONArray.
    */
-  private String makeJsReferencePath(List parts)
+  public JSONArray toJSONArray()
   {
-    if (parts==null || parts.size()==0)
-    {
-      // this is not expected... safety check
-      throw new IllegalArgumentException("invalid location");
-    }
+    JSONArray json = new JSONArray();
 
-    StringBuffer out;
-    Iterator i=parts.iterator();
-    out = new StringBuffer(i.next().toString());
+    JSONArray fixup = new JSONArray(fixupLocation);
+    JSONArray original = new JSONArray(originalLocation);
 
-    while (i.hasNext())
-    {
-      out.append("[");
-      Object next = i.next();
-      if (next instanceof Integer)
-      {
-        out.append((Integer)next);
-      }
-      else
-      {
-        out.append(JSONObject.quote((String)next));
-      }
-      out.append("]");
-    }
-    return out.toString();
+    json.put(fixup);
+    json.put(original);
+
+    return json;
   }
-
 }

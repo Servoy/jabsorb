@@ -185,12 +185,13 @@ public class MapSerializer extends AbstractSerializer
     ObjectMatch m = new ObjectMatch(-1);
     Iterator i = jsonmap.keys();
     String key = null;
+    state.setSerialized(o, m);
     try
     {
       while (i.hasNext())
       {
         key = (String) i.next();
-        m = ser.tryUnmarshall(state, null, jsonmap.get(key)).max(m);
+        m.setMismatch(ser.tryUnmarshall(state, null, jsonmap.get(key)).max(m).getMismatch());
       }
     }
     catch (UnmarshallException e)
@@ -221,7 +222,7 @@ public class MapSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("no type hint");
     }
-    AbstractMap abmap = null;
+    AbstractMap abmap;
     if (java_class.equals("java.util.Map")
         || java_class.equals("java.util.AbstractMap")
         || java_class.equals("java.util.HashMap"))
@@ -253,6 +254,7 @@ public class MapSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("map missing");
     }
+    state.setSerialized(o, abmap);
     Iterator i = jsonmap.keys();
     String key = null;
     try

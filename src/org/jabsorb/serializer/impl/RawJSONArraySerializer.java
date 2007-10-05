@@ -26,12 +26,18 @@
 
 package org.jabsorb.serializer.impl;
 
+import java.util.List;
+import java.util.Iterator;
+
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
+import org.jabsorb.JSONSerializer;
 import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONException;
 
 /**
  * Formats the Java JSONArray object.
@@ -66,18 +72,51 @@ public class RawJSONArraySerializer extends AbstractSerializer
   public Object marshall(SerializerState state, Object p, Object o)
       throws MarshallException
   {
-    return o;
+    // reprocess the raw json in order to fixup circular references and duplicates
+    JSONArray jsonIn = (JSONArray) o;
+    JSONArray jsonOut = new JSONArray();
+
+    int i = 0;
+    try
+    {
+      int j = jsonIn.length();
+
+      for (i=0; i<j; i++)
+      {
+        Object json = ser.marshall(state, o, jsonIn.get(i), new Integer(i));
+        if (JSONSerializer.CIRC_REF_OR_DUPLICATE != json)
+        {
+          jsonOut.put(i, json);
+        }
+        else
+        {
+          // put a slot where the object would go, so it can be fixed up properly in the fix up phase
+          jsonOut.put(i, JSONObject.NULL);
+        }
+      }
+    }
+    catch (MarshallException e)
+    {
+      throw (MarshallException) new MarshallException("element " + i).initCause(e);
+    }
+    catch (JSONException e)
+    {
+      throw (MarshallException) new MarshallException("element " + i).initCause(e);
+    }
+    return jsonOut;
   }
 
   public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
       Object jso) throws UnmarshallException
   {
+    state.setSerialized(jso, ObjectMatch.OKAY);
     return ObjectMatch.OKAY;
   }
 
   public Object unmarshall(SerializerState state, Class clazz, Object jso)
       throws UnmarshallException
   {
+    state.setSerialized(jso, jso);
     return jso;
   }
 }
