@@ -129,7 +129,7 @@ var unitTests={
 
       // circular references 2
       { code: 'jsonrpc.test.echoRawJSON(aaa)',
-        test: 'result.bbb.aaa===result'},
+        test: '(result.bbb.aaa===result)'},
 
       // circular references 3
       { code: 'jsonrpc.test.echoRawJSON({"field1": circ3})',
@@ -137,11 +137,11 @@ var unitTests={
 
       //duplicates test
       { code: 'jsonrpc.test.echoRawJSON({"field1": dup1})',
-        test: 'result.field1.arthur.mother==result.field1.diana&&result.field1.diana.son===result.field1.arthur'},
+        test: 'result.field1.arthur.mother == result.field1.diana && result.field1.diana.son===result.field1.arthur'},
 
       //duplicates and circular references
       { code: 'jsonrpc.test.echoRawJSON(dup2)',
-        test: 'result.arthur.mother===result.diana&&result.diana.son===result.arthur'},
+        test: 'result.arthur.mother===result.diana && result.diana.son===result.arthur'},
 
       //duplicates from the server
       { code: 'jsonrpc.test.aDupDupTest()',
@@ -164,16 +164,31 @@ var unitTests={
       { code:             'function(){ var callableRef = jsonrpc.test.getCallableRef(); var p = callableRef.ping();return({ping:p})}();',
         asyncCode: 'var __=function(){ var callableRef = jsonrpc.test.getCallableRef(); var p = callableRef.ping();cb    ({ping:p});}();',
         test: 'result.ping == "ping pong"'
+      },
+      { code: 'jsonrpc.test.getCallableRefVector();',
+        test: '(result.list[0].ping() == "ping pong") && (result.list[1].ping() == "ping pong")'
+      },
+      { code: 'jsonrpc.test.getCallableRefMap();',
+        test: '(result.map["a"].ping() == "ping pong") && (result.map["b"].ping() == "ping pong")'
+      },
+      { code: 'jsonrpc.test.getCallableRefSet();',
+        test: 'function(){for(a in result.set){if(result.set[a].ping() != "ping pong")return false;}return true;}() '
       }
     ]
   },
   
-  "Primitive Tests":
+  "Primitives":
   {  
     tests:
     [
+      { code: 'jsonrpc.test.voidFunction()',
+        test: 'result == undefined'
+      },
       { code: 'jsonrpc.test.echoChar("c")',
         test: 'result == "c"'
+      },
+      { code: 'jsonrpc.test.echo("")',
+        test: 'result == ""'
       },
       { code: 'jsonrpc.test.echoIntegerObject(1234567890)',
         test: 'result == 1234567890'
@@ -196,7 +211,7 @@ var unitTests={
     ]
   },
   
-  "Object Tests":
+  "Objects":
   {  
     tests:
     [
@@ -209,6 +224,15 @@ var unitTests={
       { code: 'jsonrpc.test.echoObject({ "javaClass": "org.jabsorb.test.Test$Waggle", "bang": "foo", "baz": 9, "bork": 5 })',
         test: 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9 && result.bork == 5'
       },
+      { code: 'jsonrpc.test.echoRawJSON({ a: false})',
+        test: 'result.a === false '
+      },
+      { code: 'jsonrpc.test.echoRawJSON({ a: ""})',
+        test: 'result.a === "" '
+      },
+      { code: 'jsonrpc.test.echoRawJSON({ a: 0})',
+        test: 'result.a === 0 '
+      },
       { code: 'jsonrpc.test.echoObjectArray([{ "javaClass": "org.jabsorb.test.Test$Waggle", "bang": "foo", "baz": 9, "bork": 5 }])',
         test: 'result[0].javaClass == "org.jabsorb.test.Test$Waggle" && result[0].bang =="foo" && result[0].baz == 9 && result[0].bork == 5'
       },
@@ -217,8 +241,8 @@ var unitTests={
       },
     ]
   },
-
-  "Date Tests":
+  
+  "Dates":
   {  
     tests:
     [
@@ -228,7 +252,7 @@ var unitTests={
     ]
   },
   
-  "List Tests":
+  "Lists":
   {  
     tests:
     [
@@ -274,7 +298,7 @@ var unitTests={
     ]
   },
   
-  "Set Tests":
+  "Sets":
   {  
     tests:
     [
@@ -284,7 +308,7 @@ var unitTests={
     ]
   },
   
-  "Map Tests":
+  "Maps":
   {  
     tests:
     [
@@ -305,18 +329,20 @@ var unitTests={
       }
     ]
   },
-  
-  "Special Character Tests":
+  "Exceptions":
   {  
     tests:
     [
-      { code: 'jsonrpc.test.voidFunction()',
-        test: 'result == undefined'
-      },
       { code: 'jsonrpc.test.throwException()',
         test: 'e == "java.lang.Exception: test exception"',
         exception: true
       },
+    ]
+  },
+  "Special Characters":
+  {  
+    tests:
+    [
       { code: 'jsonrpc.test.echo("hello")',
         test: 'result == "hello"'
       },

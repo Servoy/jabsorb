@@ -38,7 +38,7 @@
           <div>(
           <input type="checkbox" id="showSuccesses" checked="1" />
           Show successes  |
-          <input type="checkbox" id="hideUnrun" checked="0" />
+          <input type="checkbox" id="hideUnrun"  />
           Hide unrun  |
           <input type="checkbox" id="profile" />
           Profile  |
@@ -58,7 +58,6 @@
         <td style="text-align:right">
           Max parallel async requests
           <input type="text" id="max_requests" value="8" size="2" />
-          </div>
         </td> 
       </tr>
     </table>

@@ -504,6 +504,7 @@ JSONRpcClient.prototype._createMethod = function (methodName)
     }
     else
     {
+      //when there is a callback, add the req to the list 
       JSONRpcClient.async_requests.push(req);
       JSONRpcClient.kick_async();
       return req.requestId;
@@ -512,6 +513,7 @@ JSONRpcClient.prototype._createMethod = function (methodName)
 
   return serverMethodCaller;
 };
+
 
 /**
  * This is used to add a list of methods to this.
@@ -897,14 +899,60 @@ JSONRpcClient.prototype._handleResponse = function (http)
   {
     applyFixups(r,obj.fixups);
   }
-
+  var i,tmp;
+    
   /* Handle CallableProxy */
-  if (r && r.objectID && r.JSONRPCType == "CallableReference")
+  if (r) 
   {
-    return new JSONRpcClient(this.serverURL, this.user, this.pass, r.objectID);
+    if(r.objectID && r.JSONRPCType == "CallableReference")
+    {  
+      return new JSONRpcClient(this.serverURL, this.user, this.pass, r.objectID, 
+        r.javaClass, r.JSONRPCType);
+    }
+    if(r.list && r.list!==null)
+    {
+       for(i=0;i<r.list.length;i++)
+       {
+         tmp=JSONRpcClient.makeCallableReference(this,r.list[i]);
+         if(tmp!=null)
+         {
+           r.list[i]=tmp;
+         }
+       }
+    }
+    else if(r.map && r.map!==null)
+    {
+       for(i in r.map)
+       {
+         tmp=JSONRpcClient.makeCallableReference(this,r.map[i]);
+         if(tmp!=null)
+         {
+           r.map[i]=tmp;
+         }
+       }
+    }
+    else if(r.set && r.set!==null)
+    {
+      for(i in r.set)
+      {
+         tmp=JSONRpcClient.makeCallableReference(this,r.set[i]);
+         if(tmp!=null)
+         {
+           r.set[i]=tmp;
+         }
+      }
+    }
   }
-
   return r;
+};
+
+JSONRpcClient.makeCallableReference = function(self,value)
+{
+  if(value && value.objectID && value.javaClass && value.JSONRPCType == "CallableReference")
+  {
+    return new JSONRpcClient(self.serverURL, self.user, self.pass, value.objectID,value.javaClass,value.JSONRPCType);
+  }
+  return null;
 };
 
 /* XMLHttpRequest wrapper code */
