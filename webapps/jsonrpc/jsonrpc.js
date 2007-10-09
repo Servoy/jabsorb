@@ -901,10 +901,7 @@ JSONRpcClient.prototype._handleResponse = function (http)
   var r = obj.result;
 
   // look for circular reference/duplicates fixups and execute them if they are there
-  if (obj.fixups)
-  {
-    applyFixups(r,obj.fixups);
-  }
+  
   var i,tmp;
     
   /* Handle CallableProxy */
@@ -915,41 +912,52 @@ JSONRpcClient.prototype._handleResponse = function (http)
       return new JSONRpcClient(this.serverURL, this.user, this.pass, r.objectID, 
         r.javaClass, r.JSONRPCType);
     }
-    if(r.list && r.list!==null)
+    r=JSONRpcClient.extractCallableReferences(this,r);
+  }
+  if (obj.fixups)
+  {
+    applyFixups(r,obj.fixups);
+  }
+  return r;
+};
+
+JSONRpcClient.extractCallableReferences = function(self,root)
+{
+  var i,tmp,value;
+  for (i in root)
+  {
+    if(typeof(root[i])=="object")
     {
-       for(i=0;i<r.list.length;i++)
-       {
-         tmp=JSONRpcClient.makeCallableReference(this,r.list[i]);
-         if(tmp!=null)
-         {
-           r.list[i]=tmp;
-         }
-       }
-    }
-    else if(r.map && r.map!==null)
-    {
-       for(i in r.map)
-       {
-         tmp=JSONRpcClient.makeCallableReference(this,r.map[i]);
-         if(tmp!=null)
-         {
-           r.map[i]=tmp;
-         }
-       }
-    }
-    else if(r.set && r.set!==null)
-    {
-      for(i in r.set)
+      tmp=JSONRpcClient.makeCallableReference(self,root[i]);
+      if(tmp!=null)
       {
-         tmp=JSONRpcClient.makeCallableReference(this,r.set[i]);
-         if(tmp!=null)
-         {
-           r.set[i]=tmp;
-         }
+        root[i]=tmp;
+      }
+      else
+      {
+        tmp=JSONRpcClient.extractCallableReferences(self,root[i]);
+        root[i]=tmp;
+      }
+    }
+    if(typeof(i)=="object")
+    {
+      tmp=JSONRpcClient.makeCallableReference(self,i);
+      if(tmp!=null)
+      {
+        value=root[i];
+        delete root[i];
+        root[tmp]=value;
+      }
+      else
+      {
+        tmp=JSONRpcClient.extractCallableReferences(self,i);
+        value=root[i];
+        delete root[i];
+        root[tmp]=value;
       }
     }
   }
-  return r;
+  return root;
 };
 
 JSONRpcClient.makeCallableReference = function(self,value)

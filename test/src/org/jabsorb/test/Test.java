@@ -27,6 +27,7 @@
 package org.jabsorb.test;
 
 import java.io.Serializable;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
@@ -51,6 +53,8 @@ import org.json.JSONObject;
  */
 public class Test implements Serializable
 {
+  
+  
   private final static long serialVersionUID = 2;
 
   // Void test
@@ -528,13 +532,13 @@ public class Test implements Serializable
     }
   }
 
-  static public class CallableRefTest implements Serializable
+  static public class CallableRefTest implements Serializable, Comparable
   {
 
     private final static long serialVersionUID = 2;
 
     private static RefTest ref = new RefTest("a secret");
-
+    
     public String ping()
     {
       return "ping pong";
@@ -549,6 +553,11 @@ public class Test implements Serializable
     {
       return r.toString();
     }
+
+    public int compareTo(Object arg0)
+    {
+      return System.identityHashCode(this)-System.identityHashCode(arg0);
+    }
   }
 
   private static CallableRefTest callableRef = new CallableRefTest();
@@ -557,7 +566,36 @@ public class Test implements Serializable
   {
     return callableRef;
   }
-
+  
+  public Vector getCallableRefVector()
+  {
+    Vector v = new Vector();
+    v.add(callableRef);
+    v.add(callableRef);
+    return v;
+  }
+  public Vector getCallableRefInnerVector()
+  {
+    Vector v1 = new Vector();
+    Vector v = new Vector();
+    v.add(callableRef);
+    v.add(callableRef);
+    v1.add(v);    
+    return v1;
+  }
+  public Map getCallableRefMap()
+  {
+    Map m = new TreeMap();
+    m.put("a",callableRef);
+    m.put("b",callableRef);
+    return m;
+  }
+  public Set getCallableRefSet()
+  {
+    Set s = new TreeSet();
+    s.add(callableRef);
+    return s;
+  }
   // Callback tests
 
   public void setCallback(JSONRPCBridge bridge, boolean flag)
@@ -577,7 +615,7 @@ public class Test implements Serializable
 
     private final static long serialVersionUID = 2;
 
-    public void preInvoke(Object context, Object instance, Method m,
+    public void preInvoke(Object context, Object instance, AccessibleObject m,
                           Object arguments[]) throws Exception
     {
       System.out.print("Test.preInvoke");
@@ -585,7 +623,7 @@ public class Test implements Serializable
       {
         System.out.print(" instance=" + instance);
       }
-      System.out.print(" method=" + m.getName());
+      System.out.print(" method=" + ((Method)m).getName());
       for (int i = 0; i < arguments.length; i++)
       {
         System.out.print(" arg[" + i + "]=" + arguments[i]);
@@ -593,7 +631,7 @@ public class Test implements Serializable
       System.out.println("");
     }
 
-    public void postInvoke(Object context, Object instance, Method m,
+    public void postInvoke(Object context, Object instance, AccessibleObject m,
                            Object result) throws Exception
     {
     }

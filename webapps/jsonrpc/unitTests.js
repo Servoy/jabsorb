@@ -168,6 +168,9 @@ var unitTests={
       { code: 'jsonrpc.test.getCallableRefVector();',
         test: '(result.list[0].ping() == "ping pong") && (result.list[1].ping() == "ping pong")'
       },
+      { code: 'jsonrpc.test.getCallableRefInnerVector();',
+        test: '(result.list[0].list[0].ping() == "ping pong") && (result.list[0].list[1].ping() == "ping pong")'
+      },
       { code: 'jsonrpc.test.getCallableRefMap();',
         test: '(result.map["a"].ping() == "ping pong") && (result.map["b"].ping() == "ping pong")'
       },
@@ -241,6 +244,7 @@ var unitTests={
       },
     ]
   },
+  
   
   "Dates":
   {  
