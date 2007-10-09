@@ -37,7 +37,7 @@ Function.prototype.bind = function() {
 };
 
 //from prototype.js
-Function.prototype.bindAsEventListener = function(object) {
+Function.prototype.bindAsEventListener = function() {
   var __method = this, args = $A(arguments), object = args.shift();
   return function(event) {
     __method.apply(object, [event || window.event].concat(args));
@@ -214,7 +214,9 @@ function createShowTestsTable()
       detailedRow,
       textVal,
       href,
-      downArrowDiv;
+      downArrowDiv,
+      div,
+      text;
   
   widths=["25%","25%","25%","25%"];
   headingTexts=["Test Set","Tests","Successes","Failures"];

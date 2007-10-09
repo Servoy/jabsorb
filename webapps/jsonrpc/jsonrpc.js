@@ -26,7 +26,7 @@
 
 /* escape a character */
 
-escapeJSONChar=function ()
+var escapeJSONChar=function ()
 {
   var escapeChars = ["\b","\t","\n","\f","\r"];
 
@@ -514,6 +514,46 @@ JSONRpcClient.prototype._createMethod = function (methodName)
   return serverMethodCaller;
 };
 
+/**
+ * Creates a new object from the bridge. A callback may optionally be given as
+ * the first argument to make this an async call.
+ *
+ * @param callback (optional)
+ * @param constructorName The name of the class to create, which should be 
+ *   registered with JSONRPCBridge.registerClass()
+ * @param _args The arguments the constructor takes
+ * @return the new object if sync, the request id if async.
+ */
+JSONRpcClient.prototype.createObject = function ()
+{
+  var args = [],
+      callback = null,
+      constructorName,
+      _args,
+      req;
+  for(var i=0;i<arguments.length;i++)
+  {
+    args.push(arguments[i]);
+  }
+  if(typeof args[0] == "function")
+  {
+    callback = args.shift();
+  }
+  constructorName=args[0]+".constructor";
+  _args=args[1];      
+        
+  req = this._makeRequest.call(this, constructorName, _args, callback);
+  if(callback === null) 
+  {
+    return this._sendRequest.call(this, req);
+  }
+  else 
+  {
+    JSONRpcClient.async_requests.push(req);
+    JSONRpcClient.kick_async();
+    return req.requestId;
+  }
+};
 
 /**
  * This is used to add a list of methods to this.
@@ -725,13 +765,14 @@ JSONRpcClient.prototype._makeRequest = function (methodName, args, cb)
 
 JSONRpcClient.prototype._sendRequest = function (req)
 {
+  var http,self,res;
   if (req.profile)
   {
     req.profile.start = new Date();
   }
 
   /* Get free http object from the pool */
-  var http = JSONRpcClient.poolGetHTTPRequest();
+  http = JSONRpcClient.poolGetHTTPRequest();
   JSONRpcClient.num_req_active++;
 
   /* Send the request */
@@ -749,7 +790,7 @@ JSONRpcClient.prototype._sendRequest = function (req)
   /* Construct call back if we have one */
   if (req.cb)
   {
-    var self = this;
+    self = this;
     http.onreadystatechange = function()
     {
       if (http.readyState == 4)
@@ -757,11 +798,15 @@ JSONRpcClient.prototype._sendRequest = function (req)
         http.onreadystatechange = function ()
         {
         };
-        var res = { "cb": req.cb, "result": null, "ex": null};
+        res = { "cb": req.cb, "result": null, "ex": null};
         if (req.profile)
         {
           res.profile = req.profile;
           res.profile.end = new Date();
+        }
+        else
+        {
+          res.profile = false;
         }
         try
         {
@@ -804,6 +849,7 @@ JSONRpcClient.prototype._sendRequest = function (req)
   {
     return this._handleResponse(http);
   }
+  return null;
 };
 
 JSONRpcClient.prototype._handleResponse = function (http)
