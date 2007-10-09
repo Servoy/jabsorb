@@ -630,7 +630,45 @@ function postResults(name,i, result, e, profile)
   {
     if (typeof result == "object")
     {
-      resultText = toJSON(result);
+      var tmp = toJSON(result);
+      var done={};
+      var toString=function(o)
+      {
+        var str,x;
+        if (typeof o == "object")
+        {
+          if(done[o])
+          {
+            return "circRef";
+          }
+          done[o]="";
+          if(o.constructor === Array)
+          {
+            str="[";
+            for(x in o)
+            {
+              str+=toString(o[x])+", ";
+            }  
+            str+="]";
+          }
+          else
+          {
+            str="{";
+            for(x in o)
+            {
+              str+=toString(x)+": "+toString(o[x])+", ";
+            }  
+            str+="}";
+          }
+          return str;
+          
+        }
+        else
+        {
+          return o.toString();
+        }
+      };
+      resultText= toString(tmp);
     }
     else
     {
@@ -642,6 +680,12 @@ function postResults(name,i, result, e, profile)
     }
     catch(e)
     {
+      var tmp="";
+      for(var aa in e)
+      {
+        tmp+=aa+" "+e[aa].toString()+"\t";
+      }
+      resultText=tmp;
     }
   }
   if (profile)
