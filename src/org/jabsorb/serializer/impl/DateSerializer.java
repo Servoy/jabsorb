@@ -167,11 +167,8 @@ public class DateSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("invalid class " + clazz);
     }
-    else
-    {
-      state.setSerialized(o, returnValue);
-      return returnValue;
-    }
-  }
+    state.setSerialized(o, returnValue);
+    return returnValue;
+   }
 
 }

@@ -26,18 +26,15 @@
 
 package org.jabsorb.serializer.impl;
 
-import java.util.List;
-import java.util.Iterator;
-
+import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
-import org.jabsorb.JSONSerializer;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Formats the Java JSONArray object.
