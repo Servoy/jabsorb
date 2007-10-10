@@ -20,46 +20,49 @@
 package org.jabsorb.serializer;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Encapsulates a single fix up entry for a circular
- * reference or duplicate detected during processing
- * of Java into JSON (aka marshalling.)
+ * Encapsulates a single fix up entry for a circular reference or duplicate
+ * detected during processing of Java into JSON (aka marshalling.)
  */
 public class FixUp
 {
-  private final Logger log = LoggerFactory.getLogger(FixUp.class);
+  /**
+   * A List of String|Integer's representing references to locate the place
+   * where this fixup entry needs to be created.
+   */
   private List fixupLocation;
-  private List originalLocation;
 
+  /**
+   * List of String|Integer's representing references to locate the original
+   * location of the circular reference or duplicate that this FixUp applies to.
+   */
+  private List originalLocation;
 
   /**
    * Create a FixUp for a duplicate or circular reference.
-   *
-   * @param fixupLocation a List of String|Integer's representing references to locate the place where
-   *         this fixup entry needs to be created.
-   *
-   * @param originalLocation List of String|Integer's representing references to locate the original
-   *         location of the circular reference or duplicate that this FixUp applies to.
+   * 
+   * @param fixupLocation a List of String|Integer's representing references to
+   *          locate the place where this fixup entry needs to be created.
+   * 
+   * @param originalLocation List of String|Integer's representing references to
+   *          locate the original location of the circular reference or
+   *          duplicate that this FixUp applies to.
    */
   public FixUp(List fixupLocation, List originalLocation)
   {
     this.fixupLocation = new ArrayList(fixupLocation);
     // pop root object that won't be used in the fixup off the stack
-    if (this.fixupLocation.size()>0)
+    if (this.fixupLocation.size() > 0)
     {
       this.fixupLocation.remove(0);
     }
     this.originalLocation = new ArrayList(originalLocation);
     // pop root object that won't be used in the fixup off the stack
-    if (this.originalLocation.size()>0)
+    if (this.originalLocation.size() > 0)
     {
       this.originalLocation.remove(0);
     }
@@ -67,10 +70,10 @@ public class FixUp
   }
 
   /**
-   * Convert this FixUp to a JSONArray for transmission over JSON-RPC.
-   * The JSONArray will contain two sub JSONArrays, the first one representing the fixup location
-   * and the 2nd one representing the original location.
-   *
+   * Convert this FixUp to a JSONArray for transmission over JSON-RPC. The
+   * JSONArray will contain two sub JSONArrays, the first one representing the
+   * fixup location and the 2nd one representing the original location.
+   * 
    * @return the FixUp represented as a JSONArray.
    */
   public JSONArray toJSONArray()
