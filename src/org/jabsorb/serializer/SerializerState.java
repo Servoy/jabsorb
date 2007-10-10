@@ -54,6 +54,37 @@ public class SerializerState
   private List fixups = new ArrayList();
 
   /**
+   * Represents the current json location that we are at during processing.
+   * Each time we go one layer deeper in processing, the reference is pushed onto the stack
+   * And each time we recurse out of that layer, it is popped off the stack.
+   */
+  private LinkedList currentLocation = new LinkedList();
+
+  /**
+   * Add a fixup entry.  Assumes that the SerializerState is in the correct scope for the
+   * fix up location.
+   *
+   * @param originalLocation original json path location where the object was first encountered.
+   * @param ref additional reference (String|Integer) to add on to the scope's current location.
+   * @throws MarshallException if a scope error occurs (this won't normally occur.
+   */
+  public void addFixUp(List originalLocation, Object ref) throws MarshallException
+  {
+    currentLocation.add(ref);
+    fixups.add(new FixUp(currentLocation, originalLocation));
+    pop();
+  }
+
+  /**
+   * Get the List of all FixUp objects created during processing.
+   * @return List of FixUps to circular references and duplicates found during processing.
+   */
+  public List getFixUps()
+  {
+    return fixups;
+  }
+
+  /**
    * If the given object has already been processed, return the ProcessedObject wrapper for
    * that object which will indicate the original location from where that Object was processed from.
    *
@@ -69,15 +100,37 @@ public class SerializerState
   }
 
   /**
-   * Represents the current json location that we are at during processing.
-   * Each time we go one layer deeper in processing, the reference is pushed onto the stack
-   * And each time we recurse out of that layer, it is popped off the stack.
+   * Determine if a duplicate child object of the given parentis a circular reference with the
+   * given ProcessedObject.  We know it's a circular reference if we can walk up the parent
+   * chain and find the ProcessedObject.  If instead we find null, then it's a duplicate
+   * instead of a circular ref.
+   *
+   * @param dup the duplicate object that might also be the original reference in a circular reference.
+   * @param parent the parent of an object that might be a circular reference.
+   *
+   * @return true if the duplicate is a circular reference or false if it's a duplicate only.
    */
-  private LinkedList currentLocation = new LinkedList();
+  public boolean isAncestor(ProcessedObject dup, Object parent)
+  {
+    // walk up the ancestry chain until we either find the duplicate
+    // (which would mean it's a circular ref)
+    // or we find null (the end of the chain) which would mean it's a duplicate only.
+    ProcessedObject ancestor = getProcessedObject(parent);
+    while (ancestor != null)
+    {
+      if (dup == ancestor)
+      {
+        return true;
+      }
+      ancestor = ancestor.getParent();
+    }
+    return false;
+  }
 
   /**
    * Pop off one level from the scope stack of the current location during processing.
    * If we are already at the lowest level of scope, then this has no action.
+   * @throws MarshallException If called when currentLocation is empty
    */
   public void pop() throws MarshallException
   {
@@ -128,23 +181,6 @@ public class SerializerState
   }
 
   /**
-   * Much simpler version of push to just account for the fact that an object has been processed
-   * (used for unmarshalling where we just need to re-hook up circ refs and duplicates
-   * and not generate fixups.)
-   *
-   * @param obj Object to account for as being processed.
-   * @return ProcessedObject wrapper for the accounted for object.
-   */
-  public ProcessedObject store(Object obj)
-  {
-    ProcessedObject p = new ProcessedObject();
-    p.setObject(obj);
-
-    processedObjects.put(p.getUniqueId(),p);
-    return p;
-  }
-
-  /**
    * Associate the incoming source object being serialized to it's serialized representation.
    * Currently only used within tryUnmarshall and unmarshall.  This MUST be called before a given unmarshall
    * or tryUnmarshall recurses into child objects to unmarshall them.
@@ -171,54 +207,19 @@ public class SerializerState
   }
 
   /**
-   * Get the List of all FixUp objects created during processing.
-   * @return List of FixUps to circular references and duplicates found during processing.
+   * Much simpler version of push to just account for the fact that an object has been processed
+   * (used for unmarshalling where we just need to re-hook up circ refs and duplicates
+   * and not generate fixups.)
+   *
+   * @param obj Object to account for as being processed.
+   * @return ProcessedObject wrapper for the accounted for object.
    */
-  public List getFixUps()
+  public ProcessedObject store(Object obj)
   {
-    return fixups;
-  }
+    ProcessedObject p = new ProcessedObject();
+    p.setObject(obj);
 
-  /**
-   * Add a fixup entry.  Assumes that the SerializerState is in the correct scope for the
-   * fix up location.
-   *
-   * @param originalLocation original json path location where the object was first encountered.
-   * @param ref additional reference (String|Integer) to add on to the scope's current location.
-   * @throws MarshallException if a scope error occurs (this won't normally occur.
-   */
-  public void addFixUp(List originalLocation, Object ref) throws MarshallException
-  {
-    currentLocation.add(ref);
-    fixups.add(new FixUp(currentLocation, originalLocation));
-    pop();
-  }
-
-  /**
-   * Determine if a duplicate child object of the given parentis a circular reference with the
-   * given ProcessedObject.  We know it's a circular reference if we can walk up the parent
-   * chain and find the ProcessedObject.  If instead we find null, then it's a duplicate
-   * instead of a circular ref.
-   *
-   * @param dup the duplicate object that might also be the original reference in a circular reference.
-   * @param parent the parent of an object that might be a circular reference.
-   *
-   * @return true if the duplicate is a circular reference or false if it's a duplicate only.
-   */
-  public boolean isAncestor(ProcessedObject dup, Object parent)
-  {
-    // walk up the ancestry chain until we either find the duplicate
-    // (which would mean it's a circular ref)
-    // or we find null (the end of the chain) which would mean it's a duplicate only.
-    ProcessedObject ancestor = getProcessedObject(parent);
-    while (ancestor != null)
-    {
-      if (dup == ancestor)
-      {
-        return true;
-      }
-      ancestor = ancestor.getParent();
-    }
-    return false;
+    processedObjects.put(p.getUniqueId(),p);
+    return p;
   }
 }
