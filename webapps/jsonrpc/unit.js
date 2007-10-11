@@ -385,7 +385,7 @@ function createDisplayTestSetTable(name)
    table.appendChild(cell);
   }
   
-  thead = $n("thead");
+  thead = table.createTHead();
   
   row = $n("tr");
   thead.appendChild(row);
