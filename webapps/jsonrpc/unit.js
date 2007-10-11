@@ -233,8 +233,8 @@ function createShowTestsTable()
   table.style.width=tableWidth+"px";
 
   //create the header
-  thead = $n("thead");
 
+  thead = table.createTHead();
   headerRow = $n("tr");
   thead.appendChild(headerRow);
   for(i=0;i<widths.length;i++)
