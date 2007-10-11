@@ -241,7 +241,7 @@ var unitTests={
       },
       { code: 'jsonrpc.test.echoRawJSON({ "field1": "test" })',
         test: 'result.field1 == "test"'
-      },
+      }
     ]
   },
   
@@ -340,7 +340,7 @@ var unitTests={
       { code: 'jsonrpc.test.throwException()',
         test: 'e == "java.lang.Exception: test exception"',
         exception: true
-      },
+      }
     ]
   },
   "Special Characters":
