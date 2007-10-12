@@ -143,10 +143,11 @@ function toJSON(o, rootRef)
   function reference(list)
   {
     //  duplicate the incoming list, but without the first element
-    var copy = [];
+    var i,
+        copy = [];
     if (list && list.length)
     {
-      for (var i=1; i<list.length; i++)
+      for (i=1; i<list.length; i++)
       {
         copy.push(list[i]);
       }
@@ -169,7 +170,15 @@ function toJSON(o, rootRef)
   // if it has already been processed, and thus handle circular references and duplicates
   function subObjToJSON(o,p,ref)
   {
-    var v = [];
+    var v = [],
+        // list of references to get to the fixup entry
+        fixup,
+        // list of reference to get to the original location
+        original,
+        parent,
+        circRef,
+        i;
+        
     if (o === null || o === undefined)
     {
       return "null";  // it's null or undefined, so serialize it as null
@@ -196,16 +205,8 @@ function toJSON(o, rootRef)
       if (o[marker])
       {
         // determine if it's a circular reference
-
-        // list of references to get to the fixup entry
-        var fixup = [ref];
-
-        // list of reference to get to the original location
-        var original;
-
-        var parent = p;
-
-        var circRef;
+        fixup = [ref];
+        parent = p;
 
         // walk up the parent chain till we find null
         while (parent)
@@ -278,7 +279,7 @@ function toJSON(o, rootRef)
       }
       else if (o.constructor === Array)
       {
-        for (var i = 0; i < o.length; i++)
+        for (i = 0; i < o.length; i++)
         {
           json = subObjToJSON(o[i], o, i);
 
@@ -321,7 +322,7 @@ function toJSON(o, rootRef)
   json = subObjToJSON(o, null, rootRef?rootRef:"result");
 
   removeMarkers();
-  return {"json": json, "fixUps": fixUps};
+  return {json: json, fixUps: fixUps};
 }
 
 
@@ -330,7 +331,10 @@ function toJSON(o, rootRef)
 function JSONRpcClient()
 {
   var arg_shift = 0,
-    req;
+      req,
+      _function,
+      methods,
+      self;
 
   //If a call back is being used grab it
   if (typeof arguments[0] == "function")
@@ -354,10 +358,10 @@ function JSONRpcClient()
     //Then add all the cached methods to it.
     for (var name in JSONRpcClient.knownClasses[this.javaClass])
     {
-      var f = JSONRpcClient.knownClasses[this.javaClass][name];
+      _function = JSONRpcClient.knownClasses[this.javaClass][name];
       //Change the this to the object that will be calling it
       //Note: bind is JSONRPC.bind
-      this[name]=JSONRpcClient.bind(f,this);
+      this[name]=JSONRpcClient.bind(_function,this);
     }
   }
   else
@@ -376,14 +380,14 @@ function JSONRpcClient()
       this._addMethods(["system.listMethods"],this.javaClass);
       req = this._makeRequest("system.listMethods", []);
     }
-    var m = this._sendRequest(req);
+    methods = this._sendRequest(req);
     //Now add the methods to the object
-    this._addMethods(m,this.javaClass);
+    this._addMethods(methods,this.javaClass);
   }
   //If a callback was added to the constructor, call it
   if (this.readyCB)
   {
-    var self = this;
+    self = this;
     req.cb = function (result, e)
     {
       if (!e)
@@ -515,47 +519,6 @@ JSONRpcClient.prototype._createMethod = function (methodName)
 };
 
 /**
- * Creates a new object from the bridge. A callback may optionally be given as
- * the first argument to make this an async call.
- *
- * @param callback (optional)
- * @param constructorName The name of the class to create, which should be 
- *   registered with JSONRPCBridge.registerClass()
- * @param _args The arguments the constructor takes
- * @return the new object if sync, the request id if async.
- */
-JSONRpcClient.prototype.createObject = function ()
-{
-  var args = [],
-      callback = null,
-      constructorName,
-      _args,
-      req;
-  for(var i=0;i<arguments.length;i++)
-  {
-    args.push(arguments[i]);
-  }
-  if(typeof args[0] == "function")
-  {
-    callback = args.shift();
-  }
-  constructorName=args[0]+".constructor";
-  _args=args[1];      
-        
-  req = this._makeRequest.call(this, constructorName, _args, callback);
-  if(callback === null) 
-  {
-    return this._sendRequest.call(this, req);
-  }
-  else 
-  {
-    JSONRpcClient.async_requests.push(req);
-    JSONRpcClient.kick_async();
-    return req.requestId;
-  }
-};
-
-/**
  * This is used to add a list of methods to this.
  * @param methodNames a list containing the names of the methods to add
  * @param javaClass If here it signifies that the function is part of the class
@@ -563,21 +526,25 @@ JSONRpcClient.prototype.createObject = function ()
  */
 JSONRpcClient.prototype._addMethods = function (methodNames,javaClass)
 {
+  var name,
+      obj,
+      names,
+      n,
+      method;
   //Aha! It is a class, so create a entry for it.
   //This shouldn't get called twice on the same class so we can happily
   //overwrite it
   if(javaClass){
     JSONRpcClient.knownClasses[javaClass]={};
   }
-  var name;
+  
   for (var i = 0; i < methodNames.length; i++)
   {
-
-    var obj = this;
-    var names = methodNames[i].split(".");
+    obj = this;
+    names = methodNames[i].split(".");
     //In the case of system.listMethods create a new object in this called
     //system and and the listMethod function to that object.
-    for (var n = 0; n < names.length - 1; n++)
+    for (n = 0; n < names.length - 1; n++)
     {
       name = names[n];
       if (obj[name])
@@ -596,7 +563,7 @@ JSONRpcClient.prototype._addMethods = function (methodNames,javaClass)
     if (!obj[name])
     {
       //Then create the method
-      var method = this._createMethod(methodNames[i]);
+      method = this._createMethod(methodNames[i]);
       //Bind it to the current this
       obj[name]=JSONRpcClient.bind(method,this);
       //And if this is adding it to an object, then
@@ -610,11 +577,14 @@ JSONRpcClient.prototype._addMethods = function (methodNames,javaClass)
 
 JSONRpcClient._getCharsetFromHeaders = function (http)
 {
+  var contentType,
+      parts,
+      i;
   try
   {
-    var contentType = http.getResponseHeader("Content-type");
-    var parts = contentType.split(/\s*;\s*/);
-    for (var i = 0; i < parts.length; i++)
+    contentType = http.getResponseHeader("Content-type");
+    parts = contentType.split(/\s*;\s*/);
+    for (i = 0; i < parts.length; i++)
     {
       if (parts[i].substring(0, 8) == "charset=")
       {
@@ -637,11 +607,13 @@ JSONRpcClient.num_req_active = 0;
 
 JSONRpcClient._async_handler = function ()
 {
+  var res,
+      req;
   JSONRpcClient.async_timeout = null;
 
   while (JSONRpcClient.async_responses.length > 0)
   {
-    var res = JSONRpcClient.async_responses.shift();
+    res = JSONRpcClient.async_responses.shift();
     if (res.canceled)
     {
       continue;
@@ -663,7 +635,7 @@ JSONRpcClient._async_handler = function ()
   while (JSONRpcClient.async_requests.length > 0 &&
          JSONRpcClient.num_req_active < JSONRpcClient.max_req_active)
   {
-    var req = JSONRpcClient.async_requests.shift();
+    req = JSONRpcClient.async_requests.shift();
     if (req.canceled)
     {
       continue;
@@ -740,7 +712,7 @@ JSONRpcClient.prototype._makeRequest = function (methodName, args, cb)
   }
   if (JSONRpcClient.profile_async)
   {
-    req.profile = { "submit": new Date() };
+    req.profile = {submit: new Date() };
   }
 
   // use p as an alias for params to save space in the fixups
@@ -799,7 +771,7 @@ JSONRpcClient.prototype._sendRequest = function (req)
         http.onreadystatechange = function ()
         {
         };
-        res = { "cb": req.cb, "result": null, "ex": null};
+        res = {cb: req.cb, result: null, ex: null};
         if (req.profile)
         {
           res.profile = req.profile;
@@ -883,9 +855,9 @@ JSONRpcClient.prototype._handleResponse = function (http)
     }
     for (var i = 0,j = fixups.length; i < j; i++)
     {
-      applyFixup(obj,fixups[i][0],findOriginal(obj,fixups[i][1]))
+      applyFixup(obj,fixups[i][0],findOriginal(obj,fixups[i][1]));
     }
-  };
+  }
 
   /* Get the charset */
   if (!this.charset)
