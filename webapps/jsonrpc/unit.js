@@ -234,7 +234,9 @@ function createShowTestsTable()
 
   //create the header
 
-  thead = table.createTHead();
+  thead = $n("thead");
+  table.appendChild(thead);  
+  
   headerRow = $n("tr");
   thead.appendChild(headerRow);
   for(i=0;i<widths.length;i++)
@@ -385,7 +387,9 @@ function createDisplayTestSetTable(name)
    table.appendChild(cell);
   }
   
-  thead = table.createTHead();
+
+  thead = $n("thead");
+  table.appendChild(thead);  
   
   row = $n("tr");
   thead.appendChild(row);
