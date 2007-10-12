@@ -43,7 +43,7 @@
     <a href="test.js.txt">test.js</a></li>
 </ul>
 
-<h3><a href="unit.jsp">Unit Tests</a></h3>
+<h3><a href="unit.jsp">Unit Tests</a> | <a href="unit-min.jsp">Unit Tests (for &quot;minimized version&quot; jsonrpc-min.js)</a></h3>
 
 <p>Performs unit testing and profiling with both asynchronous and synchronous
   calls.</p>

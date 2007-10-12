@@ -942,7 +942,7 @@ JSONRpcClient.extractCallableReferences = function(self,root)
     if(typeof(root[i])=="object")
     {
       tmp=JSONRpcClient.makeCallableReference(self,root[i]);
-      if(tmp!=null)
+      if(tmp)
       {
         root[i]=tmp;
       }
@@ -955,7 +955,7 @@ JSONRpcClient.extractCallableReferences = function(self,root)
     if(typeof(i)=="object")
     {
       tmp=JSONRpcClient.makeCallableReference(self,i);
-      if(tmp!=null)
+      if(tmp)
       {
         value=root[i];
         delete root[i];

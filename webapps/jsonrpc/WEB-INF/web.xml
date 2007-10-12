@@ -36,16 +36,6 @@
         <url-pattern>/index.html</url-pattern>
     </servlet-mapping>
 
-    <servlet-mapping>
-        <servlet-name>tutorial_jsp</servlet-name>
-        <url-pattern>/tutorial.html</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>manual_jsp</servlet-name>
-        <url-pattern>/manual.html</url-pattern>
-    </servlet-mapping>
-
   <servlet-mapping>
     <servlet-name>JSONRPCServlet</servlet-name>
     <url-pattern>/JSON-RPC</url-pattern>

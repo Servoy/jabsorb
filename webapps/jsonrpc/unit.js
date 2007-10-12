@@ -195,13 +195,10 @@ function expandTestSet(name)
 function collapseTestSet(name)
 {
   unitTests[name].expandIcon.childNodes[0].nodeValue="\u25bc";
-  //this.childNodes[0].src="images/red-expand.gif";
   unitTests[name].expandIcon.title="expand";
   unitTests[name].tableExpanded=false;
   hideTests(name);
 }
-
-var tableWidth=700;
 
 //This shows the summary of all tests
 function createShowTestsTable()
@@ -212,7 +209,6 @@ function createShowTestsTable()
       i,
       unitTestGroupName,
       cell,
-      widths,
       headingTexts,
       tableCellIds,
       tests,
@@ -224,26 +220,22 @@ function createShowTestsTable()
       downArrowDiv,
       div,
       text;
-  widths=["25%","25%","25%","25%"];
+
   headingTexts=["Test Set","Tests","Successes","Failures"];
   tableCellIds=["testName","testCount","successCount","failCount"];
-  
-  
+
   table.className="test_table";
-  table.style.width=tableWidth+"px";
 
   //create the header
-
   thead = $n("thead");
   table.appendChild(thead);  
   
   headerRow = $n("tr");
   thead.appendChild(headerRow);
-  for(i=0;i<widths.length;i++)
+  for(i=0;i<4;i++)
   {
     cell = $n("th");
     cell.className="test_th";
-    cell.width=widths[i];
     cell.appendChild(document.createTextNode(headingTexts[i]));
     headerRow.appendChild(cell);
   }
@@ -263,7 +255,7 @@ function createShowTestsTable()
     summaryRow.className = "tr" + table.tBodies.length%2;
     
     //create each cell in a row
-    for(i=0;i<widths.length;i++)
+    for(i=0;i<4;i++)
     {
       cell = $n("td");
       summaryRow.appendChild(cell);
@@ -293,9 +285,8 @@ function createShowTestsTable()
         
         downArrowDiv = $n("span");
         downArrowDiv.title="expand";
-        downArrowDiv.style.fontSize="12px";
-        downArrowDiv.style.color="navy";
-        downArrowDiv.style.fontWeight="bold";
+        downArrowDiv.className="expandcollapse";
+
         downArrowDiv.appendChild(document.createTextNode("\u25bc"));
         downArrowDiv.down=true;
         downArrowDiv.onclick=
@@ -311,7 +302,7 @@ function createShowTestsTable()
           }          
           this.down=!this.down;
         }.bindAsEventListener(downArrowDiv,unitTestGroupName);
-        downArrowDiv.style.cursor="alias";
+
         unitTests[unitTestGroupName].tableExpanded=false;
         unitTests[unitTestGroupName].expandIcon=downArrowDiv;
         cell.appendChild(downArrowDiv);
@@ -338,9 +329,6 @@ function createShowTestsTable()
 
     cell = $n("td");
     detailedRow.appendChild(cell);
-    cell.style.paddingTop="0px";
-    cell.style.paddingBottom="0px";
-    cell.style.paddingLeft=(innerTableWidthDifference/2)+"px";
     cell.colSpan=4;
     div = $n("div");
     unitTests[unitTestGroupName].viewer = 
@@ -359,45 +347,32 @@ function createDisplayTestSetTable(name)
       thead,
       classes,
       innerTexts,
-      widths,
       i,j,
       row,
       cell,
-      div,text,href,
-      lastColWidth=11,
-      passFailColWidth=34;
-  
+      div,text,href;
+
   table=$n("table");  
   table.className="test_table";
-  table.style.width=(tableWidth-innerTableWidthDifference)+"px";
-  table.style.tableLayout="fixed";
-  widths=[
-     Math.floor((tableWidth-innerTableWidthDifference-lastColWidth-passFailColWidth)/3)+"px",
-     Math.floor((tableWidth-innerTableWidthDifference-lastColWidth-passFailColWidth)/3)+"px",
-     Math.floor((tableWidth-innerTableWidthDifference-lastColWidth-passFailColWidth)/3)+"px",
-     passFailColWidth+"px",
-     lastColWidth+"px"];
-  classes=["code_heading","result_heading","expected_heading","pass_heading",""];
-  innerTexts=["Code","Result","Expected","Pass",""];
+
+  classes=["code_heading","result_heading","expected_heading","pass_heading"];
+  innerTexts=["Code","Result","Expected","Pass"];
   
-  for(i=0;i<widths.length;i++)
+  for(i=0;i<4;i++)
   {
-   cell = $n("col");
-   cell.width=widths[i];
-   table.appendChild(cell);
+    cell = $n("col");
+    table.appendChild(cell);
   }
-  
 
   thead = $n("thead");
   table.appendChild(thead);  
   
   row = $n("tr");
   thead.appendChild(row);
-  for(i=0;i<widths.length;i++)
+  for(i=0;i<4;i++)
   {
     cell = $n("th");
     cell.className="test_th";
-    cell.style.width=widths[i];
     div = $n("div");
     div.className=classes[i];
     text = document.createTextNode(innerTexts[i]);
@@ -407,13 +382,6 @@ function createDisplayTestSetTable(name)
   }
 
   var tBody = $n("tbody");
-  //If there are a great deal of tests, make sure the box doesn't get too big
-  if(unitTests[name].tests.length>12)
-  {
-    tBody.style.overflowY="scroll";
-    tBody.style.overflowX="hidden";
-    tBody.style.height="200px"; 
-  }
   table.appendChild(tBody);
   
   var ids=["code.","result.","expected.","pass."];
@@ -433,11 +401,13 @@ function createDisplayTestSetTable(name)
     clearChildren(row,"childNodes");
     row.className = "tr" + i%2;
     row.id = name + "row."+ i;
+
     for(j=0;j<ids.length;j++)
     {
       cell = $n("td");
       row.appendChild(cell);
       cell.className = "test_td";
+
       //Don't change this line without changing the id in postResults()
       cell.id = name+ids[j]+i;
       if(j===0)
@@ -461,7 +431,7 @@ function createDisplayTestSetTable(name)
 //Show a detail table
 function displayTests(name)
 {
-  unitTests[name].viewer.style.display="block";
+  unitTests[name].viewer.style.display="";
 }
 
 //Hide a detail table
@@ -469,7 +439,6 @@ function hideTests(name)
 {
   unitTests[name].viewer.style.display="none";
 }
-
 
 //Runs all the tests
 function runAllTests()
@@ -513,7 +482,6 @@ function runTestSet(name)
     }
   }
 }
-
 
 //Runs a test and determines which mode (sync/async) to run it in.
 //Also looks after profiling
@@ -574,7 +542,7 @@ function runTestAsync(name,i)
   }
   catch (e)
   {
-    testAsync(name,i)(null,e,false);
+    testAsyncCB(name,i)(null,e,false);
   }
 }
 

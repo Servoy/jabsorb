@@ -11,7 +11,7 @@
   </head>
   <body <%= onLoad != null ? " onLoad=\"" + onLoad + "\"" : "" %>>
 
-<table style="width:760px;border:none;margin-left:auto;margin-right:auto;margin-top:20px;" cellpadding="0" cellspacing="0">
+<table style="width:auto;border:none;margin-left:10px;margin-right:10px;margin-top:20px;" cellpadding="0" cellspacing="0">
   <tr> 
     <td width="20" height="236" valign="top" background="images/shadow-left.gif"><img src="images/shadow-left-top.gif" width="20" height="20"></td>
     <td valign="top">
@@ -23,7 +23,7 @@
     <h1><img align="left" src="images/orb.png" width="55" height="55" hspace="6" vspace="0" alt="ORB"/><%=appName%></h1>
     <div class="tagline">Java to JavaScript Object Request Broker</div>
     <hr>
-    <div class="menu"><a href="http://code.google.com/p/jabsorb/">Home</a> | <%=appName%> (<%=version%>) : <a href="index.html">Demos</a> | <a href="tutorial.html">Tutorial</a> | <a href="manual.html">Manual</a> | <a href="docs/">Javadoc</a> | <a href="CHANGES.txt">Changelog</a></div>
+    <div class="menu"><a href="http://code.google.com/p/jabsorb/">Home</a> | <%=appName%> (<%=version%>) : <a href="index.html">Demos</a> | <a href="http://code.google.com/p/jabsorb/w/list">Documentation</a> | <a href="docs/">Javadoc</a> | <a href="CHANGES.txt">Changelog</a></div>
 
           </td>
         </tr>

@@ -1,6 +1,7 @@
 .test_table {
     width: 100%;
     border:1px solid navy;
+    margin:5px;
     border-collapse:collapse;
     background-color:white;
 }
@@ -27,7 +28,6 @@
 }
 
 .code_heading {
-    width: 260px;
     height: 16px;
 }
 
@@ -37,25 +37,20 @@
 }
 
 .pass_heading {
-    width: 32px;
     height: 16px;
 }
 
 .code_cell {
-    width: 260px;
 }
 
 .result_cell {
-    width: 100%;
 }
 
 .pass_cell {
-    width: 32px;
     color: #009933;
 }
 
 .fail_cell {
-    width: 32px;
     color: #f00;
 }
 
@@ -66,4 +61,12 @@
 .tr1
 {
     background-color:white;
+}
+
+.expandcollapse
+{
+  font-size:12px;
+  font-weight:bold;
+  color:navy;
+  cursor:pointer;
 }
