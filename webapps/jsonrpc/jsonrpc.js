@@ -519,6 +519,47 @@ JSONRpcClient.prototype._createMethod = function (methodName)
 };
 
 /**
+ * Creates a new object from the bridge. A callback may optionally be given as
+ * the first argument to make this an async call.
+ *
+ * @param callback (optional)
+ * @param constructorName The name of the class to create, which should be 
+ *   registered with JSONRPCBridge.registerClass()
+ * @param _args The arguments the constructor takes
+ * @return the new object if sync, the request id if async.
+ */
+JSONRpcClient.prototype.createObject = function ()
+{
+  var args = [],
+      callback = null,
+      constructorName,
+      _args,
+      req;
+  for(var i=0;i<arguments.length;i++)
+  {
+    args.push(arguments[i]);
+  }
+  if(typeof args[0] == "function")
+  {
+    callback = args.shift();
+  }
+  constructorName=args[0]+".constructor";
+  _args=args[1];      
+        
+  req = JSONRpcClient._makeRequest(this, constructorName, _args, 0,callback);
+  if(callback === null) 
+  {
+    return JSONRpcClient._sendRequest(this, req);
+  }
+  else 
+  {
+    JSONRpcClient.async_requests.push(req);
+    JSONRpcClient.kick_async();
+    return req.requestId;
+  }
+};
+
+/**
  * This is used to add a list of methods to this.
  * @param methodNames a list containing the names of the methods to add
  * @param javaClass If here it signifies that the function is part of the class
