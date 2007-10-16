@@ -26,14 +26,22 @@
 
 package org.jabsorb.reflect;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import org.jabsorb.JSONRPCBridge;
+import org.jabsorb.JSONRPCResult;
 import org.jabsorb.localarg.LocalArgController;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,6 +102,36 @@ public class ClassAnalyzer
     classCache = new HashMap();
   }
 
+  /*
+  public static void main(String args[])
+  {
+    JSONRPCBridge b = new JSONRPCBridge();
+    try
+    {
+      // b.registerCallableReference(org.jabsorb.test.ConstructorTest.class);
+      // b.registerClass("ConstructorTest",org.jabsorb.test.ConstructorTest.class);
+
+    //  JSONRPCResult r = b.call(null, new org.json.JSONObject(
+      //    "{id:6,method:\"ConstructorTest.constructor\",params:[\"132\"]}"));
+      b.registerObject("test", new org.jabsorb.test.Test());
+//      b.registerReference(org.jabsorb.test.Test.RefTest.class);
+//      b.registerCallableReference(org.jabsorb.test.Test.CallableRefTest.class);
+
+//      JSONRPCResult r = b.call(null,new org.json.JSONObject("{id:8,method:\"test.echoRawJSON\",params:[\"News Aggregator\", {serverURL: \"JSON-RPC\", user: null, pass: null, objectID:524374102, javaClass: \"com.hiveshare.data.Object\", JSONRPCType:\"CallableReference\", charset: \"utf-8\"}],fixups:[]}"));
+  //    JSONRPCResult r = b.call(null,new org.json.JSONObject("{\"id\":2,\"method\":\"test.getCallableRefVector\",\"params\":[],\"fixups\":[]}"));
+      JSONRPCResult r = b.call(null,new org.json.JSONObject("{id:2,method:\"test.throwException\",params:[],fixups:[]}"));
+      JSONObject o = (JSONObject) r.getResult();
+      System.out.println(o.toString());
+      System.out.println(r.toString());
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+  }
+
+  // */
+
   /**
    * Analyze a class and create a ClassData object containing all of the public
    * methods (both static and non-static) in the class.
@@ -106,90 +144,103 @@ public class ClassAnalyzer
   private static ClassData analyzeClass(Class clazz)
   {
     log.info("analyzing " + clazz.getName());
-    Method methods[] = clazz.getMethods();
-    ClassData cd = new ClassData();
-    cd.clazz = clazz;
-
-    // Create temporary method map
-    HashMap staticMethodMap = new HashMap();
-    HashMap methodMap = new HashMap();
-    for (int i = 0; i < methods.length; i++)
+    final List constructors = new ArrayList(Arrays.asList(clazz
+        .getConstructors()));
+    final List memberMethods = new ArrayList();
+    final List staticMethods = new ArrayList();
     {
-      Method method = methods[i];
-      if (method.getDeclaringClass() == Object.class)
+      final Method methods[] = clazz.getMethods();
+      for (int i = 0; i < methods.length; i++)
       {
-        continue;
-      }
-      int mod = methods[i].getModifiers();
-      if (!Modifier.isPublic(mod))
-      {
-        continue;
-      }
-      Class param[] = method.getParameterTypes();
-
-      // don't count locally resolved args
-      int argCount = 0;
-      for (int n = 0; n < param.length; n++)
-      {
-        if (LocalArgController.isLocalArg(param[n]))
+        if (Modifier.isStatic(methods[i].getModifiers()))
         {
-          continue;
+          staticMethods.add(methods[i]);
         }
-        argCount++;
+        else
+        {
+          memberMethods.add(methods[i]);
+        }
       }
+    }
 
-      MethodKey mk = new MethodKey(method.getName(), argCount);
-      ArrayList marr = (ArrayList) methodMap.get(mk);
+    ClassData cd = new ClassData(clazz, createMap(memberMethods, false),
+        createMap(staticMethods, false), createMap(constructors, true));
+
+    return cd;
+  }
+
+  /**
+   * Creates a mapping of AccessibleObjectKey to a Collection which contains all
+   * the AccessibleObjects which have the same amount of arguments. This takes
+   * into account LocalArgResolvers, discounting them from the argument size.
+   * 
+   * @param accessibleObjects The objects to put into the map
+   * @param isConstructor Whether the objects are methods or constructors
+   * @return Map of AccessibleObjectKey to a Collection of AccessibleObjects
+   */
+  private static Map createMap(Collection accessibleObjects,
+      boolean isConstructor)
+  {
+    final Map map = new HashMap();
+    for (final Iterator i = accessibleObjects.iterator(); i.hasNext();)
+    {
+      final Member accessibleObject = (Member) i.next();
+
+      if (!Modifier.isPublic(accessibleObject.getModifiers()))
+        continue;
+
+      final AccessibleObjectKey accessibleObjectKey;
+      {
+        // argCount determines the key
+        int argCount = 0;
+        {
+          // The parameters determine the size of argCount
+          final Class[] param;
+          if (isConstructor)
+          {
+            param = ((Constructor) accessibleObject).getParameterTypes();
+          }
+          else
+          {
+            // If it is a method and the method was defined in Object(), skip
+            // it.
+            if (((Method) accessibleObject).getDeclaringClass() == Object.class)
+            {
+              continue;
+            }
+            param = ((Method) accessibleObject).getParameterTypes();
+          }
+          // don't count locally resolved args
+          for (int n = 0; n < param.length; n++)
+          {
+            if (LocalArgController.isLocalArg(param[n]))
+              continue;
+            argCount++;
+          }
+
+          if (isConstructor)
+          {
+            // Since there is only one constructor name, we don't need to put a
+            // name in.
+            accessibleObjectKey = new AccessibleObjectKey(
+                JSONRPCBridge.CONSTRUCTOR_FLAG, argCount);
+          }
+          else
+          {
+            // The key is the methods name and arg count
+            accessibleObjectKey = new AccessibleObjectKey(
+                ((Method) accessibleObject).getName(), argCount);
+          }
+        }
+      }
+      Collection marr = (ArrayList) map.get(accessibleObjectKey);
       if (marr == null)
       {
         marr = new ArrayList();
-        methodMap.put(mk, marr);
+        map.put(accessibleObjectKey, marr);
       }
-      marr.add(method);
-      if (Modifier.isStatic(mod))
-      {
-        marr = (ArrayList) staticMethodMap.get(mk);
-        if (marr == null)
-        {
-          marr = new ArrayList();
-          staticMethodMap.put(mk, marr);
-        }
-        marr.add(method);
-      }
+      marr.add(accessibleObject);
     }
-    cd.methodMap = new HashMap();
-    cd.staticMethodMap = new HashMap();
-    // Convert ArrayLists to arrays
-    Iterator i = methodMap.entrySet().iterator();
-    while (i.hasNext())
-    {
-      Map.Entry entry = (Map.Entry) i.next();
-      MethodKey mk = (MethodKey) entry.getKey();
-      ArrayList marr = (ArrayList) entry.getValue();
-      if (marr.size() == 1)
-      {
-        cd.methodMap.put(mk, marr.get(0));
-      }
-      else
-      {
-        cd.methodMap.put(mk, marr.toArray(new Method[0]));
-      }
-    }
-    i = staticMethodMap.entrySet().iterator();
-    while (i.hasNext())
-    {
-      Map.Entry entry = (Map.Entry) i.next();
-      MethodKey mk = (MethodKey) entry.getKey();
-      ArrayList marr = (ArrayList) entry.getValue();
-      if (marr.size() == 1)
-      {
-        cd.staticMethodMap.put(mk, marr.get(0));
-      }
-      else
-      {
-        cd.staticMethodMap.put(mk, marr.toArray(new Method[0]));
-      }
-    }
-    return cd;
+    return map;
   }
 }

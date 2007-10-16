@@ -109,10 +109,7 @@ public class ReferenceSerializer extends AbstractSerializer
         log.debug("marshalling reference to object " + identity + " of class "
             + clazz.getName());
       }
-      synchronized (bridge.getBridgeState())
-      {
-        bridge.getReferenceMap().put(identity, o);
-      }
+      bridge.addReference(o);
       JSONObject jso = new JSONObject();
       try
       {
@@ -134,6 +131,8 @@ public class ReferenceSerializer extends AbstractSerializer
             + " of class " + clazz.getName());
       }
       bridge.registerObject(identity, o);
+      bridge.addReference(o);
+      
       JSONObject jso = new JSONObject();
       try
       {
@@ -174,11 +173,11 @@ public class ReferenceSerializer extends AbstractSerializer
     {
       throw new UnmarshallException(e.getMessage());
     }
-    if (json_type != null && json_type.equals("Reference"))
+    if (json_type != null)
     {
-      synchronized (bridge.getBridgeState())
+      if((json_type.equals("Reference"))||(json_type.equals("CallableReference")))
       {
-        ref = bridge.getReferenceMap().get(new Integer(object_id));
+        ref = bridge.getReference(object_id);
       }
     }
     state.setSerialized(o, ref);

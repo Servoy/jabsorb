@@ -30,7 +30,7 @@ package org.jabsorb.reflect;
  * A key for identifying a method and the number of arguments to that method
  * uniquely.
  */
-public class MethodKey
+public class AccessibleObjectKey
 {
   /**
    * The name of the method
@@ -49,19 +49,23 @@ public class MethodKey
    * @param methodName Method name.
    * @param numArgs The number of arguments the method takes.
    */
-  public MethodKey(String methodName, int numArgs)
+  public AccessibleObjectKey(String methodName, int numArgs)
   {
     this.methodName = methodName;
     this.numArgs = numArgs;
   }
 
+  public String toString()
+  {
+    return methodName+"("+numArgs+")";
+  }
   public boolean equals(Object o)
   {
-    if (!(o instanceof MethodKey))
+    if (!(o instanceof AccessibleObjectKey))
     {
       return false;
     }
-    return (methodName.equals(((MethodKey) o).methodName) && numArgs == ((MethodKey) o).numArgs);
+    return (methodName.equals(((AccessibleObjectKey) o).methodName) && numArgs == ((AccessibleObjectKey) o).numArgs);
   }
 
   /**

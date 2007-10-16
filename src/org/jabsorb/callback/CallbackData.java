@@ -36,8 +36,6 @@ public class CallbackData implements Serializable
 {
   /**
    * Generated version id.
-   * 
-   * TODO: Should this be a more randomised number?
    */
   private final static long serialVersionUID = 2;
 

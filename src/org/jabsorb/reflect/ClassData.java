@@ -27,6 +27,7 @@
 package org.jabsorb.reflect;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Information on the public methods of a class as reflected from the Class
@@ -38,19 +39,47 @@ public class ClassData
   /**
    * The class that this ClassData maps.
    */
-  protected Class clazz;
+  private final Class clazz;
 
   /**
-   * Map of public instance methods. Key is a MethodKey object, value is either
-   * a Method or a Method[].
+   * Map of public instance methods. Key is a AccessibleObjectKey object, value
+   * is an List of Method.
    */
-  protected HashMap methodMap;
+  private final Map methodMap;
 
   /**
-   * Map of public static methods. Key is a MethodKey object, value is either a
-   * Method or a Method[].
+   * Map of public static methods. Key is a AccessibleObjectKey object, value is
+   * an List of Method.
    */
-  protected HashMap staticMethodMap;
+  private final Map staticMethodMap;
+
+  /**
+   * Map of public constructors. Key is a AccessibleObjectKey object, value is
+   * an List of Constructor.
+   */
+  private final Map constructorMap;
+
+  /**
+   * Creates a new ClassData
+   * 
+   * @param clazz The class that this ClassData maps.
+   * @param methodMap Map of public instance methods. Static methods do not go
+   *          here. Key is a AccessibleObjectKey object, value is an List of
+   *          Method.
+   * @param staticMethodMap Map of public static methods. Key is a
+   *          AccessibleObjectKey object, value is an List of Method.
+   * @param constructorMap Map of public constructors. Key is a
+   *          AccessibleObjectKey object, value is an List of Constructor.
+   */
+  public ClassData(Class clazz, Map methodMap, Map staticMethodMap,
+      Map constructorMap)
+  {
+    this.clazz = clazz;
+    this.methodMap = new HashMap(methodMap);
+    this.methodMap.putAll(staticMethodMap);
+    this.staticMethodMap = new HashMap(staticMethodMap);
+    this.constructorMap = new HashMap(constructorMap);
+  }
 
   /**
    * Get the class that this ClassData maps.
@@ -63,28 +92,40 @@ public class ClassData
   }
 
   /**
-   * Get the Map of public non-static methods that can be invoked for the class.
-   * The keys of the Map will be MethodKey objects and the values will be either
-   * a Method object, or an array of Method objects, if there is more than one
-   * possible method that can be invoked matching the MethodKey.
+   * Get the Map of public constructors that can be invoked for the class. The
+   * key of the Map is a AccessibleObjectKey object and the value is a list of
+   * Constructor objects.
+   * 
+   * @return Map of static methods that can be invoked for the class.
+   */
+  public Map getConstructorMap()
+  {
+    return constructorMap;
+  }
+
+  /**
+   * Get the Map of public methods (both static and non-static) that can be
+   * invoked for the class. This is *NOT* just the method map that was passed in
+   * the constructor, but is concatenated with the static methods as well. The
+   * keys of the Map will be AccessibleObjectKey objects and the values will be
+   * a List of Method objects.
    * 
    * @return Map of public instance methods which can be invoked for the class.
    *         this ClassData.
    */
-  public HashMap getMethodMap()
+  public Map getMethodMap()
   {
     return methodMap;
   }
 
   /**
    * Get the Map of public static methods that can be invoked for the class. The
-   * key of the Map is a MethodKey object and the value is either a Method
-   * object, or an array of Method objects (if there is more than one possible
-   * method that can be invoked matching the MethodKey.)
+   * key of the Map is a AccessibleObjectKey object and the value is a list of
+   * Method objects.
    * 
    * @return Map of static methods that can be invoked for the class.
    */
-  public HashMap getStaticMethodMap()
+  public Map getStaticMethodMap()
   {
     return staticMethodMap;
   }

@@ -58,11 +58,17 @@ public class JSONRPCResult
   public final static int CODE_ERR_PARSE = 590;
 
   /**
+   * Denotes (when calling a constructor) that no method was found with the
+   * given name/arguments.
+   */
+  public final static int CODE_ERR_NOCONSTRUCTOR = 594;
+  
+  /**
    * Denotes (when using a callable reference) that no method was found with the
    * given name.
    */
   public final static int CODE_ERR_NOMETHOD = 591;
-
+ 
   /**
    * Denotes that an error occured while unmarshalling the request.
    */
@@ -82,7 +88,12 @@ public class JSONRPCResult
    * The error method shown when an error occured while parsing the request.
    */
   public final static String MSG_ERR_PARSE = "couldn't parse request arguments";
-
+  
+  /**
+   * The error method shown when no constructor was found with the given name.
+   */
+  public static final String MSG_ERR_NOCONSTRUCTOR = "constructor not found";
+  
   /**
    * The error method shown when no method was found with the given name.
    */

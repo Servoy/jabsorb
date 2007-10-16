@@ -27,7 +27,7 @@
 package org.jabsorb.callback;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
+import java.lang.reflect.AccessibleObject;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -43,7 +43,7 @@ public class CallbackController implements Serializable
   /**
    * Generated version id.
    */
-  private final static long serialVersionUID = 2;
+  private final static long serialVersionUID = 3;
 
   /**
    * The log used for this class.
@@ -62,6 +62,99 @@ public class CallbackController implements Serializable
   public CallbackController()
   {
     callbackSet = new HashSet();
+  }
+
+  /**
+   * Calls the 'invocation Error' callback handler.
+   * 
+   * @param context The transport context (the HttpServletRequest object in the
+   *          case of the HTTP transport).
+   * @param instance The object instance or null if it is a static method.
+   * @param accessibleObject Method/constructor that failed the invocation.
+   * @param error Error resulting from the invocation.
+   */
+  public void errorCallback(Object context, Object instance,
+      AccessibleObject accessibleObject, Throwable error)
+  {
+    synchronized (callbackSet)
+    {
+      Iterator i = callbackSet.iterator();
+      while (i.hasNext())
+      {
+        CallbackData cbdata = (CallbackData) i.next();
+        if (cbdata.understands(context)
+            && (cbdata.getCallback() instanceof ErrorInvocationCallback))
+        {
+          ErrorInvocationCallback ecb = (ErrorInvocationCallback) cbdata
+              .getCallback();
+          try
+          {
+            ecb.invocationError(context, instance, accessibleObject, error);
+          }
+          catch (Throwable th)
+          {
+            // Ignore all errors in callback, don't want
+            // event listener to bring everything to its knees.
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Calls the 'postInvoke' callback handler.
+   * 
+   * @param context The transport context (the HttpServletRequest object in the
+   *          case of the HTTP transport).
+   * @param instance The object instance or null if it is a static method.
+   * @param accessibleObject The method/constructor that was just called.
+   * @param result The object that was returned.
+   * @throws Exception if postInvoke fails
+   */
+  public void postInvokeCallback(Object context, Object instance,
+      AccessibleObject accessibleObject, Object result) throws Exception
+  {
+    synchronized (callbackSet)
+    {
+      Iterator i = callbackSet.iterator();
+      while (i.hasNext())
+      {
+        CallbackData cbdata = (CallbackData) i.next();
+        if (cbdata.understands(context))
+        {
+          cbdata.getCallback().postInvoke(context, instance, accessibleObject,
+              result);
+        }
+      }
+    }
+  }
+
+  /**
+   * Calls the 'preInvoke' callback handler.
+   * 
+   * @param context The transport context (the HttpServletRequest object in the
+   *          case of the HTTP transport).
+   * @param instance The object instance or null if it is a static method.
+   * @param accessibleObject The method/constructor that is about to be called.
+   * @param arguments The argements to be passed to the method.
+   * @throws Exception If preInvoke fails
+   */
+  public void preInvokeCallback(Object context, Object instance,
+      AccessibleObject accessibleObject, Object arguments[]) throws Exception
+  {
+    synchronized (callbackSet)
+    {
+      Iterator i = callbackSet.iterator();
+      while (i.hasNext())
+      {
+        CallbackData cbdata = (CallbackData) i.next();
+        if (cbdata.understands(context))
+        {
+          cbdata.getCallback().preInvoke(context, instance, accessibleObject,
+              arguments);
+        }
+      }
+    }
   }
 
   /**
@@ -106,97 +199,6 @@ public class CallbackController implements Serializable
     {
       log.debug("unregistered callback " + callback.getClass().getName()
           + " with context " + contextInterface.getName());
-    }
-  }
-
-  /**
-   * Calls the 'preInvoke' callback handler. 
-   * 
-   * @param context The transport context (the HttpServletRequest object in the
-   *          case of the HTTP transport).
-   * @param instance The object instance or null if it is a static method.
-   * @param method The method that is about to be called.
-   * @param arguments The argements to be passed to the method.
-   * @throws Exception If preInvoke fails
-   */
-  public void preInvokeCallback(Object context, Object instance, Method method,
-      Object arguments[]) throws Exception
-  {
-    synchronized (callbackSet)
-    {
-      Iterator i = callbackSet.iterator();
-      while (i.hasNext())
-      {
-        CallbackData cbdata = (CallbackData) i.next();
-        if (cbdata.understands(context))
-        {
-          cbdata.getCallback().preInvoke(context, instance, method, arguments);
-        }
-      }
-    }
-  }
-
-  /**
-   * Calls the 'postInvoke' callback handler. 
-   * 
-   * @param context The transport context (the HttpServletRequest object in the
-   *          case of the HTTP transport).
-   * @param instance The object instance or null if it is a static method.
-   * @param method The method that was just called.
-   * @param result The object that was returned.
-   * @throws Exception if postInvoke fails
-   */
-  public void postInvokeCallback(Object context, Object instance,
-      Method method, Object result) throws Exception
-  {
-    synchronized (callbackSet)
-    {
-      Iterator i = callbackSet.iterator();
-      while (i.hasNext())
-      {
-        CallbackData cbdata = (CallbackData) i.next();
-        if (cbdata.understands(context))
-        {
-          cbdata.getCallback().postInvoke(context, instance, method, result);
-        }
-      }
-    }
-  }
-
-  /**
-   * Calls the 'invocation Error' callback handler.
-   * 
-   * @param context The transport context (the HttpServletRequest object in the
-   *          case of the HTTP transport).
-   * @param instance The object instance or null if it is a static method.
-   * @param method Method that failed the invocation.
-   * @param error Error resulting from the invocation.
-   */
-  public void errorCallback(Object context, Object instance, Method method,
-      Throwable error)
-  {
-    synchronized (callbackSet)
-    {
-      Iterator i = callbackSet.iterator();
-      while (i.hasNext())
-      {
-        CallbackData cbdata = (CallbackData) i.next();
-        if (cbdata.understands(context)
-            && (cbdata.getCallback() instanceof ErrorInvocationCallback))
-        {
-          ErrorInvocationCallback ecb = (ErrorInvocationCallback) cbdata
-              .getCallback();
-          try
-          {
-            ecb.invocationError(context, instance, method, error);
-          }
-          catch (Throwable th)
-          {
-            // Ignore all errors in callback, don't want
-            // event listener to bring everything to its knees.
-          }
-        }
-      }
     }
   }
 

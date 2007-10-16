@@ -88,8 +88,19 @@ public class StringSerializer extends AbstractSerializer
   public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
       Object jso) throws UnmarshallException
   {
-    state.setSerialized(jso, ObjectMatch.OKAY);
-    return ObjectMatch.OKAY;
+    
+    Class classes[] = jso.getClass().getClasses();
+    for(int i=0;i<classes.length;i++)
+    {
+      if(classes[i].equals(String.class))
+      {
+        state.setSerialized(jso, ObjectMatch.OKAY);
+        return ObjectMatch.OKAY;
+      }
+    }
+    
+    state.setSerialized(jso, ObjectMatch.SIMILAR);
+    return ObjectMatch.SIMILAR;
   }
 
   public Object unmarshall(SerializerState state, Class clazz, Object jso)

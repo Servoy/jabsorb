@@ -80,11 +80,22 @@ public class PrimitiveSerializer extends AbstractSerializer
     // TODO: is there a better way of doing this instead of all the if elses?
     if (int.class.equals(clazz))
     {
+      //TODO: Should something be done about these early returns?
       if (jso instanceof String)
       {
         return new Integer((String) jso);
       }
-      return new Integer(((Number) jso).intValue());
+      //Handle it if it is out of the range of the number
+      Number n = (Number) jso;
+      if(n.longValue()!=n.intValue())
+      {
+        throw new NumberFormatException("number is too large for an int");
+      }
+      if(n.floatValue()!=n.intValue())
+      {
+        throw new NumberFormatException("number is not an integer");
+      }
+      return new Integer(n.intValue());
     }
     else if (long.class.equals(clazz))
     {
@@ -92,7 +103,12 @@ public class PrimitiveSerializer extends AbstractSerializer
       {
         return new Long((String) jso);
       }
-      return new Long(((Number) jso).longValue());
+      Number n = (Number) jso;
+      if(n.floatValue()!=n.longValue())
+      {
+        throw new NumberFormatException("number is not an integer");
+      }
+      return new Long(n.longValue());
     }
     else if (short.class.equals(clazz))
     {
@@ -100,7 +116,18 @@ public class PrimitiveSerializer extends AbstractSerializer
       {
         return new Short((String) jso);
       }
-      return new Short(((Number) jso).shortValue());
+      //Handle it if it is out of the range of the number
+      Number n = (Number) jso;
+      if(n.longValue()!=n.shortValue())
+      {
+        //TODO: is appropriate to throw?
+        throw new NumberFormatException("number is too large for an short");
+      }
+      if(n.floatValue()!=n.shortValue())
+      {
+        throw new NumberFormatException("number is not an integer");
+      }
+      return new Short(n.shortValue());
     }
     else if (byte.class.equals(clazz))
     {
@@ -108,13 +135,29 @@ public class PrimitiveSerializer extends AbstractSerializer
       {
         return new Byte((String) jso);
       }
-      return new Byte(((Number) jso).byteValue());
+      //Handle it if it is out of the range of the number
+      Number n = (Number) jso;
+      if(n.longValue()!=n.byteValue())
+      {
+        //TODO: is appropriate to throw?
+        throw new NumberFormatException("number is too large for an short");
+      }
+      if(n.floatValue()!=n.byteValue())
+      {
+        throw new NumberFormatException("number is not an integer");
+      }
+      return new Byte(n.byteValue());
     }
     else if (float.class.equals(clazz))
     {
       if (jso instanceof String)
       {
         return new Float((String) jso);
+      }
+      Number n = (Number) jso;
+      if((n.floatValue()>Float.MAX_VALUE)||(n.floatValue()<-Float.MAX_VALUE))
+      {
+        throw new NumberFormatException("number is too large for a float");
       }
       return new Float(((Number) jso).floatValue());
     }
@@ -126,6 +169,7 @@ public class PrimitiveSerializer extends AbstractSerializer
       }
       return new Double(((Number) jso).doubleValue());
     }
+    
     return null;
   }
 
@@ -134,6 +178,8 @@ public class PrimitiveSerializer extends AbstractSerializer
   {
     try
     {
+      //TODO: This should really check the return instead of just waiting for 
+      //an exception. If it returns null, it should fail!
       toPrimitive(clazz, jso);
     }
     catch (NumberFormatException e)

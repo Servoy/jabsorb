@@ -73,9 +73,32 @@ public class BooleanSerializer extends AbstractSerializer
   public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
       Object jso) throws UnmarshallException
   {
-    ObjectMatch returnValue = ObjectMatch.OKAY;
-    state.setSerialized(jso, returnValue);
-    return ObjectMatch.OKAY;
+    final ObjectMatch toReturn;
+    if (jso instanceof String)
+    {
+      // TODO: Boolean parses stuff as ignoreCase(x)=="true" as true or
+      // anything else as false. I'm pretty sure in this case it this should
+      // only be javascript true or false strings, because otherwise
+      // this will catch string passed to it.
+      if (jso.equals("true") || jso.equals("false"))
+      {
+        toReturn = ObjectMatch.OKAY;
+      }
+      else
+      {
+        toReturn = ObjectMatch.ROUGHLY_SIMILAR;
+      }
+    }
+    else if (jso instanceof Boolean)
+    {
+      toReturn = ObjectMatch.OKAY;
+    }
+    else
+    {
+      toReturn = ObjectMatch.ROUGHLY_SIMILAR;
+    }
+    state.setSerialized(jso, toReturn);
+    return toReturn;
   }
 
   public Object unmarshall(SerializerState state, Class clazz, Object jso)
