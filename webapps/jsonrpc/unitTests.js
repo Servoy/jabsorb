@@ -157,6 +157,12 @@ var unitTests={
   {
     tests:
     [
+      { code: 'jsonrpc.test.getCallableRefVector();',
+        test: '(result.list[0].ping() == "ping pong") && (result.list[1].ping() == "ping pong")'
+      },
+      { code: 'jsonrpc.test.getCallableRefVector();',
+        test: '(result.list[0].ping() == "ping pong") && (result.list[1].ping() == "ping pong")'
+      },
       { code:             'function(){ var callableRef = jsonrpc.test.getCallableRef(); return ({ oid:callableRef.objectID, ping:callableRef.ping(), refoid:callableRef.getRef().objectID, inside:callableRef.whatsInside(callableRef.getRef()) })}()',
         asyncCode: 'var __=function(){ var callableRef = jsonrpc.test.getCallableRef(); cb     ({ oid:callableRef.objectID, ping:callableRef.ping(), refoid:callableRef.getRef().objectID, inside:callableRef.whatsInside(callableRef.getRef()) })}()',
         test: 'result.ping == "ping pong" && result.inside =="a secret"'
@@ -164,9 +170,6 @@ var unitTests={
       { code:             'function(){ var callableRef = jsonrpc.test.getCallableRef(); var p = callableRef.ping();return({ping:p})}();',
         asyncCode: 'var __=function(){ var callableRef = jsonrpc.test.getCallableRef(); var p = callableRef.ping();cb    ({ping:p});}();',
         test: 'result.ping == "ping pong"'
-      },
-      { code: 'jsonrpc.test.getCallableRefVector();',
-        test: '(result.list[0].ping() == "ping pong") && (result.list[1].ping() == "ping pong")'
       },
       { code: 'jsonrpc.test.getCallableRefInnerVector();',
         test: '(result.list[0].list[0].ping() == "ping pong") && (result.list[0].list[1].ping() == "ping pong")'
@@ -245,6 +248,68 @@ var unitTests={
     ]
   },
   
+  "Constructors":
+  {  
+    tests:
+    [
+      { code: 'jsonrpc.createObject("ConstructorTest",[])',
+        asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[])',
+        test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "default"'
+      },
+      { code: 'jsonrpc.createObject("ConstructorTest",[1])',
+        asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[1])',
+        test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "int"'
+      },
+      { code: 'jsonrpc.createObject("ConstructorTest",[-1])',
+        asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[-1])',
+        test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "int"'
+      },
+      { code: 'jsonrpc.createObject("ConstructorTest",[5000000000])',
+        asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[5000000000])',
+        test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "long"'
+      },
+      { code: 'jsonrpc.createObject("ConstructorTest",[-5000000000])',
+        asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[-5000000000])',
+        test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "long"'
+      },
+      { code: 'jsonrpc.createObject("ConstructorTest",[3.4E37])',
+        asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[3.4E37])',
+        test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "float"'
+      },      
+      { code: 'jsonrpc.createObject("ConstructorTest",[-3.4E37])',
+        asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[-3.4E37])',
+        test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "float"'
+      },      
+      { code: 'jsonrpc.createObject("ConstructorTest",[3.4E39])',
+        asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[3.4E39])',
+        test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "double"'
+      },      
+      { code: 'jsonrpc.createObject("ConstructorTest",[-3.4E39])',
+        asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[-3.4E39])',
+        test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "double"'
+      },      
+      { code: 'jsonrpc.createObject("ConstructorTest",[true])',
+        asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[true])',
+        test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "boolean"'
+      },      
+      { code: 'jsonrpc.createObject("ConstructorTest",[false])',
+        asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[false])',
+        test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "boolean"'
+      },      
+      { code: 'jsonrpc.createObject("ConstructorTest",["hello world"])',
+        asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",["hello world"])',
+        test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "String"'
+      },
+      { code: 'jsonrpc.createObject("ConstructorTest",[321,"hello world"])',
+        asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[321,"hello world"])',
+        test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "int,String"'
+      },
+      { code: 'jsonrpc.createObject("ConstructorTest",[321,321])',
+        asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[321,321])',
+        test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "int,int"'
+      }
+    ]
+  },
   
   "Dates":
   {  
