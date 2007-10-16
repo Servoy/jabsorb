@@ -219,7 +219,8 @@ function createShowTestsTable()
       href,
       downArrowDiv,
       div,
-      text;
+      text,
+      altClass;
 
   headingTexts=["Test Set","Tests","Successes","Failures"];
   tableCellIds=["testName","testCount","successCount","failCount"];
@@ -252,7 +253,8 @@ function createShowTestsTable()
     tbody.appendChild(summaryRow);
 
     //TODO: do this on the tbody instead
-    summaryRow.className = "tr" + table.tBodies.length%2;
+    altClass = "tr" + table.tBodies.length%2;
+    summaryRow.className = altClass;
     
     //create each cell in a row
     for(i=0;i<4;i++)
@@ -328,6 +330,7 @@ function createShowTestsTable()
     tbody.appendChild(detailedRow);
 
     cell = $n("td");
+    cell.className="innerTests_td " + altClass;
     detailedRow.appendChild(cell);
     cell.colSpan=4;
     div = $n("div");
@@ -353,7 +356,7 @@ function createDisplayTestSetTable(name)
       div,text,href;
 
   table=$n("table");  
-  table.className="test_table";
+  table.className="innerTests_table";
 
   classes=["code_heading","result_heading","expected_heading","pass_heading"];
   innerTexts=["Code","Result","Expected","Pass"];

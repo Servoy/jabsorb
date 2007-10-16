@@ -6,6 +6,18 @@
     background-color:white;
 }
 
+.innerTests_table {
+    width:auto;
+    border:1px solid navy;
+    border-collapse:collapse;
+    background-color:white;
+    margin-left:20px;
+    margin-top:0;
+    margin-bottom:0;
+    margin-right:20px;
+}
+
+
 .test_th {
     border:1px solid navy;
     color: navy;
@@ -25,6 +37,11 @@
     font-size: 10px;
     text-align: left;
     padding: 2px;
+}
+
+.innerTests_td {
+    padding:0;
+    margin-left:20px;
 }
 
 .code_heading {
