@@ -1,5 +1,16 @@
 CHANGES log
 
+2007-10-16 jabsorb 1.2rc release candidate
+
+new features:
+
+* Circular References and Duplicate objects are now resolved and can be passed
+  from client to server and server to client.  This means that the data stream
+  is no longer strict JSON-RPC (although it can still be used that way, if circular
+  references & duplicates are not used.)
+
+* Callable Refs can be anywhere within the object hierarchy (nested callable refs.)
+
 2007-09-20 jabsorb 1.1 release
 
 new features:
