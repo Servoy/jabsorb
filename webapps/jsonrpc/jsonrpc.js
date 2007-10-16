@@ -334,7 +334,8 @@ function JSONRpcClient()
       req,
       _function,
       methods,
-      self;
+      self,
+      name;
 
   //If a call back is being used grab it
   if (typeof arguments[0] == "function")
@@ -346,58 +347,80 @@ function JSONRpcClient()
   this.serverURL = arguments[arg_shift];
   this.user = arguments[arg_shift + 1];
   this.pass = arguments[arg_shift + 2];
-  //A unique identifier which the identity hashcode of the object on the server, if this is a reference type
-  this.objectID = arguments[arg_shift + 3];
-  //The full package+classname of the object
-  this.javaClass = arguments[arg_shift + 4];
-  //The reference type this is: Reference or CallableReference
-  this.JSONRPCType = arguments[arg_shift + 5];
-  //if we have already made one of these classes before
-  if(JSONRpcClient.knownClasses[this.javaClass]&&(this.JSONRPCType=="CallableReference"))
+  this.objectID=0;
+
+  //Make the call to list the methods
+  req = JSONRpcClient._makeRequest(this,"system.listMethods", []);
+  //If a callback was added to the constructor, call it
+  if(this.readyCB) 
   {
-    //Then add all the cached methods to it.
-    for (var name in JSONRpcClient.knownClasses[this.javaClass])
+    self = this;
+    req.cb = function(result, e) 
     {
-      _function = JSONRpcClient.knownClasses[this.javaClass][name];
-      //Change the this to the object that will be calling it
-      //Note: bind is JSONRPC.bind
-      this[name]=JSONRpcClient.bind(_function,this);
-    }
+       if(!e) 
+       {
+         self._addMethods(result);
+       }
+       self.readyCB(result, e);
+    };
   }
-  else
+
+  methods = JSONRpcClient._sendRequest(this,req);
+  if(!this.readyCB)
+  {
+    this._addMethods(methods);
+  }
+}
+
+/**
+ * Creates a new callable proxy (reference). 
+ *
+ * @param objectID The id of the object as determined by the server
+ * @param javaClass The package+classname of the object
+ *
+ * @return a new callable proxy object
+ */
+JSONRpcClient.prototype.createCallableProxy=function(objectID,javaClass)
+{
+  var cp,req,methodNames,methods,name,i;
+  
+  cp = new JSONRPCCallableProxy(objectID,javaClass);
+  //if we have already made one of these classes before
+  if(!JSONRpcClient.knownClasses[javaClass])
   {
     //If we are here, it is either the first time an object of this type has
     //been created or the bridge
     // If it is an object list the methods for it
-    if(this.objectID)
-    {
-      this._addMethods(["listMethods"],this.javaClass);
-      req = this._makeRequest("listMethods", []);
-    }
-    //If it is the bridge get the bridge's methods
-    else
-    {
-      this._addMethods(["system.listMethods"],this.javaClass);
-      req = this._makeRequest("system.listMethods", []);
-    }
-    methods = this._sendRequest(req);
+    req = JSONRpcClient._makeRequest(this,"listMethods", [],objectID);
+    methodNames = JSONRpcClient._sendRequest(this,req);
     //Now add the methods to the object
-    this._addMethods(methods,this.javaClass);
-  }
-  //If a callback was added to the constructor, call it
-  if (this.readyCB)
-  {
-    self = this;
-    req.cb = function (result, e)
+    methods=this._addMethods(methodNames,true);
+    JSONRpcClient.knownClasses[javaClass]={};
+    for(i=0;i<methods.length;i++)
     {
-      if (!e)
-      {
-        self._addMethods(result);
-      }
-      self.readyCB(result, e);
-    };
+      JSONRpcClient.knownClasses[javaClass][methodNames[i]]=methods[i];
+    }
   }
+  //Then add all the cached methods to it.
+  for (name in JSONRpcClient.knownClasses[javaClass])
+  {
+    //Change the this to the object that will be calling it
+    cp[name]=JSONRpcClient.bind(
+      JSONRpcClient.knownClasses[javaClass][name],cp);
+  }
+  return cp;
+};
+
+/* JSONRpcClient constructor */
+
+function JSONRPCCallableProxy()
+{
+    //A unique identifier which the identity hashcode of the object on the server, if this is a reference type
+  this.objectID = arguments[0];
+  //The full package+classname of the object
+  this.javaClass = arguments[1];
 }
+
 //This is a static variable that maps className to a map of functions names to
 //calls, ie Map knownClasses<ClassName,Map<FunctionName,Function>>
 JSONRpcClient.knownClasses = {};
@@ -483,7 +506,7 @@ JSONRpcClient.bind=function(functionName,context)
  * This creates a method that points to the serverMethodCaller and binds it
  * with the correct methodName.
  */
-JSONRpcClient.prototype._createMethod = function (methodName)
+JSONRpcClient._createMethod = function (client,methodName)
 {
   //This function is what the user calls.
   //This function uses a closure on methodName to ensure that the function
@@ -501,10 +524,10 @@ JSONRpcClient.prototype._createMethod = function (methodName)
     {
       callback = args.shift();
     }
-    var req = this._makeRequest.call(this, methodName, args, callback);
+    var req = JSONRpcClient._makeRequest(this, methodName, args, this.objectID,callback);
     if (!callback)
     {
-      return this._sendRequest.call(this, req);
+      return JSONRpcClient._sendRequest(client, req);
     }
     else
     {
@@ -562,22 +585,23 @@ JSONRpcClient.prototype.createObject = function ()
 /**
  * This is used to add a list of methods to this.
  * @param methodNames a list containing the names of the methods to add
- * @param javaClass If here it signifies that the function is part of the class
- *   and should be cached.
+ * @param dontAdd If this is set, methods wont actually added
+ * @return the methods that were created
  */
-JSONRpcClient.prototype._addMethods = function (methodNames,javaClass)
+JSONRpcClient.prototype._addMethods = function (methodNames,dontAdd)
 {
   var name,
       obj,
       names,
       n,
-      method;
+      method,
+      methods=[];
   //Aha! It is a class, so create a entry for it.
   //This shouldn't get called twice on the same class so we can happily
   //overwrite it
-  if(javaClass){
-    JSONRpcClient.knownClasses[javaClass]={};
-  }
+  //if(javaClass){
+  //  JSONRpcClient.knownClasses[javaClass]={};
+  //}
   
   for (var i = 0; i < methodNames.length; i++)
   {
@@ -604,16 +628,15 @@ JSONRpcClient.prototype._addMethods = function (methodNames,javaClass)
     if (!obj[name])
     {
       //Then create the method
-      method = this._createMethod(methodNames[i]);
-      //Bind it to the current this
-      obj[name]=JSONRpcClient.bind(method,this);
-      //And if this is adding it to an object, then
-      //add it to the cache
-      if(javaClass&&(name!="listMethods")){
-        JSONRpcClient.knownClasses[javaClass][name]=method;
+      method = JSONRpcClient._createMethod(this,methodNames[i]);
+      if(!dontAdd)
+      {
+        obj[name]=JSONRpcClient.bind(method,this);
       }
+      methods.push(method);
     }
   }
+  return methods;
 };
 
 JSONRpcClient._getCharsetFromHeaders = function (http)
@@ -681,7 +704,7 @@ JSONRpcClient._async_handler = function ()
     {
       continue;
     }
-    req.client._sendRequest.call(req.client, req);
+    JSONRpcClient._sendRequest(req.client, req);
   }
 };
 
@@ -730,23 +753,24 @@ JSONRpcClient.cancelRequest = function (requestId)
   return false;
 };
 
-JSONRpcClient.prototype._makeRequest = function (methodName, args, cb)
+JSONRpcClient._makeRequest = function (client,methodName, args,objectID,cb)
 {
   var req = {};
-  req.client = this;
+  req.client = client;
   req.requestId = JSONRpcClient.requestId++;
 
-  var obj = "{\"id\":"+req.requestId+",\"method\":";
+  var obj = "{id:"+req.requestId+",method:";
 
-  if (this.objectID)
+  if ((objectID)&&(objectID>0))
   {
-    obj += "\".obj#" + this.objectID + "." + methodName +"\"";
+    obj += "\".obj#" + objectID + "." + methodName +"\"";
   }
   else
   {
     obj += "\"" + methodName + "\"";
   }
 
+//TODO: i dont think this if works
   if (cb)
   {
     req.cb = cb;
@@ -759,7 +783,7 @@ JSONRpcClient.prototype._makeRequest = function (methodName, args, cb)
   // use p as an alias for params to save space in the fixups
   var j= toJSON(args,"p");
 
-  obj += ",\"params\":" + j.json;
+  obj += ",params:" + j.json;
 
   // only attach duplicates/fixups if they are found
   // this is to provide graceful backwards compatibility to the json-rpc spec.
@@ -768,7 +792,7 @@ JSONRpcClient.prototype._makeRequest = function (methodName, args, cb)
     // todo: the call to toJSON here to turn the fixups into json is a bit 
     // inefficient, since there will never be fixups in the fixups... but
     // it saves us from writing some additional code at this point...
-    obj += ",\"fixups\":" + toJSON(j.fixUps).json;  
+    obj += ",fixups:" + toJSON(j.fixUps).json;  
   }
 
   req.data = obj + "}";
@@ -776,9 +800,9 @@ JSONRpcClient.prototype._makeRequest = function (methodName, args, cb)
   return req;
 };
 
-JSONRpcClient.prototype._sendRequest = function (req)
+JSONRpcClient._sendRequest = function (client,req)
 {
-  var http,self;
+  var http;
   if (req.profile)
   {
     req.profile.start = new Date();
@@ -789,7 +813,7 @@ JSONRpcClient.prototype._sendRequest = function (req)
   JSONRpcClient.num_req_active++;
 
   /* Send the request */
-  http.open("POST", this.serverURL, !!req.cb, this.user, this.pass);
+  http.open("POST", client.serverURL, !!req.cb, client.user, client.pass);
 
   /* setRequestHeader is missing in Opera 8 Beta */
   try
@@ -803,7 +827,6 @@ JSONRpcClient.prototype._sendRequest = function (req)
   /* Construct call back if we have one */
   if (req.cb)
   {
-    self = this;
     http.onreadystatechange = function()
     {
       var res;
@@ -824,7 +847,7 @@ JSONRpcClient.prototype._sendRequest = function (req)
         }
         try
         {
-          res.result = self._handleResponse(http);
+          res.result = client._handleResponse(http);
         }
         catch(e)
         {
@@ -856,12 +879,13 @@ JSONRpcClient.prototype._sendRequest = function (req)
   {
     JSONRpcClient.poolReturnHTTPRequest(http);
     JSONRpcClient.num_req_active--;
-    throw new JSONRpcClient.Exception(JSONRpcClient.Exception.CODE_ERR_CLIENT, "Connection failed");
+    throw new JSONRpcClient.Exception(
+      JSONRpcClient.Exception.CODE_ERR_CLIENT, "Connection failed");
   }
 
   if (!req.cb)
   {
-    return this._handleResponse(http);
+    return client._handleResponse(http);
   }
   return null;
 };
@@ -954,7 +978,8 @@ JSONRpcClient.prototype._handleResponse = function (http)
   }
   var r = obj.result;
 
-  // look for circular reference/duplicates fixups and execute them if they are there
+  // look for circular reference/duplicates fixups and execute them 
+  // if they are there
   
   var i,tmp;
     
@@ -963,8 +988,7 @@ JSONRpcClient.prototype._handleResponse = function (http)
   {
     if(r.objectID && r.JSONRPCType == "CallableReference")
     {  
-      return new JSONRpcClient(this.serverURL, this.user, this.pass, r.objectID, 
-        r.javaClass, r.JSONRPCType);
+      return this.createCallableProxy(r.objectID,r.javaClass,r.JSONRPCType);
     }
     r=JSONRpcClient.extractCallableReferences(this,r);
   }
@@ -975,27 +999,27 @@ JSONRpcClient.prototype._handleResponse = function (http)
   return r;
 };
 
-JSONRpcClient.extractCallableReferences = function(self,root)
+JSONRpcClient.extractCallableReferences = function(client,root)
 {
   var i,tmp,value;
   for (i in root)
   {
     if(typeof(root[i])=="object")
     {
-      tmp=JSONRpcClient.makeCallableReference(self,root[i]);
+      tmp=JSONRpcClient.makeCallableReference(client,root[i]);
       if(tmp)
       {
         root[i]=tmp;
       }
       else
       {
-        tmp=JSONRpcClient.extractCallableReferences(self,root[i]);
+        tmp=JSONRpcClient.extractCallableReferences(client,root[i]);
         root[i]=tmp;
       }
     }
     if(typeof(i)=="object")
     {
-      tmp=JSONRpcClient.makeCallableReference(self,i);
+      tmp=JSONRpcClient.makeCallableReference(client,i);
       if(tmp)
       {
         value=root[i];
@@ -1004,7 +1028,7 @@ JSONRpcClient.extractCallableReferences = function(self,root)
       }
       else
       {
-        tmp=JSONRpcClient.extractCallableReferences(self,i);
+        tmp=JSONRpcClient.extractCallableReferences(client,i);
         value=root[i];
         delete root[i];
         root[tmp]=value;
@@ -1014,11 +1038,11 @@ JSONRpcClient.extractCallableReferences = function(self,root)
   return root;
 };
 
-JSONRpcClient.makeCallableReference = function(self,value)
+JSONRpcClient.makeCallableReference = function(client,value)
 {
   if(value && value.objectID && value.javaClass && value.JSONRPCType == "CallableReference")
   {
-    return new JSONRpcClient(self.serverURL, self.user, self.pass, value.objectID,value.javaClass,value.JSONRPCType);
+    return client.createCallableProxy(value.objectID,value.javaClass,value.JSONRPCType);
   }
   return null;
 };
