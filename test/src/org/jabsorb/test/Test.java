@@ -615,7 +615,7 @@ public class Test implements Serializable
 
     private final static long serialVersionUID = 2;
 
-    public void preInvoke(Object context, Object instance, Method m,
+    public void preInvoke(Object context, Object instance, AccessibleObject m,
                           Object arguments[]) throws Exception
     {
       System.out.print("Test.preInvoke");
@@ -631,7 +631,7 @@ public class Test implements Serializable
       System.out.println("");
     }
 
-    public void postInvoke(Object context, Object instance, Method m,
+    public void postInvoke(Object context, Object instance, AccessibleObject m,
                            Object result) throws Exception
     {
     }
