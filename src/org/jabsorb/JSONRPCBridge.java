@@ -1088,7 +1088,7 @@ public class JSONRPCBridge implements Serializable
       }
       else
       {
-        throw new NoSuchMethodException();
+        throw new NoSuchMethodException(JSONRPCResult.MSG_ERR_NOMETHOD);
       }
     }
     // else it is an object, so we can get the member methods
