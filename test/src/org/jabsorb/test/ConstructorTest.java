@@ -1,6 +1,8 @@
 package org.jabsorb.test;
 
-public class ConstructorTest
+import java.io.Serializable;
+
+public class ConstructorTest implements Serializable
 {
   public static void main(String args[])
   {
