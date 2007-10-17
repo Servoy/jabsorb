@@ -102,36 +102,6 @@ public class ClassAnalyzer
     classCache = new HashMap();
   }
 
-  /*
-  public static void main(String args[])
-  {
-    JSONRPCBridge b = new JSONRPCBridge();
-    try
-    {
-      // b.registerCallableReference(org.jabsorb.test.ConstructorTest.class);
-      // b.registerClass("ConstructorTest",org.jabsorb.test.ConstructorTest.class);
-
-    //  JSONRPCResult r = b.call(null, new org.json.JSONObject(
-      //    "{id:6,method:\"ConstructorTest.constructor\",params:[\"132\"]}"));
-      b.registerObject("test", new org.jabsorb.test.Test());
-//      b.registerReference(org.jabsorb.test.Test.RefTest.class);
-//      b.registerCallableReference(org.jabsorb.test.Test.CallableRefTest.class);
-
-//      JSONRPCResult r = b.call(null,new org.json.JSONObject("{id:8,method:\"test.echoRawJSON\",params:[\"News Aggregator\", {serverURL: \"JSON-RPC\", user: null, pass: null, objectID:524374102, javaClass: \"com.hiveshare.data.Object\", JSONRPCType:\"CallableReference\", charset: \"utf-8\"}],fixups:[]}"));
-  //    JSONRPCResult r = b.call(null,new org.json.JSONObject("{\"id\":2,\"method\":\"test.getCallableRefVector\",\"params\":[],\"fixups\":[]}"));
-      JSONRPCResult r = b.call(null,new org.json.JSONObject("{id:2,method:\"test.throwException\",params:[],fixups:[]}"));
-      JSONObject o = (JSONObject) r.getResult();
-      System.out.println(o.toString());
-      System.out.println(r.toString());
-    }
-    catch (Exception e)
-    {
-      e.printStackTrace();
-    }
-  }
-
-  // */
-
   /**
    * Analyze a class and create a ClassData object containing all of the public
    * methods (both static and non-static) in the class.
