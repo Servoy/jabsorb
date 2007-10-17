@@ -566,7 +566,7 @@ JSONRpcClient.prototype.createObject = function ()
   {
     callback = args.shift();
   }
-  constructorName=args[0]+".constructor";
+  constructorName=args[0]+".$constructor";
   _args=args[1];      
         
   req = JSONRpcClient._makeRequest(this, constructorName, _args, 0,callback);

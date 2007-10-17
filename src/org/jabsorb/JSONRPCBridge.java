@@ -177,7 +177,7 @@ public class JSONRPCBridge implements Serializable
   /**
    * The string identifying constuctor calls
    */
-  public static final String CONSTRUCTOR_FLAG = "constructor";
+  public static final String CONSTRUCTOR_FLAG = "$constructor";
 
   /**
    * Unique serialisation id.
@@ -536,7 +536,6 @@ public class JSONRPCBridge implements Serializable
     JSONRPCResult r = AccessibleObjectResolver.invokeAccessibleObject(ao,
         context, arguments, javascriptObject, requestId, ser, cbc,
         exceptionTransformer);
-    System.out.println(r);
     return r;
   }
 
@@ -1070,7 +1069,7 @@ public class JSONRPCBridge implements Serializable
             .getMethodMap());
       }
       // try to get the constructor data
-      else if (methodName.equals("constructor"))
+      else if (methodName.equals(CONSTRUCTOR_FLAG))
       {
         try
         {
@@ -1083,9 +1082,13 @@ public class JSONRPCBridge implements Serializable
         }
       }
       // else it must be static
-      else
+      else if(classData!=null)
       {
         methodMap.putAll(classData.getStaticMethodMap());
+      }
+      else
+      {
+        throw new NoSuchMethodException();
       }
     }
     // else it is an object, so we can get the member methods
