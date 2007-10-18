@@ -380,22 +380,33 @@ function JSONRpcClient()
       this._addMethods(["system.listMethods"],this.javaClass);
       req = this._makeRequest("system.listMethods", []);
     }
-    methods = this._sendRequest(req);
-    //Now add the methods to the object
-    this._addMethods(methods,this.javaClass);
-  }
-  //If a callback was added to the constructor, call it
-  if (this.readyCB)
-  {
-    self = this;
-    req.cb = function (result, e)
+
+    // If the constructor has an async callback we add a wrapper
+    // callback to the request which is called when system.listMethods
+    // completes which then adds the methods and calls the callback.
+    if (this.readyCB)
     {
-      if (!e)
+      self = this;
+      req.cb = function (result, e)
       {
-        self._addMethods(result);
-      }
-      self.readyCB(result, e);
-    };
+        if (!e)
+        {
+          self._addMethods(result);
+        }
+        self.readyCB(result, e);
+      };
+    }
+
+    // Send the request
+    methods = this._sendRequest(req);
+
+    //Now add the methods to the object
+    //Note: we don't do this if an async constructor callback has been used
+    //as this is done in the request's wrapper callback
+    if (!this.readyCB)
+    {
+      this._addMethods(methods,this.javaClass);
+    }
   }
 }
 //This is a static variable that maps className to a map of functions names to
