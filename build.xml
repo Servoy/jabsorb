@@ -36,26 +36,26 @@
     <property file="build.properties" />
 
     <path id="default-classpath" description="This is used for building the jar">
+    	<pathelement path="${tomcat.lib}/servlet-api.jar" />
       <fileset dir="${lib}">
         <include name="*.jar"/>
       </fileset>
       <fileset dir="${lib-ext}">
         <include name="*.jar"/>
       </fileset>
-    	<pathelement path="/usr/share/tomcat-6/lib/servlet-api.jar" />
     </path>
     <path id="jarClasspath" description="This is used for targets that use the jar">
       <path refid="default-classpath" />
       <pathelement path="${app-jar}" />
     </path>
     <path id="tomcatClasspath" description="This is used for targets that use Jasper">
-      <path refid="jarClasspath" />
       <fileset dir="${tomcat.lib}">
         <include name="*.jar"/>
       </fileset>
       <fileset dir="${tomcat.binlib}"> 
         <include name="*.jar"/>
       </fileset>
+      <path refid="jarClasspath" />
     </path>
   </target>
   
