@@ -252,6 +252,15 @@ public class JSONSerializer implements Serializable
   public Object marshall(SerializerState state, Object parent, Object java, Object ref)
       throws MarshallException
   {
+    if (java == null)
+    {
+      if (log.isDebugEnabled())
+      {
+        log.debug("marshall null");
+      }
+      return JSONObject.NULL;
+    }
+
     // check for duplicate objects or circular references
     ProcessedObject p = state.getProcessedObject(java);
 
@@ -295,14 +304,6 @@ public class JSONSerializer implements Serializable
 
     try
     {
-      if (java == null)
-      {
-        if (log.isDebugEnabled())
-        {
-          log.debug("marshall null");
-        }
-        return JSONObject.NULL;
-      }
       if (log.isDebugEnabled())
       {
         log.debug("marshall class " + java.getClass().getName());

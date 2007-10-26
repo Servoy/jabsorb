@@ -341,6 +341,25 @@ public class Test implements Serializable
     return list;
   }
 
+  /**
+   * Return a List that has several Strings and a few nulls.
+   * We want make sure that the null objects don't get fixed up (as duplicates...)
+   * @return a List that has several Strings and a few nulls.
+   */
+  public List listNullTest()
+  {
+    List l = new ArrayList();
+    l.add("one");
+    l.add("two");
+    l.add(null);
+    l.add("my");
+    l.add("shoe");
+    l.add(null);
+    l.add(null);
+    l.add(null);
+    return l;
+  }
+
   // Misc tests
 
   public String[] twice(String string)
