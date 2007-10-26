@@ -143,12 +143,19 @@ var unitTests={
       { code: 'jsonrpc.test.echoRawJSON(dup2)',
         test: 'result.arthur.mother===result.diana && result.diana.son===result.arthur'},
 
+      // the following 3 tests don't really have a good way to test if they pass/fail (need server side support)
+      // but they are in here in the hopes that this server side support will be added soon
+
       //duplicates from the server
       { code: 'jsonrpc.test.aDupDupTest()',
         test: 'true'},
   
       //more duplicates from the server
       { code: 'jsonrpc.test.aDupDupDupTest()',
+        test: 'true'},
+
+      //a list with some nulls in it
+      { code: 'jsonrpc.test.listNullTest()',
         test: 'true'}
     ]
   },
