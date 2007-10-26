@@ -181,6 +181,7 @@
     <delete file="${webapp}/jsonrpc.js.txt" />
     
     <delete file="${webapp}/jsonrpc.js.gz" />
+    <delete file="${webapp}/jsonrpc-min.js" />
     <delete file="${webapp}/jsonrpc-min.js.gz" />
 
     <delete>
@@ -219,6 +220,7 @@
 
 <!--
     <delete file="${webapp}/jsonrpc.js.gz" />
+    <delete file="${webapp}/jsonrpc-min.js" />
     <delete file="${webapp}/jsonrpc-min.js.gz" />
 -->
 
@@ -237,12 +239,22 @@
     <echo message="Done with release-prep-clean!" />
   </target>
 
-  <!-- some web/app servers (such as jetty) automatically scan for gzipped static content with
-       a .gz extension create these .gz versions as part of the build -->
-  <target name="compress-web-content">
+  <!-- create minified and gzipped versions of jsonrpc.js -->
+  <target name="compress-web-content" depends="init">
   
-    <!-- todo: -min version needs to be created as part of build process using the yui compressor 
-         (currently it's manually created) -->
+    <!-- Create minimized version with the yui compressor 
+         see http://www.julienlecomte.net/yuicompressor/ -->
+
+    <echo>Creating jsonrpc-min.js from jsonrpc.js using the YUI compressor.</echo>
+    <java jar="lib-ant/yuicompressor-2.2.5.jar" fork="true" failonerror="true">
+      <arg value="-o"/>
+      <arg value="${webapp}/jsonrpc-min.js"/>
+      <arg value="${webapp}/jsonrpc.js"/>
+    </java>
+
+    <!-- create .gz versions - some web/app servers (such as jetty) can
+         automatically scan for gzipped static content with
+         a .gz extensions -->
 
     <gzip destfile="${webapp}/jsonrpc.js.gz" src="${webapp}/jsonrpc.js"/>
     <gzip destfile="${webapp}/jsonrpc-min.js.gz" src="${webapp}/jsonrpc-min.js"/>
