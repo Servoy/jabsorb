@@ -36,26 +36,26 @@
     <property file="build.properties" />
 
     <path id="default-classpath" description="This is used for building the jar">
+    	<pathelement path="${tomcat.lib}/servlet-api.jar" />
       <fileset dir="${lib}">
         <include name="*.jar"/>
       </fileset>
       <fileset dir="${lib-ext}">
         <include name="*.jar"/>
       </fileset>
-    	<pathelement path="/usr/share/tomcat-6/lib/servlet-api.jar" />
     </path>
     <path id="jarClasspath" description="This is used for targets that use the jar">
       <path refid="default-classpath" />
       <pathelement path="${app-jar}" />
     </path>
     <path id="tomcatClasspath" description="This is used for targets that use Jasper">
-      <path refid="jarClasspath" />
       <fileset dir="${tomcat.lib}">
         <include name="*.jar"/>
       </fileset>
       <fileset dir="${tomcat.binlib}"> 
         <include name="*.jar"/>
       </fileset>
+      <path refid="jarClasspath" />
     </path>
   </target>
   
@@ -69,7 +69,7 @@
     </javac>
   </target>
 
-  <target name="dist" depends="compile,init-build" description="Puts the compiled source into a jar">
+  <target name="dist" depends="compile,compress-web-content,init-build" description="Puts the compiled source into a jar">
     <jar destfile="${app-jar}" basedir="${build}" excludes="*~" />
   </target>
 
@@ -181,6 +181,7 @@
     <delete file="${webapp}/jsonrpc.js.txt" />
     
     <delete file="${webapp}/jsonrpc.js.gz" />
+    <delete file="${webapp}/jsonrpc-min.js" />
     <delete file="${webapp}/jsonrpc-min.js.gz" />
 
     <delete>
@@ -219,6 +220,7 @@
 
 <!--
     <delete file="${webapp}/jsonrpc.js.gz" />
+    <delete file="${webapp}/jsonrpc-min.js" />
     <delete file="${webapp}/jsonrpc-min.js.gz" />
 -->
 
@@ -237,12 +239,22 @@
     <echo message="Done with release-prep-clean!" />
   </target>
 
-  <!-- some web/app servers (such as jetty) automatically scan for gzipped static content with
-       a .gz extension create these .gz versions as part of the build -->
-  <target name="compress-web-content">
+  <!-- create minified and gzipped versions of jsonrpc.js -->
+  <target name="compress-web-content" depends="init">
   
-    <!-- todo: -min version needs to be created as part of build process using the yui compressor 
-         (currently it's manually created) -->
+    <!-- Create minimized version with the yui compressor 
+         see http://www.julienlecomte.net/yuicompressor/ -->
+
+    <echo>Creating jsonrpc-min.js from jsonrpc.js using the YUI compressor.</echo>
+    <java jar="lib-ant/yuicompressor-2.2.5.jar" fork="true" failonerror="true">
+      <arg value="-o"/>
+      <arg value="${webapp}/jsonrpc-min.js"/>
+      <arg value="${webapp}/jsonrpc.js"/>
+    </java>
+
+    <!-- create .gz versions - some web/app servers (such as jetty) can
+         automatically scan for gzipped static content with
+         a .gz extensions -->
 
     <gzip destfile="${webapp}/jsonrpc.js.gz" src="${webapp}/jsonrpc.js"/>
     <gzip destfile="${webapp}/jsonrpc-min.js.gz" src="${webapp}/jsonrpc-min.js"/>
@@ -259,7 +271,7 @@
     <delete file="${release}/${app-prefix}-javadoc.tar.gz"/>
   </target>
 
-  <target name="release" depends="init,cleanrelease,clean,release-src,docs,compress-web-content,test.dist,release-prep-clean"
+  <target name="release" depends="init,cleanrelease,clean,release-src,docs,test.dist,release-prep-clean"
           description="make complete release distributions for unix and windows">
 
     <!-- build FULL release which contains the completely built javadoc, war and .jar
