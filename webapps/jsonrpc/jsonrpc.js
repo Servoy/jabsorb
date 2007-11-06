@@ -90,12 +90,10 @@ function escapeJSONString(s)
  *
  * @param o       the object being converted to json
  *
- * @param rootRef the optional "root" reference name for the object being converted to json
- *                (used in the fixUps) 'result' is used if this is omitted.
- *
- * @return an object, { 'json': jsonString, 'fixUps': fixupString }
+ * @return an object, { 'json': jsonString, 'fixups': fixupString } or
+ *            just { 'json' : jsonString }  if there were no fixups found.
  */
-function toJSON(o, rootRef)
+function toJSON(o)
 {
   // to detect circular references and duplicate objects, each object has a special marker
   // added to it as we go along.
@@ -125,7 +123,7 @@ function toJSON(o, rootRef)
   var markerHead;
 
   // fixups detected as we go along, both for circular references and duplicates
-  var fixUps = [];
+  var fixups = [];
 
   // unlink the whole chain of marker objects that were added to objects when processing
   function removeMarkers()
@@ -139,22 +137,6 @@ function toJSON(o, rootRef)
     }
   }
 
-  // create a compound object reference from a simple list of reference keys
-  function reference(list)
-  {
-    //  duplicate the incoming list, but without the first element
-    var i,
-        copy = [];
-    if (list && list.length)
-    {
-      for (i=1; i<list.length; i++)
-      {
-        copy.push(list[i]);
-      }
-    }
-    return copy;
-  }
-
   // special object used to indicate that an object should be omitted
   // because it was found to be a circular reference or duplicate
   var omitCircRefOrDuplicate = {};
@@ -162,12 +144,25 @@ function toJSON(o, rootRef)
   // temp variable to hold json while processing
   var json;
 
-  // do the work of converting an individual "sub" object to JSON
-  // p is the parent of the object being processed, it will be null if it's the root object
-  // ref is the "reference" of the object in the parent that is being converted
-  // such that p[ref] === o
-  // each object that is processed has a special marker object attached to it, to quickly detect
-  // if it has already been processed, and thus handle circular references and duplicates
+  /**
+   * Do the work of converting an individual "sub" object to JSON.
+   * Each object that is processed has a special marker object attached to it, 
+   * to quickly detect if it has already been processed and thus handle 
+   * circular references and duplicates.
+   *
+   * @param o   object being converted into JSON.
+   * 
+   * @param p   the parent of the object being processed, it should be null or
+   *            undefined if it's the root object.
+   * 
+   * @param ref the "reference" of the object in the parent that is being 
+   *            converted such that p[ref] === o.
+   * 
+   * @return A string containing the JSON representation of the object o, but 
+   *         with duplicates and circular references removed (according to the 
+   *         option settings JSONRpcClient.fixupCircRefs and 
+   *         JSONRpcClient.fixupDuplicates. 
+   */
   function subObjToJSON(o,p,ref)
   {
     var v = [],
@@ -235,8 +230,12 @@ function toJSON(o, rootRef)
           //either save off the circular reference or throw an exception, depending on the client setting
           if (JSONRpcClient.fixupCircRefs)
           {
+            // remove last redundant unshifted reference
+            fixup.shift();
+            original.shift();
+
             //todo: (LATER) if multiple fixups go to the same original, this could be optimized somewhat
-            fixUps.push([reference(fixup), reference(original)]);
+            fixups.push([fixup, original]);
             return omitCircRefOrDuplicate;
           }
           else
@@ -259,7 +258,12 @@ function toJSON(o, rootRef)
               parent = parent[marker].parent;
             }
             //todo: (LATER) if multiple fixups go to the same original, this could be optimized somewhat
-            fixUps.push([reference(fixup), reference(original)]);
+
+            // remove last redundant unshifted reference
+            fixup.shift();
+            original.shift();
+
+            fixups.push([fixup, original]);
             return omitCircRefOrDuplicate;
           }
         }
@@ -319,15 +323,22 @@ function toJSON(o, rootRef)
     }
   }
 
-  json = subObjToJSON(o, null, rootRef?rootRef:"result");
+  json = subObjToJSON(o, null, "root");
 
   removeMarkers();
-  return {json: json, fixUps: fixUps};
+
+  // only return the fixups if one or more were found
+  if (fixups.length)
+  {
+    return {json: json, fixups: fixups};
+  }
+  else
+  {
+    return {json: json};
+  }
 }
 
-
 /* JSONRpcClient constructor */
-
 function JSONRpcClient()
 {
   var arg_shift = 0,
@@ -781,18 +792,18 @@ JSONRpcClient._makeRequest = function (client,methodName, args,objectID,cb)
   }
 
   // use p as an alias for params to save space in the fixups
-  var j= toJSON(args,"p");
+  var j= toJSON(args);
 
   obj += ",params:" + j.json;
 
   // only attach duplicates/fixups if they are found
   // this is to provide graceful backwards compatibility to the json-rpc spec.
-  if (j.fixUps)
+  if (j.fixups)
   {
     // todo: the call to toJSON here to turn the fixups into json is a bit 
     // inefficient, since there will never be fixups in the fixups... but
     // it saves us from writing some additional code at this point...
-    obj += ",fixups:" + toJSON(j.fixUps).json;  
+    obj += ",fixups:" + toJSON(j.fixups).json;  
   }
 
   req.data = obj + "}";

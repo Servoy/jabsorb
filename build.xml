@@ -69,7 +69,7 @@
     </javac>
   </target>
 
-  <target name="dist" depends="compile,init-build" description="Puts the compiled source into a jar">
+  <target name="dist" depends="compile,compress-web-content,init-build" description="Puts the compiled source into a jar">
     <jar destfile="${app-jar}" basedir="${build}" excludes="*~" />
   </target>
 
@@ -271,7 +271,7 @@
     <delete file="${release}/${app-prefix}-javadoc.tar.gz"/>
   </target>
 
-  <target name="release" depends="init,cleanrelease,clean,release-src,docs,compress-web-content,test.dist,release-prep-clean"
+  <target name="release" depends="init,cleanrelease,clean,release-src,docs,test.dist,release-prep-clean"
           description="make complete release distributions for unix and windows">
 
     <!-- build FULL release which contains the completely built javadoc, war and .jar
