@@ -885,6 +885,7 @@ JSONRpcClient._sendRequest = function (client,req)
 
   if (!req.cb)
   {
+    delete JSONRpcClient.async_inflight[req.requestId]; 
     return client._handleResponse(http);
   }
   return null;
