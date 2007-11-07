@@ -295,7 +295,7 @@ public class ArraySerializer extends AbstractSerializer
         Object a[] = (Object[]) o;
         for (int i = 0; i < a.length; i++)
         {
-          Object json = ser.marshall(state, p, a[i], new Integer(i));
+          Object json = ser.marshall(state, o, a[i], new Integer(i));
           if (JSONSerializer.CIRC_REF_OR_DUPLICATE == json )
           {
             // if dup or circ ref found, put a null slot in
