@@ -1,5 +1,21 @@
 CHANGES log
 
+2007-11-07 jabsorb 1.2rc3 release candidate
+
+* Fix bug that caused bad fixups in the ArraySerializer.
+
+* Optimizations to javascript fixup code.
+
+* Changed build script to automatically create minified version of jsonrpc.js.
+
+* memory leak bug fix with synchronous calls (thanks to Eric Pascarello for 
+  finding this bug and providing the fix.)
+
+2007-10-25 jabsorb 1.2rc2 release candidate
+
+* Fix bug whereby null references were generating duplicate fixups (thanks
+  to Alek Traunic for reporting this.)
+
 2007-10-16 jabsorb 1.2rc release candidate
 
 new features:
