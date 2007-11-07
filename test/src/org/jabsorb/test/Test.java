@@ -289,7 +289,7 @@ public class Test implements Serializable
    * all refer to the same object 
    * @return a List with some duplicates.
    */
-  public List aDupDupTest()
+  public List aDupDup()
   {
     List list = new ArrayList();
 
@@ -313,9 +313,9 @@ public class Test implements Serializable
 
   /**
    * Another duplicate with substantial savings to be gained by fixing it up
-   * @return aList with duplicates.
+   * @return a List with duplicates.
    */
-  public List aDupDupDupTest()
+  public List aDupDupDup()
   {
     Map m = new HashMap();
     m.put("drink","soda");
@@ -340,13 +340,60 @@ public class Test implements Serializable
     list.add(m2);
     return list;
   }
+  
+  /**
+   * Test of duplicate Strings
+   * @return a List with 3 duplicate Strings.
+   */
+  public List aStringListDup()
+  {
+    List list = new ArrayList();
+
+    String dup = "Supercalifragilisticexpialidocious";
+    list.add(dup);
+    list.add(dup);
+    list.add(dup);
+    return list;
+  }
+
+  /**
+   * Test an array of 3 duplicate Strings.
+   * 
+   * @return an array of 3 duplicate Strings.
+   */
+  public String[] aStringArrayDup()
+  {
+    String[] arr = new String[3];
+    String dup = "Supercalifragilisticexpialidocious";
+    arr[0] = dup;
+    arr[1] = dup;
+    arr[2] = dup;
+    return arr;
+  }
+  
+  /**
+   * Test an array of 3 duplicate Beans.
+   * 
+   * @return an array of 3 duplicate Beans.
+   */
+  public BeanA[] aBeanArrayDup()
+  {
+    BeanB b = new BeanB();
+    BeanA a = new BeanA();
+    a.setBeanB(b);
+    BeanA[] arr = new BeanA[3];
+    arr[0] = a;
+    arr[1] = a;
+    arr[2] = a;
+    return arr;
+  }
 
   /**
    * Return a List that has several Strings and a few nulls.
    * We want make sure that the null objects don't get fixed up (as duplicates...)
    * @return a List that has several Strings and a few nulls.
    */
-  public List listNullTest()
+  public List listNull()
   {
     List l = new ArrayList();
     l.add("one");

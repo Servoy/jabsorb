@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * The following can be added to your web.xml to export the servlet under the
  * URI &quot;<code>/JSON-RPC</code>&quot;
  * </p>
- * 
+ *
  * <pre>
  * &lt;servlet&gt;
  *   &lt;servlet-name&gt;org.jabsorb.JSONRPCServlet&lt;/servlet-name&gt;
@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
  *   &lt;url-pattern&gt;/JSON-RPC&lt;/url-pattern&gt;
  * &lt;/servlet-mapping&gt;
  * </pre>
- * 
+ *
  * </p>
  * The JSONRPCServlet looks for a session specific bridge object under the
  * attribute <code>"JSONRPCBridge"</code> in the HttpSession associated with
@@ -135,7 +135,7 @@ public class JSONRPCServlet extends HttpServlet
    *
    * So, the GZIP_THRESHOLD should be tuned to a size that is optimal for your application.  If your application is
    * always served from a high speed network, you might want to set this to a very high number--
-   * (or even -1 to turn it off) for slower networks where it's more important to conserve bandwidth, 
+   * (or even -1 to turn it off) for slower networks where it's more important to conserve bandwidth,
    * set this to a lower number (but not too low!)
    *
    * Set this to zero if you want to always attempt to gzip the output when the browser can accept gzip encoded responses.
@@ -224,8 +224,6 @@ public class JSONRPCServlet extends HttpServlet
   public void service(HttpServletRequest request, HttpServletResponse response)
     throws IOException
   {
-try
-{
     // Use protected method in case someone wants to override it
     JSONRPCBridge json_bridge = findBridge(request);
 
@@ -283,7 +281,7 @@ try
     }
 
     String sendString = json_res.toString();
-    
+
     // dump the received string
     if (log.isDebugEnabled())
     {
@@ -340,19 +338,13 @@ try
     out.write(bout);
     out.flush();
     out.close();
-} catch (Error e)
-{
-  e.printStackTrace();
-  log.error("got error ",e);
-  throw e;
-}
   }
 
   /**
    * Find the JSONRPCBridge from the current session.
    * If it can't be found in the session, or there is no session,
    * then return the global bridge.
-   * 
+   *
    * @param request The message received
    * @return the JSONRPCBridge to use for this request
    */

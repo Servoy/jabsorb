@@ -135,27 +135,39 @@ var unitTests={
       { code: 'jsonrpc.test.echoRawJSON({"field1": circ3})',
         test: 'result.field1.arr[4]===result.field1 && circ3ArrLen === result.field1.arr.length'},
 
-      //duplicates test
+      // duplicates test
       { code: 'jsonrpc.test.echoRawJSON({"field1": dup1})',
         test: 'result.field1.arthur.mother == result.field1.diana && result.field1.diana.son===result.field1.arthur'},
 
-      //duplicates and circular references
+      // duplicates and circular references
       { code: 'jsonrpc.test.echoRawJSON(dup2)',
         test: 'result.arthur.mother===result.diana && result.diana.son===result.arthur'},
+
+      // List of duplicate Strings
+      { code: 'jsonrpc.test.aStringListDup()',
+        test: 'result.list[0]===result.list[1] && result.list[1]===result.list[2]'},
+
+      // Array of duplicate Strings
+      { code: 'jsonrpc.test.aStringArrayDup()',
+        test: 'result[0]===result[1] && result[1]===result[2]'},
+
+      // Array of duplicate Beans
+      { code: 'jsonrpc.test.aBeanArrayDup()',
+        test: 'result[0]===result[1] && result[1]===result[2]'},
 
       // the following 3 tests don't really have a good way to test if they pass/fail (need server side support)
       // but they are in here in the hopes that this server side support will be added soon
 
-      //duplicates from the server
-      { code: 'jsonrpc.test.aDupDupTest()',
+      // duplicates from the server
+      { code: 'jsonrpc.test.aDupDup()',
         test: 'true'},
   
-      //more duplicates from the server
-      { code: 'jsonrpc.test.aDupDupDupTest()',
+      // more duplicates from the server
+      { code: 'jsonrpc.test.aDupDupDup()',
         test: 'true'},
 
       //a list with some nulls in it
-      { code: 'jsonrpc.test.listNullTest()',
+      { code: 'jsonrpc.test.listNull()',
         test: 'true'}
     ]
   },
