@@ -29,13 +29,6 @@
     </init-param>
   </servlet>
 
-<!--GENERATED_JSPS-->
-
-    <servlet-mapping>
-        <servlet-name>index_jsp</servlet-name>
-        <url-pattern>/index.html</url-pattern>
-    </servlet-mapping>
-
   <servlet-mapping>
     <servlet-name>JSONRPCServlet</servlet-name>
     <url-pattern>/JSON-RPC</url-pattern>

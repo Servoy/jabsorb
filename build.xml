@@ -32,11 +32,9 @@
   <!-- necessary to be called for every other target, even clean! -->
   <target name="init">
     <tstamp />
-    <property file="libraries.properties" />
     <property file="build.properties" />
 
     <path id="default-classpath" description="This is used for building the jar">
-    	<pathelement path="${tomcat.lib}/servlet-api.jar" />
       <fileset dir="${lib}">
         <include name="*.jar"/>
       </fileset>
@@ -47,15 +45,6 @@
     <path id="jarClasspath" description="This is used for targets that use the jar">
       <path refid="default-classpath" />
       <pathelement path="${app-jar}" />
-    </path>
-    <path id="tomcatClasspath" description="This is used for targets that use Jasper">
-      <fileset dir="${tomcat.lib}">
-        <include name="*.jar"/>
-      </fileset>
-      <fileset dir="${tomcat.binlib}"> 
-        <include name="*.jar"/>
-      </fileset>
-      <path refid="jarClasspath" />
     </path>
   </target>
   
@@ -86,11 +75,8 @@
     </javac>
   </target>
 
-  <target name="test.jsp" depends="compile.test, init" description="Creates the test jsps">
-    <taskdef classname="org.apache.jasper.JspC" name="jasper2">
-      <classpath refid="tomcatClasspath" />
-    </taskdef>
-    <jasper2 validateXml="false" uriroot="${webapp}" package="" webXmlFragment="${webinf}/web.xml.generated" outputDir="${jsp.out}" />
+  <target name="test.dist" depends="dist,init" description="Creates a war with the test files">
+    <copy file="${app-jar}" tofile="${webinf}/lib/${app-jar}" />
     <copy file="${test.src}/org/jabsorb/test/Hello.java" tofile="${webapp}/Hello.java.txt" />
     <copy file="${webapp}/hello.jsp" tofile="${webapp}/hello.jsp.txt" />
     <copy file="${webapp}/hello.js" tofile="${webapp}/hello.js.txt" />
@@ -99,25 +85,13 @@
     <copy file="${webapp}/test.js" tofile="${webapp}/test.js.txt" />
     <copy file="${webapp}/jsonrpc.js" tofile="${webapp}/jsonrpc.js.txt" />
     <copy file="${webinf}/web.xml" tofile="${webinf}/web.xml.out" />
-    <loadfile property="generated_web.xml" srcFile="${webapp}/WEB-INF/web.xml.generated" />
-    <replace file="${webapp}/WEB-INF/web.xml.out" token="&lt;!--GENERATED_JSPS--&gt;" value="${generated_web.xml}" />
-  </target>
-
-  <target name="compile.jsp" depends="test.jsp, init" description="Compiles the jsps">
-    <javac debug="true" source="1.4" srcdir="${jsp.out}" destdir="${test.classes}">
-      <classpath refid="tomcatClasspath" />
-    </javac>
-  </target>
-
-  <target name="test.dist" depends="dist,compile.jsp, init" description="Creates a war with the test files">
-    <copy file="${app-jar}" tofile="${webinf}/lib/${app-jar}" />
     <copy todir="${test.lib}">
       <fileset dir="./lib">
         <include name="**/*.jar" />
       </fileset>
     </copy>
     <jar destfile="${test.lib}/rsrc.jar" basedir="${test.rsrc}" excludes="*~" />
-    <war destfile="${app-war}" basedir="${webapp}" excludes="**/*~,**/*.jsp,WEB-INF/web.xml*" webxml="${webapp}/WEB-INF/web.xml.out" />
+    <war destfile="${app-war}" basedir="${webapp}" excludes="**/*~,WEB-INF/web.xml*" webxml="${webapp}/WEB-INF/web.xml" />
   </target>
 
   <target name="docs" depends="init" description="Creates the javadoc api documentation">
@@ -157,12 +131,16 @@
     </javadoc>
   </target>
 
+  <target name="installpath.check" depends="init" description="Checks that the webapp installpath is present">
+    <available file="${installpath}" type="dir" property="installpath.present"/>
+    <fail message="Please set installpath in build.properties to your web container's webapp directory" unless="installpath.present"/>
+  </target>
 
-  <target name="install" depends="test.dist, init" description="Installs the war to the tomcat directory">
+  <target name="install" depends="test.dist, installpath.check, init" description="Installs the war to the webapp container directory">
     <copy file="${app-war}" todir="${installpath}" />
   </target>
 
-  <target name="uninstall" depends="init" description="Uninstalls the war from the tomcat directory">
+  <target name="uninstall" depends="init, installpath.check" description="Uninstalls the war from the webapp container directory">
     <delete file="${installpath}/${app-war}" />
     <delete dir="${installpath}/${app-prefix}/" />
   </target>
