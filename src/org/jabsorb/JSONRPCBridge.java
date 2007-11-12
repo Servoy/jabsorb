@@ -1650,9 +1650,9 @@ public class JSONRPCBridge implements Serializable
     {
       throw (NoSuchElementException) new NoSuchElementException(e.getMessage()).initCause(e);
     }
-    catch (UnmarshallException f)
+    catch (UnmarshallException e)
     {
-      throw new UnmarshallException("arg " + (i + 1) + " " + f.getMessage());
+      throw (UnmarshallException) new UnmarshallException("arg " + (i + 1) + " could not unmarshall").initCause(e);
     }
 
     return javaArgs;

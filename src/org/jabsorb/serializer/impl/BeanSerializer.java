@@ -373,10 +373,25 @@ public class BeanSerializer extends AbstractSerializer
     {
       instance = clazz.newInstance();
     }
-    catch (Exception e)
+    catch (InstantiationException e)
     {
-      throw new UnmarshallException("can't instantiate bean " + clazz.getName()
-          + ": " + e.getMessage());
+      throw (UnmarshallException) new UnmarshallException(
+        "could not instantiate bean of type " + 
+        clazz.getName() + ", make sure it has a no argument " +
+        "constructor and that it is not an interface or " +
+        "abstract class").initCause(e);
+    }
+    catch (IllegalAccessException e)
+    {
+      throw (UnmarshallException) new UnmarshallException(
+        "could not instantiate bean of type " + 
+        clazz.getName()).initCause(e);
+    }
+    catch (RuntimeException e)
+    {
+      throw (UnmarshallException) new UnmarshallException(
+        "could not instantiate bean of type " + 
+        clazz.getName()).initCause(e);
     }
     state.setSerialized(o, instance);
     Object invokeArgs[] = new Object[1];
@@ -395,13 +410,15 @@ public class BeanSerializer extends AbstractSerializer
         }
         catch (UnmarshallException e)
         {
-          throw new UnmarshallException("bean " + clazz.getName() + " "
-              + e.getMessage());
+          throw (UnmarshallException) new UnmarshallException(
+            "could not unmarshall field \"" + field + "\" of bean " + 
+            clazz.getName()).initCause(e);
         }
         catch (JSONException e)
         {
-          throw new UnmarshallException("bean " + clazz.getName() + " "
-              + e.getMessage());
+          throw (UnmarshallException) new UnmarshallException(
+              "could not unmarshall field \"" + field + "\" of bean " + 
+              clazz.getName()).initCause(e);
         }
         if (log.isDebugEnabled())
         {
