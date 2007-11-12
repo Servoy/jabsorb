@@ -601,13 +601,15 @@ public class JSONSerializer implements Serializable
 
       throw new UnmarshallException("can't assign null primitive");
     }
-    Serializer s = getSerializer(clazz, json.getClass());
+    Class jsonClass = json.getClass();
+    Serializer s = getSerializer(clazz, jsonClass);
     if (s != null)
     {
       return s.unmarshall(state, clazz, json);
     }
 
-    throw new UnmarshallException("can't unmarshall");
+    throw new UnmarshallException("no serializer found that can unmarshall " + 
+      (jsonClass!=null?jsonClass.getName():"null") + " to " +  clazz.getName());
   }
 
   /**
