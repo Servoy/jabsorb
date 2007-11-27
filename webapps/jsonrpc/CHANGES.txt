@@ -1,5 +1,12 @@
 CHANGES log
 
+2007-11-20 jabsorb 1.2 release
+
+* Minor improvements to exception handling.
+
+* Remove JSP precompilation from build script and make JSP compilation dynamic
+  for test web app.
+
 2007-11-07 jabsorb 1.2rc3 release candidate
 
 * Fix bug that caused bad fixups in the ArraySerializer.
