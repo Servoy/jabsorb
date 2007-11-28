@@ -149,7 +149,7 @@ public class DictionarySerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("Could not read javaClass");
+      throw new UnmarshallException("Could not read javaClass", e);
     }
     if (java_class == null)
     {
@@ -167,7 +167,7 @@ public class DictionarySerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("map missing");
+      throw new UnmarshallException("map missing", e);
     }
     if (jsonmap == null)
     {
@@ -188,11 +188,11 @@ public class DictionarySerializer extends AbstractSerializer
     }
     catch (UnmarshallException e)
     {
-      throw (UnmarshallException) new UnmarshallException("key " + key + " " + e.getMessage()).initCause(e);
+      throw new UnmarshallException("key " + key + " " + e.getMessage(), e);
     }
     catch (JSONException e)
     {
-      throw (UnmarshallException)new UnmarshallException("key " + key + " " + e.getMessage()).initCause(e);
+      throw new UnmarshallException("key " + key + " " + e.getMessage(), e);
     }
 
     return m;
@@ -209,7 +209,7 @@ public class DictionarySerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("Could not read javaClass");
+      throw new UnmarshallException("Could not read javaClass", e);
     }
     if (java_class == null)
     {
@@ -232,7 +232,7 @@ public class DictionarySerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("map missing");
+      throw new UnmarshallException("map missing", e);
     }
     if (jsonmap == null)
     {
@@ -253,11 +253,11 @@ public class DictionarySerializer extends AbstractSerializer
     }
     catch (UnmarshallException e)
     {
-      throw (UnmarshallException) new UnmarshallException("key " + key + " " + e.getMessage()).initCause(e);
+      throw new UnmarshallException("key " + key + " " + e.getMessage(), e);
     }
     catch (JSONException e)
     {
-      throw (UnmarshallException)new UnmarshallException("key " + key + " " + e.getMessage()).initCause(e);
+      throw new UnmarshallException("key " + key + " " + e.getMessage(), e);
     }
     return ht;
   }

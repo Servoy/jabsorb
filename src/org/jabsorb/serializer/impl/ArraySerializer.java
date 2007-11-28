@@ -95,12 +95,12 @@ public class ArraySerializer extends AbstractSerializer
     }
     catch (UnmarshallException e)
     {
-      throw new UnmarshallException("element " + i + " " + e.getMessage());
+      throw new UnmarshallException("element " + i + " " + e.getMessage(), e);
     }
     catch (JSONException e)
     {
       throw new UnmarshallException("element " + i + " " + e.getMessage()
-          + " not found in json object");
+          + " not found in json object", e);
     }
     return m;
   }
@@ -211,12 +211,12 @@ public class ArraySerializer extends AbstractSerializer
     }
     catch (UnmarshallException e)
     {
-      throw new UnmarshallException("element " + i + " " + e.getMessage());
+      throw new UnmarshallException("element " + i + " " + e.getMessage(), e);
     }
     catch (JSONException e)
     {
       throw new UnmarshallException("element " + i + " " + e.getMessage()
-          + " not found in json object");
+          + " not found in json object", e);
     }
   }
 

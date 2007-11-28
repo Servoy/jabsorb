@@ -155,7 +155,7 @@ public class MapSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("Could not read javaClass");
+      throw new UnmarshallException("Could not read javaClass", e);
     }
     if (java_class == null)
     {
@@ -176,7 +176,7 @@ public class MapSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("Could not read map: " + e.getMessage());
+      throw new UnmarshallException("Could not read map: " + e.getMessage(), e);
     }
     if (jsonmap == null)
     {
@@ -196,11 +196,11 @@ public class MapSerializer extends AbstractSerializer
     }
     catch (UnmarshallException e)
     {
-      throw new UnmarshallException("key " + key + " " + e.getMessage());
+      throw new UnmarshallException("key " + key + " " + e.getMessage(), e);
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("key " + key + " " + e.getMessage());
+      throw new UnmarshallException("key " + key + " " + e.getMessage(), e);
     }
     return m;
   }
@@ -216,7 +216,7 @@ public class MapSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("Could not read javaClass");
+      throw new UnmarshallException("Could not read javaClass", e);
     }
     if (java_class == null)
     {
@@ -248,7 +248,7 @@ public class MapSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("Could not read map: " + e.getMessage());
+      throw new UnmarshallException("Could not read map: " + e.getMessage(), e);
     }
     if (jsonmap == null)
     {
@@ -267,11 +267,11 @@ public class MapSerializer extends AbstractSerializer
     }
     catch (UnmarshallException e)
     {
-      throw new UnmarshallException("key " + key + " " + e.getMessage());
+      throw new UnmarshallException("key " + key + " " + e.getMessage(), e);
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("key " + key + " " + e.getMessage());
+      throw new UnmarshallException("key " + key + " " + e.getMessage(), e);
     }
 
     return abmap;

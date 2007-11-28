@@ -38,13 +38,24 @@ public class MarshallException extends Exception
   private final static long serialVersionUID = 2;
 
   /**
-   * Creates a new MarshallException
+   * Creates a new MarshallException.
    * 
-   * @param msg
-   *          The message to be displayed.
+   * @param msg the message to be displayed.
    */
   public MarshallException(String msg)
   {
     super(msg);
+  }
+
+  /**
+   * Creates a new MarshallException.
+   * 
+   * @param msg   the message to be displayed
+   * @param cause the cause.  (A <tt>null</tt> value is permitted, and indicates
+   *              that the cause is nonexistent or unknown.)
+   */
+  public MarshallException(String msg, Throwable cause)
+  {
+    super(msg,cause);
   }
 }

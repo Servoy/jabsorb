@@ -150,7 +150,7 @@ public class NumberSerializer extends AbstractSerializer
     }
     catch (NumberFormatException e)
     {
-      throw new UnmarshallException("not a number");
+      throw new UnmarshallException("not a number", e);
     }
     state.setSerialized(jso, ObjectMatch.OKAY);
     return ObjectMatch.OKAY;
@@ -169,10 +169,10 @@ public class NumberSerializer extends AbstractSerializer
       state.setSerialized(jso, num);
       return num;
     }
-    catch (NumberFormatException nfe)
+    catch (NumberFormatException e)
     {
       throw new UnmarshallException("cannot convert object " + jso
-          + " to type " + clazz.getName());
+          + " to type " + clazz.getName(), e);
     }
   }
 

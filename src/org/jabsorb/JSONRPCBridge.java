@@ -1603,7 +1603,7 @@ public class JSONRPCBridge implements Serializable
     }
     catch (UnmarshallException e)
     {
-      throw new UnmarshallException("arg " + (i + 1) + " " + e.getMessage());
+      throw new UnmarshallException("arg " + (i + 1) + " " + e.getMessage(), e);
     }
     return candidate;
   }
@@ -1652,7 +1652,7 @@ public class JSONRPCBridge implements Serializable
     }
     catch (UnmarshallException e)
     {
-      throw (UnmarshallException) new UnmarshallException("arg " + (i + 1) + " could not unmarshall").initCause(e);
+      throw new UnmarshallException("arg " + (i + 1) + " could not unmarshall", e);
     }
 
     return javaArgs;

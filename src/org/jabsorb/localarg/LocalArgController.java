@@ -164,7 +164,7 @@ public class LocalArgController
           catch (LocalArgResolveException e)
           {
             throw new UnmarshallException("error resolving local argument: "
-                + e);
+                + e, e);
           }
         }
       }

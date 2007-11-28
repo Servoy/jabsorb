@@ -138,7 +138,7 @@ public class PrimitiveSerializer extends AbstractSerializer
     }
     catch (NumberFormatException e)
     {
-      throw new UnmarshallException("not a primitive");
+      throw new UnmarshallException("not a primitive", e);
     }
     state.setSerialized(jso, ObjectMatch.OKAY);
     return ObjectMatch.OKAY;
@@ -153,10 +153,10 @@ public class PrimitiveSerializer extends AbstractSerializer
       state.setSerialized(jso, primitive);
       return primitive;
     }
-    catch (NumberFormatException nfe)
+    catch (NumberFormatException e)
     {
       throw new UnmarshallException("cannot convert object " + jso
-          + " to type " + clazz.getName());
+          + " to type " + clazz.getName(), e);
     }
   }
 

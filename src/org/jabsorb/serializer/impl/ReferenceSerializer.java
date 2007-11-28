@@ -172,7 +172,7 @@ public class ReferenceSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException(e.getMessage());
+      throw new UnmarshallException(e.getMessage(), e);
     }
     if (json_type != null && json_type.equals("Reference"))
     {
