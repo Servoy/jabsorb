@@ -97,7 +97,7 @@ public class SetSerializer extends AbstractSerializer
       }
       catch (JSONException e)
       {
-        throw new MarshallException("javaClass not found!");
+        throw new MarshallException("javaClass not found!", e);
       }
     }
     try
@@ -107,7 +107,7 @@ public class SetSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new MarshallException("Could not set 'set': " + e.getMessage());
+      throw new MarshallException("Could not set 'set': " + e.getMessage(), e);
     }
     Object key = null;
     Iterator i = set.iterator();
@@ -130,11 +130,11 @@ public class SetSerializer extends AbstractSerializer
     }
     catch (MarshallException e)
     {
-      throw (MarshallException) new MarshallException("set key " + key + e.getMessage()).initCause(e);
+      throw new MarshallException("set key " + key + e.getMessage(), e);
     }
     catch (JSONException e)
     {
-      throw (MarshallException) new MarshallException("set key " + key + e.getMessage()).initCause(e);
+      throw new MarshallException("set key " + key + e.getMessage(), e);
     }
     finally
     {
@@ -154,7 +154,7 @@ public class SetSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("Could not read javaClass");
+      throw new UnmarshallException("Could not read javaClass", e);
     }
     if (java_class == null)
     {
@@ -175,7 +175,7 @@ public class SetSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("set missing");
+      throw new UnmarshallException("set missing", e);
     }
 
     if (jsonset == null)
@@ -198,11 +198,11 @@ public class SetSerializer extends AbstractSerializer
     }
     catch (UnmarshallException e)
     {
-      throw new UnmarshallException("key " + key + " " + e.getMessage());
+      throw new UnmarshallException("key " + key + " " + e.getMessage(), e);
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("key " + key + " " + e.getMessage());
+      throw new UnmarshallException("key " + key + " " + e.getMessage(), e);
     }
     return m;
   }
@@ -218,7 +218,7 @@ public class SetSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("Could not read javaClass");
+      throw new UnmarshallException("Could not read javaClass", e);
     }
     if (java_class == null)
     {
@@ -250,7 +250,7 @@ public class SetSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("set missing");
+      throw new UnmarshallException("set missing", e);
     }
 
     if (jsonset == null)
@@ -272,11 +272,11 @@ public class SetSerializer extends AbstractSerializer
     }
     catch (UnmarshallException e)
     {
-      throw new UnmarshallException("key " + i + e.getMessage());
+      throw new UnmarshallException("key " + i + e.getMessage(), e);
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("key " + key + " " + e.getMessage());
+      throw new UnmarshallException("key " + key + " " + e.getMessage(), e);
     }
     return abset;
   }

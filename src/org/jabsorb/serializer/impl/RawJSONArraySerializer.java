@@ -94,11 +94,11 @@ public class RawJSONArraySerializer extends AbstractSerializer
     }
     catch (MarshallException e)
     {
-      throw (MarshallException) new MarshallException("element " + i).initCause(e);
+      throw new MarshallException("element " + i, e);
     }
     catch (JSONException e)
     {
-      throw (MarshallException) new MarshallException("element " + i).initCause(e);
+      throw new MarshallException("element " + i, e);
     }
     return jsonOut;
   }

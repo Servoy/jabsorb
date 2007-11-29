@@ -100,7 +100,7 @@ public class ListSerializer extends AbstractSerializer
       }
       catch (JSONException e)
       {
-        throw new MarshallException("javaClass not found!");
+        throw new MarshallException("javaClass not found!", e);
       }
     }
     try
@@ -110,7 +110,7 @@ public class ListSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new MarshallException("Error setting list: " + e);
+      throw new MarshallException("Error setting list: " + e, e);
     }
     int index = 0;
     try
@@ -133,7 +133,7 @@ public class ListSerializer extends AbstractSerializer
     }
     catch (MarshallException e)
     {
-      throw (MarshallException) new MarshallException("element " + index).initCause(e);
+      throw new MarshallException("element " + index, e);
     }
     finally
     {
@@ -157,7 +157,7 @@ public class ListSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("Could not read javaClass");
+      throw new UnmarshallException("Could not read javaClass", e);
     }
     if (java_class == null)
     {
@@ -178,7 +178,7 @@ public class ListSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("Could not read list: " + e.getMessage());
+      throw new UnmarshallException("Could not read list: " + e.getMessage(), e);
     }
     if (jsonlist == null)
     {
@@ -196,11 +196,11 @@ public class ListSerializer extends AbstractSerializer
     }
     catch (UnmarshallException e)
     {
-      throw new UnmarshallException("element " + i + " " + e.getMessage());
+      throw new UnmarshallException("element " + i + " " + e.getMessage(), e);
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("element " + i + " " + e.getMessage());
+      throw new UnmarshallException("element " + i + " " + e.getMessage(), e);
     }
     return m;
   }
@@ -216,7 +216,7 @@ public class ListSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("Could not read javaClass");
+      throw new UnmarshallException("Could not read javaClass", e);
     }
     if (java_class == null)
     {
@@ -249,7 +249,7 @@ public class ListSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("Could not read list: " + e.getMessage());
+      throw new UnmarshallException("Could not read list: " + e.getMessage(), e);
     }
     if (jsonlist == null)
     {
@@ -266,11 +266,11 @@ public class ListSerializer extends AbstractSerializer
     }
     catch (UnmarshallException e)
     {
-      throw new UnmarshallException("element " + i + " " + e.getMessage());
+      throw new UnmarshallException("element " + i + " " + e.getMessage(), e);
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("element " + i + " " + e.getMessage());
+      throw new UnmarshallException("element " + i + " " + e.getMessage(), e);
     }
     return al;
   }

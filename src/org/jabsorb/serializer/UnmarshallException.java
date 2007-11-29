@@ -47,4 +47,17 @@ public class UnmarshallException extends Exception
   {
     super(msg);
   }
+  
+  /**
+   * Creates a new UnmarshallException.
+   * 
+   * @param msg   the message to be displayed
+   * @param cause the cause.  (A <tt>null</tt> value is permitted, and indicates
+   *              that the cause is nonexistent or unknown.)
+   */
+  public UnmarshallException(String msg, Throwable cause)
+  {
+    super(msg,cause);
+  }
+
 }

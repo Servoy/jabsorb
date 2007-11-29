@@ -92,7 +92,7 @@ public class DateSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw (MarshallException) new MarshallException(e.getMessage()).initCause(e);
+      throw new MarshallException(e.getMessage(), e);
     }
     return obj;
   }
@@ -108,7 +108,7 @@ public class DateSerializer extends AbstractSerializer
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("no type hint");
+      throw new UnmarshallException("no type hint", e);
     }
     if (java_class == null)
     {
@@ -133,7 +133,7 @@ public class DateSerializer extends AbstractSerializer
     }
     catch(JSONException e)
     {
-      throw new UnmarshallException("Could not get the time in date serialiser");
+      throw new UnmarshallException("Could not get the time in date serialiser", e);
     }
     if (jso.has("javaClass"))
     {
@@ -141,13 +141,13 @@ public class DateSerializer extends AbstractSerializer
       {
         clazz = Class.forName(jso.getString("javaClass"));
       }
-      catch (ClassNotFoundException cnfe)
+      catch (ClassNotFoundException e)
       {
-        throw new UnmarshallException(cnfe.getMessage());
+        throw new UnmarshallException(e.getMessage(), e);
       }
       catch(JSONException e)
       {
-        throw new UnmarshallException("Could not find javaClass");
+        throw new UnmarshallException("Could not find javaClass", e);
       }
     }
     Object returnValue = null;

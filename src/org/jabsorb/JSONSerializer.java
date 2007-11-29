@@ -183,7 +183,7 @@ public class JSONSerializer implements Serializable
     }
     catch (JSONException e)
     {
-      throw new UnmarshallException("couldn't parse JSON");
+      throw new UnmarshallException("couldn't parse JSON", e);
     }
     SerializerState state = new SerializerState();
     return unmarshall(state, null, json);
@@ -651,7 +651,7 @@ public class JSONSerializer implements Serializable
       }
       catch (Exception e)
       {
-        throw new UnmarshallException("class in hint not found");
+        throw new UnmarshallException("class in hint not found", e);
       }
     }
     if (o instanceof JSONArray)
@@ -681,7 +681,7 @@ public class JSONSerializer implements Serializable
       }
       catch (ClassNotFoundException e)
       {
-        throw new UnmarshallException("problem getting array type");
+        throw new UnmarshallException("problem getting array type", e);
       }
     }
     return o.getClass();

@@ -491,7 +491,7 @@ public class AccessibleObjectResolver
     }
     catch (UnmarshallException e)
     {
-      throw new UnmarshallException("arg " + (i + 1) + " " + e.getMessage());
+      throw new UnmarshallException("arg " + (i + 1) + " " + e.getMessage(), e);
     }
     AccessibleObjectCandidate candidate = new AccessibleObjectCandidate(
         accessibleObject, parameterTypes, matches);
@@ -543,7 +543,7 @@ public class AccessibleObjectResolver
     }
     catch (UnmarshallException e)
     {
-      throw (UnmarshallException) new UnmarshallException("arg " + (i + 1) + " could not unmarshall").initCause(e);
+      throw new UnmarshallException("arg " + (i + 1) + " could not unmarshall", e);
     }
 
     return javaArgs;

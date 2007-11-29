@@ -113,7 +113,7 @@ public class BooleanSerializer extends AbstractSerializer
       }
       catch (Exception e)
       {
-        throw new UnmarshallException("Cannot convert " + jso + " to Boolean");
+        throw new UnmarshallException("Cannot convert " + jso + " to Boolean", e);
       }
     }
     else if (clazz == boolean.class)

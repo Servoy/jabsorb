@@ -184,8 +184,8 @@ public class BeanSerializer extends AbstractSerializer
     }
     catch (IntrospectionException e)
     {
-      throw (MarshallException) new MarshallException(o.getClass().getName() +
-        " is not a bean").initCause(e);
+      throw new MarshallException(o.getClass().getName() +
+        " is not a bean", e);
     }
 
     JSONObject val = new JSONObject();
@@ -197,8 +197,8 @@ public class BeanSerializer extends AbstractSerializer
       }
       catch (JSONException e)
       {
-        throw (MarshallException) new MarshallException(
-          "JSONException: " + e.getMessage()).initCause(e);
+        throw new MarshallException(
+          "JSONException: " + e.getMessage(), e);
       }
     }
     Iterator i = bd.readableProps.entrySet().iterator();
@@ -224,7 +224,7 @@ public class BeanSerializer extends AbstractSerializer
           e = ((InvocationTargetException) e).getTargetException();
         }
         throw new MarshallException("bean " + o.getClass().getName()
-            + " can't invoke " + getMethod.getName() + ": " + e.getMessage());
+            + " can't invoke " + getMethod.getName() + ": " + e.getMessage(), e);
       }
       try
       {
@@ -243,15 +243,15 @@ public class BeanSerializer extends AbstractSerializer
           }
           catch (JSONException e)
           {
-            throw (MarshallException) new MarshallException(
-              "JSONException: " + e.getMessage()).initCause(e);
+            throw new MarshallException(
+              "JSONException: " + e.getMessage(), e);
           }
         }
       }
       catch (MarshallException e)
       {
-        throw (MarshallException) new MarshallException("bean " + o.getClass().getName() + " "
-            + e.getMessage()).initCause(e);
+        throw new MarshallException("bean " + o.getClass().getName() + " "
+            + e.getMessage(), e);
       }
     }
 
@@ -269,7 +269,7 @@ public class BeanSerializer extends AbstractSerializer
     }
     catch (IntrospectionException e)
     {
-      throw new UnmarshallException(clazz.getName() + " is not a bean");
+      throw new UnmarshallException(clazz.getName() + " is not a bean", e);
     }
 
     int match = 0;
@@ -327,12 +327,12 @@ public class BeanSerializer extends AbstractSerializer
         catch (UnmarshallException e)
         {
           throw new UnmarshallException("bean " + clazz.getName() + " "
-              + e.getMessage());
+              + e.getMessage(), e);
         }
         catch (JSONException e)
         {
           throw new UnmarshallException("bean " + clazz.getName() + " "
-              + e.getMessage());
+              + e.getMessage(), e);
         }
       }
       else
@@ -362,7 +362,7 @@ public class BeanSerializer extends AbstractSerializer
     }
     catch (IntrospectionException e)
     {
-      throw new UnmarshallException(clazz.getName() + " is not a bean");
+      throw new UnmarshallException(clazz.getName() + " is not a bean", e);
     }
     if (log.isDebugEnabled())
     {
@@ -375,23 +375,23 @@ public class BeanSerializer extends AbstractSerializer
     }
     catch (InstantiationException e)
     {
-      throw (UnmarshallException) new UnmarshallException(
+      throw new UnmarshallException(
         "could not instantiate bean of type " + 
         clazz.getName() + ", make sure it has a no argument " +
         "constructor and that it is not an interface or " +
-        "abstract class").initCause(e);
+        "abstract class", e);
     }
     catch (IllegalAccessException e)
     {
-      throw (UnmarshallException) new UnmarshallException(
+      throw new UnmarshallException(
         "could not instantiate bean of type " + 
-        clazz.getName()).initCause(e);
+        clazz.getName(), e);
     }
     catch (RuntimeException e)
     {
-      throw (UnmarshallException) new UnmarshallException(
+      throw new UnmarshallException(
         "could not instantiate bean of type " + 
-        clazz.getName()).initCause(e);
+        clazz.getName(), e);
     }
     state.setSerialized(o, instance);
     Object invokeArgs[] = new Object[1];
@@ -410,15 +410,15 @@ public class BeanSerializer extends AbstractSerializer
         }
         catch (UnmarshallException e)
         {
-          throw (UnmarshallException) new UnmarshallException(
+          throw new UnmarshallException(
             "could not unmarshall field \"" + field + "\" of bean " + 
-            clazz.getName()).initCause(e);
+            clazz.getName(), e);
         }
         catch (JSONException e)
         {
-          throw (UnmarshallException) new UnmarshallException(
+          throw new UnmarshallException(
               "could not unmarshall field \"" + field + "\" of bean " + 
-              clazz.getName()).initCause(e);
+              clazz.getName(), e);
         }
         if (log.isDebugEnabled())
         {
@@ -436,7 +436,7 @@ public class BeanSerializer extends AbstractSerializer
             e = ((InvocationTargetException) e).getTargetException();
           }
           throw new UnmarshallException("bean " + clazz.getName()
-              + "can't invoke " + setMethod.getName() + ": " + e.getMessage());
+              + "can't invoke " + setMethod.getName() + ": " + e.getMessage(), e);
         }
       }
     }

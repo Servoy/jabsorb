@@ -93,11 +93,11 @@ public class RawJSONObjectSerializer extends AbstractSerializer
     }
     catch (MarshallException e)
     {
-      throw (MarshallException) new MarshallException("JSONObject key " + key + " " + e.getMessage()).initCause(e);
+      throw new MarshallException("JSONObject key " + key + " " + e.getMessage(), e);
     }
     catch (JSONException e)
     {
-      throw (MarshallException) new MarshallException("JSONObject key " + key + " " + e.getMessage()).initCause(e);
+      throw new MarshallException("JSONObject key " + key + " " + e.getMessage(), e);
     }
     return jsonOut;
   }
