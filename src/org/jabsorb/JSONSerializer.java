@@ -120,6 +120,50 @@ public class JSONSerializer implements Serializable
   private boolean fixupDuplicates = true;
 
   /**
+   * Are FixUps are generated for primitive objects (classes of type String, 
+   * Boolean, Integer, Boolean, Long, Byte, Double, Float and Short) 
+   * This flag will have no effect if fixupDuplicates is false.
+   */
+  private boolean fixupDuplicatePrimitives = false;
+
+  /**
+   * The list of class types that are considered primitives
+   * that should not be fixed up when fixupDuplicatePrimitives is false.
+   */
+  protected static Class[] duplicatePrimitiveTypes =
+  { 
+    String.class, Integer.class, Boolean.class, Long.class, 
+    Byte.class, Double.class, Float.class, Short.class 
+  };
+
+  /**
+   * Determine if this serializer considers the given Object to be a primitive  
+   * wrapper type Object.  This is used to determine which types of Objects 
+   * should be fixed up as duplicates if the fixupDuplicatePrimitives flag
+   * is false.
+   *  
+   * @param o Object to test for primitive.
+   */
+  public boolean isPrimitive(Object o)
+  {
+    if (o == null)
+    {
+      return true;  // extra safety check- null is considered primitive too
+    }
+
+    Class c = o.getClass();
+    
+    for (int i=0,j=duplicatePrimitiveTypes.length; i<j; i++)
+    {
+      if (duplicatePrimitiveTypes[i] == c)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Get the fixupCircRefs flag.  If true, FixUps are generated to handle circular
    * references found during marshalling.  If false, an exception is thrown if a
    * circular reference is found during serialization.
@@ -165,6 +209,30 @@ public class JSONSerializer implements Serializable
     this.fixupDuplicates = fixupDuplicates;
   }
 
+  /**
+   * Get the fixupDuplicatePrimitives flag.  If true (and fixupDuplicates is 
+   * also true), FixUps are generated for duplicate primitive objects found 
+   * during marshalling.  If false, the duplicates are re-serialized.
+   *
+   * @return the fixupDuplicatePrimitives flag.
+   */
+  public boolean getFixupDuplicatePrimitives()
+  {
+    return fixupDuplicatePrimitives;
+  }
+
+  /**
+   * Set the fixupDuplicatePrimitives flag.  If true (and fixupDuplicates is 
+   * also true), FixUps are generated for duplicate primitive objects found 
+   * during marshalling. If false, the duplicates are re-serialized.
+   *
+   * @param fixupDuplicatePrimitives the fixupDuplicatePrimitives flag.
+   */
+  public void setFixupDuplicatePrimitives(boolean fixupDuplicatePrimitives)
+  {
+    this.fixupDuplicatePrimitives = fixupDuplicatePrimitives;
+  }
+  
   /**
    * Convert a string in JSON format into Java objects.
    * 
@@ -285,8 +353,11 @@ public class JSONSerializer implements Serializable
         throw new MarshallException("Circular Reference");
       }
 
-      // if its a duplicate only, and we aren't fixing up duplicates, re-serialize the object into the json
-      if (!fixupDuplicates && !foundCircRef)
+      // if its a duplicate only, and we aren't fixing up duplicates or if 
+      // it is a primitive, and fixing up of primitives is not allowed then
+      // re-serialize the object into the json.
+      if (!foundCircRef  && 
+         (!fixupDuplicates || (!fixupDuplicatePrimitives && isPrimitive(java))))
       {
         //todo: if a duplicate is being reserialized... it will overwrite the original location of the
         //todo: first one found... need to think about the ramifications of this -- optimally, circ refs found
