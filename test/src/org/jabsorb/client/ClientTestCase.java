@@ -26,11 +26,13 @@ package org.jabsorb.client;
 import java.io.IOException;
 import java.util.Arrays;
 
+/*
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
+*/
 import org.jabsorb.test.Test;
 import org.jabsorb.test.TestImpl;
 import org.jabsorb.test.Test.Waggle;
@@ -42,7 +44,7 @@ import org.jabsorb.test.Test.Wiggle;
 public class ClientTestCase extends ServerTestBase
 {
 
-  HttpState         state;
+//  HttpState         state;
 
   TransportRegistry registry;
 
@@ -66,6 +68,7 @@ public class ClientTestCase extends ServerTestBase
    * registerObject("test", ...) from the JSP
    * @deprecated since we are running the server in-process
    */
+  /*
   void setupServerTestEnvironment(String url) throws HttpException, IOException
   {
     HttpClient client = new HttpClient();
@@ -78,6 +81,7 @@ public class ClientTestCase extends ServerTestBase
           "Setup did not succeed. Make sure the JSON-RPC-Java test application is running on "
               + getServiceRootURL());
   }
+  */
 
   public void testBadClient()
   {
@@ -103,6 +107,7 @@ public class ClientTestCase extends ServerTestBase
     basicClientTest(test);
   }
 
+  /* TODO check the HTTPSession back in
   public void testHTTPSession()
   {
     try
@@ -122,6 +127,7 @@ public class ClientTestCase extends ServerTestBase
       registry = null;
     }
   }
+  */
 
   void basicClientTest(Test test)
   {
