@@ -52,7 +52,7 @@
     <mkdir dir="${build}" />
   </target>
 
-  <target name="compile" depends="init,init-build" description="Compiles the source into the build directory">
+  <target name="compile" depends="init,init-build, copy-dependencies" description="Compiles the source into the build directory">
     <javac debug="true" source="1.4" srcdir="${src}" destdir="${build}">
       <classpath refid="default-classpath" />
     </javac>
@@ -69,7 +69,7 @@
   </target>
 
   <target name="setup-dependencies">
-	<path id="maven-ant-tasks.classpath" path="lib/maven-ant-tasks-2.0.7.jar" />
+	<path id="maven-ant-tasks.classpath" path="lib-ant/maven-ant-tasks-2.0.7.jar" />
     <typedef resource="org/apache/maven/artifact/ant/antlib.xml" 
   		uri="urn:maven-artifact-ant" classpathref="maven-ant-tasks.classpath" />
   	<artifact:pom id="maven.project" file="pom.xml" />
