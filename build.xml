@@ -27,7 +27,7 @@
 
 -->
 
-<project name="jabsorb" default="dist" basedir=".">
+<project name="jabsorb" default="dist" basedir="." xmlns:artifact="urn:maven-artifact-ant">
  
   <!-- necessary to be called for every other target, even clean! -->
   <target name="init">
@@ -68,13 +68,60 @@
     <mkdir dir="${test.classes}" />
   </target>
 
-  <target name="compile.test" depends="test.init, dist, init" description="Compiles the testing classes">
+  <target name="setup-dependencies">
+	<path id="maven-ant-tasks.classpath" path="lib/maven-ant-tasks-2.0.7.jar" />
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml" 
+  		uri="urn:maven-artifact-ant" classpathref="maven-ant-tasks.classpath" />
+  	<artifact:pom id="maven.project" file="pom.xml" />
+  </target>
+	
+  <target name="check-dependencies" depends="init" 
+	description="Check if the dependencies present in ${lib-ext}">
+  	<!-- In order to re-generate the ${lib-ext} directory, delete the {lib-ext}/dependencies file -->
+    <available file="${lib-ext}/dependencies" type="file" property="dependencies.present"/>
+  </target>
+  
+  <target name="copy-dependencies" depends="init,setup-dependencies,check-dependencies" 
+  	unless="dependencies.present"
+  	description="Download and copy test dependencies to the ${lib-ext} directory (only once)">
+   	<artifact:dependencies filesetId="dependencies.fileset" pathId="dependencies.path">
+   		<pom refid="maven.project"/>
+   	</artifact:dependencies>
+  	<!-- <delete dir="${lib-ext}" includes="*"/> -->
+  	<copy todir="${lib-ext}" flatten="true">
+  		<fileset refid="dependencies.fileset"/>
+  	</copy>
+  	<pathconvert refid="dependencies.path"  property="dependencies.string"/>
+  	<echo file="${lib-ext}/dependencies"> ${dependencies.string} </echo>
+  </target>			
+
+  <target name="compile.test" depends="test.init, dist, init, copy-dependencies" description="Compiles the testing classes">
     <javac debug="true" source="1.4" srcdir="${test.src}" destdir="${test.classes}">
       <classpath refid="jarClasspath" />
     </javac>
   </target>
+	
+  <target name="test.junit" depends="compile, compile.test">
+  	<property name="test.reports" value="${build}/testreports"/>
+  	<mkdir dir="${test.reports}"/>
+  	<junit printsummary="withOutAndErr" showoutput="true" haltonfailure="yes">
+  		<classpath >
+  			<path refid="default-classpath"/>
+  			<pathelement location="${build}"/>
+  			<pathelement location="${test.classes}"/>
+  			</classpath>
+  		<formatter type="plain"/>
+  		<batchtest fork="yes" todir="${test.reports}">
+			<fileset dir="${test.classes}">
+				<include name="**/*TestCase.class"/>
+				<exclude name="**/*Suite.class"/>
+			</fileset>
+  		</batchtest>
+  	</junit>
+  </target>
 
-  <target name="test.dist" depends="compile.test,dist,init" description="Creates a war with the test files">
+
+  <target name="test.dist" depends="compile.test,dist,init,test.junit" description="Creates a war with the test files">
     <copy file="${app-jar}" tofile="${webinf}/lib/${app-jar}" />
     <copy file="${test.src}/org/jabsorb/test/Hello.java" tofile="${webapp}/Hello.java.txt" />
     <copy file="${webapp}/hello.jsp" tofile="${webapp}/hello.jsp.txt" />
@@ -107,6 +154,7 @@
       </classpath>
       <package name="org.jabsorb" />
       <package name="org.jabsorb.reflect" />
+      <package name="org.jabsorb.client" />
       <package name="org.jabsorb.callback" />
       <package name="org.jabsorb.localarg" />
       <package name="org.jabsorb.localarg.impl" />
