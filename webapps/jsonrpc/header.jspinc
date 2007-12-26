@@ -23,7 +23,7 @@
     <h1><img align="left" src="images/orb.png" width="55" height="55" hspace="6" vspace="0" alt="ORB"/><%=appName%></h1>
     <div class="tagline">Java to JavaScript Object Request Broker</div>
     <hr>
-    <div class="menu"><a href="http://code.google.com/p/jabsorb/">Home</a> | <%=appName%> (<%=version%>) : <a href="index.html">Demos</a> | <a href="http://code.google.com/p/jabsorb/w/list">Documentation</a> | <a href="docs/">Javadoc</a> | <a href="CHANGES.txt">Changelog</a></div>
+    <div class="menu"><a href="http://jabsorb.org">Home</a> | <%=appName%> (<%=version%>) : <a href="index.jsp">Demos</a> | <a href="http://jabsorb.org/Documentation">Documentation</a> | <a href="docs/">Javadoc</a> | <a href="CHANGES.txt">Changelog</a></div>
 
           </td>
         </tr>
