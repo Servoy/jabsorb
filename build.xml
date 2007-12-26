@@ -1,7 +1,7 @@
 <!--
 
   jabsorb - a Java to JavaScript Advanced Object Request Broker
-  http://www.jabsorb.org
+  http://jabsorb.org
 
   Copyright 2007 The jabsorb team
 
@@ -66,7 +66,6 @@
     <tstamp />
     <mkdir dir="${test.lib}" />
     <mkdir dir="${test.classes}" />
-    <mkdir dir="${jsp.out}" />
   </target>
 
   <target name="compile.test" depends="test.init, dist, init" description="Compiles the testing classes">
@@ -95,13 +94,13 @@
   </target>
 
   <target name="docs" depends="init" description="Creates the javadoc api documentation">
-    <echo message="Making docs from ${jsp.out}" />
+    <echo message="Making docs to ${webapp}/docs" />
     <javadoc source="1.4" sourcepath="${src}"
              destdir="${webapp}/docs"
              public="true"
              nodeprecated="true"
              windowtitle="${app} ${version} API"
-             Header="&lt;b&gt;&lt;a href=&quot;http://www.jabsorb.org&quot;&gt;${app} ${version}&lt;/a&gt;&lt;/b&gt;">
+             Header="&lt;b&gt;&lt;a href=&quot;http://jabsorb.org&quot;&gt;${app} ${version}&lt;/a&gt;&lt;/b&gt;">
       <classpath>
         <path refid="default-classpath" />
         <pathelement path="${app-jar}" />
@@ -172,7 +171,6 @@
       <fileset dir="${webapp}/docs" />
       <fileset dir="${test.lib}" />
       <fileset dir="${test.classes}" />
-      <fileset dir="${jsp.out}" />
     </delete>
     
     <echo message="Done with clean!" />
@@ -212,7 +210,6 @@
 <!--      <fileset dir="${webapp}/docs" /> -->
       <fileset dir="${test.lib}" />
       <fileset dir="${test.classes}" />
-      <fileset dir="${jsp.out}" />
     </delete>
     <echo message="Done with release-prep-clean!" />
   </target>
