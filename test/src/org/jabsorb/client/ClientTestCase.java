@@ -83,6 +83,9 @@ public class ClientTestCase extends ServerTestBase
   }
   */
 
+  /**
+   * Test for invalid URL
+   */
   public void testBadClient()
   {
     Client badClient = new Client(registry
