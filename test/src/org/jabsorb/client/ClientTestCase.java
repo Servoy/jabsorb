@@ -24,19 +24,15 @@
 package org.jabsorb.client;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.Arrays;
 
-/*
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
-*/
 import org.jabsorb.test.Test;
-import org.jabsorb.test.TestImpl;
-import org.jabsorb.test.Test.Waggle;
-import org.jabsorb.test.Test.Wiggle;
 
 /**
  * This test implements some of Jabsorb tests.
@@ -44,16 +40,19 @@ import org.jabsorb.test.Test.Wiggle;
 public class ClientTestCase extends ServerTestBase
 {
 
-//  HttpState         state;
+  HttpState         state;
 
   TransportRegistry registry;
+  
+  public ClientTestCase() {
+	  
+  }
 
   protected void setUp() throws Exception
   {
     super.setUp(); // Makes sure jabsorb server tests are running at this URL
 
     registry = new TransportRegistry();
-
   }
 
   TransportRegistry getRegistry()
@@ -68,7 +67,6 @@ public class ClientTestCase extends ServerTestBase
    * registerObject("test", ...) from the JSP
    * @deprecated since we are running the server in-process
    */
-  /*
   void setupServerTestEnvironment(String url) throws HttpException, IOException
   {
     HttpClient client = new HttpClient();
@@ -81,7 +79,6 @@ public class ClientTestCase extends ServerTestBase
           "Setup did not succeed. Make sure the JSON-RPC-Java test application is running on "
               + getServiceRootURL());
   }
-  */
 
   /**
    * Test for invalid URL
@@ -109,29 +106,32 @@ public class ClientTestCase extends ServerTestBase
     Test test = (Test) client.openProxy("test", Test.class);
     basicClientTest(test);
   }
-
-  /* TODO check the HTTPSession back in
+  
+  HTTPSession newHTTPSession(String url) {
+	  try {
+		  TransportRegistry reg= getRegistry();
+		  // Note: HTTPSession is not registered by default. Normally you would
+		  // register during initialization. In this test, we are testing different
+		  // states of the registry, hence we register it here and clean up afterwards
+		  HTTPSession.register(reg);		
+		  // Note: will not work without registering HTTPSession, see #setUp() 
+	      return (HTTPSession) getRegistry().createSession(url);
+	  }
+      finally
+      {
+        // Modified the registry; let's clean up after ourselves. Next call
+    	// to getRegistry will create a new one
+        registry = null;
+      }
+  }
+  
   public void testHTTPSession()
   {
-    try
-    {
-      TransportRegistry reg = getRegistry();
-      HTTPSession.register(reg);
-      HTTPSession httpSession = (HTTPSession) reg
-          .createSession(getServiceRootURL() + "/JSON-RPC");
-      httpSession.setState(state);
-      Client client = new Client(httpSession);
+      Client client = new Client(newHTTPSession(getServiceURL()));
       Test test = (Test) client.openProxy("test", Test.class);
       basicClientTest(test);
-   }
-    finally
-    {
-      // Modified the registry; let's clean up after ourselves
-      registry = null;
-    }
   }
-  */
-
+  
   void basicClientTest(Test test)
   {
     test.voidFunction();
@@ -156,4 +156,24 @@ public class ClientTestCase extends ServerTestBase
     assertEquals(doublo, test.echoDoubleObject(doublo));
   }
 
+  // TODO run embedded proxy server (is  Jetty capable of working like a proxy?) to really test proxy.
+  // Right now, we are just testing that the proxy parameters are being set
+  public void testProxyConfiguration() {
+	  HTTPSession proxiedSession= newHTTPSession(getServiceURL());
+	  int proxyPort= 40888;	// hopefully, the port is unused
+	  proxiedSession.getHostConfiguration().setProxy("localhost", proxyPort);
+	  Client client = new Client(proxiedSession);
+	  Test proxyObject= (Test)client.openProxy("test", Test.class);
+	  try {
+		  proxyObject.voidFunction();
+	  } catch(ClientError ex) {
+		  if ( !(ex.getCause() instanceof ConnectException) )
+			  fail("expected ConnectException, got " + ex.getCause().getClass().getName());
+	  }
+  }
+
+
+  String getServiceURL() {
+	  return getServiceRootURL() + "/JSON-RPC";
+  }
 }
