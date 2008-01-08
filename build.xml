@@ -53,13 +53,14 @@
   </target>
 
   <target name="compile" depends="init,init-build, copy-dependencies" description="Compiles the source into the build directory">
-    <javac debug="true" source="1.4" srcdir="${src}" destdir="${build}">
+	<mkdir dir="${build.classes}"/>
+  	<javac debug="true" source="1.4" srcdir="${src}" destdir="${build.classes}">
       <classpath refid="default-classpath" />
     </javac>
   </target>
 
   <target name="dist" depends="compile,compress-web-content,init-build" description="Puts the compiled source into a jar">
-    <jar destfile="${app-jar}" basedir="${build}" excludes="*~" />
+    <jar destfile="${app-jar}" basedir="${build.classes}" excludes="*~" />
   </target>
 
   <target name="test.init" depends="init" description="Makes directories needed for the test jsps">
@@ -107,7 +108,7 @@
   	<junit printsummary="withOutAndErr" showoutput="true" haltonfailure="yes">
   		<classpath >
   			<path refid="default-classpath"/>
-  			<pathelement location="${build}"/>
+  			<pathelement location="${build.classes}"/>
   			<pathelement location="${test.classes}"/>
   			</classpath>
   		<formatter type="plain"/>
