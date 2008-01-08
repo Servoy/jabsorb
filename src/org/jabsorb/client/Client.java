@@ -45,7 +45,7 @@ public class Client implements InvocationHandler
 
   Session        session;
 
-  JSONSerializer message2Object;
+  JSONSerializer serializer;
 
   /**
    * Create a client given a session
@@ -58,8 +58,8 @@ public class Client implements InvocationHandler
     try
     {
       this.session = session;
-      message2Object = new JSONSerializer();
-      message2Object.registerDefaultSerializers();
+      serializer = new JSONSerializer();
+      serializer.registerDefaultSerializers();
     }
     catch (Exception e)
     {
@@ -131,43 +131,43 @@ public class Client implements InvocationHandler
       return proxyObj.getClass().getName() + '@'
           + Integer.toHexString(proxyObj.hashCode());
     }
-    JSONObject message = new JSONObject();
-    String tag = proxyMap.getString(proxyObj);
-    String methodTag = tag == null ? "" : tag + ".";
-    methodTag += methodName;
-    message.put("method", methodTag);
-
-    JSONArray params = new JSONArray();
-    if (args != null)
-    {
-      for (int argNo = 0; argNo < args.length; argNo++)
-      {
-        Object arg = args[argNo];
-        SerializerState state = new SerializerState();
-        params.put(message2Object.marshall(state, /* parent */null, arg,
-            new Integer(argNo)));
-      }
-    }
-    message.put("params", params);
-    message.put("id", 1);
-    JSONObject responseMessage = session.sendAndReceive(message);
-    if (!responseMessage.has("result"))
-      processException(responseMessage);
-    Object rawResult = responseMessage.get("result");
-    if (rawResult == null)
-    {
-      processException(responseMessage);
-    }
-    Class returnType = method.getReturnType();
-    if (returnType.equals(Void.TYPE))
-      return null;
-    SerializerState state = new SerializerState();
-    return message2Object.unmarshall(state, returnType, rawResult);
+    return invoke(proxyMap.getString(proxyObj), method.getName(), args, method.getReturnType());
   }
+  
+  private Object invoke(String objectTag, String methodName, Object[] args, Class returnType) throws Exception {
+		JSONObject message= new JSONObject();
+		String methodTag= objectTag == null ? "" : objectTag + ".";
+		methodTag+= methodName;
+		message.put("method", methodTag);
+
+		JSONArray params= new JSONArray();
+		if (args != null) {
+			for (int argNo= 0; argNo < args.length; argNo++) {
+				Object arg= args[argNo];
+				SerializerState state= new SerializerState();
+				params.put(serializer.marshall(state, /* parent */null, arg, new Integer(argNo)));
+			}
+		}
+		message.put("params", params);
+		message.put("id", 1);
+		
+		JSONObject responseMessage= session.sendAndReceive(message);
+
+		if (!responseMessage.has("result"))
+			processException(responseMessage);
+		Object rawResult= responseMessage.get("result");
+		if (rawResult == null) {
+			processException(responseMessage);
+		}
+		if (returnType.equals(Void.TYPE))
+			return null;
+		SerializerState state= new SerializerState();
+		return serializer.unmarshall(state, returnType, rawResult);
+	}
 
   /**
-   * Generate and throw exception based on the data in the 'responseMessage'
-   */
+	 * Generate and throw exception based on the data in the 'responseMessage'
+	 */
   private void processException(JSONObject responseMessage)
       throws JSONException
   {
