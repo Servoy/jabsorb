@@ -45,7 +45,7 @@ public class URLConnectionSession implements Session
       request.close();
       // TODO the following sequence of reading a string out of output stream is too complicated
       // there must be a simpler way
-      StringBuilder builder = new StringBuilder(1024);
+      StringBuffer builder = new StringBuffer(1024);
       char[] buffer = new char[1024];
       Reader reader = new InputStreamReader(connection.getInputStream());
       while (true)
