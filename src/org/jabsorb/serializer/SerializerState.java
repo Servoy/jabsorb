@@ -27,7 +27,7 @@
 package org.jabsorb.serializer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -41,11 +41,11 @@ import java.util.Map;
 public class SerializerState
 {
   /**
-   * The key is the identity hash code of a processed object wrapped in an Integer object.
-   * The value is a ProcessedObject instance which contains both the object that was processed, and
-   * other information about the object used for generating fixups when marshalling.
+   * The key is the processed object.  The value is a ProcessedObject instance 
+   * which contains both the object that was processed, and other information 
+   * about the object used for generating fixups when marshalling.
    */
-  private Map processedObjects = new HashMap();
+  private Map processedObjects = new IdentityHashMap();
 
   /**
    * A List of FixUp objects that are generated during processing for circular references
@@ -96,7 +96,7 @@ public class SerializerState
   {
     // get unique key for this object
     // this is the basis for determining if we have already processed the object or not.
-    return (ProcessedObject) processedObjects.get(new Integer(System.identityHashCode(object)));
+    return (ProcessedObject) processedObjects.get(object);
   }
 
   /**
@@ -172,7 +172,7 @@ public class SerializerState
     p.setParent(parentProcessedObject);
     p.setObject(obj);
 
-    processedObjects.put(p.getUniqueId(),p);
+    processedObjects.put(obj, p);
     if (ref != null)
     {
       p.setRef(ref);
@@ -219,7 +219,7 @@ public class SerializerState
     ProcessedObject p = new ProcessedObject();
     p.setObject(obj);
 
-    processedObjects.put(p.getUniqueId(),p);
+    processedObjects.put(obj, p);
     return p;
   }
 }
