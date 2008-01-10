@@ -89,18 +89,6 @@ public class ProcessedObject
   }
 
   /**
-   * Get the unique id for this ProcessedObject.
-   * This is the basis for determining if the ProcessedObject has already been processed or not, and therefore
-   * for detecting if it is a circular reference and/or duplicate object.
-   *
-   * @return the unique id for this ProcessedObject.
-   */
-  public Integer getUniqueId()
-  {
-    return new Integer(System.identityHashCode(object));
-  }
-
-  /**
    * Set the source object that is being processed.  This is the java object that is being marshalled into json
    * or the json object that is being unmarshalled into Java.
    *
