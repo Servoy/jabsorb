@@ -120,8 +120,8 @@ public class JSONSerializer implements Serializable
   private boolean fixupDuplicates = true;
 
   /**
-   * Are FixUps are generated for primitive objects (classes of type String, 
-   * Boolean, Integer, Boolean, Long, Byte, Double, Float and Short) 
+   * Are FixUps are generated for primitive objects (classes of type String,
+   * Boolean, Integer, Boolean, Long, Byte, Double, Float and Short)
    * This flag will have no effect if fixupDuplicates is false.
    */
   private boolean fixupDuplicatePrimitives = false;
@@ -131,17 +131,17 @@ public class JSONSerializer implements Serializable
    * that should not be fixed up when fixupDuplicatePrimitives is false.
    */
   protected static Class[] duplicatePrimitiveTypes =
-  { 
-    String.class, Integer.class, Boolean.class, Long.class, 
-    Byte.class, Double.class, Float.class, Short.class 
+  {
+    String.class, Integer.class, Boolean.class, Long.class,
+    Byte.class, Double.class, Float.class, Short.class
   };
 
   /**
-   * Determine if this serializer considers the given Object to be a primitive  
-   * wrapper type Object.  This is used to determine which types of Objects 
+   * Determine if this serializer considers the given Object to be a primitive
+   * wrapper type Object.  This is used to determine which types of Objects
    * should be fixed up as duplicates if the fixupDuplicatePrimitives flag
    * is false.
-   *  
+   *
    * @param o Object to test for primitive.
    */
   public boolean isPrimitive(Object o)
@@ -152,7 +152,7 @@ public class JSONSerializer implements Serializable
     }
 
     Class c = o.getClass();
-    
+
     for (int i=0,j=duplicatePrimitiveTypes.length; i<j; i++)
     {
       if (duplicatePrimitiveTypes[i] == c)
@@ -210,8 +210,8 @@ public class JSONSerializer implements Serializable
   }
 
   /**
-   * Get the fixupDuplicatePrimitives flag.  If true (and fixupDuplicates is 
-   * also true), FixUps are generated for duplicate primitive objects found 
+   * Get the fixupDuplicatePrimitives flag.  If true (and fixupDuplicates is
+   * also true), FixUps are generated for duplicate primitive objects found
    * during marshalling.  If false, the duplicates are re-serialized.
    *
    * @return the fixupDuplicatePrimitives flag.
@@ -222,8 +222,8 @@ public class JSONSerializer implements Serializable
   }
 
   /**
-   * Set the fixupDuplicatePrimitives flag.  If true (and fixupDuplicates is 
-   * also true), FixUps are generated for duplicate primitive objects found 
+   * Set the fixupDuplicatePrimitives flag.  If true (and fixupDuplicates is
+   * also true), FixUps are generated for duplicate primitive objects found
    * during marshalling. If false, the duplicates are re-serialized.
    *
    * @param fixupDuplicatePrimitives the fixupDuplicatePrimitives flag.
@@ -232,10 +232,10 @@ public class JSONSerializer implements Serializable
   {
     this.fixupDuplicatePrimitives = fixupDuplicatePrimitives;
   }
-  
+
   /**
    * Convert a string in JSON format into Java objects.
-   * 
+   *
    * @param jsonString The JSON format string.
    * @return An object (or tree of objects) representing the data in the JSON
    *         format string.
@@ -262,7 +262,7 @@ public class JSONSerializer implements Serializable
    * name of objects being serialized? This can be helpful when unmarshalling,
    * though if not needed can be left out in favor of increased performance and
    * smaller size of marshalled String. Default is true.
-   * 
+   *
    * @return whether Java Class hints are included in the serialised JSON
    *         objects
    */
@@ -276,7 +276,7 @@ public class JSONSerializer implements Serializable
    * serialized JSON object. Defaults to true. Set to false for performance
    * gains and small JSON serialized size. Useful because null and undefined for
    * JSON object attributes is virtually the same thing.
-   * 
+   *
    * @return boolean value as to whether null attributes will be in the
    *         serialized JSON objects
    */
@@ -298,7 +298,7 @@ public class JSONSerializer implements Serializable
    * of the given java object and then invoking it to marshall the java object
    * into json. <p/> The Serializer will invoke this method recursively while
    * marshalling complex object graphs.
-   * 
+   *
    * @param state can be used by the underlying Serializer objects to hold state
    *          while marshalling.
    *
@@ -353,10 +353,10 @@ public class JSONSerializer implements Serializable
         throw new MarshallException("Circular Reference");
       }
 
-      // if its a duplicate only, and we aren't fixing up duplicates or if 
+      // if its a duplicate only, and we aren't fixing up duplicates or if
       // it is a primitive, and fixing up of primitives is not allowed then
       // re-serialize the object into the json.
-      if (!foundCircRef  && 
+      if (!foundCircRef  &&
          (!fixupDuplicates || (!fixupDuplicatePrimitives && isPrimitive(java))))
       {
         //todo: if a duplicate is being reserialized... it will overwrite the original location of the
@@ -394,9 +394,9 @@ public class JSONSerializer implements Serializable
 
   /**
    * Register all of the provided standard serializers.
-   * 
+   *
    * @throws Exception If a serialiser has already been registered for a class.
-   * 
+   *
    * TODO: Should this be thrown: This can only happen if there is an internal
    * problem with the code
    */
@@ -432,10 +432,10 @@ public class JSONSerializer implements Serializable
    * serializers. This is because when the JSONSerializer is trying to find a
    * serializer, if it can't find the serializer by a direct match, it will
    * search for a serializer in the reverse order that they were registered.
-   * 
+   *
    * @param s A class implementing the Serializer interface (usually derived
    *          from AbstractSerializer).
-   * 
+   *
    * @throws Exception If a serialiser has already been registered for a class.
    */
   public void registerSerializer(Serializer s) throws Exception
@@ -479,7 +479,7 @@ public class JSONSerializer implements Serializable
    * name of objects being serialized? This can be helpful when unmarshalling,
    * though if not needed can be left out in favor of increased performance and
    * smaller size of marshalled String. Default is true.
-   * 
+   *
    * @param marshallClassHints flag to enable/disable inclusion of Java class
    *          hints in the serialized JSON objects
    */
@@ -493,7 +493,7 @@ public class JSONSerializer implements Serializable
    * serialized JSON object. Defaults to true. Set to false for performance
    * gains and small JSON serialized size. Useful because null and undefined for
    * JSON object attributes is virtually the same thing.
-   * 
+   *
    * @param marshallNullAttributes flag to enable/disable marshalling of null
    *          attributes in the serialized JSON objects
    */
@@ -537,7 +537,7 @@ public class JSONSerializer implements Serializable
    * This is only used when there are overloaded method names that are being called
    * from JSON-RPC to determine which call signature the method call matches most
    * closely and therefore which method is the intended target method to call.
-   * </p> 
+   * </p>
    * @param state used by the underlying Serializer objects to hold state
    *          while unmarshalling for detecting circular references and duplicates.
    *
@@ -611,7 +611,7 @@ public class JSONSerializer implements Serializable
    * the correct Serializer to use and then delegating to that Serializer to
    * unmarshall for us. This method will be invoked recursively as Serializers
    * unmarshall complex object graphs.
-   * 
+   *
    * @param state used by the underlying Serializer objects to hold state
    *          while unmarshalling for detecting circular references and duplicates.
    *
@@ -679,7 +679,7 @@ public class JSONSerializer implements Serializable
       return s.unmarshall(state, clazz, json);
     }
 
-    throw new UnmarshallException("no serializer found that can unmarshall " + 
+    throw new UnmarshallException("no serializer found that can unmarshall " +
       (jsonClass!=null?jsonClass.getName():"null") + " to " +  clazz.getName());
   }
 
@@ -693,7 +693,7 @@ public class JSONSerializer implements Serializable
    * object is neither a JSONObject or JSONArray, return the Class of the object
    * directly. (this implies a primitive type, such as String, Integer or
    * Boolean)
-   * 
+   *
    * @param o a JSONObject or JSONArray object to get the Class type from the
    *          javaClass hint.
    * @return the Class of javaClass hint found, or null if the passed in Object
@@ -714,15 +714,15 @@ public class JSONSerializer implements Serializable
     }
     if (o instanceof JSONObject)
     {
+      String className = "(unknown)";
       try
       {
-        String class_name = ((JSONObject) o).getString("javaClass");
-        Class clazz = Class.forName(class_name);
-        return clazz;
+        className = ((JSONObject) o).getString("javaClass");
+        return Class.forName(className);
       }
       catch (Exception e)
       {
-        throw new UnmarshallException("class in hint not found", e);
+        throw new UnmarshallException("Class specified in javaClass hint not found: " + className, e);
       }
     }
     if (o instanceof JSONArray)
@@ -760,7 +760,7 @@ public class JSONSerializer implements Serializable
 
   /**
    * Find the serializer for the given Java type and/or JSON type.
-   * 
+   *
    * @param clazz The Java class to lookup.
    * @param jsoClazz The JSON class type to lookup (may be null in the
    *          marshalling case in which case only the class is used to lookup
@@ -807,9 +807,9 @@ public class JSONSerializer implements Serializable
 
   /**
    * Reads an object, serialising each
-   * 
+   *
    * TODO: This is not used!
-   * 
+   *
    * @param in The stream to take an object to serialise
    * @throws java.io.IOException if the object can't be read from the stream
    * @throws ClassNotFoundException If a class cannot be found for the object to
