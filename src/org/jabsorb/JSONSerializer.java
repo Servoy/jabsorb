@@ -714,15 +714,15 @@ public class JSONSerializer implements Serializable
     }
     if (o instanceof JSONObject)
     {
+      String className = "(unknown)";
       try
       {
-        String class_name = ((JSONObject) o).getString("javaClass");
-        Class clazz = Class.forName(class_name);
-        return clazz;
+        className = ((JSONObject) o).getString("javaClass");
+        return Class.forName(className);
       }
       catch (Exception e)
       {
-        throw new UnmarshallException("class in hint not found", e);
+        throw new UnmarshallException("Class specified in javaClass hint not found: " + className, e);
       }
     }
     if (o instanceof JSONArray)
