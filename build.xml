@@ -122,7 +122,7 @@
   </target>
 
 
-  <target name="test.dist" depends="compile.test,dist,init,test.junit" description="Creates a war with the test files">
+  <target name="test.dist" depends="compile.test,dist,init" description="Creates a war with the test files">
     <copy file="${app-jar}" tofile="${webinf}/lib/${app-jar}" />
     <copy file="${test.src}/org/jabsorb/test/Hello.java" tofile="${webapp}/Hello.java.txt" />
     <copy file="${webapp}/hello.jsp" tofile="${webapp}/hello.jsp.txt" />
