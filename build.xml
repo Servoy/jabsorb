@@ -70,7 +70,12 @@
 
   <target name="compile.test" depends="test.init, dist, init" description="Compiles the testing classes">
     <javac debug="true" source="1.4" srcdir="${test.src}" destdir="${test.classes}">
-      <classpath refid="jarClasspath" />
+      <classpath>
+      	<path refid="jarClasspath" />
+        <fileset dir="${lib-test}">
+          <include name="*.jar"/>
+        </fileset>
+     </classpath>
     </javac>
   </target>
 

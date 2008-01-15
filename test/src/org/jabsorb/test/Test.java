@@ -51,7 +51,7 @@ import org.json.JSONObject;
 /**
  * Server side unit tests, used by unit.jsp / unit.js.
  */
-public class Test implements Serializable
+public class Test implements Serializable, ITest
 {
   
   
@@ -702,4 +702,5 @@ public class Test implements Serializable
     {
     }
   };
+  
 }
