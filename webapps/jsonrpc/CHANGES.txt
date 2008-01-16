@@ -1,6 +1,6 @@
 CHANGES log
 
-2008-01-15 jabsorb 1.2.2 release
+2008-01-16 jabsorb 1.2.2 release
 
 * The json-rpc-client is now part of jabsorb, under the new package 
   org.jabsorb.client.  Thanks to Sasha Ovanskin for this extremely useful 
