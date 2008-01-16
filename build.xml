@@ -110,15 +110,9 @@
         <path refid="default-classpath" />
         <pathelement path="${app-jar}" />
       </classpath>
-      <package name="org.jabsorb" />
-      <package name="org.jabsorb.reflect" />
-      <package name="org.jabsorb.callback" />
-      <package name="org.jabsorb.localarg" />
-      <package name="org.jabsorb.localarg.impl" />
-      <package name="org.jabsorb.serializer" />
-      <package name="org.jabsorb.serializer.impl" />
-      <package name="org.jabsorb.json" />
-      <package name="org.json" />
+
+      <package name="org.jabsorb.*" />
+      <package name="org.json.*" />
 
       <!-- note that the jdk source code is referenced here so that javadoc will be generated from
           interface class methods when none is specified in the implementation -->
