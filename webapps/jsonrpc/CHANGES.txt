@@ -1,5 +1,18 @@
 CHANGES log
 
+2008-01-15 jabsorb 1.2.2 release
+
+* The json-rpc-client is now part of jabsorb, under the new package 
+  org.jabsorb.client.  Thanks to Sasha Ovanskin for this extremely useful 
+  addition to jabsorb.
+
+* Changed internal circular and duplicate reference detection to use an 
+  IdentityHashmap.
+ 
+* Improved the message for an exception that can be thrown when a javaClass 
+  hint cannot be found or instantiated.  Thanks to Stanley Knutson for the 
+  suggestion.  
+
 2007-12-26 jabsorb 1.2.1 release
 
 * More improvements to exception handling; exception cause is included whenever
