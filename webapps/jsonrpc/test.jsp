@@ -1,6 +1,7 @@
 <%@
 page contentType="text/html; charset=UTF-8" %><%@
 page language="java" %><%@
+page import="org.jabsorb.test.ITest" %><%@
 page import="org.jabsorb.test.Test"
 %><jsp:useBean id="JSONRPCBridge" scope="session"
      class="org.jabsorb.JSONRPCBridge"

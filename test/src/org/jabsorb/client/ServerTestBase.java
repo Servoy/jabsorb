@@ -25,7 +25,7 @@ public class ServerTestBase extends TestCase
 	  
 	  public ServerContext() throws Exception {
 			port= 8083;
-			JSONRPCBridge.getGlobalBridge().registerObject("test", new org.jabsorb.test.TestImpl());
+			JSONRPCBridge.getGlobalBridge().registerObject("test", new org.jabsorb.test.Test());
 			server= new Server(port);
 			context= new Context(server, JABSORB_CONTEXT, Context.SESSIONS);
 			ServletHolder jsonRpcServlet= new ServletHolder(new JSONRPCServlet());

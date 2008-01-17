@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.SerializerState;
-import org.jabsorb.test.Test.Waggle;
+import org.jabsorb.test.ITest.Waggle;
 import org.json.JSONObject;
 
 import junit.framework.TestCase;
@@ -71,11 +71,11 @@ public class TestSerializer extends TestCase
   {
     SerializerState marshallerState = new SerializerState();
     SerializerState unmarshallerState = new SerializerState();
-    Test.Waggle waggle = new Test.Waggle(1);
+    ITest.Waggle waggle = new ITest.Waggle(1);
     JSONObject json1 = (JSONObject) ser.marshall(marshallerState, null, waggle,
         "waggle");
-    Test.Waggle unmarshalled = (Test.Waggle) ser.unmarshall(unmarshallerState,
-        Test.Waggle.class, json1);
+    ITest.Waggle unmarshalled = (ITest.Waggle) ser.unmarshall(unmarshallerState,
+        ITest.Waggle.class, json1);
     assertEquals(waggle.toString(), unmarshalled.toString());
     marshallerState = new SerializerState();
     JSONObject json2 = (JSONObject) ser.marshall(marshallerState, null,

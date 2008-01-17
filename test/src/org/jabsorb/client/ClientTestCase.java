@@ -32,7 +32,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.jabsorb.test.Test;
+import org.jabsorb.test.ITest;
 
 /**
  * This test implements some of Jabsorb tests.
@@ -89,7 +89,7 @@ public class ClientTestCase extends ServerTestBase
         .createSession("http://non-existing-server:99"));
     try
     {
-      Test badTest = (Test) badClient.openProxy("test", Test.class);
+      ITest badTest = (ITest) badClient.openProxy("test", ITest.class);
       badTest.voidFunction();
       fail();
     }
@@ -103,7 +103,7 @@ public class ClientTestCase extends ServerTestBase
   {
     Client client = new Client(getRegistry().createSession(
         getServiceRootURL() + "/JSON-RPC"));
-    Test test = (Test) client.openProxy("test", Test.class);
+    ITest test = (ITest) client.openProxy("test", ITest.class);
     basicClientTest(test);
   }
   
@@ -128,11 +128,11 @@ public class ClientTestCase extends ServerTestBase
   public void testHTTPSession()
   {
       Client client = new Client(newHTTPSession(getServiceURL()));
-      Test test = (Test) client.openProxy("test", Test.class);
+      ITest test = (ITest) client.openProxy("test", ITest.class);
       basicClientTest(test);
   }
   
-  void basicClientTest(Test test)
+  void basicClientTest(ITest test)
   {
     test.voidFunction();
     assertEquals("hello", test.echo("hello"));
@@ -141,9 +141,9 @@ public class ClientTestCase extends ServerTestBase
     assertTrue(Arrays.equals(ints, test.echo(ints)));
     String[] strs = { "foo", "bar", "baz" };
     assertTrue(Arrays.equals(strs, test.echo(strs)));
-    Test.Wiggle wiggle = new Test.Wiggle();
+    ITest.Wiggle wiggle = new ITest.Wiggle();
     assertEquals(wiggle.toString(), test.echo(wiggle).toString());
-    Test.Waggle waggle = new Test.Waggle(1);
+    ITest.Waggle waggle = new ITest.Waggle(1);
     assertEquals(waggle.toString(), test.echo(waggle).toString());
     assertEquals('?', test.echoChar('?'));
     Integer into = new Integer(1234567890);
@@ -163,7 +163,7 @@ public class ClientTestCase extends ServerTestBase
 	  int proxyPort= 40888;	// hopefully, the port is unused
 	  proxiedSession.getHostConfiguration().setProxy("localhost", proxyPort);
 	  Client client = new Client(proxiedSession);
-	  Test proxyObject= (Test)client.openProxy("test", Test.class);
+	  ITest proxyObject= (ITest)client.openProxy("test", ITest.class);
 	  try {
 		  proxyObject.voidFunction();
 	  } catch(ClientError ex) {

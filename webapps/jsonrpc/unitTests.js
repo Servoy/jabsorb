@@ -246,8 +246,8 @@ var unitTests={
       { code: 'jsonrpc.test.aBean()',
         test: 'result != null'
       },
-      { code: 'jsonrpc.test.echoObject({ "javaClass": "org.jabsorb.test.Test$Waggle", "bang": "foo", "baz": 9, "bork": 5 })',
-        test: 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9 && result.bork == 5'
+      { code: 'jsonrpc.test.echoObject({ "javaClass": "org.jabsorb.test.ITest$Waggle", "bang": "foo", "baz": 9, "bork": 5 })',
+        test: 'result.javaClass == "org.jabsorb.test.ITest$Waggle" && result.bang =="foo" && result.baz == 9 && result.bork == 5'
       },
       { code: 'jsonrpc.test.echoRawJSON({ a: false})',
         test: 'result.a === false '
@@ -258,8 +258,8 @@ var unitTests={
       { code: 'jsonrpc.test.echoRawJSON({ a: 0})',
         test: 'result.a === 0 '
       },
-      { code: 'jsonrpc.test.echoObjectArray([{ "javaClass": "org.jabsorb.test.Test$Waggle", "bang": "foo", "baz": 9, "bork": 5 }])',
-        test: 'result[0].javaClass == "org.jabsorb.test.Test$Waggle" && result[0].bang =="foo" && result[0].baz == 9 && result[0].bork == 5'
+      { code: 'jsonrpc.test.echoObjectArray([{ "javaClass": "org.jabsorb.test.ITest$Waggle", "bang": "foo", "baz": 9, "bork": 5 }])',
+        test: 'result[0].javaClass == "org.jabsorb.test.ITest$Waggle" && result[0].bang =="foo" && result[0].baz == 9 && result[0].bork == 5'
       },
       { code: 'jsonrpc.test.echoRawJSON({ "field1": "test" })',
         test: 'result.field1 == "test"'
@@ -404,16 +404,16 @@ var unitTests={
         test: 'result.map.constructor == Object'
       },
       { code: 'jsonrpc.test.echo({ bang: "foo", baz: 9 })',
-        test: 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9'
+        test: 'result.javaClass == "org.jabsorb.test.ITest$Waggle" && result.bang =="foo" && result.baz == 9'
       },
       { code: 'jsonrpc.test.echo({ bang: "foo", baz: 9, bork: 5 })',
-        test: 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9'
+        test: 'result.javaClass == "org.jabsorb.test.ITest$Waggle" && result.bang =="foo" && result.baz == 9'
       },
       { code: 'jsonrpc.test.echo({ bang: "foo", baz: 9, bork: null })',
-        test: 'result.javaClass == "org.jabsorb.test.Test$Waggle" && result.bang =="foo" && result.baz == 9'
+        test: 'result.javaClass == "org.jabsorb.test.ITest$Waggle" && result.bang =="foo" && result.baz == 9'
       },
       { code: 'jsonrpc.test.echo({ foo: "bang", bar: 11 })',
-        test: 'result.javaClass == "org.jabsorb.test.Test$Wiggle" && result.foo =="bang" && result.bar == 11'
+        test: 'result.javaClass == "org.jabsorb.test.ITest$Wiggle" && result.foo =="bang" && result.bar == 11'
       }
     ]
   },
