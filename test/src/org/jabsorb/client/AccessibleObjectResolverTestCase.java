@@ -15,7 +15,7 @@ import org.json.JSONArray;
 
 import junit.framework.TestCase;
 
-public class AccessibleObjectResolverTest extends TestCase {
+public class AccessibleObjectResolverTestCase extends TestCase {
 	AccessibleObjectResolver resolver;
 	Map methodMap;
 	JSONSerializer serializer;
