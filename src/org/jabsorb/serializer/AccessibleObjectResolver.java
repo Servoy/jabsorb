@@ -58,27 +58,27 @@ public class AccessibleObjectResolver
    */
   private final static Logger log = LoggerFactory
       .getLogger(AccessibleObjectResolver.class);
-  
+
   /**
-   * This is used to order the preference of primitives, as used when 
+   * This is used to order the preference of primitives, as used when
    * overloading a method. Eg, with a(int x) and a(float x), a(1) should call
    * a(int x).
    */
   private static final HashMap primitiveRankings;
-  
+
   static{
     //Ranks the primitives
     int counter=0;
     primitiveRankings=new HashMap();
-    primitiveRankings.put("byte",counter++);
-    primitiveRankings.put("short",counter++);
-    primitiveRankings.put("int",counter++);
-    primitiveRankings.put("long",counter++);
-    primitiveRankings.put("float",counter++);
-    primitiveRankings.put("double",counter++);
-    primitiveRankings.put("boolean",counter++);
+    primitiveRankings.put("byte",new Integer(counter++));
+    primitiveRankings.put("short",new Integer(counter++));
+    primitiveRankings.put("int",new Integer(counter++));
+    primitiveRankings.put("long",new Integer(counter++));
+    primitiveRankings.put("float",new Integer(counter++));
+    primitiveRankings.put("double",new Integer(counter++));
+    primitiveRankings.put("boolean",new Integer(counter++));
   }
-  
+
   /**
    * Calls a method/constructor
    *
@@ -450,13 +450,13 @@ public class AccessibleObjectResolver
       final Class parameterClass1 = parameters1[i];
       if (parameterClass != parameterClass1)
       {
-        //We need to do a special check first between the classes, because 
+        //We need to do a special check first between the classes, because
         //isAssignableFrom() doesn't work between primitives.
         if(parameterClass.isPrimitive()&&parameterClass1.isPrimitive())
         {
-          
-          if(((Integer)primitiveRankings.get(parameterClass.getSimpleName())).intValue()
-            <((Integer)primitiveRankings.get(parameterClass1.getSimpleName())).intValue())
+
+          if(((Integer)primitiveRankings.get(parameterClass.getName())).intValue()
+            <((Integer)primitiveRankings.get(parameterClass1.getName())).intValue())
           {
             c++;
           }
