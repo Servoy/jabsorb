@@ -203,12 +203,13 @@ public class ClassAnalyzer
           }
         }
       }
-      Collection marr = (ArrayList) map.get(accessibleObjectKey);
+      List marr = (ArrayList) map.get(accessibleObjectKey);
       if (marr == null)
       {
         marr = new ArrayList();
         map.put(accessibleObjectKey, marr);
       }
+      
       marr.add(accessibleObject);
     }
     return map;

@@ -465,14 +465,14 @@ public class AccessibleObjectResolver
             c1++;
           }
         }
-        if (parameterClass.isAssignableFrom(parameterClass1))
+        else if (parameterClass.isAssignableFrom(parameterClass1))
         {
           c1++;
         }
         else
         {
           c++;
-        }
+        } 
       }
     }
     if (c1 > c)
