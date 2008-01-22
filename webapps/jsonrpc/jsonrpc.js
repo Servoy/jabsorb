@@ -430,6 +430,7 @@ function JSONRPCCallableProxy()
   this.objectID = arguments[0];
   //The full package+classname of the object
   this.javaClass = arguments[1];
+  this.JSONRPCType = "CallableReference";
 }
 
 //This is a static variable that maps className to a map of functions names to
@@ -635,18 +636,19 @@ JSONRpcClient.prototype._addMethods = function (methodNames,dontAdd)
     }
     //The last part of the name is the actual functionName
     name = names[names.length - 1];
-    //If it doesn't yet exist (why would it??)
-    if (!obj[name])
+
+    //Create the method
+    method = JSONRpcClient._createMethod(this,methodNames[i]);
+
+    //If it doesn't yet exist and it is to be added to this
+    if ((!obj[name])&&(!dontAdd))
     {
-      //Then create the method
-      method = JSONRpcClient._createMethod(this,methodNames[i]);
-      if(!dontAdd)
-      {
-        obj[name]=JSONRpcClient.bind(method,this);
-      }
-      methods.push(method);
+      obj[name]=JSONRpcClient.bind(method,this);
     }
+    //maintain a list of all methods created so that methods[i]==methodNames[i]
+    methods.push(method);
   }
+
   return methods;
 };
 
