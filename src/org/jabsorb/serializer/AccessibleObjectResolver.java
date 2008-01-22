@@ -251,7 +251,7 @@ public class AccessibleObjectResolver
     AccessibleObjectKey mk = new AccessibleObjectKey(methodName, arguments.length());
     // of AccessibleObject
     ArrayList accessibleObjects = (ArrayList) methodMap.get(mk);
-    if (accessibleObjects.size() == 0)
+    if((accessibleObjects==null)||(accessibleObjects.size() == 0))
     {
       return null;
     }
