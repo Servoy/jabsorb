@@ -670,8 +670,12 @@ public class JSONRPCBridge implements Serializable
    * on the instance on the server.
    * </p>
    * <p>
-   * <b>Note:</b> A limitation exists in the JSON-RPC client where only the top
-   * most object returned from a method can be made into a proxy.
+   * <p>
+   * Note that the global bridge does not support registering of callable 
+   * references and attempting to do so will throw an Exception. 
+   * These operations are inherently session based and are disabled on the 
+   * global bridge because there is currently no safe simple way to garbage 
+   * collect such references across the JavaScript/Java barrier.
    * </p>
    * <p>
    * A Callable Reference in JSON format looks like this:
@@ -681,8 +685,7 @@ public class JSONRPCBridge implements Serializable
    * 
    * @param clazz The class object that should be marshalled as a callable
    *          reference.
-   * @throws Exception If the bridge is global, callable references cannot be
-   *           added
+   * @throws Exception if this method is called on the global bridge.
    */
   public void registerCallableReference(Class clazz) throws Exception
   {
@@ -817,10 +820,16 @@ public class JSONRPCBridge implements Serializable
    * exported objects. <p/> A Reference in JSON format looks like this: <p/>
    * <code>{ "javaClass":"org.jabsorb.test.Foo",<br />
    * "objectID":5535614,<br /> "JSONRPCType":"Reference" }</code>
+   * <p>
+   * Note that the global bridge does not support registering of  
+   * references and attempting to do so will throw an Exception. 
+   * These operations are inherently session based and are disabled on the 
+   * global bridge because there is currently no safe simple way to garbage 
+   * collect such references across the JavaScript/Java barrier.
+   * </p>
    * 
    * @param clazz The class object that should be marshalled as a reference.
-   * @throws Exception If the bridge is global, callable references cannot be
-   *           added
+   * @throws Exception if this method is called on the global bridge.   
    */
   public void registerReference(Class clazz) throws Exception
   {
