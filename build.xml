@@ -340,7 +340,7 @@
 	
 	<target name="install-locally" depends="init" description="Install artifacts into local repository">
 	    <jar destfile="${build}/jabsorb-sources.jar" basedir="${src}" excludes="*~" />
-		<artifact:install file="build/jabsorb-trunk.jar">
+		<artifact:install file="${build}/jabsorb-trunk.jar">
 			<pom file="pom.xml"/>
 			<attach file="${build}/jabsorb-sources.jar" classifier="sources"/>
 		</artifact:install>
