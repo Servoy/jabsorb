@@ -391,9 +391,11 @@ public class JSONRPCBridge implements Serializable
   /**
    * Call a method using a JSON-RPC request object.
    * 
-   * @param context The transport context (the HttpServletRequest object in the
-   *          case of the HTTP transport).
-   * @param jsonReq The JSON-RPC request structured as a JSON object tree.
+   * @param  context The transport context (the HttpServletRequest and 
+   *         HttpServletResponse objects in the case of the HTTP transport).
+   *         
+   * @param  jsonReq The JSON-RPC request structured as a JSON object tree.
+   * 
    * @return a JSONRPCResult object with the result of the invocation or an
    *         error.
    */
@@ -599,6 +601,32 @@ public class JSONRPCBridge implements Serializable
     {
       return true;
     }
+    
+    // check if the class implements any interface that is
+    // registered as a callable reference...
+    Class[] interfaces = clazz.getInterfaces();
+    for (int i=0; i<interfaces.length; i++)
+    {
+      if (callableReferenceSet.contains(interfaces[i]))
+      {
+        return true;
+      }
+    }
+
+    // check super classes as well...
+    Class superClass = clazz.getSuperclass();
+    while (superClass != null)
+    {
+      if (callableReferenceSet.contains(superClass))
+      {
+        return true;
+      }
+      superClass = superClass.getSuperclass();
+    }
+    
+    // should interfaces of each superclass be checked too???
+    // not sure...
+    
     return globalBridge.isCallableReference(clazz);
   }
 
