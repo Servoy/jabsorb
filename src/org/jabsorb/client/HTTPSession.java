@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HTTPSession implements Session
 {
-  private static Logger log = LoggerFactory.getLogger(HTTPSession.class);
+  private final static Logger log = LoggerFactory.getLogger(HTTPSession.class);
 
   protected HttpClient  client;
 
@@ -86,7 +86,9 @@ public class HTTPSession implements Session
     try
     {
       if (log.isDebugEnabled())
+      {
         log.debug("Sending: " + message.toString(2));
+      }
       PostMethod postMethod = new PostMethod(uri.toString());
       postMethod.setRequestHeader("Content-Type", "text/plain");
 
@@ -138,7 +140,9 @@ public class HTTPSession implements Session
     {
       client = new HttpClient();
       if (state == null)
+      {
         state = new HttpState();
+      }
       client.setState(state);
     }
     return client;

@@ -26,6 +26,7 @@ package org.jabsorb.client;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.jabsorb.JSONRPCResult;
 import org.jabsorb.JSONSerializer;
@@ -68,7 +69,7 @@ public class Client implements InvocationHandler
   }
 
   /** Manual instantiation of HashMap<String, Object> */
-  static class ProxyMap extends HashMap
+  private static class ProxyMap extends HashMap
   {
     public String getString(Object key)
     {
@@ -81,7 +82,7 @@ public class Client implements InvocationHandler
     }
   }
 
-  ProxyMap proxyMap = new ProxyMap();
+  private ProxyMap proxyMap = new ProxyMap();
 
   /**
    * Create a proxy for communicating with the remote service.

@@ -47,7 +47,9 @@ public class TransportRegistry
   public synchronized static TransportRegistry i()
   {
     if (singleton == null)
+    {
       singleton = new TransportRegistry();
+    }
     return singleton;
   }
 

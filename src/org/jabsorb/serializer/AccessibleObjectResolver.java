@@ -64,19 +64,20 @@ public class AccessibleObjectResolver
    * overloading a method. Eg, with a(int x) and a(float x), a(1) should call
    * a(int x).
    */
-  private static final HashMap primitiveRankings;
+  private static final Map primitiveRankings;
 
-  static{
+  static
+  {
     //Ranks the primitives
     int counter=0;
     primitiveRankings=new HashMap();
-    primitiveRankings.put("byte",new Integer(counter++));
-    primitiveRankings.put("short",new Integer(counter++));
-    primitiveRankings.put("int",new Integer(counter++));
-    primitiveRankings.put("long",new Integer(counter++));
-    primitiveRankings.put("float",new Integer(counter++));
-    primitiveRankings.put("double",new Integer(counter++));
-    primitiveRankings.put("boolean",new Integer(counter++));
+    primitiveRankings.put("byte",    new Integer(counter++));
+    primitiveRankings.put("short",   new Integer(counter++));
+    primitiveRankings.put("int",     new Integer(counter++));
+    primitiveRankings.put("long",    new Integer(counter++));
+    primitiveRankings.put("float",   new Integer(counter++));
+    primitiveRankings.put("double",  new Integer(counter++));
+    primitiveRankings.put("boolean", new Integer(counter++));
   }
 
   /**
@@ -250,8 +251,8 @@ public class AccessibleObjectResolver
     // below
     AccessibleObjectKey mk = new AccessibleObjectKey(methodName, arguments.length());
     // of AccessibleObject
-    ArrayList accessibleObjects = (ArrayList) methodMap.get(mk);
-    if((accessibleObjects==null)||(accessibleObjects.size() == 0))
+    List accessibleObjects = (List) methodMap.get(mk);
+    if(accessibleObjects==null || accessibleObjects.size() == 0)
     {
       return null;
     }
@@ -335,9 +336,7 @@ public class AccessibleObjectResolver
         AccessibleObject ao = best.getAccessibleObject();
         if (log.isDebugEnabled())
         {
-          log
-              .debug("found method " + methodName + "(" + argSignature(ao)
-                  + ")");
+          log.debug("found method " + methodName +"(" + argSignature(ao) + ")");
         }
         return ao;
       }
@@ -372,7 +371,9 @@ public class AccessibleObjectResolver
     for (int i = 0; i < param.length; i++)
     {
       if (i > 0)
+      {
         buf.append(",");
+      }
       buf.append(param[i].getName());
     }
     return buf.toString();
@@ -454,7 +455,6 @@ public class AccessibleObjectResolver
         //isAssignableFrom() doesn't work between primitives.
         if(parameterClass.isPrimitive()&&parameterClass1.isPrimitive())
         {
-
           if(((Integer)primitiveRankings.get(parameterClass.getName())).intValue()
             <((Integer)primitiveRankings.get(parameterClass1.getName())).intValue())
           {
@@ -481,7 +481,6 @@ public class AccessibleObjectResolver
     }
 
     return methodCandidate;
-
   }
 
   /**

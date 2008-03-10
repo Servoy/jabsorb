@@ -23,27 +23,27 @@
  */
 package org.jabsorb.client;
 
-import org.json.JSONException;
-
 /**
  * Exception created from the JSON-RPC error response
  */
 public class ErrorResponse extends ClientError
 {
-  String trace;
+  private String trace;
 
   public ErrorResponse(Integer code, String message, String trace)
   {
-    super(formatMessage(code, message, trace));
+    super(ErrorResponse.formatMessage(code, message, trace));
     this.trace = trace;
   }
 
-  static String formatMessage(Integer code, String message, String trace)
+  private static String formatMessage(Integer code, String message, String trace)
   {
     String result = code == null ? "JSONRPC error: " : "JSONRPC error code "
         + code.toString() + ": ";
     if (message != null)
+    {
       result += "\nCaused by " + message;
+    }
     return result;
   }
 }

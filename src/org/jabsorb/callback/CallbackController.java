@@ -30,6 +30,7 @@ import java.io.Serializable;
 import java.lang.reflect.AccessibleObject;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,12 +50,12 @@ public class CallbackController implements Serializable
    * The log used for this class.
    */
   private final static Logger log = LoggerFactory
-      .getLogger(CallbackController.class);
+    .getLogger(CallbackController.class);
 
   /**
    * Holds all callbacks registered with this controller. Type: CallbackData
    */
-  private HashSet callbackSet;
+  private Set callbackSet;
 
   /**
    * Default constructor.

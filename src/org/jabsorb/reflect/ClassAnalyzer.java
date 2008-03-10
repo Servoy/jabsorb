@@ -39,9 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jabsorb.JSONRPCBridge;
-import org.jabsorb.JSONRPCResult;
 import org.jabsorb.localarg.LocalArgController;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +60,7 @@ public class ClassAnalyzer
    * 
    * key: Clazz, val ClassData
    */
-  private static HashMap classCache = new HashMap();
+  private static Map classCache = new HashMap();
 
   /**
    * <p>

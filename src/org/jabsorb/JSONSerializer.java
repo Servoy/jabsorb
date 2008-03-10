@@ -26,12 +26,17 @@
 
 package org.jabsorb;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
@@ -80,17 +85,17 @@ public class JSONSerializer implements Serializable
   /**
    * Key: Serializer
    */
-  private HashSet serializerSet = new HashSet();
+  private Set serializerSet = new HashSet();
 
   /**
    * key: Class, value: Serializer
    */
-  private transient HashMap serializableMap = null;
+  private transient Map serializableMap = null;
 
   /**
    * List for reverse registration order search
    */
-  private ArrayList serializerList = new ArrayList();
+  private List serializerList = new ArrayList();
 
   /**
    * Should serializers defined in this object include the fully qualified class
@@ -815,8 +820,8 @@ public class JSONSerializer implements Serializable
    * @throws ClassNotFoundException If a class cannot be found for the object to
    *           be read
    */
-  private void readObject(java.io.ObjectInputStream in)
-      throws java.io.IOException, ClassNotFoundException
+  private void readObject(ObjectInputStream in)
+      throws IOException, ClassNotFoundException
   {
     in.defaultReadObject();
     serializableMap = new HashMap();

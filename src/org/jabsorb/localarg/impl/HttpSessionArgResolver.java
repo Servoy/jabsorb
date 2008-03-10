@@ -32,7 +32,7 @@ import org.jabsorb.localarg.LocalArgResolveException;
 import org.jabsorb.localarg.LocalArgResolver;
 
 /**
- * An LocalArgResolver implementation that is registered by default on the
+ * A LocalArgResolver implementation that is registered by default on the
  * JSONRPCBridge and will replace an HttpSession argument on a called method
  * with the current session. If no session exists, a session will be created.
  */

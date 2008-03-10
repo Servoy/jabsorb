@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -85,12 +86,10 @@ public class LocalArgController
    */
   public static boolean isLocalArg(Class param)
   {
-    HashSet resolverSet = null;
     synchronized (localArgResolverMap)
     {
-      resolverSet = (HashSet) localArgResolverMap.get(param);
+      return localArgResolverMap.containsKey(param);
     }
-    return (resolverSet != null ? true : false);
   }
 
   /**
@@ -114,7 +113,7 @@ public class LocalArgController
   {
     synchronized (localArgResolverMap)
     {
-      HashSet resolverSet = (HashSet) localArgResolverMap.get(argClazz);
+      Set resolverSet = (Set) localArgResolverMap.get(argClazz);
       if (resolverSet == null)
       {
         resolverSet = new HashSet();
@@ -148,7 +147,7 @@ public class LocalArgController
   public static Object resolveLocalArg(Object context[], Class param)
       throws UnmarshallException
   {
-    HashSet resolverSet = (HashSet) localArgResolverMap.get(param);
+    Set resolverSet = (Set) localArgResolverMap.get(param);
     Iterator i = resolverSet.iterator();
     while (i.hasNext())
     {
