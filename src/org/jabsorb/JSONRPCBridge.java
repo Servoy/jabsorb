@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.jabsorb.callback.CallbackController;
@@ -760,7 +761,7 @@ public class JSONRPCBridge implements Serializable
     {
       return false;
     }
-    HashSet callableReferenceSet = state.getCallableReferenceSet();
+    Set callableReferenceSet = state.getCallableReferenceSet();
     if (callableReferenceSet == null)
     {
       return false;
@@ -769,6 +770,32 @@ public class JSONRPCBridge implements Serializable
     {
       return true;
     }
+    
+    // check if the class implements any interface that is
+    // registered as a callable reference...
+    Class[] interfaces = clazz.getInterfaces();
+    for (int i=0; i<interfaces.length; i++)
+    {
+      if (callableReferenceSet.contains(interfaces[i]))
+      {
+        return true;
+      }
+    }
+
+    // check super classes as well...
+    Class superClass = clazz.getSuperclass();
+    while (superClass != null)
+    {
+      if (callableReferenceSet.contains(superClass))
+      {
+        return true;
+      }
+      superClass = superClass.getSuperclass();
+    }
+    
+    // should interfaces of each superclass be checked too???
+    // not sure...
+    
     return globalBridge.isCallableReference(clazz);
   }
 
