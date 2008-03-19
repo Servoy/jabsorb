@@ -232,14 +232,6 @@ public class JSONRPCServlet extends HttpServlet
     // Use protected method in case someone wants to override it
     JSONRPCBridge json_bridge = findBridge(request);
 
-    // Encode using UTF-8, although We are actually ASCII clean as
-    // all unicode data is JSON escaped using backslash u. This is
-    // less data efficient for foreign character sets but it is
-    // needed to support naughty browsers such as Konqueror and Safari
-    // which do not honour the charset set in the response
-    response.setContentType("text/plain;charset=utf-8");
-    OutputStream out = response.getOutputStream();
-
     // Decode using the charset in the request if it exists otherwise
     // use UTF-8 as this is what all browser implementations use.
     // The JSON-RPC-Java JavaScript client is ASCII clean so it
@@ -250,9 +242,18 @@ public class JSONRPCServlet extends HttpServlet
     {
       charset = "UTF-8";
     }
+
     BufferedReader in = new BufferedReader(new InputStreamReader(request
         .getInputStream(), charset));
 
+    String receiveString = (String) request.getAttribute("_jabsorb_beenHere");
+
+    // if JSON data is found in a special request attribute, it means
+    // that a continuation was used and this request is being retried
+    // as a consequence of a Jetty continuation
+    // see http://blogs.webtide.com/gregw/2007/11/18/1195421880000.html
+    if (receiveString == null)
+    {
     // Read the request
     CharArrayWriter data = new CharArrayWriter();
     char buf[] = new char[buf_size];
@@ -261,8 +262,17 @@ public class JSONRPCServlet extends HttpServlet
     {
       data.write(buf, 0, ret);
     }
+      receiveString = data.toString();
 
-    String receiveString = data.toString();
+      // save the json-rpc data in a special request attribute, in case a jetty 
+      // continuation exception (org.mortbay.jetty.RetryRequest) is thrown and this 
+      // request is retried by the container
+      request.setAttribute("_jabsorb_beenHere", receiveString);
+    }
+    else
+    {
+      log.debug("jetty continuation resumed...");
+    }
 
     if (log.isDebugEnabled())
     {
@@ -280,7 +290,7 @@ public class JSONRPCServlet extends HttpServlet
     }
     catch (JSONException e)
     {
-      log.error("can't parse call" + data, e);
+      log.error("can't parse call" + receiveString, e);
       json_res = new JSONRPCResult(JSONRPCResult.CODE_ERR_PARSE, null,
           JSONRPCResult.MSG_ERR_PARSE);
     }
@@ -337,6 +347,14 @@ public class JSONRPCServlet extends HttpServlet
         log.debug("not gzipping because user agent doesn't accept gzip encoding...");
       }
     }
+
+    // Encode using UTF-8, although We are actually ASCII clean as
+    // all unicode data is JSON escaped using backslash u. This is
+    // less data efficient for foreign character sets but it is
+    // needed to support naughty browsers such as Konqueror and Safari
+    // which do not honour the charset set in the response
+    response.setContentType("text/plain;charset=utf-8");
+    OutputStream out = response.getOutputStream();
 
     response.setIntHeader("Content-Length", bout.length);
 

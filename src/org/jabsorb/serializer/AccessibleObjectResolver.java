@@ -210,6 +210,15 @@ public class AccessibleObjectResolver
       {
         e = ((InvocationTargetException) e).getTargetException();
       }
+
+      // handle Jetty continuations-- this is kind of a hack
+      // but at least this will work without requiring jetty as
+      // a dependent library
+      if ("org.mortbay.jetty.RetryRequest".equals(e.getClass().getName()))
+      {
+        throw (RuntimeException)e;
+      }
+
       if (cbc != null)
       {
         for (int i = 0; i < context.length; i++)
@@ -472,7 +481,7 @@ public class AccessibleObjectResolver
         else
         {
           c++;
-        } 
+        }
       }
     }
     if (c1 > c)
