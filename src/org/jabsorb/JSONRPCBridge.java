@@ -510,8 +510,8 @@ public class JSONRPCBridge implements Serializable
           listMethods(objectID));
     }
 
-    // #5: Get the object to act upon and the possible that could be called on
-    // it
+    // #5: Get the object to act upon and the possible method that could be 
+    // called on it
     final Map methodMap;
     final Object javascriptObject;
     try
