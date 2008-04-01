@@ -338,7 +338,24 @@ function toJSON(o)
   }
 }
 
-/* JSONRpcClient constructor */
+/** 
+ * JSONRpcClient constructor
+ * 
+ * @param callback|methods - the function to call once the rpc list methods has completed.
+ *                   if this argument is omitted completely, then the JSONRpcClient
+ *                   is constructed synchronously.
+ *                   if this arguement is an array then it is the list of methods
+ *                   that can be invoked on the server (and the server will not
+ *                   be queried for that information)
+ * 
+ * @param serverURL - path to JSONRpcServlet on server.
+ * @param user
+ * @param pass
+ * @param objectID
+ * @param javaClass
+ * @param JSONRPCType
+ *
+ */
 function JSONRpcClient()
 {
   var arg_shift = 0,
@@ -346,40 +363,53 @@ function JSONRpcClient()
       _function,
       methods,
       self,
-      name;
+      name,
+      arg0type= (typeof arguments[0]),
+      doListMethods=true;
 
   //If a call back is being used grab it
-  if (typeof arguments[0] == "function")
+  if (arg0type === "function")
   {
     this.readyCB = arguments[0];
     arg_shift++;
   }
+  // if it's an array then just do add methods directly
+  else if (arguments[0] && arg0type === "object" && arguments[0].length)
+  {
+    this._addMethods(arguments[0]); // go ahead and add the methods directly
+    arg_shift++;
+    doListMethods=false;
+  }
+
   //The next 3 args are passed to the http request
   this.serverURL = arguments[arg_shift];
   this.user = arguments[arg_shift + 1];
   this.pass = arguments[arg_shift + 2];
   this.objectID=0;
 
-  //Make the call to list the methods
-  req = JSONRpcClient._makeRequest(this,"system.listMethods", []);
-  //If a callback was added to the constructor, call it
-  if(this.readyCB) 
+  if (doListMethods)
   {
-    self = this;
-    req.cb = function(result, e) 
+    //Make the call to list the methods
+    req = JSONRpcClient._makeRequest(this,"system.listMethods", []);
+    //If a callback was added to the constructor, call it
+    if(this.readyCB) 
     {
-       if(!e) 
-       {
-         self._addMethods(result);
-       }
-       self.readyCB(result, e);
-    };
-  }
+      self = this;
+      req.cb = function(result, e) 
+      {
+         if(!e) 
+         {
+           self._addMethods(result);
+         }
+         self.readyCB(result, e);
+      };
+    }
 
-  methods = JSONRpcClient._sendRequest(this,req);
-  if(!this.readyCB)
-  {
-    this._addMethods(methods);
+    methods = JSONRpcClient._sendRequest(this,req);
+    if(!this.readyCB)
+    {
+      this._addMethods(methods);
+    }
   }
 }
 
