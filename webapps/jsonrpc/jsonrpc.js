@@ -338,20 +338,46 @@ function toJSON(o)
   }
 }
 
-/* JSONRpcClient constructor */
+/** 
+ * JSONRpcClient constructor
+ * 
+ * @param callback|methods - the function to call once the rpc list methods has completed.
+ *                   if this argument is omitted completely, then the JSONRpcClient
+ *                   is constructed synchronously.
+ *                   if this arguement is an array then it is the list of methods
+ *                   that can be invoked on the server (and the server will not
+ *                   be queried for that information)
+ * 
+ * @param serverURL - path to JSONRpcServlet on server.
+ * @param user
+ * @param pass
+ * @param objectID
+ * @param javaClass
+ * @param JSONRPCType
+ *
+ */
 function JSONRpcClient()
 {
   var arg_shift = 0,
       req,
       _function,
       methods,
-      self;
+      self,
+      arg0type= (typeof arguments[0]),
+      doListMethods=true;
 
   //If a call back is being used grab it
-  if (typeof arguments[0] == "function")
+  if (arg0type === "function")
   {
     this.readyCB = arguments[0];
     arg_shift++;
+  }
+  // if it's an array then just do add methods directly
+  else if (arguments[0] && arg0type === "object" && arguments[0].length)
+  {
+    this._addMethods(arguments[0]); // go ahead and add the methods directly
+    arg_shift++;
+    doListMethods=false;
   }
   //The next 3 args are passed to the http request
   this.serverURL = arguments[arg_shift];
@@ -375,7 +401,7 @@ function JSONRpcClient()
       this[name]=JSONRpcClient.bind(_function,this);
     }
   }
-  else
+  else if (doListMethods)
   {
     //If we are here, it is either the first time an object of this type has
     //been created or the bridge
