@@ -673,7 +673,7 @@ function postResults(name,i, result, e, profile)
       var tmp="";
       for(var aa in e)
       {
-        tmp+=aa+" "+e[aa].toString()+"\t";
+        tmp+=aa+" "+e[aa]+"\t";
       }
       resultText=tmp;
     }
