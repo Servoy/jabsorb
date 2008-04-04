@@ -504,7 +504,20 @@ JSONRpcClient.Exception.prototype = new Error();
 
 JSONRpcClient.Exception.prototype.toString = function (code, msg)
 {
-  return this.name + ": " + this.message;
+  var str="";
+  if(this.name)
+  {
+    str+=this.name;
+  }
+  if(this.message)
+  {
+    str+=": "+this.message;
+  }
+  if(str.length==0)
+  {
+    str="no exception information given";
+  }
+  return str;
 };
 
 
@@ -512,7 +525,12 @@ JSONRpcClient.Exception.prototype.toString = function (code, msg)
 
 JSONRpcClient.default_ex_handler = function (e)
 {
-  alert(e);
+  var str="";
+  for(a in e)
+  {
+    str+=a +"\t"+e[a]+"\n";
+  }
+  alert(str);
 };
 
 
@@ -936,38 +954,6 @@ JSONRpcClient._sendRequest = function (client,req)
 
 JSONRpcClient.prototype._handleResponse = function (http)
 {
-  /**
-   * Apply fixups.
-   * @param obj root object to apply fixups against.
-   * @param fixups array of fixups to apply.  each element of this array is a 2 element array, containing
-   *        the array with the fixup location followed by an array with the original location to fix up into the fixup
-   *        location.
-   */
-  function applyFixups(obj, fixups)
-  {
-    function findOriginal(ob, original)
-    {
-      for (var i=0,j=original.length;i<j;i++)
-      {
-        ob = ob[original[i]];
-      }
-      return ob;
-    }
-    function applyFixup(ob, fixups, value)
-    {
-      var j=fixups.length-1;
-      for (var i=0;i<j;i++)
-      {
-        ob = ob[fixups[i]];
-      }
-      ob[fixups[j]] = value;
-    }
-    for (var i = 0,j = fixups.length; i < j; i++)
-    {
-      applyFixup(obj,fixups[i][0],findOriginal(obj,fixups[i][1]));
-    }
-  }
-
   /* Get the charset */
   if (!this.charset)
   {
@@ -1006,7 +992,44 @@ JSONRpcClient.prototype._handleResponse = function (http)
   if (status != 200)
   {
     throw new JSONRpcClient.Exception(status, statusText);
+  };
+  return this.evaluateString(data);
+};
+
+JSONRpcClient.prototype.evaluateString=function(data)
+{
+  /**
+   * Apply fixups.
+   * @param obj root object to apply fixups against.
+   * @param fixups array of fixups to apply.  each element of this array is a 2 element array, containing
+   *        the array with the fixup location followed by an array with the original location to fix up into the fixup
+   *        location.
+   */
+  function applyFixups(obj, fixups)
+  {
+    function findOriginal(ob, original)
+    {
+      for (var i=0,j=original.length;i<j;i++)
+      {
+        ob = ob[original[i]];
+      }
+      return ob;
+    }
+    function applyFixup(ob, fixups, value)
+    {
+      var j=fixups.length-1;
+      for (var i=0;i<j;i++)
+      {
+        ob = ob[fixups[i]];
+      }
+      ob[fixups[j]] = value;
+    }
+    for (var i = 0,j = fixups.length; i < j; i++)
+    {
+      applyFixup(obj,fixups[i][0],findOriginal(obj,fixups[i][1]));
+    }
   }
+
   var obj;
   try
   {
@@ -1015,7 +1038,7 @@ JSONRpcClient.prototype._handleResponse = function (http)
   catch(e)
   {
     throw new JSONRpcClient.Exception(550, "error parsing result");
-  }
+  } 
   if (obj.error)
   {
     throw new JSONRpcClient.Exception (obj.error.code, obj.error.msg, obj.error.trace);
