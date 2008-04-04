@@ -408,8 +408,26 @@ public class Test {
             a.put(c);
             System.out.println(j.toString(4));
             
+            s = "{plist=Apple; AnimalSmells = { pig = piggish; lamb = lambish; worm = wormy; }; AnimalSounds = { pig = oink; lamb = baa; worm = baa;  Lisa = \"Why is the worm talking like a lamb?\" } ; AnimalColors = { pig = pink; lamb = black; worm = pink; } } "; 
+            j = new JSONObject(s);
+            System.out.println(j.toString(4));
+            
+            s = " (\"San Francisco\", \"New York\", \"Seoul\", \"London\", \"Seattle\", \"Shanghai\")";
+            a = new JSONArray(s);
+            System.out.println(a.toString());
+          
+            
             System.out.println("\nTesting Exceptions: ");
 
+            System.out.print("Exception: ");
+            try {
+                a = new JSONArray();
+                a.put(Double.NEGATIVE_INFINITY);
+                a.put(Double.NaN);
+                System.out.println(a.toString());
+            } catch (Exception e) {
+                System.out.println(e);
+            }
             System.out.print("Exception: ");
             try {
                 System.out.println(j.getDouble("stooge"));
@@ -468,6 +486,15 @@ public class Test {
             try {            	
             	ja = new JSONArray(new Object());
             	System.out.println(ja.toString());
+            } catch (Exception e) {
+            	System.out.println(e);
+            }
+
+            System.out.print("Exception: ");
+            try {            	
+            	s = "[)";
+            	a = new JSONArray(s);
+            	System.out.println(a.toString());
             } catch (Exception e) {
             	System.out.println(e);
             }

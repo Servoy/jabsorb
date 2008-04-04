@@ -104,7 +104,13 @@ public class JSONArray {
      */
     public JSONArray(JSONTokener x) throws JSONException {
         this();
-        if (x.nextClean() != '[') {
+        char c = x.nextClean();
+        char q;
+        if (c == '[') {
+            q = ']';
+        } else if (c == '(') {
+            q = ')';
+        } else {
             throw x.syntaxError("A JSONArray text must start with '['");
         }
         if (x.nextClean() == ']') {
@@ -119,7 +125,8 @@ public class JSONArray {
                 x.back();
                 this.myArrayList.add(x.nextValue());
             }
-            switch (x.nextClean()) {
+            c = x.nextClean();
+            switch (c) {
             case ';':
             case ',':
                 if (x.nextClean() == ']') {
@@ -128,6 +135,10 @@ public class JSONArray {
                 x.back();
                 break;
             case ']':
+            case ')':
+                if (q != c) {
+                    throw x.syntaxError("Expected a '" + new Character(q) + "'");
+                }
                 return;
             default:
                 throw x.syntaxError("Expected a ',' or ']'");

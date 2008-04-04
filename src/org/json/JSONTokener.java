@@ -318,6 +318,7 @@ public class JSONTokener {
                 back();
                 return new JSONObject(this);
             case '[':
+            case '(':
                 back();
                 return new JSONArray(this);
         }
