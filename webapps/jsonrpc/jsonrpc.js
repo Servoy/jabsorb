@@ -389,6 +389,8 @@ function JSONRpcClient()
 
   if (doListMethods)
   {
+    //Add the listMethods system methods
+    this._addMethods(["system.listMethods"]);
     //Make the call to list the methods
     req = JSONRpcClient._makeRequest(this,"system.listMethods", []);
     //If a callback was added to the constructor, call it
@@ -667,8 +669,10 @@ JSONRpcClient.prototype._addMethods = function (methodNames,dontAdd)
   {
     obj = this;
     names = methodNames[i].split(".");
-    //In the case of system.listMethods create a new object in this called
-    //system and and the listMethod function to that object.
+    //Create intervening objects in the path to the method name.
+    //For example with the method name "system.listMethods", we first
+    //create a new object called "system" and then add the "listMethod"
+    //function to that object.
     for (n = 0; n < names.length - 1; n++)
     {
       name = names[n];
