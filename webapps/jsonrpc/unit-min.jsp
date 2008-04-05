@@ -12,6 +12,8 @@
    JSONRPCBridge.registerObject("test", testObject);
    JSONRPCBridge.registerReference(org.jabsorb.test.Test.RefTest.class);
    JSONRPCBridge.registerCallableReference(org.jabsorb.test.Test.CallableRefTest.class);
+   JSONRPCBridge.registerCallableReference(org.jabsorb.test.ConstructorTest.class);
+   JSONRPCBridge.registerClass("ConstructorTest",org.jabsorb.test.ConstructorTest.class);
 %>
 <%!
   String title = "Unit Tests (for &quot;minimized&quot; version, <b>jsonrpc-min.js</b>)";
