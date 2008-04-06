@@ -997,10 +997,10 @@ JSONRpcClient.prototype._handleResponse = function (http)
   {
     throw new JSONRpcClient.Exception(status, statusText);
   };
-  return this.evaluateString(data);
+  return this.unmarshallResponse(data);
 };
 
-JSONRpcClient.prototype.evaluateString=function(data)
+JSONRpcClient.prototype.unmarshallResponse=function(data)
 {
   /**
    * Apply fixups.
