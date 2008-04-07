@@ -179,17 +179,14 @@ var unitTests={
       { code: 'jsonrpc.test.getCallableRefVector();',
         test: '(result.list[0].ping() == "ping pong") && (result.list[1].ping() == "ping pong")'
       },
-      { code: 'jsonrpc.test.getCallableRefVector();',
-        test: '(result.list[0].ping() == "ping pong") && (result.list[1].ping() == "ping pong")'
-      },
-      { code:             'function(){ var callableRef = jsonrpc.test.getCallableRef(); return ({ oid:callableRef.objectID, ping:callableRef.ping(), refoid:callableRef.getRef().objectID, inside:callableRef.whatsInside(callableRef.getRef()) })}()',
+    /*{ code:             'function(){ var callableRef = jsonrpc.test.getCallableRef(); return ({ oid:callableRef.objectID, ping:callableRef.ping(), refoid:callableRef.getRef().objectID, inside:callableRef.whatsInside(callableRef.getRef()) })}()',
         asyncCode: 'var __=function(){ var callableRef = jsonrpc.test.getCallableRef(); cb     ({ oid:callableRef.objectID, ping:callableRef.ping(), refoid:callableRef.getRef().objectID, inside:callableRef.whatsInside(callableRef.getRef()) })}()',
         test: 'result.ping == "ping pong" && result.inside =="a secret"'
       },
       { code:             'function(){ var callableRef = jsonrpc.test.getCallableRef(); var p = callableRef.ping();return({ping:p})}();',
         asyncCode: 'var __=function(){ var callableRef = jsonrpc.test.getCallableRef(); var p = callableRef.ping();cb    ({ping:p});}();',
         test: 'result.ping == "ping pong"'
-      },
+      },*/
       { code: 'jsonrpc.test.getCallableRefInnerVector();',
         test: '(result.list[0].list[0].ping() == "ping pong") && (result.list[0].list[1].ping() == "ping pong")'
       },
