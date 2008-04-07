@@ -407,10 +407,15 @@ function JSONRpcClient()
       };
     }
 
-    methods = JSONRpcClient._sendRequest(this,req);
     if(!this.readyCB)
     {
+      methods = JSONRpcClient._sendRequest(this,req);
       this._addMethods(methods);
+    }
+    else
+    {
+      JSONRpcClient.async_requests.push(req);
+      JSONRpcClient.kick_async();
     }
   }
 }
@@ -420,30 +425,13 @@ function JSONRpcClient()
  *
  * @param objectID The id of the object as determined by the server
  * @param javaClass The package+classname of the object
- *
  * @return a new callable proxy object
  */
 JSONRpcClient.prototype.createCallableProxy=function(objectID,javaClass)
 {
-  var cp,req,methodNames,methods,name,i;
+  var cp,req,methodNames,name,i;
   
   cp = new JSONRPCCallableProxy(objectID,javaClass);
-  //if we have already made one of these classes before
-  if(!JSONRpcClient.knownClasses[javaClass])
-  {
-    //If we are here, it is either the first time an object of this type has
-    //been created or the bridge
-    // If it is an object list the methods for it
-    req = JSONRpcClient._makeRequest(this,"listMethods", [],objectID);
-    methodNames = JSONRpcClient._sendRequest(this,req);
-    //Now add the methods to the object
-    methods=this._addMethods(methodNames,true);
-    JSONRpcClient.knownClasses[javaClass]={};
-    for(i=0;i<methods.length;i++)
-    {
-      JSONRpcClient.knownClasses[javaClass][methodNames[i]]=methods[i];
-    }
-  }
   //Then add all the cached methods to it.
   for (name in JSONRpcClient.knownClasses[javaClass])
   {
@@ -657,7 +645,9 @@ JSONRpcClient.prototype._addMethods = function (methodNames,dontAdd)
       names,
       n,
       method,
-      methods=[];
+      methods=[],
+      javaClass,
+      tmpNames;
   //Aha! It is a class, so create a entry for it.
   //This shouldn't get called twice on the same class so we can happily
   //overwrite it
@@ -668,37 +658,69 @@ JSONRpcClient.prototype._addMethods = function (methodNames,dontAdd)
   for (var i = 0; i < methodNames.length; i++)
   {
     obj = this;
+    
     names = methodNames[i].split(".");
-    //Create intervening objects in the path to the method name.
-    //For example with the method name "system.listMethods", we first
-    //create a new object called "system" and then add the "listMethod"
-    //function to that object.
-    for (n = 0; n < names.length - 1; n++)
+
+    if(names[0].substring(0,3)=="cd_")
     {
-      name = names[n];
-      if (obj[name])
+      tmpNames=names[0].substring(3).split("^");
+      javaClass="";
+      //TODO: make this into a join()!
+      for(n=0;n<tmpNames.length;n++)
       {
-        obj = obj[name];
+        if(n!=0)
+        {
+          javaClass+=".";
+        }
+        javaClass+=tmpNames[n];
       }
-      else
+    }
+    else
+    {
+      //Create intervening objects in the path to the method name.
+      //For example with the method name "system.listMethods", we first
+      //create a new object called "system" and then add the "listMethod"
+      //function to that object.
+      for (n = 0; n < names.length - 1; n++)
       {
-        obj[name] = {};
-        obj = obj[name];
+        name = names[n];
+        if (obj[name])
+        {
+          obj = obj[name];
+        }
+        else
+        {
+          obj[name] = {};
+          obj = obj[name];
+        }
       }
     }
     //The last part of the name is the actual functionName
     name = names[names.length - 1];
 
     //Create the method
-    method = JSONRpcClient._createMethod(this,methodNames[i]);
-
-    //If it doesn't yet exist and it is to be added to this
-    if ((!obj[name])&&(!dontAdd))
+    
+    if(javaClass)
     {
-      obj[name]=JSONRpcClient.bind(method,this);
+      method = JSONRpcClient._createMethod(this,name);
+      if(!JSONRpcClient.knownClasses[javaClass])
+      {
+        JSONRpcClient.knownClasses[javaClass]={};
+      }
+      JSONRpcClient.knownClasses[javaClass][name]=method;
     }
-    //maintain a list of all methods created so that methods[i]==methodNames[i]
-    methods.push(method);
+    else
+    {
+      method = JSONRpcClient._createMethod(this,methodNames[i]);
+      //If it doesn't yet exist and it is to be added to this
+      if ((!obj[name])&&(!dontAdd))
+      {
+        obj[name]=JSONRpcClient.bind(method,this);
+      }
+      //maintain a list of all methods created so that methods[i]==methodNames[i]
+      methods.push(method);
+    }
+    javaClass=null;
   }
 
   return methods;
@@ -1059,13 +1081,16 @@ JSONRpcClient.prototype.unmarshallResponse=function(data)
   {
     if(r.objectID && r.JSONRPCType == "CallableReference")
     {  
-      return this.createCallableProxy(r.objectID,r.javaClass,r.JSONRPCType);
+      return this.createCallableProxy(r.objectID,r.javaClass);
     }
-    r=JSONRpcClient.extractCallableReferences(this,r);
-  }
-  if (obj.fixups)
-  {
-    applyFixups(r,obj.fixups);
+    else
+    {
+      r=JSONRpcClient.extractCallableReferences(this,r);
+      if (obj.fixups)
+      {
+        applyFixups(r,obj.fixups);
+      }
+    }
   }
   return r;
 };
@@ -1113,7 +1138,7 @@ JSONRpcClient.makeCallableReference = function(client,value)
 {
   if(value && value.objectID && value.javaClass && value.JSONRPCType == "CallableReference")
   {
-    return client.createCallableProxy(value.objectID,value.javaClass,value.JSONRPCType);
+    return client.createCallableProxy(value.objectID,value.javaClass);
   }
   return null;
 };
@@ -1126,9 +1151,12 @@ JSONRpcClient.http_max_spare = 8;
 
 JSONRpcClient.poolGetHTTPRequest = function ()
 {
-  if (JSONRpcClient.http_spare.length > 0)
+  // atomic test and fetch spare
+  // (pop returns undefined if http_spare is empty)
+  var http = JSONRpcClient.http_spare.pop();
+  if(http)
   {
-    return JSONRpcClient.http_spare.pop();
+    return http;
   }
   return JSONRpcClient.getHTTPRequest();
 };

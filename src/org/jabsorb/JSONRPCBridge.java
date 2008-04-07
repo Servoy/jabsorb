@@ -34,14 +34,15 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 import org.jabsorb.callback.CallbackController;
 import org.jabsorb.callback.InvocationCallback;
 import org.jabsorb.localarg.LocalArgController;
 import org.jabsorb.localarg.LocalArgResolver;
+import org.jabsorb.reflect.AccessibleObjectKey;
 import org.jabsorb.reflect.ClassAnalyzer;
 import org.jabsorb.reflect.ClassData;
-import org.jabsorb.reflect.AccessibleObjectKey;
 import org.jabsorb.serializer.AccessibleObjectResolver;
 import org.jabsorb.serializer.Serializer;
 import org.jabsorb.serializer.impl.ReferenceSerializer;
@@ -503,13 +504,7 @@ public class JSONRPCBridge implements Serializable
       return new JSONRPCResult(JSONRPCResult.CODE_SUCCESS, requestId,
           systemListMethods());
     }
-    if ((objectID != 0) && (methodName != null)
-        && (methodName.equals("listMethods")))
-    {
-      return new JSONRPCResult(JSONRPCResult.CODE_SUCCESS, requestId,
-          listMethods(objectID));
-    }
-
+   
     // #5: Get the object to act upon and the possible method that could be 
     // called on it
     final Map methodMap;
@@ -985,7 +980,7 @@ public class JSONRPCBridge implements Serializable
    * 
    * @param m HashSet to add all static methods to.
    */
-  private void allInstanceMethods(HashSet m)
+  private void allInstanceMethods(Set m)
   {
     synchronized (objectMap)
     {
@@ -1008,12 +1003,35 @@ public class JSONRPCBridge implements Serializable
   }
 
   /**
+   * Add all methods on registered callable references to a HashSet.
+   * 
+   * @param m HashSet to add all methods to.
+   */
+  private void allCallableReferences(Set m)
+  {
+    synchronized (callableReferenceSet)
+    {
+      Iterator i = callableReferenceSet.iterator();
+      while (i.hasNext())
+      {
+        Class clazz = (Class) i.next();
+ 
+        ClassData cd = ClassAnalyzer.getClassData(clazz);
+
+        uniqueMethods(m, "cd_"+clazz.getName().replace(".", "^")+".", cd.getStaticMethodMap());
+        uniqueMethods(m, "cd_"+clazz.getName().replace(".", "^")+".", cd.getMethodMap());
+      }
+    }
+  }
+
+  
+  /**
    * Add all static methods that can be invoked on this bridge to the given
    * HashSet.
    * 
    * @param m HashSet to add all static methods to.
    */
-  private void allStaticMethods(HashSet m)
+  private void allStaticMethods(Set m)
   {
     synchronized (classMap)
     {
@@ -1184,31 +1202,6 @@ public class JSONRPCBridge implements Serializable
   }
 
   /**
-   * Lists the methods for an object
-   * 
-   * @param objectID The object to list the methods for
-   * @return The list of methods in a JSONArray
-   */
-  private JSONArray listMethods(int objectID)
-  {
-    ClassData cd = ClassAnalyzer.getClassData(resolveObject(
-        new Integer(objectID)).getClazz());
-    // Handle "system.listMethods"
-    // this is called by the browser side javascript
-    // when a new JSONRpcClient object with an objectID is initialized.
-
-    HashSet m = new HashSet();
-    uniqueMethods(m, "", cd.getStaticMethodMap());
-    uniqueMethods(m, "", cd.getMethodMap());
-    JSONArray methods = new JSONArray();
-    for (Iterator i = m.iterator(); i.hasNext();)
-    {
-      methods.put(i.next());
-    }
-    return methods;
-  }
-
-  /**
    * Given a previous json object, find the next object under the given index.
    * 
    * @param prev object to find subobject of.
@@ -1330,7 +1323,7 @@ public class JSONRPCBridge implements Serializable
    */
   private JSONArray systemListMethods()
   {
-    HashSet m = new HashSet();
+    Set m = new TreeSet();
     globalBridge.allInstanceMethods(m);
     if (globalBridge != this)
     {
@@ -1339,6 +1332,7 @@ public class JSONRPCBridge implements Serializable
     }
     allStaticMethods(m);
     allInstanceMethods(m);
+    allCallableReferences(m);
     JSONArray methods = new JSONArray();
     Iterator i = m.iterator();
     while (i.hasNext())
