@@ -31,7 +31,7 @@
     </td>
     <td style="text-align:right">
       Max parallel async requests
-      <input type="text" id="max_requests" value="2" size="2" />
+      <input type="text" id="max_requests" value="8" size="2" />
     </td>
   </tr>
 </table>
