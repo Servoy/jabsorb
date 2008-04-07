@@ -514,10 +514,18 @@ public class JSONRPCBridge implements Serializable
     // called on it
     final Map methodMap;
     final Object javascriptObject;
+    final AccessibleObject ao;
     try
     {
       javascriptObject = getObjectContext(objectID, className);
       methodMap = getAccessibleObjectMap(objectID, className, methodName);
+      // #6: Resolve the method      
+      ao = AccessibleObjectResolver.resolveMethod(
+          methodMap, methodName, arguments, ser);
+      if (ao == null)
+      {
+         throw new NoSuchMethodException(JSONRPCResult.MSG_ERR_NOMETHOD);
+      }
     }
     catch (NoSuchMethodException e)
     {
@@ -529,10 +537,6 @@ public class JSONRPCBridge implements Serializable
       return new JSONRPCResult(JSONRPCResult.CODE_ERR_NOMETHOD, requestId,
           JSONRPCResult.MSG_ERR_NOMETHOD);
     }
-
-    // #6: Resolve the method
-    final AccessibleObject ao = AccessibleObjectResolver.resolveMethod(
-        methodMap, methodName, arguments, ser);
 
     // #7: Call the method
     JSONRPCResult r = AccessibleObjectResolver.invokeAccessibleObject(ao,

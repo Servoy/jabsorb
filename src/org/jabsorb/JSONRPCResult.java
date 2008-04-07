@@ -65,7 +65,7 @@ public class JSONRPCResult
   
   /**
    * Denotes (when using a callable reference) that no method was found with the
-   * given name.
+   * given name and number of arguments.
    */
   public final static int CODE_ERR_NOMETHOD = 591;
  
@@ -95,9 +95,10 @@ public class JSONRPCResult
   public static final String MSG_ERR_NOCONSTRUCTOR = "constructor not found";
   
   /**
-   * The error method shown when no method was found with the given name.
+   * The error method shown when no method was found with the given name and number of arguments.
    */
-  public final static String MSG_ERR_NOMETHOD = "method not found (session may have timed out)";
+  public final static String MSG_ERR_NOMETHOD = "method with the requested number of arguments not found (session may" +
+      " have timed out)";
 
   /**
    * The error method shown when something in the fixups was amiss.
