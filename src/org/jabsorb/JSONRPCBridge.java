@@ -176,10 +176,20 @@ public class JSONRPCBridge implements Serializable
   }
 
   /**
+   * The prefix for callable references, as sent in messages 
+   */
+  public static final String CALLABLE_REFERENCE_METHOD_PREFIX=".ref";
+  
+  /**
    * The string identifying constuctor calls
    */
   public static final String CONSTRUCTOR_FLAG = "$constructor";
-
+  
+  /**
+   * The prefix for objects, as sent in messages
+   */
+  public static final String OBJECT_METHOD_PREFIX=".obj";
+  
   /**
    * Unique serialisation id.
    */
@@ -487,17 +497,18 @@ public class JSONRPCBridge implements Serializable
     // #3: Get the id of the object (if it exists) from the className
     // (in the format: ".obj#<objectID>")
     final int objectID;
-    if (encodedMethod.startsWith(".obj#"))
     {
-      StringTokenizer t = new StringTokenizer(className, "#");
-      t.nextToken();
-      objectID = Integer.parseInt(t.nextToken());
+      final int objectStartIndex=encodedMethod.indexOf('[');
+      final int objectEndIndex=encodedMethod.indexOf(']');
+      if (encodedMethod.startsWith(OBJECT_METHOD_PREFIX)&&(objectStartIndex!=-1)&&(objectEndIndex!=-1)&&(objectStartIndex<objectEndIndex))
+      {
+        objectID = Integer.parseInt(encodedMethod.substring(objectStartIndex+1,objectEndIndex));
+      }
+      else
+      {
+        objectID = 0;
+      }
     }
-    else
-    {
-      objectID = 0;
-    }
-
     // #4: Handle list method calls
     if ((objectID == 0) && (encodedMethod.equals("system.listMethods")))
     {
@@ -1005,7 +1016,7 @@ public class JSONRPCBridge implements Serializable
   /**
    * Add all methods on registered callable references to a HashSet.
    * 
-   * @param m HashSet to add all methods to.
+   * @param m Set to add all methods to.
    */
   private void allCallableReferences(Set m)
   {
@@ -1018,12 +1029,11 @@ public class JSONRPCBridge implements Serializable
  
         ClassData cd = ClassAnalyzer.getClassData(clazz);
 
-        uniqueMethods(m, "cd_"+clazz.getName().replace(".", "^")+".", cd.getStaticMethodMap());
-        uniqueMethods(m, "cd_"+clazz.getName().replace(".", "^")+".", cd.getMethodMap());
+        uniqueMethods(m, CALLABLE_REFERENCE_METHOD_PREFIX+"["+clazz.getName()+"].", cd.getStaticMethodMap());
+        uniqueMethods(m, CALLABLE_REFERENCE_METHOD_PREFIX+"["+clazz.getName()+"].", cd.getMethodMap());
       }
     }
   }
-
   
   /**
    * Add all static methods that can be invoked on this bridge to the given

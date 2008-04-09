@@ -632,6 +632,8 @@ JSONRpcClient.prototype.createObject = function ()
   }
 };
 
+JSONRpcClient.CALLABLE_REFERENCE_METHOD_PREFIX = ".ref";
+
 /**
  * This is used to add a list of methods to this.
  * @param methodNames a list containing the names of the methods to add
@@ -647,7 +649,9 @@ JSONRpcClient.prototype._addMethods = function (methodNames,dontAdd)
       method,
       methods=[],
       javaClass,
-      tmpNames;
+      tmpNames,
+      startIndex,
+      endIndex;
   //Aha! It is a class, so create a entry for it.
   //This shouldn't get called twice on the same class so we can happily
   //overwrite it
@@ -660,20 +664,15 @@ JSONRpcClient.prototype._addMethods = function (methodNames,dontAdd)
     obj = this;
     
     names = methodNames[i].split(".");
-
-    if(names[0].substring(0,3)=="cd_")
+    startIndex=methodNames[i].indexOf("[");
+    endIndex=methodNames[i].indexOf("]");
+    if(
+        (methodNames[i].substring(0,
+          JSONRpcClient.CALLABLE_REFERENCE_METHOD_PREFIX.length)==
+          JSONRpcClient.CALLABLE_REFERENCE_METHOD_PREFIX)
+      &&(startIndex!=-1)&&(endIndex!=-1)&&(startIndex<endIndex))        
     {
-      tmpNames=names[0].substring(3).split("^");
-      javaClass="";
-      //TODO: make this into a join()!
-      for(n=0;n<tmpNames.length;n++)
-      {
-        if(n!=0)
-        {
-          javaClass+=".";
-        }
-        javaClass+=tmpNames[n];
-      }
+      javaClass=methodNames[i].substring(startIndex+1,endIndex);
     }
     else
     {
@@ -850,7 +849,7 @@ JSONRpcClient._makeRequest = function (client,methodName, args,objectID,cb)
 
   if ((objectID)&&(objectID>0))
   {
-    obj += "\".obj#" + objectID + "." + methodName +"\"";
+    obj += "\".obj[" + objectID + "]." + methodName +"\"";
   }
   else
   {
