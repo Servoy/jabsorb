@@ -410,7 +410,8 @@ public class JSONRPCServlet extends HttpServlet
     }
     try
     {
-      return new JSONObject(unformattedJSON).toString(2);
+      // sort the keys in the output as well
+      return new JSONObject(unformattedJSON).toString(2, true);
     }
     catch (JSONException je)
     {

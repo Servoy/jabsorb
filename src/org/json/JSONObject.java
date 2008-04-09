@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.TreeSet;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -54,14 +55,14 @@ import java.util.Map;
  * The generic <code>get()</code> and <code>opt()</code> methods return an
  * object, which you can cast or query for type. There are also typed
  * <code>get</code> and <code>opt</code> methods that do type checking and type
- * coersion for you.
+ * coercion for you.
  * <p>
  * The <code>put</code> methods adds values to an object. For example, <pre>
  *     myString = new JSONObject().put("JSON", "Hello, World!").toString();</pre>
  * produces the string <code>{"JSON": "Hello, World"}</code>.
  * <p>
  * The texts produced by the <code>toString</code> methods strictly conform to
- * the JSON sysntax rules.
+ * the JSON syntax rules.
  * The constructors are more forgiving in the texts they will accept:
  * <ul>
  * <li>An extra <code>,</code>&nbsp;<small>(comma)</small> may appear just
@@ -129,7 +130,7 @@ public class JSONObject {
     /**
      * The hash map where the JSONObject's properties are kept.
      */
-    private HashMap myHashMap;
+    private Map myHashMap;
 
 
     /**
@@ -618,11 +619,23 @@ public class JSONObject {
 
     /**
      * Get an enumeration of the keys of the JSONObject.
+     * The keys will have no implicit ordering.
      *
      * @return An iterator of the keys.
      */
     public Iterator keys() {
         return this.myHashMap.keySet().iterator();
+    }
+
+
+    /**
+     * Get an enumeration of the keys of the JSONObject.
+     * The keys will be sorted alphabetically.
+     *
+     * @return An iterator of the keys.
+     */
+    public Iterator sortedKeys() {
+      return new TreeSet(this.myHashMap.keySet()).iterator();
     }
 
 
@@ -638,7 +651,7 @@ public class JSONObject {
 
     /**
      * Produce a JSONArray containing the names of the elements of this
-     * JSONObject.
+     * JSONObject.  The names will not be in ordered in any particular way.
      * @return A JSONArray containing the key strings, or null if the JSONObject
      * is empty.
      */
@@ -650,6 +663,23 @@ public class JSONObject {
         }
         return ja.length() == 0 ? null : ja;
     }
+    
+
+    /**
+     * Produce a JSONArray containing the names of the elements of this
+     * JSONObject, sorted alphabetically.
+     * @return A JSONArray containing the key strings sorted alphabetically 
+     * or null if the JSONObject is empty.
+     */
+    public JSONArray sortedNames() {
+        JSONArray ja = new JSONArray();
+        Iterator  keys = sortedKeys();
+        while (keys.hasNext()) {
+            ja.put(keys.next());
+        }
+        return ja.length() == 0 ? null : ja;
+    }
+
 
     /**
      * Produce a string from a Number.
@@ -1170,6 +1200,24 @@ public class JSONObject {
         return toString(indentFactor, 0);
     }
 
+    /**
+     * Make a prettyprinted JSON text of this JSONObject with the option
+     * to sort all the keys alphabetically.
+     * <p>
+     * Warning: This method assumes that the data structure is acyclical.
+     * @param indentFactor The number of spaces to add to each level of
+     *  indentation.
+     * @param sorted if true, the keys will be sorted alphabetically.
+     * @return a printable, displayable, portable, transmittable
+     *  representation of the object, beginning
+     *  with <code>{</code>&nbsp;<small>(left brace)</small> and ending
+     *  with <code>}</code>&nbsp;<small>(right brace)</small>.
+     * @throws JSONException If the object contains an invalid number.
+     */
+    public String toString(int indentFactor, boolean sorted) throws JSONException {
+        return toString(indentFactor, 0, sorted);
+    }
+
 
     /**
      * Make a prettyprinted JSON text of this JSONObject.
@@ -1185,12 +1233,33 @@ public class JSONObject {
      * @throws JSONException If the object contains an invalid number.
      */
     String toString(int indentFactor, int indent) throws JSONException {
+        return toString(indentFactor, indent, false);
+    }
+    
+    
+    /**
+     * Make a prettyprinted JSON text of this JSONObject.
+     * <p>
+     * Warning: This method assumes that the data structure is acyclical.
+     * @param indentFactor The number of spaces to add to each level of
+     *  indentation.
+     * @param indent The indentation of the top level.
+     * @param sorted if true, then sort the keys alphabetically in the 
+     *        prettyprinted output.
+     * @return a printable, displayable, transmittable
+     *  representation of the object, beginning
+     *  with <code>{</code>&nbsp;<small>(left brace)</small> and ending
+     *  with <code>}</code>&nbsp;<small>(right brace)</small>.
+     * @throws JSONException If the object contains an invalid number.
+     */
+    String toString(int indentFactor, int indent, boolean sorted) 
+        throws JSONException {
         int          i;
         int          n = length();
         if (n == 0) {
             return "{}";
         }
-        Iterator     keys = keys();
+        Iterator     keys = (sorted?sortedKeys():keys());
         StringBuffer sb = new StringBuffer("{");
         int          newindent = indent + indentFactor;
         Object       o;
@@ -1199,7 +1268,7 @@ public class JSONObject {
             sb.append(quote(o.toString()));
             sb.append(": ");
             sb.append(valueToString(this.myHashMap.get(o), indentFactor,
-                    indent));
+                    indent, sorted));
         } else {
             while (keys.hasNext()) {
                 o = keys.next();
@@ -1214,7 +1283,7 @@ public class JSONObject {
                 sb.append(quote(o.toString()));
                 sb.append(": ");
                 sb.append(valueToString(this.myHashMap.get(o), indentFactor,
-                        newindent));
+                        newindent, sorted));
             }
             if (sb.length() > 1) {
                 sb.append('\n');
@@ -1293,14 +1362,15 @@ public class JSONObject {
      * @param indentFactor The number of spaces to add to each level of
      *  indentation.
      * @param indent The indentation of the top level.
+     * @param sorted if true, the keys will be sorted alphabetically.
      * @return a printable, displayable, transmittable
      *  representation of the object, beginning
      *  with <code>{</code>&nbsp;<small>(left brace)</small> and ending
      *  with <code>}</code>&nbsp;<small>(right brace)</small>.
      * @throws JSONException If the object contains an invalid number.
      */
-     static String valueToString(Object value, int indentFactor, int indent)
-            throws JSONException {
+     static String valueToString(Object value, int indentFactor, int indent, 
+         boolean sorted) throws JSONException {
         if (value == null || value.equals(null)) {
             return "null";
         }
@@ -1321,34 +1391,36 @@ public class JSONObject {
             return value.toString();
         }
         if (value instanceof JSONObject) {
-            return ((JSONObject)value).toString(indentFactor, indent);
+            return ((JSONObject)value).toString(indentFactor, indent, sorted);
         }
         if (value instanceof JSONArray) {
-            return ((JSONArray)value).toString(indentFactor, indent);
+            return ((JSONArray)value).toString(indentFactor, indent, sorted);
         }
         if (value instanceof Map) {
-            return new JSONObject((Map)value).toString(indentFactor, indent);
+            return new JSONObject((Map)value).toString(indentFactor, indent, 
+                sorted);
         }
         if (value instanceof Collection) {
-            return new JSONArray((Collection)value).toString(indentFactor, indent);
+            return new JSONArray((Collection)value).toString(indentFactor, 
+                indent, sorted);
         }
         if (value.getClass().isArray()) {
-            return new JSONArray(value).toString(indentFactor, indent);
+            return new JSONArray(value).toString(indentFactor, indent, sorted);
         }
         return quote(value.toString());
     }
 
 
-     /**
-      * Write the contents of the JSONObject as JSON text to a writer.
-      * For compactness, no whitespace is added.
-      * <p>
-      * Warning: This method assumes that the data structure is acyclical.
-      *
-      * @return The writer.
-      * @throws JSONException
-      */
-     public Writer write(Writer writer) throws JSONException {
+    /**
+     * Write the contents of the JSONObject as JSON text to a writer.
+     * For compactness, no whitespace is added.
+     * <p>
+     * Warning: This method assumes that the data structure is acyclical.
+     *
+     * @return The writer.
+     * @throws JSONException
+     */
+    public Writer write(Writer writer) throws JSONException {
         try {
             boolean  b = false;
             Iterator keys = keys();
@@ -1376,5 +1448,5 @@ public class JSONObject {
         } catch (IOException e) {
             throw new JSONException(e);
         }
-     }
+    }
 }
