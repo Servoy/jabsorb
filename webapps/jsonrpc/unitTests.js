@@ -419,7 +419,7 @@ var unitTests={
     tests:
     [
       { code: 'jsonrpc.test.throwException()',
-        test: 'e == "java.lang.Exception: test exception"',
+        test: 'e.code == 490 && e.msg == "test exception"',
         exception: true
       }
     ]

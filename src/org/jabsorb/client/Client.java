@@ -169,7 +169,7 @@ public class Client implements InvocationHandler
   /**
 	 * Generate and throw exception based on the data in the 'responseMessage'
 	 */
-  private void processException(JSONObject responseMessage)
+  protected void processException(JSONObject responseMessage)
       throws JSONException
   {
     JSONObject error = (JSONObject) responseMessage.get("error");

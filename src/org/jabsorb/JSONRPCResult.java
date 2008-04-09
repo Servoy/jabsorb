@@ -213,15 +213,26 @@ public class JSONRPCResult
       }
       else if (errorCode == CODE_REMOTE_EXCEPTION)
       {
-        Throwable e = (Throwable) result;
-        CharArrayWriter caw = new CharArrayWriter();
-        e.printStackTrace(new PrintWriter(caw));
-        JSONObject err = new JSONObject();
-        err.put("code", new Integer(errorCode));
-        err.put("msg", e.getMessage());
-        err.put("trace", caw.toString());
-        o.put("id", id);
-        o.put("error", err);
+        o.put("id", id); 
+        if (result instanceof Throwable)
+        {
+          Throwable e = (Throwable) result;
+          CharArrayWriter caw = new CharArrayWriter();
+          e.printStackTrace(new PrintWriter(caw));
+          JSONObject err = new JSONObject();
+          err.put("code", new Integer(errorCode));
+          err.put("msg", e.getMessage());
+          err.put("trace", caw.toString());
+          o.put("error", err);
+        }
+        else
+        {
+          // When using a customized implementation of ExceptionTransformer
+          // an error result may be something other than Throwable. In this
+          // case, it has to be a JSON compatible object, we will just store it
+          // to the 'error' property of the response. 
+          o.put("error", result);
+        }
       }
       else
       {

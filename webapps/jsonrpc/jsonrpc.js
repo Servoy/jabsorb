@@ -458,28 +458,28 @@ function JSONRPCCallableProxy()
 JSONRpcClient.knownClasses = {};
 
 /* JSONRpcCLient.Exception */
-JSONRpcClient.Exception = function (code, message, javaStack)
+JSONRpcClient.Exception = function (errorObject)
 {
-  this.code = code;
-  var name,m;
-  if (javaStack)
+  var m;
+  for( var prop in errorObject) 
   {
-    this.javaStack = javaStack;
-    m = javaStack.match(/^([^:]*)/);
-    if (m)
+    if (errorObject.hasOwnProperty(prop)) 
     {
-      name = m[0];
+      this[prop] = errorObject[prop];
     }
   }
-  if (name)
+  if (this.trace)
   {
-    this.name = name;
+    m = this.trace.match(/^([^:]*)/);
+    if (m)
+    {
+      this.name = m[0];
+    }
   }
-  else
+  if (!this.name)
   {
     this.name = "JSONRpcClientException";
   }
-  this.message = message;
 };
 
 //Error codes that are the same as on the bridge
@@ -966,7 +966,10 @@ JSONRpcClient._sendRequest = function (client,req)
     JSONRpcClient.poolReturnHTTPRequest(http);
     JSONRpcClient.num_req_active--;
     throw new JSONRpcClient.Exception(
-      JSONRpcClient.Exception.CODE_ERR_CLIENT, "Connection failed");
+      { 
+        code: JSONRpcClient.Exception.CODE_ERR_CLIENT, 
+        message: "Connection failed" 
+      } );
   }
 
   if (!req.cb)
@@ -1006,7 +1009,11 @@ JSONRpcClient.prototype._handleResponse = function (http)
     JSONRpcClient.poolReturnHTTPRequest(http);
     JSONRpcClient.num_req_active--;
     JSONRpcClient.kick_async();
-    throw new JSONRpcClient.Exception(JSONRpcClient.Exception.CODE_ERR_CLIENT, "Connection failed");
+    throw new JSONRpcClient.Exception(
+      { 
+        code: JSONRpcClient.Exception.CODE_ERR_CLIENT, 
+        message: "Connection failed" 
+      });
   }
 
   /* Return http object to the pool; */
@@ -1016,7 +1023,7 @@ JSONRpcClient.prototype._handleResponse = function (http)
   /* Unmarshall the response */
   if (status != 200)
   {
-    throw new JSONRpcClient.Exception(status, statusText);
+    throw new JSONRpcClient.Exception({ code: status, message: statusText });
   };
   return this.unmarshallResponse(data);
 };
@@ -1062,11 +1069,11 @@ JSONRpcClient.prototype.unmarshallResponse=function(data)
   }
   catch(e)
   {
-    throw new JSONRpcClient.Exception(550, "error parsing result");
+    throw new JSONRpcClient.Exception({ code: 550, message: "error parsing result" });
   } 
   if (obj.error)
   {
-    throw new JSONRpcClient.Exception (obj.error.code, obj.error.msg, obj.error.trace);
+    throw new JSONRpcClient.Exception (obj.error);
   }
   var r = obj.result;
 
@@ -1209,5 +1216,9 @@ JSONRpcClient.getHTTPRequest = function ()
 
   /* None found */
   JSONRpcClient.httpObjectName = null;
-  throw new JSONRpcClient.Exception(0, "Can't create XMLHttpRequest object");
+  throw new JSONRpcClient.Exception(
+    { 
+      code: 0, 
+      message: "Can't create XMLHttpRequest object" 
+    });
 };
