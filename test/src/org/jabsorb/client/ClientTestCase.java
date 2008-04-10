@@ -2,7 +2,7 @@
  * jabsorb - a Java to JavaScript Advanced Object Request Broker
  * http://www.jabsorb.org
  *
- * Copyright 2007 The jabsorb team
+ * Copyright 2007-2008 The jabsorb team
  *
  * based on original code from
  * JSON-RPC-Client, a Java client extension to JSON-RPC-Java
