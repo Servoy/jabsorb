@@ -814,27 +814,7 @@ public class JSONArray {
      * @throws JSONException
      */
     public String toString(int indentFactor) throws JSONException {
-        return toString(indentFactor, 0, false);
-    }
-
-    
-    /**
-     * Make a prettyprinted JSON text of this JSONArray with the option
-     * to sort all the keys of any recursive JSONObjects alphabetically.
-     * 
-     * Warning: This method assumes that the data structure is acyclical.
-     * @param indentFactor The number of spaces to add to each level of
-     *  indentation.
-     * @param sorted if true, then any recursively prettyprinted JSONObjects
-     *        will have its keys sorted alphabetically.
-     * @return a printable, displayable, transmittable
-     *  representation of the object, beginning
-     *  with <code>[</code>&nbsp;<small>(left bracket)</small> and ending
-     *  with <code>]</code>&nbsp;<small>(right bracket)</small>.
-     * @throws JSONException
-     */
-    public String toString(int indentFactor, boolean sorted) throws JSONException {
-        return toString(indentFactor, 0, sorted);
+        return toString(indentFactor, 0);
     }
 
 
@@ -844,14 +824,11 @@ public class JSONArray {
      * @param indentFactor The number of spaces to add to each level of
      *  indentation.
      * @param indent The indention of the top level.
-     * @param sorted if true, then any recursively prettyprinted JSONObjects
-     *        will have its keys sorted alphabetically.
-     * 
      * @return a printable, displayable, transmittable
      *  representation of the array.
      * @throws JSONException
      */
-    String toString(int indentFactor, int indent, boolean sorted) throws JSONException {
+    String toString(int indentFactor, int indent) throws JSONException {
         int len = length();
         if (len == 0) {
             return "[]";
@@ -860,7 +837,7 @@ public class JSONArray {
         StringBuffer sb = new StringBuffer("[");
         if (len == 1) {
             sb.append(JSONObject.valueToString(this.myArrayList.get(0),
-                    indentFactor, indent, sorted));
+                    indentFactor, indent));
         } else {
             int newindent = indent + indentFactor;
             sb.append('\n');
@@ -872,7 +849,7 @@ public class JSONArray {
                     sb.append(' ');
                 }
                 sb.append(JSONObject.valueToString(this.myArrayList.get(i),
-                        indentFactor, newindent, sorted));
+                        indentFactor, newindent));
             }
             sb.append('\n');
             for (i = 0; i < indent; i += 1) {
