@@ -1,6 +1,23 @@
 CHANGES log
 
-2008-01-16 jabsorb 1.2.2 release
+2008-04-10 jabsorb 1.3 release
+
+* Constructors added.
+
+* Extracted unmarshallString() out of handleResponse() in jsonrpc.js. This 
+  can be used to evaluate any JSON string with the client. 
+
+* Modified message format to: .extensiontype[qualifier].methodname
+
+* Updated JSON library 
+
+* Tidied up exception interface
+
+* Maven used to get external libraries.
+
+* Added embedded jetty server which runs the test app.
+
+2008-01-16/ jabsorb 1.2.2 release
 
 * The json-rpc-client is now part of jabsorb, under the new package 
   org.jabsorb.client.  Thanks to Sasha Ovanskin for this extremely useful 
