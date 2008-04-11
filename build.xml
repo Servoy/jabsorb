@@ -3,7 +3,7 @@
   jabsorb - a Java to JavaScript Advanced Object Request Broker
   http://jabsorb.org
 
-  Copyright 2007 The jabsorb team
+  Copyright 2007-2008 The jabsorb team
 
   based on original code from
   JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
@@ -105,6 +105,7 @@
     <echo file="${lib-ext}/dependencies"> ${dependencies.string} </echo>
   </target>
 	
+  <!-- this target does not currently work on JDK 1.4 right now due to maven dependancy/repository issues -->
   <target name="compile.test" depends="test.init, dist, init" description="Compiles the testing classes">
     <javac debug="true" source="1.4" srcdir="${test.src}" destdir="${test.classes}">
       <classpath>
@@ -135,7 +136,7 @@
   </target>
 
 
-  <target name="test.dist" depends="compile.test,dist,init" description="Creates a war with the test files">
+  <target name="test.dist" depends="dist,init" description="Creates a war with the test files">
     <copy file="${app-jar}" tofile="${webinf}/lib/${app-jar-name}" />
     <copy file="${test.src}/org/jabsorb/test/Hello.java" tofile="${webapp}/Hello.java.txt" />
     <copy file="${webapp}/hello.jsp" tofile="${webapp}/hello.jsp.txt" />
