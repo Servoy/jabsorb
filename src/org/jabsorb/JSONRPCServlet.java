@@ -353,7 +353,7 @@ public class JSONRPCServlet extends HttpServlet
     // less data efficient for foreign character sets but it is
     // needed to support naughty browsers such as Konqueror and Safari
     // which do not honour the charset set in the response
-    response.setContentType("text/plain;charset=utf-8");
+    response.setContentType("application/json;charset=utf-8");
     OutputStream out = response.getOutputStream();
 
     response.setIntHeader("Content-Length", bout.length);
