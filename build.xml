@@ -379,6 +379,9 @@
 	         failonerror="true"
 	    >
 	   	<arg value="${port-number}"/>
+
+      <jvmarg value="-Djava.util.logging.config.file=testlogging.properties"/>
+
 	    <classpath >
         <path refid="jarClasspath" />
         <path refid="test-classpath" />
