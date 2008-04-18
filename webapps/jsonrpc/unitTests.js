@@ -411,7 +411,10 @@ var unitTests={
       },
       { code: 'jsonrpc.test.echo({ foo: "bang", bar: 11 })',
         test: 'result.javaClass == "org.jabsorb.test.ITest$Wiggle" && result.foo =="bang" && result.bar == 11'
-      }
+      },
+      { code: 'jsonrpc.test.trueBooleansInMap({ javaClass:"java.util.HashMap", map: {"yo": false, "ho": true, "bottle": false, "rum":true}})',
+        test: 'result === 2'
+      } 
     ]
   },
   "Exceptions":

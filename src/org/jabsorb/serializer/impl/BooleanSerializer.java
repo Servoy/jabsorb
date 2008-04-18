@@ -105,6 +105,7 @@ public class BooleanSerializer extends AbstractSerializer
       throws UnmarshallException
   {
     Boolean returnValue = Boolean.FALSE;
+
     if (jso instanceof String)
     {
       try
@@ -116,7 +117,7 @@ public class BooleanSerializer extends AbstractSerializer
         throw new UnmarshallException("Cannot convert " + jso + " to Boolean", e);
       }
     }
-    else if (clazz == boolean.class)
+    else if (jso instanceof Boolean || clazz == boolean.class)
     {
       returnValue = (Boolean) jso;
     }
@@ -124,5 +125,4 @@ public class BooleanSerializer extends AbstractSerializer
     state.setSerialized(jso, returnValue);
     return returnValue;
   }
-
 }

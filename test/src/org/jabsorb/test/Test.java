@@ -601,4 +601,27 @@ private static CallableRefTest callableRef = new CallableRefTest();
     {
     }
   };
+  
+  /**
+   * Count the number of true booleans in the Map.
+   * 
+   * @param input map.
+   * @return number of booleans in the map that were set to true.
+   */
+  public int trueBooleansInMap (Map in)
+  {
+    int numTrue = 0;
+    Set keys = in.keySet();
+    for (Iterator i=keys.iterator(); i.hasNext();)
+    {
+      Object key = i.next();
+      Object value = in.get(key);
+      if (value instanceof Boolean && ((Boolean) value).booleanValue())
+      {
+        numTrue ++;
+      }
+    }
+    return numTrue;
+  }
+
 }
