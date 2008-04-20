@@ -28,6 +28,7 @@ package org.jabsorb.test;
 
 import org.apache.jasper.servlet.JspServlet;
 import org.jabsorb.JSONRPCServlet;
+import org.jabsorb.ext.InitializationServlet;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.DefaultServlet;
@@ -42,7 +43,7 @@ public class JabsorbTestServer
    * The directory on which the webapp is found
    */
   public final String BASE_CONTEXT = "";
-
+ 
   /**
    * Runs the webserver on port 8084
    * 
@@ -116,6 +117,10 @@ public class JabsorbTestServer
     ServletHolder jsonRpcServlet = new ServletHolder(new JSONRPCServlet());
     jsonRpcServlet.setInitParameter("auto-session-bridge", "0");
     context.addServlet(jsonRpcServlet, "/JSON-RPC/*");
+    
+    // do other initialization that normally happens in web.xml
+    ServletHolder initServlet = new ServletHolder(new InitializationServlet());
+    context.addServlet(initServlet, null);
   }
 
   /**

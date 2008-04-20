@@ -151,6 +151,22 @@
         <include name="**/*.jar" />
       </fileset>
     </copy>
+    
+    <!-- build the embedded apache derby database for the ext/projectmetrics demo -->
+    <java classname="org.jabsorb.ext.ProjectMetricsDatabase"
+        fork="true" failonerror="true">
+        
+      <!-- path to files to load into DB -->
+      <arg value="${test.rsrc}/projectmetrics"/> 
+
+      <classpath >
+        <path refid="default-classpath"/>
+        <pathelement location="${build.classes}"/>
+        <pathelement location="${test.classes}"/>
+        <path refid="test-classpath" />
+      </classpath>
+    </java>
+    
     <jar destfile="${test.lib}/rsrc.jar" basedir="${test.rsrc}" excludes="*~" />
     <war destfile="${app-war}" basedir="${webapp}" excludes="**/*~,WEB-INF/web.xml*" webxml="${webapp}/WEB-INF/web.xml" />
   </target>

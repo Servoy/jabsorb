@@ -51,12 +51,12 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.4.2</version>
+			<version>1.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-jdk14</artifactId>
-			<version>1.4.2</version>
+			<version>1.5.0</version>
 		</dependency>
 
 		<!-- Optional runtime dependencies -->
@@ -64,7 +64,7 @@
 			<!-- Replacement for commons-logging required by httpclient -->
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl104-over-slf4j</artifactId>
-			<version>1.4.2</version>
+			<version>1.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-httpclient</groupId>
@@ -77,7 +77,14 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
+		<!-- Apache derby embedded database used by the ExtJS demo in jabsorb war-->
+		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derby</artifactId>
+			<version>10.3.2.1</version>
+		</dependency>
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>org.mortbay.jetty</groupId>

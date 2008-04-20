@@ -33,6 +33,11 @@
     <a href="hello.js.txt">hello.js</a></li>
 </ul>
 
+<h3><a href="projectmetrics.html">Project Metrics</a></h3>
+
+<p>A demonstration of jabsorb using ExtJS on the frontend
+   and an Apache Derby embedded database on the back end.</p>
+
 <h3><a href="test.jsp">Tests</a></h3>
 
 <p>Basic demo that performs a number of simple tests and shows the usage of a

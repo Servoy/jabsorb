@@ -2,6 +2,16 @@
 <!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
 <web-app>
 
+  <!-- this servlet is just a hook into the web app lifecycle so
+       we can do some init and destroy logic
+       it doesn't actually serve any resources
+  -->
+  <servlet>
+    <servlet-name>InitializationServlet</servlet-name>
+    <servlet-class>org.jabsorb.ext.InitializationServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
   <servlet>
     <servlet-name>JSONRPCServlet</servlet-name>
     <servlet-class>org.jabsorb.JSONRPCServlet</servlet-class>
