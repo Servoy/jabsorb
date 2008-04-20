@@ -1,0 +1,24 @@
+/* styles used by the source code table */
+table.jabsorbsourcecode
+{
+  border:1px solid black;
+  border-collapse: collapse;
+}
+table.jabsorbsourcecode thead {
+  background-color:#effeef;
+  font-weight: bold;
+}
+
+table.jabsorbsourcecode thead td {
+  padding-left:20px;
+  padding-right:20px;
+  border:1px solid black;
+}
+table.jabsorbsourcecode tbody td {
+  padding-left:20px;
+  padding-right:20px;
+  border-right:1px solid black;
+}
+table.jabsorbsourcecode tbody td a {
+  cursor: pointer;
+}
