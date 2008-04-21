@@ -217,18 +217,23 @@ public class ColumnMetaData
     this.characterType =
         columnType == Types.CHAR ||
         columnType == Types.VARCHAR ||
-        columnType == Types.LONGVARCHAR ||
-        columnType == Types.NCHAR ||
-        columnType == Types.NVARCHAR ||
-        columnType == Types.LONGNVARCHAR;
+        columnType == Types.LONGVARCHAR;
+
+// JDBC 4 only
+//        columnType == Types.NCHAR ||
+//        columnType == Types.NVARCHAR ||
+//        columnType == Types.LONGNVARCHAR;
+
 
     this.lobType =
         columnType == Types.BLOB ||
         columnType == Types.CLOB ||
         columnType == Types.REF ||
-        columnType == Types.DATALINK ||
-        columnType == Types.NCLOB ||
-        columnType == Types.SQLXML;
+        columnType == Types.DATALINK;
+
+// JDBC 4 only
+//        columnType == Types.NCLOB ||
+//        columnType == Types.SQLXML;
   }
 
   /**
