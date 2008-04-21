@@ -32,7 +32,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * JSON-RPC call API for the etc/project metrics jabsorb demo.
+ * JSON-RPC call API for the ExtJS/project metrics jabsorb demo.
  * The public methods in this class can be called directly from the browser.
  * Objects passed and returned are passed to the JavaScript side via JSON-RPC.
  * 
