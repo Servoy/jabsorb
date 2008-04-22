@@ -52,6 +52,17 @@ import org.slf4j.LoggerFactory;
 public class ProjectMetricsDatabase
 {
   /**
+   * Test whether the database folder (and thus the database itself)
+   * already exists or not.
+   *
+   * @return true if the database exists.
+   */
+  public static boolean exists()
+  {
+    return new File(getDerbyFolder()).exists();
+  }
+
+  /**
    * When this class is invoked as a program, it's used to create the database
    * from the .json input files.
    * 
@@ -63,10 +74,19 @@ public class ProjectMetricsDatabase
    * @throws IOException  if something goes wrong while reading the filesystem.
    * @throws UnmarshallException if the json is in an unexpected format.
    */
-  public static void main(String[] args) 
+  public static void main(String[] args)
     throws SQLException, IOException, UnmarshallException
   {
     PrintStream out = System.out;
+
+    if (ProjectMetricsDatabase.exists())
+    {
+      out.println("The Apache Derby database has already been created-- " + 
+        "(remove the " + ProjectMetricsDatabase.getDerbyFolder() + 
+        " folder to rebuild it)");
+      System.exit(1);
+    }
+
     if (args.length==0)
     {
       out.println("usage:  ProjectMetricsDatabase <path | file>");
@@ -74,22 +94,22 @@ public class ProjectMetricsDatabase
       out.println("  metrics information from one or more .json files.");
       out.println();
       out.println("  example:  ProjectMetricsDatabase test/rsrc/projectmetrics");
-      System.exit(1);
-    }
-    
-    File inputFile = new File(args[0]);
-    
-    if (!inputFile.exists())
-    {
-      out.println("path or file " + args[0] + " not found.");
       System.exit(2);
     }
 
+    File inputFile = new File(args[0]);
+
+    if (!inputFile.exists())
+    {
+      out.println("path or file " + args[0] + " not found.");
+      System.exit(3);
+    }
+
     ProjectMetricsDatabase db = new ProjectMetricsDatabase();
-    
+
     // get a connection and create the db if it doesn't yet exist
     Connection conn = null;
-    
+
     // create the db tables
     try
     {
@@ -114,7 +134,7 @@ public class ProjectMetricsDatabase
         "SIZE BIGINT NOT NULL," +
         "LINES INTEGER NOT NULL" +
         ")");
-      
+
       db.loadFile(conn, inputFile);
     }
     finally
@@ -147,11 +167,21 @@ public class ProjectMetricsDatabase
       serializer.registerDefaultSerializers();
       serializer.setFixupDuplicates(false);
       serializer.setFixupCircRefs(false);
-    } 
+    }
     catch (Exception e) 
     {
       log.error("couldn't register default serializers.", e);
     }
+  }
+
+  /**
+   * Get the folder to store derby in.
+   *
+   * @param the folder in which the derby database will be stored.
+   */
+  private static String getDerbyFolder()
+  {
+    return System.getProperty("user.home") + "/.jabsorb/derby";
   }
 
   /**
@@ -162,7 +192,7 @@ public class ProjectMetricsDatabase
     try
     {
       // just assume DB is located in a local path
-      System.setProperty("derby.system.home", "./derby");
+      System.setProperty("derby.system.home", getDerbyFolder());
 
       // start apache derby embedded driver
       Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
@@ -219,7 +249,7 @@ public class ProjectMetricsDatabase
       }
     }
   }
-  
+
   /**
    * Exactly like the exec method , but if any SQLException is thrown, 
    * the Exception is supressed.
