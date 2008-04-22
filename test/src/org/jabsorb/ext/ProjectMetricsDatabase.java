@@ -79,12 +79,13 @@ public class ProjectMetricsDatabase
   {
     PrintStream out = System.out;
 
+    // if database already exists, just exit without recreating it
     if (ProjectMetricsDatabase.exists())
     {
-      out.println("The Apache Derby database has already been created-- " + 
+      out.println("[OK] The Apache Derby database has already been created-- " + 
         "(remove the " + ProjectMetricsDatabase.getDerbyFolder() + 
-        " folder to rebuild it)");
-      System.exit(1);
+        " folder if you need to rebuild it)");
+      return;
     }
 
     if (args.length==0)
