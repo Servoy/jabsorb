@@ -135,7 +135,6 @@
   	</junit>
   </target>
 
-
   <target name="test.dist" depends="compile.test,dist,init" description="Creates a war with the test files">
     <copy file="${app-jar}" tofile="${webinf}/lib/${app-jar-name}" />
     <copy file="${test.src}/org/jabsorb/test/Hello.java" tofile="${webapp}/Hello.java.txt" />
@@ -151,11 +150,18 @@
         <include name="**/*.jar" />
       </fileset>
     </copy>
-    
+
+    <!-- include Apache Derby .jar file used by the ext/project metrics demo -->
+    <copy todir="${test.lib}">
+      <fileset dir="./lib-ext">
+        <include name="**/derby*.jar" />
+      </fileset>
+    </copy>
+
     <!-- build the embedded apache derby database for the ext/projectmetrics demo -->
     <java classname="org.jabsorb.ext.ProjectMetricsDatabase"
         fork="true" failonerror="true">
-        
+
       <!-- path to files to load into DB -->
       <arg value="${test.rsrc}/projectmetrics"/> 
 
@@ -166,7 +172,7 @@
         <path refid="test-classpath" />
       </classpath>
     </java>
-    
+
     <jar destfile="${test.lib}/rsrc.jar" basedir="${test.rsrc}" excludes="*~" />
     <war destfile="${app-war}" basedir="${webapp}" excludes="**/*~,WEB-INF/web.xml*" webxml="${webapp}/WEB-INF/web.xml" />
   </target>
