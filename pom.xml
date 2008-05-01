@@ -78,7 +78,7 @@
 			</exclusions>
 		</dependency>
 
-		<!-- Apache derby embedded database used by the ExtJS demo in jabsorb war-->
+		<!-- Apache derby embedded database used by the project metrics demo in jabsorb war-->
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
