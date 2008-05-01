@@ -812,13 +812,14 @@ public class JSONSerializer implements Serializable
 
   /**
    * Reads an object, serialising each
-   *
-   * TODO: This is not used!
+   * This is used by the java serialization logic.
    *
    * @param in The stream to take an object to serialise
    * @throws java.io.IOException if the object can't be read from the stream
    * @throws ClassNotFoundException If a class cannot be found for the object to
    *           be read
+   *           
+   * @see java.io.Serializable
    */
   private void readObject(ObjectInputStream in)
       throws IOException, ClassNotFoundException
