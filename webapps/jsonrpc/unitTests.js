@@ -258,6 +258,9 @@ var unitTests={
       { code: 'jsonrpc.test.echoObjectArray([{ "javaClass": "org.jabsorb.test.ITest$Waggle", "bang": "foo", "baz": 9, "bork": 5 }])',
         test: 'result[0].javaClass == "org.jabsorb.test.ITest$Waggle" && result[0].bang =="foo" && result[0].baz == 9 && result[0].bork == 5'
       },
+      { code: 'jsonrpc.test.echoObject([{ "javaClass": "org.jabsorb.test.ITest$Waggle", "bang": "foo", "baz": 9, "bork": 5 }])',
+        test: 'result[0].javaClass == "org.jabsorb.test.ITest$Waggle" && result[0].bang =="foo" && result[0].baz == 9 && result[0].bork == 5'
+      },
       { code: 'jsonrpc.test.echoRawJSON({ "field1": "test" })',
         test: 'result.field1 == "test"'
       }

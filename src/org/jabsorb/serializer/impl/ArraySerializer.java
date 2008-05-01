@@ -74,8 +74,9 @@ public class ArraySerializer extends AbstractSerializer
   public boolean canSerialize(Class clazz, Class jsonClazz)
   {
     Class cc = clazz.getComponentType();
-    return (super.canSerialize(clazz, jsonClazz) || ((jsonClazz == null || jsonClazz == JSONArray.class) && (clazz
-        .isArray() && !cc.isPrimitive())));
+    return (super.canSerialize(clazz, jsonClazz) || ((jsonClazz == null || 
+      jsonClazz==JSONArray.class) && (clazz.isArray() && !cc.isPrimitive())) || 
+      (clazz==java.lang.Object.class && jsonClazz == JSONArray.class));
   }
 
   public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object o)
@@ -199,7 +200,8 @@ public class ArraySerializer extends AbstractSerializer
       }
       else
       {
-        Object arr[] = (Object[]) Array.newInstance(clazz.getComponentType(),
+        Object arr[] = (Object[]) Array.newInstance(
+            clazz==java.lang.Object.class?java.lang.Object.class:cc,
             jso.length());
         state.setSerialized(o, arr);
         for (; i < jso.length(); i++)
