@@ -17,6 +17,8 @@ CHANGES log
 
 * Added embedded jetty server which runs the test app.
 
+* Fixed separate bugs regarding serialization of arrays and booleans.
+
 2008-01-16/ jabsorb 1.2.2 release
 
 * The json-rpc-client is now part of jabsorb, under the new package 
