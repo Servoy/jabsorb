@@ -1,6 +1,6 @@
 CHANGES log
 
-2008-04-10 jabsorb 1.3 release
+2008-05-09 jabsorb 1.3 release
 
 * Constructors added.
 
