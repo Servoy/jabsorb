@@ -153,6 +153,11 @@ public class Test implements Serializable, ITest
   {
     return d;
   }
+  
+  public java.sql.Date echoSQLDateObject(java.sql.Date d)
+  {
+    return d;
+  }
 
   public Object echoObject(Object o)
   {

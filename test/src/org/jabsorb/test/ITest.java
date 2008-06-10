@@ -171,6 +171,8 @@ public interface ITest
   Double echoDoubleObject(Double d);
 
   Date echoDateObject(Date d);
+  
+  java.sql.Date echoSQLDateObject(java.sql.Date d);
 
   Object echoObject(Object o);
 

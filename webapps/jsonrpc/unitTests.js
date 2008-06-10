@@ -246,6 +246,9 @@ var unitTests={
       { code: 'jsonrpc.test.echoObject({ "javaClass": "org.jabsorb.test.ITest$Waggle", "bang": "foo", "baz": 9, "bork": 5 })',
         test: 'result.javaClass == "org.jabsorb.test.ITest$Waggle" && result.bang =="foo" && result.baz == 9 && result.bork == 5'
       },
+      { code: 'jsonrpc.test.echoObject([1,"string"])',
+        test: 'result[0]== 1 && result[1]==="string"'
+      },
       { code: 'jsonrpc.test.echoRawJSON({ a: false})',
         test: 'result.a === false '
       },
@@ -336,6 +339,9 @@ var unitTests={
     [
       { code: 'jsonrpc.test.echoDateObject(new Date(1121689294000))',
         test: 'result.javaClass == "java.util.Date" && result.time == 1121689294000'
+      },
+      { code: 'jsonrpc.test.echoSQLDateObject({javaClass:"java.sql.Date",time:1121689294001})',
+        test: 'result.javaClass == "java.sql.Date" && result.time == 1121689294001'
       }
     ]
   },
