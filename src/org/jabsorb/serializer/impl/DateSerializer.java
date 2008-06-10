@@ -114,7 +114,9 @@ public class DateSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("no type hint");
     }
-    if (!(java_class.equals("java.util.Date")))
+    if (!(java_class.equals("java.util.Date")) && 
+        !(java_class.equals("java.sql.Timestamp")) && 
+        !(java_class.equals("java.sql.Date")) )
     {
       throw new UnmarshallException("not a Date");
     }
