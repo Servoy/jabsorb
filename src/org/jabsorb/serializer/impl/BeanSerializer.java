@@ -124,6 +124,11 @@ public class BeanSerializer extends AbstractSerializer
     bd.writableProps = new HashMap();
     for (int i = 0; i < props.length; i++)
     {
+      //This is declared by enums and shouldn't be shown.
+      if(props[i].getName().equals("declaringClass"))
+      {
+        continue;
+      }
       if (props[i].getWriteMethod() != null)
       {
         bd.writableProps.put(props[i].getName(), props[i].getWriteMethod());
