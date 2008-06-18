@@ -107,7 +107,7 @@ public class AccessibleObjectResolver
     // Call the method
     try
     {
-      boolean isConstructor = accessibleObject instanceof Constructor;
+      final boolean isConstructor = accessibleObject instanceof Constructor;
 
       if (log.isDebugEnabled())
       {
@@ -125,7 +125,7 @@ public class AccessibleObjectResolver
         }
       }
 
-      Class[] parameterTypes;
+      final Class[] parameterTypes;
 
       if (isConstructor)
       {
@@ -137,7 +137,7 @@ public class AccessibleObjectResolver
       }
 
       // Unmarshall arguments
-      Object javaArgs[] = AccessibleObjectResolver.unmarshallArgs(context,
+      final Object javaArgs[] = AccessibleObjectResolver.unmarshallArgs(context,
           parameterTypes, arguments, serializer);
 
       // Call pre invoke callbacks
@@ -151,7 +151,7 @@ public class AccessibleObjectResolver
       }
 
       // Invoke the method
-      Object returnObj;
+      final Object returnObj;
       if (isConstructor)
       {
         returnObj = ((Constructor) accessibleObject).newInstance(javaArgs);
@@ -172,8 +172,8 @@ public class AccessibleObjectResolver
       }
 
       // Marshall the result
-      SerializerState serializerState = new SerializerState();
-      Object json = serializer.marshall(serializerState, null, returnObj, "r");
+      final SerializerState serializerState = new SerializerState();
+      final Object json = serializer.marshall(serializerState, null, returnObj, "r");
       result = new JSONRPCResult(JSONRPCResult.CODE_SUCCESS, requestId, json,
           serializerState.getFixUps());
 
