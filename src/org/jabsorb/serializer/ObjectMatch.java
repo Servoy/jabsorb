@@ -64,6 +64,7 @@ public class ObjectMatch
 
   /**
    * The number of mismatched fields that occurred on a tryUnmarshall call.
+   * TODO: make this value final, so it can't be changed!
    */
   private int mismatch;
 
@@ -113,10 +114,18 @@ public class ObjectMatch
    */
   public ObjectMatch max(ObjectMatch m)
   {
+    if(m == null)
+    {
+      return this;
+    }
     if (this.mismatch > m.mismatch)
     {
       return this;
     }
     return m;
+  }
+  public String toString()
+  {
+    return Integer.toString(this.mismatch);
   }
 }
