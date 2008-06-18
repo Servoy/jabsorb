@@ -540,6 +540,12 @@ JSONRpcClient.fixupCircRefs = true;
 JSONRpcClient.fixupDuplicates = true;
 
 /**
+ * if true, java.util.Date object are unmarshalled to javascript dates
+ * if false, no customized unmarshalling for dates is done
+ */
+JSONRpcClient.transformDates = false;
+
+/**
  * Used to bind the this of the serverMethodCaller() (see below) which is to be
  * bound to the right object. This is needed as the serverMethodCaller is
  * called only once in createMethod and is then assigned to multiple
@@ -1061,6 +1067,58 @@ JSONRpcClient.prototype.unmarshallResponse=function(data)
       applyFixup(obj,fixups[i][0],findOriginal(obj,fixups[i][1]));
     }
   }
+  /**
+   * Traverse the resulting object graph and replace serialized date objects with javascript dates. An object is 
+   * replaced with a JS date when any of the following conditions is true:
+   *   The object has a class hint, and the value of the hint is 'java.util.Date'
+   *   The object does not have a class hint, and the ONE AND ONLY property is 'time'
+   * Note that the traversal creates an infinite loop if the object graph is not a DAG, so do not call this function 
+   * after fixing up circular refs.
+   * @param obj root of the object graph where dates should be replaces.
+   * @return object graph where serialized date objects are replaced by javascript dates.
+   */
+  function transform_date(obj) 
+  {
+    var hint,foo,num,i,jsDate
+    if (obj && typeof obj === 'object')
+    {
+      hint = obj.hasOwnProperty('javaClass');
+      foo = hint ? obj.javaClass === 'java.util.Date' : obj.hasOwnProperty('time');
+      num = 0;
+      // if there is no class hint but the object has 'time' property, count its properties
+      if (!hint && foo)
+      {
+        for (i in obj) 
+        {
+          if (obj.hasOwnProperty(i)) 
+          {
+            num++;
+          }
+        }
+      }
+      // if class hint is java.util.Date or no class hint set, but the only property is named 'time', we create jsdate
+      if (hint && foo || foo && num === 1) 
+      {
+        jsDate = new Date(obj.time);
+        return jsDate;
+      } 
+      else
+      {
+        for (i in obj) 
+        { 
+          if (obj.hasOwnProperty(i))
+          {
+            obj[i] = transform_date(obj[i]);
+          }
+        }
+        return obj;
+      }
+    } 
+    else 
+    {
+      return obj;
+    }
+  } 
 
   var obj;
   try
@@ -1091,7 +1149,7 @@ JSONRpcClient.prototype.unmarshallResponse=function(data)
     }
     else
     {
-      r=JSONRpcClient.extractCallableReferences(this,r);
+      r=JSONRpcClient.extractCallableReferences(this, JSONRpcClient.transformDates ? transform_date(r) : r);
       if (obj.fixups)
       {
         applyFixups(r,obj.fixups);

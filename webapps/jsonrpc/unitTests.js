@@ -338,7 +338,7 @@ var unitTests={
     tests:
     [
       { code: 'jsonrpc.test.echoDateObject(new Date(1121689294000))',
-        test: 'result.javaClass == "java.util.Date" && result.time == 1121689294000'
+        test: 'JSONRpcClient.transformDates?!((result<new Date(1121689294000))||(result>new Date(1121689294000))):result.javaClass == "java.util.Date" && result.time == 1121689294000'
       },
       { code: 'jsonrpc.test.echoSQLDateObject({javaClass:"java.sql.Date",time:1121689294001})',
         test: 'result.javaClass == "java.sql.Date" && result.time == 1121689294001'
