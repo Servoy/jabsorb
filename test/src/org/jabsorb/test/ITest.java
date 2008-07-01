@@ -171,9 +171,9 @@ public interface ITest
 
   Integer echoIntegerObject(Integer i);
 
-  Integer echoOverloadedObject(Integer i);
+  String echoOverloadedObject(Number i);
   
-  String echoOverloadedObject(String s);
+  String echoOverloadedObject(Boolean s);
   
   Long echoLongObject(Long l);
 

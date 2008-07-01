@@ -222,10 +222,10 @@ var unitTests={
         test: 'result == 1234567890'
       },
       { code: 'jsonrpc.test.echoOverloadedObject(1234567890)',
-        test: 'result == 1234567890'
+        test: 'result == "number method"'
       },
-      { code: 'jsonrpc.test.echoOverloadedObject("a string")',
-        test: 'result == "a string"'
+      { code: 'jsonrpc.test.echoOverloadedObject(true)',
+        test: 'result == "boolean method"'
       },
       { code: 'jsonrpc.test.echoLongObject(1099511627776)',
         test: 'result == 1099511627776'

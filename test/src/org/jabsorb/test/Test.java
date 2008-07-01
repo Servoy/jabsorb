@@ -174,14 +174,14 @@ public class Test implements Serializable, ITest
     return o;
   }
   
-  public Integer echoOverloadedObject(Integer i)
+  public String echoOverloadedObject(Number i)
   {
-    return i;
+    return "number method";
   }
   
-  public String echoOverloadedObject(String s)
+  public String echoOverloadedObject(Boolean s)
   {
-    return s;
+    return "boolean method";
   }
 
   public JSONObject echoRawJSON(JSONObject rawObject)
