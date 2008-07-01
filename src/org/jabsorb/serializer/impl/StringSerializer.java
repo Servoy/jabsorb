@@ -88,7 +88,12 @@ public class StringSerializer extends AbstractSerializer
   public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
       Object jso) throws UnmarshallException
   {
-    
+    //For some reason getClass can be String but getClasses will return an 
+    //empty array. This catches this.
+    if(jso.getClass().equals(String.class))
+    {
+      return ObjectMatch.OKAY;
+    }
     Class classes[] = jso.getClass().getClasses();
     for(int i=0;i<classes.length;i++)
     {
