@@ -212,6 +212,12 @@ var unitTests={
       { code: 'jsonrpc.test.echo("")',
         test: 'result == ""'
       },
+      { code: 'jsonrpc.test.echo(123)',
+        test: 'result == 123'
+      },
+      { code: 'jsonrpc.test.echo("a string")',
+        test: 'result == "a string"'
+      },
       { code: 'jsonrpc.test.echoIntegerObject(1234567890)',
         test: 'result == 1234567890'
       },
