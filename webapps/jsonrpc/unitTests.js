@@ -388,7 +388,16 @@ var unitTests={
       },
       { code: 'jsonrpc.test.aList()',
         test: 'result.list.constructor == Array'
+      },
+              
+      { code: 'jsonrpc.test.echoObject([1,2])',
+        test: 'result.constructor == Array && result[0]==1 && result[1]==2' 
+      },
+      { code: 'jsonrpc.test.echoObject(["a","b"])',
+        test: 'result.constructor == Array && result[0]=="a" && result[1]=="b"' 
       }
+        
+      
     ]
   },
   

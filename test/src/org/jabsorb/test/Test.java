@@ -93,6 +93,11 @@ public class Test implements Serializable, ITest
   }
 
   // Type tests
+  
+  public Object[] echoArray(Object[] object)
+  {
+    return object;
+  }
 
   public List echoList(List l)
   {

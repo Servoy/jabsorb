@@ -148,6 +148,13 @@ public interface ITest
 
   String echo(String message);
 
+  /**
+   * Made to test issue 47
+   * @param object the array to echo
+   * @return the same array given.
+   */
+  Object[] echoArray(Object[] object);
+  
   List echoList(List l);
 
   byte[] echoByteArray(byte ba[]);
