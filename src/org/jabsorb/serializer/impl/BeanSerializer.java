@@ -320,13 +320,16 @@ public class BeanSerializer extends AbstractSerializer
                 + " method " + setMethod.getName() + " does not have one arg");
           }
           tmp = ser.tryUnmarshall(state, param[0], jso.get(field));
-          if (m == null)
+          if(tmp!=null)
           {
-            m = tmp;
-          }
-          else
-          {
-            m = m.max(tmp);
+            if (m == null)
+            {
+              m = tmp;
+            }
+            else
+            {
+              m = m.max(tmp);
+            }
           }
         }
         catch (UnmarshallException e)
