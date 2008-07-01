@@ -607,6 +607,14 @@ public class JSONSerializer implements Serializable
     {
       return s.tryUnmarshall(state, clazz, json);
     }
+    // As a last resort, we check if the object is in fact an instance of the
+    // desired class. This will typically happen when the parameter is of
+    // type java.lang.Object and the passed object is a String or an Integer
+    // that is passed verbatim by JSON
+    if(clazz.isInstance(json))
+    {
+      return ObjectMatch.SIMILAR;
+    }
 
     throw new UnmarshallException("no match");
   }
@@ -683,6 +691,16 @@ public class JSONSerializer implements Serializable
     {
       return s.unmarshall(state, clazz, json);
     }
+    
+    // As a last resort, we check if the object is in fact an instance of the
+    // desired class. This will typically happen when the parameter is of
+    // type java.lang.Object and the passed object is a String or an Integer
+    // that is passed verbatim by JSON
+    if(clazz.isInstance(json))
+    {
+      return json;
+    }
+
 
     throw new UnmarshallException("no serializer found that can unmarshall " +
       (jsonClass!=null?jsonClass.getName():"null") + " to " +  clazz.getName());
