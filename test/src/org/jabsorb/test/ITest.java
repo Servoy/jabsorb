@@ -171,6 +171,10 @@ public interface ITest
 
   Integer echoIntegerObject(Integer i);
 
+  Integer echoOverloadedObject(Integer i);
+  
+  String echoOverloadedObject(String s);
+  
   Long echoLongObject(Long l);
 
   Float echoFloatObject(Float f);

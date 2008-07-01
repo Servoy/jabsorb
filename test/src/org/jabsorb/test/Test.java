@@ -173,6 +173,16 @@ public class Test implements Serializable, ITest
   {
     return o;
   }
+  
+  public Integer echoOverloadedObject(Integer i)
+  {
+    return i;
+  }
+  
+  public String echoOverloadedObject(String s)
+  {
+    return s;
+  }
 
   public JSONObject echoRawJSON(JSONObject rawObject)
   {
