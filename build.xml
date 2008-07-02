@@ -153,7 +153,7 @@
 
     <!-- include Apache Derby .jar file used by the ext/project metrics demo -->
     <copy todir="${test.lib}">
-      <fileset dir="./lib-ext">
+      <fileset dir="./${lib-ext}">
         <include name="**/derby*.jar" />
       </fileset>
     </copy>
@@ -177,7 +177,7 @@
     <war destfile="${app-war}" basedir="${webapp}" excludes="**/*~,WEB-INF/web.xml*" webxml="${webapp}/WEB-INF/web.xml" />
   </target>
 
-  <target name="docs" depends="init" description="Creates the javadoc api documentation">
+  <target name="docs" depends="init,copy-dependencies" description="Creates the javadoc api documentation">
     <echo message="Making docs to ${webapp}/docs" />
     <javadoc source="1.4" sourcepath="${src}"
              destdir="${webapp}/docs"
@@ -222,7 +222,7 @@
     <delete dir="${installpath}/${app-prefix}/" />
   </target>
 
-  <target name="clean" depends="init" description="Cleans all files produced by ant">
+  <target name="clean" depends="init,cleanrelease,release-prep-clean" description="Cleans all files produced by ant">
     <delete file="${app-war}" />
     <delete file="${app-jar}" />
     <delete file="${webapp}/WEB-INF/web.xml.out" />
@@ -288,6 +288,7 @@
 <!--      <fileset dir="${webapp}/docs" /> -->
       <fileset dir="${test.lib}" />
       <fileset dir="${test.classes}" />
+      <fileset dir="${lib-ext}" />
     </delete>
     <echo message="Done with release-prep-clean!" />
   </target>
@@ -377,11 +378,11 @@
   <target name="release-src">
     <zip destfile="${release}/${app-prefix}-src.zip">
       <zipfileset dir="." prefix="${app-prefix}"
-          excludes="*.zip,*.tar.gz,*.iml,*.ipr,*.iws,**/.svn/**"/>
+          excludes="${lib-ext}/*,*.zip,*.tar.gz,*.iml,*.ipr,*.iws,**/.svn/**"/>
     </zip>
     <tar destfile="${release}/${app-prefix}-src.tar">
       <tarfileset dir="." prefix="${app-prefix}"
-          excludes="*.zip,*.tar.gz,*.iml,*.ipr,*.iws,**/.svn/**"/>
+          excludes="${lib-ext}/*,*.zip,*.tar.gz,*.iml,*.ipr,*.iws,**/.svn/**"/>
     </tar>
     <gzip destfile="${release}/${app-prefix}-src.tar.gz" src="${release}/${app-prefix}-src.tar"/>
     <delete file="${release}/${app-prefix}-src.tar"/>
