@@ -1,6 +1,12 @@
 CHANGES log
 
-2008-05-09 jabsorb 1.3 release
+2008-07-02 jabsorb 1.3rc2 release
+
+* Issues 28,41,45,46,47 resolved.
+
+* Extra unit tests
+
+2008-05-09 jabsorb 1.3rc1 release
 
 * Constructors added.
 
