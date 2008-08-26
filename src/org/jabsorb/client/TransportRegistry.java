@@ -88,8 +88,6 @@ public class TransportRegistry
     /**
      * @param uri
      *          URI used to open this session
-     * @param client
-     *          A client object requesting the session. Rarely used.
      */
     Session newSession(URI uri);
   }
