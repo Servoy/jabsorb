@@ -249,6 +249,7 @@
       <fileset dir="${webapp}/docs" />
       <fileset dir="${test.lib}" />
       <fileset dir="${test.classes}" />
+      <fileset dir="${lib-ext}" />
     </delete>
     
     <echo message="Done with clean!" />
