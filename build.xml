@@ -350,6 +350,7 @@
       </zipfileset>
       <zipfileset dir="${webapp}" prefix="${app-prefix}">
         <include name="jsonrpc*.js*"/>
+      	<exclude name="jsonrpc.js.txt" />
       </zipfileset>
     </zip>
     <tar destfile="${release}/${app-prefix}-minimal.tar">
