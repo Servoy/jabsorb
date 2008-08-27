@@ -1,6 +1,10 @@
 CHANGES log
 
-2008-07-02 jabsorb 1.3rc2 release
+2008-08-27 jabsorb 1.3 release
+
+* Fixed bug in which jar wasn't included in release
+
+2008-07-2 jabsorb 1.3rc2 release
 
 * Issues 28,41,45,46,47 resolved.
 
