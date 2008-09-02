@@ -55,6 +55,7 @@ import org.jabsorb.serializer.impl.NumberSerializer;
 import org.jabsorb.serializer.impl.PrimitiveSerializer;
 import org.jabsorb.serializer.impl.RawJSONArraySerializer;
 import org.jabsorb.serializer.impl.RawJSONObjectSerializer;
+import org.jabsorb.serializer.impl.ReferenceSerializer;
 import org.jabsorb.serializer.impl.SetSerializer;
 import org.jabsorb.serializer.impl.StringSerializer;
 import org.json.JSONArray;
@@ -71,6 +72,11 @@ import org.slf4j.LoggerFactory;
  */
 public class JSONSerializer implements Serializable
 {
+  /**
+   * The key in which json objects should keep their java class
+   */
+  public static final String JAVA_CLASS_KEY = "javaClass";
+
   /**
    * Unique serialisation id.
    */
@@ -148,6 +154,7 @@ public class JSONSerializer implements Serializable
    * is false.
    *
    * @param o Object to test for primitive.
+   * @return True if the object is a primi 
    */
   public boolean isPrimitive(Object o)
   {
@@ -478,6 +485,31 @@ public class JSONSerializer implements Serializable
       }
     }
   }
+  
+  /**
+   * Ensures the reference serializer is registered for the given class
+   * 
+   * @param clazz The java class that should be serialized with the reference 
+   *              serializer
+   */
+  public void registerCallableReference(Class clazz)
+  {
+    // TODO: speed this code up!
+    ReferenceSerializer ser = null;
+    for (int i = 0; i < serializerList.size(); i++)
+    {
+      Serializer s = (Serializer) serializerList.get(i);
+      if (s.getClass().equals(ReferenceSerializer.class))
+      {
+        ser = (ReferenceSerializer) s;
+        break;
+      }
+    }
+    if (ser != null)
+    {
+      serializableMap.put(clazz, ser);
+    }
+  }
 
   /**
    * Should serializers defined in this object include the fully qualified class
@@ -578,7 +610,7 @@ public class JSONSerializer implements Serializable
      * 'clazz', then override 'clazz' with the hint class.
      */
     if (clazz != null && json instanceof JSONObject
-        && ((JSONObject) json).has("javaClass")
+        && ((JSONObject) json).has(JSONSerializer.JAVA_CLASS_KEY)
         && clazz.isAssignableFrom(getClassFromHint(json)))
     {
       clazz = getClassFromHint(json);
@@ -660,7 +692,7 @@ public class JSONSerializer implements Serializable
     // If we have a JSON object class hint that is a sub class of the
     // signature 'clazz', then override 'clazz' with the hint class.
     if (clazz != null && json instanceof JSONObject
-        && ((JSONObject) json).has("javaClass")
+        && ((JSONObject) json).has(JSONSerializer.JAVA_CLASS_KEY)
         && clazz.isAssignableFrom(getClassFromHint(json)))
     {
       clazz = getClassFromHint(json);
@@ -740,7 +772,7 @@ public class JSONSerializer implements Serializable
       String className = "(unknown)";
       try
       {
-        className = ((JSONObject) o).getString("javaClass");
+        className = ((JSONObject) o).getString(JSONSerializer.JAVA_CLASS_KEY);
         return Class.forName(className);
       }
       catch (Exception e)

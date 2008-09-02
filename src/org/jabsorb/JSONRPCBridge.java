@@ -223,21 +223,9 @@ public class JSONRPCBridge implements Serializable
   private final static JSONRPCBridge globalBridge = new JSONRPCBridge();
 
   /**
-   * Global JSONSerializer instance
+   * Local JSONSerializer instance
    */
-  private static JSONSerializer ser = new JSONSerializer();
-
-  static
-  {
-    try
-    {
-      ser.registerDefaultSerializers();
-    }
-    catch (Exception e)
-    {
-      e.printStackTrace();
-    }
-  }
+  private JSONSerializer ser = new JSONSerializer();
 
   /**
    * This method retrieves the global bridge singleton. <p/> It should be used
@@ -256,7 +244,7 @@ public class JSONRPCBridge implements Serializable
    * 
    * @return the global JSONSerializer object.
    */
-  public static JSONSerializer getSerializer()
+  public JSONSerializer getSerializer()
   {
     return ser;
   }
@@ -277,18 +265,6 @@ public class JSONRPCBridge implements Serializable
   {
     LocalArgController.registerLocalArgResolver(argClazz, contextInterface,
         argResolver);
-  }
-
-  /* Inner classes */
-
-  /**
-   * Set the global JSONSerializer object.
-   * 
-   * @param ser the global JSONSerializer object.
-   */
-  public static void setSerializer(JSONSerializer ser)
-  {
-    JSONRPCBridge.ser = ser;
   }
 
   /**
@@ -377,6 +353,16 @@ public class JSONRPCBridge implements Serializable
    */
   public JSONRPCBridge()
   {
+    ser = new JSONSerializer();
+    try
+    {
+      ser.registerDefaultSerializers();
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+    
     classMap = new HashMap();
     objectMap = new HashMap();
     referenceMap = new HashMap();
@@ -739,6 +725,7 @@ public class JSONRPCBridge implements Serializable
     {
       callableReferenceSet.add(clazz);
     }
+    ser.registerCallableReference(clazz);
     if (log.isDebugEnabled())
     {
       log.debug("registered callable reference " + clazz.getName());
