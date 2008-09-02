@@ -586,9 +586,10 @@ public class JSONSerializer implements Serializable
    * @return an ObjectMatch indicating the degree to which the object matched the class,
    * @throws UnmarshallException if getClassFromHint() fails
    */
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
-      Object json) throws UnmarshallException
+  public ObjectMatch tryUnmarshall(final SerializerState state, 
+      final Class clazz, final Object json) throws UnmarshallException
   {
+    Class _clazz = clazz;
     // check for duplicate objects or circular references
     ProcessedObject p = state.getProcessedObject(json);
 
@@ -609,24 +610,24 @@ public class JSONSerializer implements Serializable
      * If we have a JSON object class hint that is a sub class of the signature
      * 'clazz', then override 'clazz' with the hint class.
      */
-    if (clazz != null && json instanceof JSONObject
+    if (_clazz != null && json instanceof JSONObject
         && ((JSONObject) json).has(JSONSerializer.JAVA_CLASS_KEY)
-        && clazz.isAssignableFrom(getClassFromHint(json)))
+        && _clazz.isAssignableFrom(getClassFromHint(json)))
     {
-      clazz = getClassFromHint(json);
+      _clazz = getClassFromHint(json);
     }
 
-    if (clazz == null)
+    if (_clazz == null)
     {
-      clazz = getClassFromHint(json);
+      _clazz = getClassFromHint(json);
     }
-    if (clazz == null)
+    if (_clazz == null)
     {
       throw new UnmarshallException("no class hint");
     }
     if (json == null || json == JSONObject.NULL)
     {
-      if (!clazz.isPrimitive())
+      if (!_clazz.isPrimitive())
       {
         return ObjectMatch.NULL;
       }
@@ -634,16 +635,16 @@ public class JSONSerializer implements Serializable
       throw new UnmarshallException("can't assign null primitive");
 
     }
-    Serializer s = getSerializer(clazz, json.getClass());
+    Serializer s = getSerializer(_clazz, json.getClass());
     if (s != null)
     {
-      return s.tryUnmarshall(state, clazz, json);
+      return s.tryUnmarshall(state, _clazz, json);
     }
     // As a last resort, we check if the object is in fact an instance of the
     // desired class. This will typically happen when the parameter is of
     // type java.lang.Object and the passed object is a String or an Integer
     // that is passed verbatim by JSON
-    if(clazz.isInstance(json))
+    if(_clazz.isInstance(json))
     {
       return ObjectMatch.SIMILAR;
     }
@@ -670,9 +671,10 @@ public class JSONSerializer implements Serializable
    * @throws UnmarshallException if there is a problem unmarshalling json to
    *           java.
    */
-  public Object unmarshall(SerializerState state, Class clazz, Object json)
-      throws UnmarshallException
+  public Object unmarshall(final SerializerState state, final Class clazz, 
+      final Object json) throws UnmarshallException
   {
+    Class _clazz = clazz;
     // check for duplicate objects or circular references
     ProcessedObject p = state.getProcessedObject(json);
 
@@ -691,26 +693,26 @@ public class JSONSerializer implements Serializable
 
     // If we have a JSON object class hint that is a sub class of the
     // signature 'clazz', then override 'clazz' with the hint class.
-    if (clazz != null && json instanceof JSONObject
+    if (_clazz != null && json instanceof JSONObject
         && ((JSONObject) json).has(JSONSerializer.JAVA_CLASS_KEY)
-        && clazz.isAssignableFrom(getClassFromHint(json)))
+        && _clazz.isAssignableFrom(getClassFromHint(json)))
     {
-      clazz = getClassFromHint(json);
+      _clazz = getClassFromHint(json);
     }
 
     // if no clazz type was passed in, look for the javaClass hint
-    if (clazz == null)
+    if (_clazz == null)
     {
-      clazz = getClassFromHint(json);
+      _clazz = getClassFromHint(json);
     }
 
-    if (clazz == null)
+    if (_clazz == null)
     {
       throw new UnmarshallException("no class hint");
     }
     if (json == null || json == JSONObject.NULL)
     {
-      if (!clazz.isPrimitive())
+      if (!_clazz.isPrimitive())
       {
         return null;
       }
@@ -718,24 +720,24 @@ public class JSONSerializer implements Serializable
       throw new UnmarshallException("can't assign null primitive");
     }
     Class jsonClass = json.getClass();
-    Serializer s = getSerializer(clazz, jsonClass);
+    Serializer s = getSerializer(_clazz, jsonClass);
     if (s != null)
     {
-      return s.unmarshall(state, clazz, json);
+      return s.unmarshall(state, _clazz, json);
     }
     
     // As a last resort, we check if the object is in fact an instance of the
     // desired class. This will typically happen when the parameter is of
     // type java.lang.Object and the passed object is a String or an Integer
     // that is passed verbatim by JSON
-    if(clazz.isInstance(json))
+    if(_clazz.isInstance(json))
     {
       return json;
     }
 
 
     throw new UnmarshallException("no serializer found that can unmarshall " +
-      (jsonClass!=null?jsonClass.getName():"null") + " to " +  clazz.getName());
+      (jsonClass!=null?jsonClass.getName():"null") + " to " +  _clazz.getName());
   }
 
   /**
