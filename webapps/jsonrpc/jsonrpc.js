@@ -2,7 +2,7 @@
  * jabsorb - a Java to JavaScript Advanced Object Request Broker
  * http://www.jabsorb.org
  *
- * Copyright 2007 The jabsorb team
+ * Copyright 2007,2008 The jabsorb team
  * Copyright (c) 2005 Michael Clark, Metaparadigm Pte Ltd
  * Copyright (c) 2003-2004 Jan-Klaas Kollhof
  *
@@ -515,7 +515,8 @@ JSONRpcClient.Exception.prototype.toString = function (code, msg)
 
 JSONRpcClient.default_ex_handler = function (e)
 {
-  var str="";
+  // unhandled exception thrown in jsonrpc handler
+  var a,str="";
   for(a in e)
   {
     str+=a +"\t"+e[a]+"\n";
