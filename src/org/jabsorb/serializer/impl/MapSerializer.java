@@ -38,7 +38,6 @@ import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
-import org.jabsorb.JSONSerializer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -121,12 +120,7 @@ public class MapSerializer extends AbstractSerializer
 
         Object json = ser.marshall(state, mapdata, ent.getValue(), keyString);
 
-        // omit the object entirely if it's a circular reference or duplicate
-        // it will be regenerated in the fixups phase
-        if (JSONSerializer.CIRC_REF_OR_DUPLICATE != json)
-        {
-          mapdata.put(keyString, json);
-        }
+        mapdata.put(keyString, json);
       }
     }
     catch (MarshallException e)

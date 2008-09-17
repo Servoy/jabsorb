@@ -37,11 +37,13 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.jabsorb.ExceptionTransformer;
-import org.jabsorb.JSONRPCResult;
 import org.jabsorb.JSONSerializer;
 import org.jabsorb.callback.CallbackController;
 import org.jabsorb.localarg.LocalArgController;
 import org.jabsorb.reflect.AccessibleObjectKey;
+import org.jabsorb.serializer.response.results.FailedResult;
+import org.jabsorb.serializer.response.results.JSONRPCResult;
+import org.jabsorb.serializer.response.results.RemoteException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.slf4j.Logger;
@@ -172,10 +174,9 @@ public class AccessibleObjectResolver
       }
 
       // Marshall the result
-      final SerializerState serializerState = new SerializerState();
+      final SerializerState serializerState = serializer.createSerializerState();
       final Object json = serializer.marshall(serializerState, null, returnObj, "r");
-      result = new JSONRPCResult(JSONRPCResult.CODE_SUCCESS, requestId, json,
-          serializerState.getFixUps());
+      result = serializerState.createResult(requestId, json);
 
       // Handle exceptions creating exception results and
       // calling error callbacks
@@ -189,7 +190,7 @@ public class AccessibleObjectResolver
           cbc.errorCallback(context[i], javascriptObject, accessibleObject, e);
         }
       }
-      result = new JSONRPCResult(JSONRPCResult.CODE_ERR_UNMARSHALL, requestId,
+      result = new FailedResult(FailedResult.CODE_ERR_UNMARSHALL, requestId,
           e.getMessage());
     }
     catch (MarshallException e)
@@ -201,7 +202,7 @@ public class AccessibleObjectResolver
           cbc.errorCallback(context[i], javascriptObject, accessibleObject, e);
         }
       }
-      result = new JSONRPCResult(JSONRPCResult.CODE_ERR_MARSHALL, requestId, e
+      result = new FailedResult(FailedResult.CODE_ERR_MARSHALL, requestId, e
           .getMessage());
     }
     catch (Throwable e)
@@ -226,8 +227,7 @@ public class AccessibleObjectResolver
           cbc.errorCallback(context[i], javascriptObject, accessibleObject, e);
         }
       }
-      result = new JSONRPCResult(JSONRPCResult.CODE_REMOTE_EXCEPTION,
-          requestId, exceptionTransformer.transform(e));
+      result = new RemoteException(requestId, exceptionTransformer.transform(e));
     }
     return result;
   }
@@ -515,7 +515,7 @@ public class AccessibleObjectResolver
       int nonLocalArgIndex = 0;
       for (; i < parameterTypes.length; i++)
       {
-        SerializerState serialiserState = new SerializerState();
+        SerializerState serialiserState = serializer.createSerializerState();
         if (LocalArgController.isLocalArg(parameterTypes[i]))
         {
           // TODO: do this on the actual candidate?
@@ -568,7 +568,7 @@ public class AccessibleObjectResolver
     {
       for (; i < param.length; i++)
       {
-        SerializerState serializerState = new SerializerState();
+        SerializerState serializerState = serializer.createSerializerState();
         if (LocalArgController.isLocalArg(param[i]))
         {
           javaArgs[i] = LocalArgController.resolveLocalArg(context, param[i]);

@@ -50,15 +50,17 @@ public class TestSerializer extends TestCase
 
   JSONSerializer        ser;
 
-  SerializerState       marshallerState   = new SerializerState();
+  SerializerState       marshallerState   ;
 
-  SerializerState       unmarshallerState = new SerializerState();
+  SerializerState       unmarshallerState ;
 
   protected void setUp() throws Exception
   {
     ser = new JSONSerializer();
     ser.registerDefaultSerializers();
     ser.setMarshallClassHints(true);
+    marshallerState= ser.createSerializerState();
+    unmarshallerState= ser.createSerializerState();
   }
 
   public void dontTestExtendedMaps() throws Exception
@@ -95,15 +97,15 @@ public class TestSerializer extends TestCase
 
   public void testWaggle() throws Exception
   {
-    SerializerState marshallerState = new SerializerState();
-    SerializerState unmarshallerState = new SerializerState();
+    SerializerState marshallerState = ser.createSerializerState();
+    SerializerState unmarshallerState = ser.createSerializerState();
     ITest.Waggle waggle = new ITest.Waggle(1);
     JSONObject json1 = (JSONObject) ser.marshall(marshallerState, null, waggle,
         "waggle");
     ITest.Waggle unmarshalled = (ITest.Waggle) ser.unmarshall(unmarshallerState,
         ITest.Waggle.class, json1);
     assertEquals(waggle.toString(), unmarshalled.toString());
-    marshallerState = new SerializerState();
+    marshallerState = ser.createSerializerState();
     JSONObject json2 = (JSONObject) ser.marshall(marshallerState, null,
         unmarshalled, "waggle");
     assertEquals(json1.toString(), json2.toString());

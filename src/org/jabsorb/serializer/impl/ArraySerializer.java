@@ -28,7 +28,6 @@ package org.jabsorb.serializer.impl;
 
 import java.lang.reflect.Array;
 
-import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
@@ -36,7 +35,6 @@ import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Responsible for serialising Java arrays
@@ -298,16 +296,7 @@ public class ArraySerializer extends AbstractSerializer
         for (int i = 0; i < a.length; i++)
         {
           Object json = ser.marshall(state, o, a[i], new Integer(i));
-          if (JSONSerializer.CIRC_REF_OR_DUPLICATE == json )
-          {
-            // if dup or circ ref found, put a null slot in
-            // the array to maintain the array numbering for the fixups
-            arr.put(JSONObject.NULL);
-          }
-          else
-          {
-            arr.put(json);
-          }
+          arr.put(json);
         }
       }
       return arr;

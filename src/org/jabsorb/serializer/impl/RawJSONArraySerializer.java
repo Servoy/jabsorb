@@ -26,7 +26,6 @@
 
 package org.jabsorb.serializer.impl;
 
-import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
@@ -34,7 +33,6 @@ import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Formats the Java JSONArray object.
@@ -81,15 +79,7 @@ public class RawJSONArraySerializer extends AbstractSerializer
       for (i=0; i<j; i++)
       {
         Object json = ser.marshall(state, o, jsonIn.get(i), new Integer(i));
-        if (JSONSerializer.CIRC_REF_OR_DUPLICATE != json)
-        {
-          jsonOut.put(i, json);
-        }
-        else
-        {
-          // put a slot where the object would go, so it can be fixed up properly in the fix up phase
-          jsonOut.put(i, JSONObject.NULL);
-        }
+        jsonOut.put(i, json);
       }
     }
     catch (MarshallException e)

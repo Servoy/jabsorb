@@ -33,7 +33,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
-import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
@@ -119,15 +118,7 @@ public class ListSerializer extends AbstractSerializer
       while (i.hasNext())
       {
         Object json = ser.marshall(state, arr, i.next(), new Integer(index));
-        if (JSONSerializer.CIRC_REF_OR_DUPLICATE != json)
-        {
-          arr.put(json);
-        }
-        else
-        {
-          // put a slot where the object would go, so it can be fixed up properly in the fix up phase
-          arr.put(JSONObject.NULL);
-        }
+        arr.put(json);
         index++;
       }
     }

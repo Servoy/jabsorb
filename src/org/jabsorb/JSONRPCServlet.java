@@ -41,6 +41,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.jabsorb.serializer.response.results.FailedResult;
+import org.jabsorb.serializer.response.results.JSONRPCResult;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -291,8 +293,8 @@ public class JSONRPCServlet extends HttpServlet
     catch (JSONException e)
     {
       log.error("can't parse call" + receiveString, e);
-      json_res = new JSONRPCResult(JSONRPCResult.CODE_ERR_PARSE, null,
-          JSONRPCResult.MSG_ERR_PARSE);
+      json_res = new FailedResult(FailedResult.CODE_ERR_PARSE, null,
+          FailedResult.MSG_ERR_PARSE);
     }
 
     String sendString = json_res.toString();

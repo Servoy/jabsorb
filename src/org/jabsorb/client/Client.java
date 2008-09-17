@@ -26,11 +26,10 @@ package org.jabsorb.client;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.Map;
 
-import org.jabsorb.JSONRPCResult;
 import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.SerializerState;
+import org.jabsorb.serializer.response.results.FailedResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -145,7 +144,7 @@ public class Client implements InvocationHandler
 		if (args != null) {
 			for (int argNo= 0; argNo < args.length; argNo++) {
 				Object arg= args[argNo];
-				SerializerState state= new SerializerState();
+				SerializerState state= serializer.createSerializerState();
 				params.put(serializer.marshall(state, /* parent */null, arg, new Integer(argNo)));
 			}
 		}
@@ -162,7 +161,7 @@ public class Client implements InvocationHandler
 		}
 		if (returnType.equals(Void.TYPE))
 			return null;
-		SerializerState state= new SerializerState();
+		SerializerState state= serializer.createSerializerState();
 		return serializer.unmarshall(state, returnType, rawResult);
 	}
 
@@ -181,7 +180,7 @@ public class Client implements InvocationHandler
       throw new ErrorResponse(code, msg, trace);
     }
     else
-      throw new ErrorResponse(new Integer(JSONRPCResult.CODE_ERR_PARSE),
+      throw new ErrorResponse(new Integer(FailedResult.CODE_ERR_PARSE),
           "Unknown response:" + responseMessage.toString(2), null);
   }
 

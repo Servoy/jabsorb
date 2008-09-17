@@ -33,9 +33,8 @@ import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
-import org.jabsorb.JSONSerializer;
-import org.json.JSONObject;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Formats the Java JSONObject object.
@@ -82,13 +81,7 @@ public class RawJSONObjectSerializer extends AbstractSerializer
         key = (String) i.next();
 
         Object j = ser.marshall(state, o, jsonIn.get(key), key);
-
-        // omit the object entirely if it's a circular reference or duplicate
-        // it will be regenerated in the fixups phase
-        if (JSONSerializer.CIRC_REF_OR_DUPLICATE != j)
-        {
-          jsonOut.put(key, j);
-        }
+        jsonOut.put(key, j);
       }
     }
     catch (MarshallException e)

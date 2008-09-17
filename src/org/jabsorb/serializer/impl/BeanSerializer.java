@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
@@ -238,13 +237,7 @@ public class BeanSerializer extends AbstractSerializer
           try
           {
             Object json = ser.marshall(state, o, result, prop);
-
-            // omit the object entirely if it's a circular reference or duplicate
-            // it will be regenerated in the fixups phase
-            if (JSONSerializer.CIRC_REF_OR_DUPLICATE != json)
-            {
-              val.put(prop, json);
-            }
+            val.put(prop, json);
           }
           catch (JSONException e)
           {

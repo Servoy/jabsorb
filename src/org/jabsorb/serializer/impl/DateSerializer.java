@@ -127,6 +127,7 @@ public class DateSerializer extends AbstractSerializer
   public Object unmarshall(SerializerState state, Class clazz, Object o)
       throws UnmarshallException
   {
+    Class realClazz = clazz;
     JSONObject jso = (JSONObject) o;
     long time;
     try
@@ -141,7 +142,7 @@ public class DateSerializer extends AbstractSerializer
     {
       try
       {
-        clazz = Class.forName(jso.getString("javaClass"));
+        realClazz = Class.forName(jso.getString("javaClass"));
       }
       catch (ClassNotFoundException e)
       {
@@ -153,21 +154,21 @@ public class DateSerializer extends AbstractSerializer
       }
     }
     Object returnValue = null;
-    if (Date.class.equals(clazz))
+    if (Date.class.equals(realClazz))
     {
       returnValue = new Date(time);
     }
-    else if (Timestamp.class.equals(clazz))
+    else if (Timestamp.class.equals(realClazz))
     {
       returnValue = new Timestamp(time);
     }
-    else if (java.sql.Date.class.equals(clazz))
+    else if (java.sql.Date.class.equals(realClazz))
     {
       returnValue = new java.sql.Date(time);
     }
     if (returnValue == null)
     {
-      throw new UnmarshallException("invalid class " + clazz);
+      throw new UnmarshallException("invalid class " + realClazz);
     }
     state.setSerialized(o, returnValue);
     return returnValue;

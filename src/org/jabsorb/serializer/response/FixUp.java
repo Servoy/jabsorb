@@ -17,7 +17,7 @@
  * limitations under the License.
  *
  */
-package org.jabsorb.serializer;
+package org.jabsorb.serializer.response;
 
 import java.util.ArrayList;
 import java.util.List;
