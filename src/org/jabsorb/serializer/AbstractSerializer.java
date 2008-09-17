@@ -38,6 +38,7 @@ public abstract class AbstractSerializer implements Serializer
    * Generated id. 
    */
   private static final long serialVersionUID = 1L;
+  
   /**
    * Main serialiser
    */
