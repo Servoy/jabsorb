@@ -1,5 +1,13 @@
 CHANGES log
 
+200x-xx-xx jabsorb 1.4-rc1 release
+
+* Removed all references to Fixups from top level classes and put it into 
+  classes that extend SerializerState. A SerializerState is now created via 
+  JSONSerializer.createSerializerState()
+
+* Refactored jsonrpc.js and renamed it jabsorb.js
+
 2008-08-27 jabsorb 1.3 release
 
 * Fixed bug in which jar wasn't included in release
