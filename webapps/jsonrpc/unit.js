@@ -93,11 +93,14 @@ function onLoad()
   showSuccessesNode.onclick=updateAllTestsVisibility;
   hideUnrunNode.onclick=updateAllTestsVisibility;
   
-  jsonrpc = new JSONRpcClient(jsonurl);
+  jsonrpc = jabsorb(function(){
+      //add the tests table
+      var displayTable = createShowTestsTable(); 
+      document.getElementById("results").appendChild(displayTable);
+    },
+    jsonurl);
 
-  //add the tests table
-  var displayTable = createShowTestsTable(); 
-  document.getElementById("results").appendChild(displayTable);
+  
 }
 
 function updateAllTestsVisibility()
@@ -461,7 +464,7 @@ function runTestSet(name)
     alert("Max requests should be between 1 and 99");
     return;
   }
-  JSONRpcClient.max_req_active = maxRequestNode.value;
+  jabsorb.max_req_active = maxRequestNode.value;
 
   clearResultSet(name);
   if (profileNode.checked)
@@ -470,7 +473,7 @@ function runTestSet(name)
   }
   if (asyncNode.checked)
   {
-    JSONRpcClient.profile_async = profileNode.checked;
+    jabsorb.profile_async = profileNode.checked;
     cb = [];
     for (i = 0; i < unitTests[name].tests.length; i++)
     {
@@ -501,7 +504,7 @@ function runTest(name,i)
   unitTests[name].tests[i].running=true;
   if (asyncNode.checked)
   {
-    JSONRpcClient.profile_async = profileNode.checked;
+    jabsorb.profile_async = profileNode.checked;
     cb = [];
     runTestAsync(name,i);
   }
@@ -531,7 +534,7 @@ function runTestAsync(name,i)
     //If it contains specific code to do the async calls then use this
     if(unitTests[name].tests[i].asyncCode)
     {
-      code=unitTests[name].tests[i].asyncCode;
+      code = unitTests[name].tests[i].asyncCode;
     }
     //Otherwise find every method call, ie: "()" and put cb in it.
     else
@@ -620,7 +623,7 @@ function postResults(name,i, result, e, profile)
   {
     if (typeof result == "object")
     {
-      var tmp = toJSON(result);
+      var tmp = jsonrpc.toJSON(result);
       var done={};
       var toString=function(o)
       {

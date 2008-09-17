@@ -26,18 +26,18 @@ dup1.usa = {
 };
 
 dup1.diana = {};
-dup1.donald = {};
+//dup1.donald = {};
 dup1.arthur = {};
 
 dup1.diana.son = dup1.arthur;
-dup1.diana.country = dup1.usa;
-dup1.donald.son = dup1.arthur;
-dup1.donald.country = dup1.usa;
+//dup1.diana.country = dup1.usa;
+//dup1.donald.son = dup1.arthur;
+//dup1.donald.country = dup1.usa;
 dup1.arthur.mother = dup1.diana;
-dup1.arthur.father = dup1.donald;
-dup1.arthur.country = dup1.usa;
-dup1.arthur.country.wow={};
-dup1.arthur.country.wow.slick=dup1.arthur.country.wow;
+//dup1.arthur.father = dup1.donald;
+//dup1.arthur.country = dup1.usa;
+//dup1.arthur.country.wow={};
+//dup1.arthur.country.wow.slick=dup1.arthur.country.wow;
 
 
 // an example of an object that has a lot of duplicates and circular references both
@@ -350,7 +350,7 @@ var unitTests={
     tests:
     [
       { code: 'jsonrpc.test.echoDateObject(new Date(1121689294000))',
-        test: 'JSONRpcClient.transformDates?!((result<new Date(1121689294000))||(result>new Date(1121689294000))):result.javaClass == "java.util.Date" && result.time == 1121689294000'
+        test: 'jsonrpc.transformDates?!((result<new Date(1121689294000))||(result>new Date(1121689294000))):result.javaClass == "java.util.Date" && result.time == 1121689294000'
       },
       { code: 'jsonrpc.test.echoSQLDateObject({javaClass:"java.sql.Date",time:1121689294001})',
         test: 'result.javaClass == "java.sql.Date" && result.time == 1121689294001'

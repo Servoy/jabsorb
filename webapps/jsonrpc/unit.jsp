@@ -19,7 +19,7 @@
   String title = "Unit Tests";
   String head =
     "    <link rel=\"stylesheet\" type=\"text/css\" href=\"css/unit.css\">\n" +
-    "    <script type=\"text/javascript\" src=\"jsonrpc.js\"></script>\n" +
+    "    <script type=\"text/javascript\" src=\"jabsorb.js\"></script>\n" +
     "    <script type=\"text/javascript\" src=\"unitTests.js\"></script>\n" +    
     "    <script type=\"text/javascript\" src=\"unit.js\"></script>\n";
   String onLoad = "onLoad()";
