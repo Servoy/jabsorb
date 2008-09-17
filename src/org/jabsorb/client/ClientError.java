@@ -29,11 +29,26 @@ package org.jabsorb.client;
  */
 public class ClientError extends RuntimeException
 {
+  /**
+   * Generated id.
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
+   * Creates a new ClientError
+   * 
+   * @param message the detail message.
+   */
   public ClientError(String message)
   {
     super(message);
   }
 
+  /**
+   * Creates a new ClientError
+   * 
+   * @param ex the underlying cause of the exception
+   */
   public ClientError(Throwable ex)
   {
     super(ex);
