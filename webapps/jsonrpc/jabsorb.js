@@ -34,7 +34,7 @@ var jabsorb = function()
   
   /** Assign public variables to this */
   var pub={};
-  
+
   /* *************************** PUBLIC VARIABLES *************************** */
   
   /**
@@ -729,10 +729,11 @@ var jabsorb = function()
       startIndex=methodNames[i].indexOf("[");
       endIndex=methodNames[i].indexOf("]");
       if(
-          (methodNames[i].substring(0,
-            prv.CALLABLE_REFERENCE_METHOD_PREFIX.length)==
-            prv.CALLABLE_REFERENCE_METHOD_PREFIX)
-        &&(startIndex!=-1)&&(endIndex!=-1)&&(startIndex<endIndex))        
+          (methodNames[i].substring(0,prv.CALLABLE_REFERENCE_METHOD_PREFIX.
+             length) == prv.CALLABLE_REFERENCE_METHOD_PREFIX)
+        &&(startIndex != -1)
+        &&(endIndex   != -1)
+        &&(startIndex  < endIndex))        
       {
         javaClass=methodNames[i].substring(startIndex+1,endIndex);
       }
@@ -777,7 +778,7 @@ var jabsorb = function()
         //If it doesn't yet exist and it is to be added to this
         if ((!toAddTo[name])&&(!dontAdd))
         {
-          tmp[name]=prv.bind(method,this);
+          tmp[name]=method;
         }
         //maintain a list of all methods created so that methods[i]==methodNames[i]
         methods.push(method);
@@ -786,21 +787,7 @@ var jabsorb = function()
     }
   
     return methods;
-  };
-  
-  /**
-   * Used to bind the this of the serverMethodCaller() (see below) which is to be
-   * bound to the right object. This is needed as the serverMethodCaller is
-   * called only once in createMethod and is then assigned to multiple
-   * CallableReferences are created.
-   */
-  prv.bind=function(functionName,context)
-  {
-    return function() {
-      return functionName.apply(context, arguments);
-    };
-  };
-  
+  };  
   
   /**
    * Creates a new callable proxy (reference). 
@@ -818,8 +805,7 @@ var jabsorb = function()
     for (name in prv.knownClasses[javaClass])
     {
       //Change the this to the object that will be calling it
-      cp.pub[name]=prv.bind(
-        prv.knownClasses[javaClass][name],cp);
+      cp.pub[name]=prv.knownClasses[javaClass][name];
     }
     return cp.pub;
   };
