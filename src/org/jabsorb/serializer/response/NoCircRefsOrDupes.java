@@ -43,23 +43,25 @@ import org.jabsorb.serializer.response.results.SuccessfulResult;
 public class NoCircRefsOrDupes extends SerializerState implements
     CircularReferenceHandler, DuplicateReferenceHandler
 {
-  public Object circularReferenceFound(List originalLocation, Object ref,
+  public Object circularReferenceFound(List<Object> originalLocation, Object ref,
       Object java) throws MarshallException
   {
     throw new MarshallException("Circular Reference");
   }
 
+  @Override
   public SuccessfulResult createResult(Object requestId, Object json)
   {
     return new SuccessfulResult(requestId, json);
   }
 
-  public Object duplicateFound(List originalLocation, Object ref, Object java)
+  public Object duplicateFound(List<Object> originalLocation, Object ref, Object java)
       throws MarshallException
   {
     return null;
   }
 
+  @Override
   public Object checkObject(Object parent, Object java, Object ref)
       throws MarshallException
   {

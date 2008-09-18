@@ -44,8 +44,8 @@ public abstract class SerializerState
    */
   protected SerializerState()
   {
-    processedObjects = new IdentityHashMap();
-    currentLocation = new LinkedList();
+    processedObjects = new IdentityHashMap<Object, ProcessedObject>();
+    currentLocation = new LinkedList<Object>();
   }
 
   /**
@@ -53,7 +53,7 @@ public abstract class SerializerState
    * which contains both the object that was processed, and other information
    * about the object used for generating fixups when marshalling.
    */
-  private final Map processedObjects;
+  private final Map<Object,ProcessedObject> processedObjects;
 
   /**
    * Represents the current json location that we are at during processing. Each
@@ -61,7 +61,7 @@ public abstract class SerializerState
    * stack And each time we recurse out of that layer, it is popped off the
    * stack.
    */
-  protected final LinkedList currentLocation;
+  protected final LinkedList<Object> currentLocation;
 
   /**
    * Creates a result to be returned to the jabsorb client.
@@ -103,7 +103,7 @@ public abstract class SerializerState
   {
     // get unique key for this object
     // this is the basis for determining if we have already processed the object or not.
-    return (ProcessedObject) processedObjects.get(object);
+    return processedObjects.get(object);
   }
 
   

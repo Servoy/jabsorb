@@ -33,9 +33,15 @@ import org.jabsorb.JSONRPCBridge;
 public class InitializationServlet extends HttpServlet
 {
   /**
+   * Generated id
+   */
+  private static final long serialVersionUID = 1L;
+
+  /**
    * Undo all the setup that was done in init() in preparation 
    * for an application shutdown.
    */
+  @Override
   public void destroy() 
   {
     // get the global bridge
@@ -47,6 +53,7 @@ public class InitializationServlet extends HttpServlet
    * Set up the global bridge and register objects that can be called 
    * through jabsorb.
    */
+  @Override
   public void init() throws ServletException 
   {
     // get the global bridge

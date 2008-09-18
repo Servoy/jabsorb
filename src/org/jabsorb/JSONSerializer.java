@@ -26,13 +26,10 @@
 
 package org.jabsorb;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -97,17 +94,17 @@ public class JSONSerializer implements Serializable
   /**
    * Key: Serializer
    */
-  private Set serializerSet = new HashSet();
+  private final Set<Serializer> serializerSet;
 
   /**
    * key: Class, value: Serializer
    */
-  private transient Map serializableMap = null;
+  private transient final Map<Class<?>, Serializer> serializableMap;
 
   /**
    * List for reverse registration order search
    */
-  private List serializerList = new ArrayList();
+  private final List<Serializer> serializerList;
 
   /**
    * Should serializers defined in this object include the fully qualified class
@@ -143,10 +140,17 @@ public class JSONSerializer implements Serializable
    */
   private boolean fixupDuplicatePrimitives = false;
 
+  public JSONSerializer()
+  {
+    this.serializerSet = new HashSet<Serializer>();
+    this.serializerList = new ArrayList<Serializer>();
+    this.serializableMap = new HashMap<Class<?>, Serializer>();
+
+  }
+
   /**
-   * Creates a new serializer state for the given serializer.
-   * 
-   * TODO: improve dependency injection method
+   * Creates a new serializer state for the given serializer. TODO: improve
+   * dependency injection method
    * 
    * @return A new serializer state which has the appropriate marshalling rules
    *         for the serializer.
@@ -333,8 +337,8 @@ public class JSONSerializer implements Serializable
       }
       return JSONObject.NULL;
     }
-    Object stateResult=state.checkObject(parent,java,ref);
-    if(stateResult!=null)
+    Object stateResult = state.checkObject(parent, java, ref);
+    if (stateResult != null)
     {
       return stateResult;
     }
@@ -356,7 +360,7 @@ public class JSONSerializer implements Serializable
       state.pop();
     }
   }
-  
+
   /**
    * Register all of the provided standard serializers.
    * 
@@ -403,17 +407,13 @@ public class JSONSerializer implements Serializable
    */
   public void registerSerializer(Serializer s) throws Exception
   {
-    Class classes[] = s.getSerializableClasses();
+    Class<?> classes[] = s.getSerializableClasses();
     Serializer exists;
     synchronized (serializerSet)
     {
-      if (serializableMap == null)
-      {
-        serializableMap = new HashMap();
-      }
       for (int i = 0; i < classes.length; i++)
       {
-        exists = (Serializer) serializableMap.get(classes[i]);
+        exists = serializableMap.get(classes[i]);
         if (exists != null && exists.getClass() != s.getClass())
         {
           throw new Exception("different serializer already registered for "
@@ -443,13 +443,13 @@ public class JSONSerializer implements Serializable
    * @param clazz The java class that should be serialized with the reference
    *          serializer
    */
-  public void registerCallableReference(Class clazz)
+  public void registerCallableReference(Class<?> clazz)
   {
     // TODO: speed this code up!
     ReferenceSerializer ser = null;
     for (int i = 0; i < serializerList.size(); i++)
     {
-      Serializer s = (Serializer) serializerList.get(i);
+      Serializer s = serializerList.get(i);
       if (s.getClass().equals(ReferenceSerializer.class))
       {
         ser = (ReferenceSerializer) s;
@@ -541,9 +541,9 @@ public class JSONSerializer implements Serializable
    * @throws UnmarshallException if getClassFromHint() fails
    */
   public ObjectMatch tryUnmarshall(final SerializerState state,
-      final Class clazz, final Object json) throws UnmarshallException
+      final Class<?> clazz, final Object json) throws UnmarshallException
   {
-    Class _clazz = clazz;
+    Class<?> _clazz = clazz;
     // check for duplicate objects or circular references
     ProcessedObject p = state.getProcessedObject(json);
 
@@ -622,10 +622,10 @@ public class JSONSerializer implements Serializable
    * @throws UnmarshallException if there is a problem unmarshalling json to
    *           java.
    */
-  public Object unmarshall(final SerializerState state, final Class clazz,
+  public Object unmarshall(final SerializerState state, final Class<?> clazz,
       final Object json) throws UnmarshallException
   {
-    Class _clazz = clazz;
+    Class<?> _clazz = clazz;
     // check for duplicate objects or circular references
     ProcessedObject p = state.getProcessedObject(json);
 
@@ -670,7 +670,7 @@ public class JSONSerializer implements Serializable
 
       throw new UnmarshallException("can't assign null primitive");
     }
-    Class jsonClass = json.getClass();
+    Class<?> jsonClass = json.getClass();
     Serializer s = getSerializer(_clazz, jsonClass);
     if (s != null)
     {
@@ -714,7 +714,7 @@ public class JSONSerializer implements Serializable
    *           the javaClass hint if the type of Object passed in is not
    *           JSONObject|JSONArray.
    */
-  private Class getClassFromHint(Object o) throws UnmarshallException
+  private Class<?> getClassFromHint(Object o) throws UnmarshallException
   {
     if (o == null)
     {
@@ -742,7 +742,7 @@ public class JSONSerializer implements Serializable
         throw new UnmarshallException("no type for empty array");
       }
       // return type of first element
-      Class compClazz;
+      Class<?> compClazz;
       try
       {
         compClazz = getClassFromHint(arr.get(0));
@@ -778,7 +778,7 @@ public class JSONSerializer implements Serializable
    * @return The found Serializer for the types specified or null if none could
    *         be found.
    */
-  private Serializer getSerializer(Class clazz, Class jsoClazz)
+  private Serializer getSerializer(Class<?> clazz, Class<?> jsoClazz)
   {
     if (log.isDebugEnabled())
     {
@@ -789,19 +789,19 @@ public class JSONSerializer implements Serializable
 
     synchronized (serializerSet)
     {
-      Serializer s = (Serializer) serializableMap.get(clazz);
-      if (s != null && s.canSerialize(clazz, jsoClazz))
       {
-        if (log.isDebugEnabled())
+        Serializer s = serializableMap.get(clazz);
+        if (s != null && s.canSerialize(clazz, jsoClazz))
         {
-          log.debug("direct match serializer " + s.getClass().getName());
+          if (log.isDebugEnabled())
+          {
+            log.debug("direct match serializer " + s.getClass().getName());
+          }
+          return s;
         }
-        return s;
       }
-      Iterator i = serializerList.iterator();
-      while (i.hasNext())
+      for (Serializer s : serializerList)
       {
-        s = (Serializer) i.next();
         if (s.canSerialize(clazz, jsoClazz))
         {
           if (log.isDebugEnabled())
@@ -813,32 +813,5 @@ public class JSONSerializer implements Serializable
       }
     }
     return null;
-  }
-
-  /**
-   * Reads an object, serialising each This is used by the java serialization
-   * logic.
-   * 
-   * @param in The stream to take an object to serialise
-   * @throws java.io.IOException if the object can't be read from the stream
-   * @throws ClassNotFoundException If a class cannot be found for the object to
-   *           be read
-   * @see java.io.Serializable
-   */
-  private void readObject(ObjectInputStream in) throws IOException,
-      ClassNotFoundException
-  {
-    in.defaultReadObject();
-    serializableMap = new HashMap();
-    Iterator i = serializerList.iterator();
-    while (i.hasNext())
-    {
-      Serializer s = (Serializer) i.next();
-      Class classes[] = s.getSerializableClasses();
-      for (int j = 0; j < classes.length; j++)
-      {
-        serializableMap.put(classes[j], s);
-      }
-    }
   }
 }

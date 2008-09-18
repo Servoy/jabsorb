@@ -53,7 +53,7 @@ public class Match implements Serializable
     this.database = database;
     this.word = word;
   }
-
+  @Override
   public String toString()
   {
     return "match: " + word + " \"" + database + "\"";

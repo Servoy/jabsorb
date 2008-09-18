@@ -31,7 +31,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Iterator;
 import java.util.List;
 
 import org.jabsorb.JSONSerializer;
@@ -301,7 +300,7 @@ public class ProjectMetricsDatabase
       if (filename.toLowerCase().endsWith(".json")) // skip non-json files
       {
         log.info("  loading " + filename);
-        store(conn, (List) loadJSONFileIntoObject(file));
+        store(conn, (List<FileAnalysis>) loadJSONFileIntoObject(file));
       }
     }
   }
@@ -425,7 +424,7 @@ public class ProjectMetricsDatabase
    * 
    * @throws SQLException         if something goes wrong with the database.
    */
-  private void store(Connection conn, List list) throws SQLException
+  private void store(Connection conn, List<FileAnalysis> list) throws SQLException
   {
     if (list == null || list.size() == 0)
     {
@@ -443,9 +442,8 @@ public class ProjectMetricsDatabase
     {
       p = conn.prepareStatement(sql);
       
-      for (Iterator i=list.iterator(); i.hasNext();)
+      for (FileAnalysis f:list)
       {
-        FileAnalysis f = (FileAnalysis) i.next();
         p.setString(1, f.getProject());
         p.setString(2, f.getPath());
         p.setString(3, f.getName());

@@ -45,21 +45,21 @@ public class StringSerializer extends AbstractSerializer
   /**
    * Classes that this can serialise.
    */
-  private static Class[] _serializableClasses = new Class[] { String.class,
+  private static Class<?>[] _serializableClasses = new Class[] { String.class,
       char.class, Character.class, byte[].class, char[].class };
 
   /**
    * Classes that this can serialise to.
    */
-  private static Class[] _JSONClasses = new Class[] { String.class,
+  private static Class<?>[] _JSONClasses = new Class[] { String.class,
       Integer.class };
 
-  public Class[] getJSONClasses()
+  public Class<?>[] getJSONClasses()
   {
     return _JSONClasses;
   }
 
-  public Class[] getSerializableClasses()
+  public Class<?>[] getSerializableClasses()
   {
     return _serializableClasses;
   }
@@ -85,7 +85,7 @@ public class StringSerializer extends AbstractSerializer
     }
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
+  public ObjectMatch tryUnmarshall(SerializerState state, Class<?> clazz,
       Object jso) throws UnmarshallException
   {
     //For some reason getClass can be String but getClasses will return an 
@@ -94,7 +94,7 @@ public class StringSerializer extends AbstractSerializer
     {
       return ObjectMatch.OKAY;
     }
-    Class classes[] = jso.getClass().getClasses();
+    Class<?> classes[] = jso.getClass().getClasses();
     for(int i=0;i<classes.length;i++)
     {
       if(classes[i].equals(String.class))
@@ -108,7 +108,7 @@ public class StringSerializer extends AbstractSerializer
     return ObjectMatch.SIMILAR;
   }
 
-  public Object unmarshall(SerializerState state, Class clazz, Object jso)
+  public Object unmarshall(SerializerState state, Class<?> clazz, Object jso)
       throws UnmarshallException
   {
     Object returnValue;

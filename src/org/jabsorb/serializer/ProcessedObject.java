@@ -153,7 +153,7 @@ public class ProcessedObject
    * @return a List of Integer | String objects representing the path to the location of this
    *         object in the JSON hierarchy.
    */
-  public List getLocation()
+  public List<Object> getLocation()
   {
     ProcessedObject link = this;
 
@@ -161,7 +161,7 @@ public class ProcessedObject
     // todo: already here and instead return a List view of that structure
     // todo: is that easy to do??
 
-    List path = new LinkedList();
+    List<Object> path = new LinkedList<Object>();
 
     while (link!=null)
     {

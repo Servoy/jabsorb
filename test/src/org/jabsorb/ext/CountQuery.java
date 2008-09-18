@@ -48,20 +48,20 @@ public class CountQuery
    */
   public CountQuery(Connection conn, String sql, Object[] bindVars) throws SQLException
   {
-    List dataList = new DataList(conn, 0, 0, 0, 0, sql, bindVars);
+    List<Map<Object,Object>> dataList = new DataList(conn, 0, 0, 0, 0, sql, bindVars);
     if (dataList.size() != 1)
     {
       throw new SQLException("got unexpected (other than one) result row count from query.");
     }
 
-    Map row = (Map) dataList.get(0);
-    Set keys = row.keySet();
+    Map<Object, Object> row =  dataList.get(0);
+    Set<Object> keys = row.keySet();
 
     if (keys.size() != 1)
     {
       throw new SQLException("got unexpected (other than one) result column from query.");
     }
-    Iterator i = keys.iterator();
+    Iterator<Object> i = keys.iterator();
 
     Object firstKey = i.next();
     Object value = row.get(firstKey);

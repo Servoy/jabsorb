@@ -54,6 +54,7 @@ public class SuccessfulResult extends JSONRPCResult
     this.result = result;
   }
 
+  @Override
   public JSONObject createOutput() throws JSONException
   {
     JSONObject o = super._createOutput();

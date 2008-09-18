@@ -26,6 +26,7 @@
 
 package org.jabsorb.reflect;
 
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -34,9 +35,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jabsorb.JSONRPCBridge;
 import org.jabsorb.localarg.LocalArgController;
@@ -60,8 +62,12 @@ public class ClassAnalyzer
    * 
    * key: Clazz, val ClassData
    */
-  private static Map classCache = new HashMap();
+  private final static Map<Class<?>,ClassData> classCache;
 
+  static
+  {
+    classCache=new HashMap<Class<?>, ClassData>();
+  }
   /**
    * <p>
    * Get ClassData containing information on public methods that can be invoked
@@ -77,12 +83,12 @@ public class ClassAnalyzer
    * 
    * @return ClassData object for the given class.
    */
-  public static ClassData getClassData(Class clazz)
+  public static ClassData getClassData(Class<?> clazz)
   {
     ClassData cd;
     synchronized (classCache)
     {
-      cd = (ClassData) classCache.get(clazz);
+      cd = classCache.get(clazz);
       if (cd == null)
       {
         cd = analyzeClass(clazz);
@@ -97,7 +103,7 @@ public class ClassAnalyzer
    */
   public static void invalidateCache()
   {
-    classCache = new HashMap();
+    classCache.clear();
   }
 
   /**
@@ -109,13 +115,13 @@ public class ClassAnalyzer
    * @return a ClassData object containing all the public static and non-static
    *         methods that can be invoked on the class.
    */
-  private static ClassData analyzeClass(Class clazz)
+  private static ClassData analyzeClass(Class<?> clazz)
   {
     log.info("analyzing " + clazz.getName());
-    final List constructors = new ArrayList(Arrays.asList(clazz
+    final List<AccessibleObject> constructors = new ArrayList<AccessibleObject>(Arrays.asList(clazz
         .getConstructors()));
-    final List memberMethods = new ArrayList();
-    final List staticMethods = new ArrayList();
+    final List<AccessibleObject> memberMethods = new ArrayList<AccessibleObject>();
+    final List<AccessibleObject> staticMethods = new ArrayList<AccessibleObject>();
     {
       final Method methods[] = clazz.getMethods();
       for (int i = 0; i < methods.length; i++)
@@ -146,15 +152,13 @@ public class ClassAnalyzer
    * @param isConstructor Whether the objects are methods or constructors
    * @return Map of AccessibleObjectKey to a Collection of AccessibleObjects
    */
-  private static Map createMap(Collection accessibleObjects,
+  private static Map<AccessibleObjectKey, Set<AccessibleObject>> createMap(Collection<AccessibleObject> accessibleObjects,
       boolean isConstructor)
   {
-    final Map map = new HashMap();
-    for (final Iterator i = accessibleObjects.iterator(); i.hasNext();)
+    final Map<AccessibleObjectKey,Set<AccessibleObject>> map = new HashMap<AccessibleObjectKey, Set<AccessibleObject>>();
+    for ( final AccessibleObject accessibleObject : accessibleObjects)
     {
-      final Member accessibleObject = (Member) i.next();
-
-      if (!Modifier.isPublic(accessibleObject.getModifiers()))
+      if (!Modifier.isPublic(((Member)accessibleObject).getModifiers()))
         continue;
 
       final AccessibleObjectKey accessibleObjectKey;
@@ -163,10 +167,10 @@ public class ClassAnalyzer
         int argCount = 0;
         {
           // The parameters determine the size of argCount
-          final Class[] param;
+          final Class<?>[] param;
           if (isConstructor)
           {
-            param = ((Constructor) accessibleObject).getParameterTypes();
+            param = ((Constructor<?>) accessibleObject).getParameterTypes();
           }
           else
           {
@@ -201,10 +205,10 @@ public class ClassAnalyzer
           }
         }
       }
-      List marr = (ArrayList) map.get(accessibleObjectKey);
+      Set<AccessibleObject> marr = map.get(accessibleObjectKey);
       if (marr == null)
       {
-        marr = new ArrayList();
+        marr = new HashSet<AccessibleObject>();
         map.put(accessibleObjectKey, marr);
       }
       

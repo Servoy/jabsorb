@@ -25,7 +25,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -48,8 +47,14 @@ import org.json.JSONObject;
  * 
  * @author Arthur Blake
  */
-public class DataList extends ArrayList
+public class DataList extends ArrayList<Map<Object,Object>>
 {
+  /**
+   * Generated id
+   */
+  private static final long serialVersionUID = 1L;
+
+
   /**
    * Build an array of ColumnMetaData object from a ResultSetMetaData object.
    *
@@ -308,10 +313,8 @@ public class DataList extends ArrayList
   public JSONArray toJSON()
   {
     JSONArray json = new JSONArray();
-    for (Iterator i = iterator(); i.hasNext();)
+    for (Map<Object,Object>row:this)
     {
-      Map row = (Map) i.next();
-
       JSONObject obj = new JSONObject(row);
       json.put(obj);
     }
@@ -332,36 +335,35 @@ public class DataList extends ArrayList
    * 
    * @throws SQLException if something goes wrong while accessing the DB.
    */
-  private void read(int skip, int pageSize, int colSkip, int pageWidth, 
+  private void read(int _skip, int _pageSize, int _colSkip, int _pageWidth, 
     ResultSet r) throws SQLException
   {
     // set the paging variables
-    this.skip=skip;
-    this.pageSize = pageSize;
-    this.colSkip = colSkip;
-    this.pageWidth = pageWidth;
+    this.skip=_skip;
+    this.pageSize = _pageSize;
+    this.colSkip = _colSkip;
+    this.pageWidth = _pageWidth;
 
-    if (colSkip <= 0)
+    if (_colSkip <= 0)
     {
-      colSkip = 0;
+      this.colSkip = 0;
     }
 
     // convert pageWidth to be the "last" column we want.
-    if (pageWidth > 0)
+    if (_pageWidth > 0)
     {
-      pageWidth += colSkip;
+      this.pageWidth += this.colSkip;
     }
     else
     {
-      pageWidth = 0;
+      this.pageWidth = 0;
     }
 
-    colSkip += 1; // convert to one indexed.
+    this.colSkip += 1; // convert to one indexed.
 
-    boolean usePageSize = pageSize > 0;
+    boolean usePageSize = _pageSize > 0;
 
     int recordNum = 0;
-    String strRecordNum = "0";
 
     try
     {
@@ -373,26 +375,25 @@ public class DataList extends ArrayList
       int j = this.columnCount = columnMetaData.length;
 
       // limit by pageWidth
-      if (pageWidth > 0 && pageWidth < j)
+      if (_pageWidth > 0 && _pageWidth < j)
       {
-        j = pageWidth;
+        j = _pageWidth;
       }
 
       while (r.next())
       {
         recordNum++;
-        strRecordNum = String.valueOf(recordNum);
 
-        if (skip > 0)
+        if (_skip > 0)
         {
-          skip--;
+          this.skip--;
           continue;
         }
-        Map line = new LinkedHashMap();
+        Map<Object,Object> line = new LinkedHashMap<Object, Object>();
 
         String colName;
 
-        for (int i = colSkip; i <= j; i++)
+        for (int i = _colSkip; i <= j; i++)
         {
           colName = columnMetaData[i-1].getColumnName();
           line.put(colName, r.getObject(colName));
@@ -400,7 +401,7 @@ public class DataList extends ArrayList
 
         add(line);
 
-        if (usePageSize && --pageSize == 0)
+        if (usePageSize && --this.pageSize == 0)
         {
           this.hitBottom = false;
           break;

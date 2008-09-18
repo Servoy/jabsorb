@@ -53,6 +53,7 @@ public class RemoteException extends FailedResult
     super(CODE_REMOTE_EXCEPTION, id, error);
   }
 
+  @Override
   protected JSONObject createOutput() throws JSONException
   {
     JSONObject o = super.createOutput();

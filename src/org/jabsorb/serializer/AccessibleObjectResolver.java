@@ -31,10 +31,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.jabsorb.ExceptionTransformer;
 import org.jabsorb.JSONSerializer;
@@ -66,25 +67,25 @@ public class AccessibleObjectResolver
    * overloading a method. Eg, with a(int x) and a(float x), a(1) should call
    * a(int x).
    */
-  private static final Map primitiveRankings;
+  private static final Map<String, Integer> primitiveRankings;
 
   static
   {
     //Ranks the primitives
-    int counter=0;
-    primitiveRankings=new HashMap();
-    primitiveRankings.put("byte",    new Integer(counter++));
-    primitiveRankings.put("short",   new Integer(counter++));
-    primitiveRankings.put("int",     new Integer(counter++));
-    primitiveRankings.put("long",    new Integer(counter++));
-    primitiveRankings.put("float",   new Integer(counter++));
-    primitiveRankings.put("double",  new Integer(counter++));
-    primitiveRankings.put("boolean", new Integer(counter++));
+    int counter = 0;
+    primitiveRankings = new HashMap<String, Integer>();
+    primitiveRankings.put("byte", counter++);
+    primitiveRankings.put("short", counter++);
+    primitiveRankings.put("int", counter++);
+    primitiveRankings.put("long", counter++);
+    primitiveRankings.put("float", counter++);
+    primitiveRankings.put("double", counter++);
+    primitiveRankings.put("boolean", counter++);
   }
 
   /**
    * Calls a method/constructor
-   *
+   * 
    * @param accessibleObject = The method/constructor to invoke
    * @param context The context of the caller. This will be the servlet request
    *          and response objects in an http servlet call environment. These
@@ -122,16 +123,17 @@ public class AccessibleObjectResolver
         }
         else
         {
-          log.debug("invoking " + ((Constructor) accessibleObject).getName()
+          log.debug("invoking " + ((Constructor<?>) accessibleObject).getName()
               + " " + "(" + argSignature(accessibleObject) + ")");
         }
       }
 
-      final Class[] parameterTypes;
+      final Class<?>[] parameterTypes;
 
       if (isConstructor)
       {
-        parameterTypes = ((Constructor) accessibleObject).getParameterTypes();
+        parameterTypes = ((Constructor<?>) accessibleObject)
+            .getParameterTypes();
       }
       else
       {
@@ -139,8 +141,8 @@ public class AccessibleObjectResolver
       }
 
       // Unmarshall arguments
-      final Object javaArgs[] = AccessibleObjectResolver.unmarshallArgs(context,
-          parameterTypes, arguments, serializer);
+      final Object javaArgs[] = AccessibleObjectResolver.unmarshallArgs(
+          context, parameterTypes, arguments, serializer);
 
       // Call pre invoke callbacks
       if (cbc != null)
@@ -156,7 +158,7 @@ public class AccessibleObjectResolver
       final Object returnObj;
       if (isConstructor)
       {
-        returnObj = ((Constructor) accessibleObject).newInstance(javaArgs);
+        returnObj = ((Constructor<?>) accessibleObject).newInstance(javaArgs);
       }
       else
       {
@@ -174,8 +176,10 @@ public class AccessibleObjectResolver
       }
 
       // Marshall the result
-      final SerializerState serializerState = serializer.createSerializerState();
-      final Object json = serializer.marshall(serializerState, null, returnObj, "r");
+      final SerializerState serializerState = serializer
+          .createSerializerState();
+      final Object json = serializer.marshall(serializerState, null, returnObj,
+          "r");
       result = serializerState.createResult(requestId, json);
 
       // Handle exceptions creating exception results and
@@ -190,8 +194,8 @@ public class AccessibleObjectResolver
           cbc.errorCallback(context[i], javascriptObject, accessibleObject, e);
         }
       }
-      result = new FailedResult(FailedResult.CODE_ERR_UNMARSHALL, requestId,
-          e.getMessage());
+      result = new FailedResult(FailedResult.CODE_ERR_UNMARSHALL, requestId, e
+          .getMessage());
     }
     catch (MarshallException e)
     {
@@ -217,7 +221,7 @@ public class AccessibleObjectResolver
       // a dependent library
       if ("org.mortbay.jetty.RetryRequest".equals(e.getClass().getName()))
       {
-        throw (RuntimeException)e;
+        throw (RuntimeException) e;
       }
 
       if (cbc != null)
@@ -239,7 +243,7 @@ public class AccessibleObjectResolver
    * more than one overloaded methods that match the method key signature, find
    * the closest matching method to invoke according to the JSON arguments being
    * passed in.
-   *
+   * 
    * @param methodMap Map keyed by MethodKey objects and the values will be
    *          either a Method object, or an array of Method objects, if there is
    *          more than one possible method that can be invoked matching the
@@ -250,7 +254,8 @@ public class AccessibleObjectResolver
    * @return the Method that most closely matches the call signature, or null if
    *         there is not a match.
    */
-  public static AccessibleObject resolveMethod(Map methodMap,
+  public static AccessibleObject resolveMethod(
+      Map<AccessibleObjectKey, Set<AccessibleObject>> methodMap,
       String methodName, JSONArray arguments, JSONSerializer serializer)
   {
     // first, match soley by the method name and number of arguments passed in
@@ -258,16 +263,17 @@ public class AccessibleObjectResolver
     // if there is no match at all, return null
     // if there are multiple matches, fall through to the second matching phase
     // below
-    AccessibleObjectKey mk = new AccessibleObjectKey(methodName, arguments.length());
+    AccessibleObjectKey mk = new AccessibleObjectKey(methodName, arguments
+        .length());
     // of AccessibleObject
-    List accessibleObjects = (List) methodMap.get(mk);
-    if(accessibleObjects==null || accessibleObjects.size() == 0)
+    Set<AccessibleObject> accessibleObjects = methodMap.get(mk);
+    if (accessibleObjects == null || accessibleObjects.size() == 0)
     {
       return null;
     }
     else if (accessibleObjects.size() == 1)
     {
-      return (AccessibleObject) accessibleObjects.get(0);
+      return accessibleObjects.iterator().next();
     }
     else
     {
@@ -278,29 +284,27 @@ public class AccessibleObjectResolver
       // try and unmarshall the arguments against each candidate method
       // to determine which one matches the best
 
-      List candidate = new ArrayList();
+      Collection<AccessibleObjectCandidate> candidates = new ArrayList<AccessibleObjectCandidate>();
       if (log.isDebugEnabled())
       {
         log.debug("looking for method " + methodName + "("
             + argSignature(arguments) + ")");
       }
-      for (int i = 0; i < accessibleObjects.size(); i++)
+      for (AccessibleObject accessibleObject: accessibleObjects)
       {
-        AccessibleObject accessibleObject = (AccessibleObject) accessibleObjects
-            .get(i);
-        Class[] parameterTypes = null;
+        Class<?>[] parameterTypes = null;
         if (accessibleObject instanceof Method)
         {
           parameterTypes = ((Method) accessibleObject).getParameterTypes();
         }
         else if (accessibleObject instanceof Constructor)
         {
-          parameterTypes = ((Constructor) accessibleObject).getParameterTypes();
+          parameterTypes = ((Constructor<?>) accessibleObject).getParameterTypes();
         }
 
         try
         {
-          candidate.add(tryUnmarshallArgs(accessibleObject, arguments,
+          candidates.add(tryUnmarshallArgs(accessibleObject, arguments,
               parameterTypes, serializer));
           if (log.isDebugEnabled())
           {
@@ -320,10 +324,8 @@ public class AccessibleObjectResolver
       // now search through all the candidates and find one which matches
       // the json arguments the closest
       AccessibleObjectCandidate best = null;
-      for (int i = 0; i < candidate.size(); i++)
+      for (AccessibleObjectCandidate c:candidates)
       {
-        AccessibleObjectCandidate c = (AccessibleObjectCandidate) candidate
-            .get(i);
         if (best == null)
         {
           best = c;
@@ -345,7 +347,9 @@ public class AccessibleObjectResolver
         AccessibleObject ao = best.getAccessibleObject();
         if (log.isDebugEnabled())
         {
-          log.debug("found method " + methodName +"(" + argSignature(ao) + ")");
+          log
+              .debug("found method " + methodName + "(" + argSignature(ao)
+                  + ")");
         }
         return ao;
       }
@@ -358,14 +362,14 @@ public class AccessibleObjectResolver
    * Display a method call argument signature for a method as a String for
    * debugging/logging purposes. The string contains the comma separated list of
    * argument types that the given method takes.
-   *
+   * 
    * @param accessibleObject Method instance to display the argument signature
    *          for.
    * @return the argument signature for the method, as a String.
    */
   private static String argSignature(AccessibleObject accessibleObject)
   {
-    Class[] param;
+    Class<?>[] param;
     if (accessibleObject instanceof Method)
     {
       param = ((Method) accessibleObject).getParameterTypes();
@@ -373,7 +377,7 @@ public class AccessibleObjectResolver
     else
     // if(accessibleObject instanceof Constructor)
     {
-      param = ((Constructor) accessibleObject).getParameterTypes();
+      param = ((Constructor<?>) accessibleObject).getParameterTypes();
     }
 
     StringBuffer buf = new StringBuffer();
@@ -390,7 +394,7 @@ public class AccessibleObjectResolver
 
   /**
    * Creates a signature for an array of arguments
-   *
+   * 
    * @param arguments The argumnts
    * @return A comma seperated string listing the arguments
    */
@@ -441,7 +445,7 @@ public class AccessibleObjectResolver
 
   /**
    * Returns the more fit of the two method candidates
-   *
+   * 
    * @param methodCandidate One of the methodCandidates to compare
    * @param methodCandidate1 The other of the methodCandidates to compare
    * @return The better of the two candidates
@@ -450,22 +454,23 @@ public class AccessibleObjectResolver
       AccessibleObjectCandidate methodCandidate,
       AccessibleObjectCandidate methodCandidate1)
   {
-    final Class[] parameters = methodCandidate.getParameterTypes();
-    final Class[] parameters1 = methodCandidate1.getParameterTypes();
+    final Class<?>[] parameters = methodCandidate.getParameterTypes();
+    final Class<?>[] parameters1 = methodCandidate1.getParameterTypes();
 
     int c = 0, c1 = 0;
     for (int i = 0; i < parameters.length; i++)
     {
-      final Class parameterClass = parameters[i];
-      final Class parameterClass1 = parameters1[i];
+      final Class<?> parameterClass = parameters[i];
+      final Class<?> parameterClass1 = parameters1[i];
       if (parameterClass != parameterClass1)
       {
         //We need to do a special check first between the classes, because
         //isAssignableFrom() doesn't work between primitives.
-        if(parameterClass.isPrimitive()&&parameterClass1.isPrimitive())
+        if (parameterClass.isPrimitive() && parameterClass1.isPrimitive())
         {
-          if(((Integer)primitiveRankings.get(parameterClass.getName())).intValue()
-            <((Integer)primitiveRankings.get(parameterClass1.getName())).intValue())
+          if ((primitiveRankings.get(parameterClass.getName()))
+              .intValue() < (primitiveRankings.get(parameterClass1
+              .getName())).intValue())
           {
             c++;
           }
@@ -494,7 +499,7 @@ public class AccessibleObjectResolver
 
   /**
    * Tries to unmarshall the arguments to a method
-   *
+   * 
    * @param accessibleObject The method/constructor to unmarshall the arguments
    *          for.
    * @param arguments The arguments to unmarshall
@@ -505,7 +510,7 @@ public class AccessibleObjectResolver
    */
   private static AccessibleObjectCandidate tryUnmarshallArgs(
       AccessibleObject accessibleObject, JSONArray arguments,
-      Class[] parameterTypes, JSONSerializer serializer)
+      Class<?>[] parameterTypes, JSONSerializer serializer)
       throws UnmarshallException
   {
     int i = 0;
@@ -546,7 +551,7 @@ public class AccessibleObjectResolver
   /**
    * Convert the arguments to a method call from json into java objects to be
    * used for invoking the method, later.
-   *
+   * 
    * @param context the context of the caller. This will be the servlet request
    *          and response objects in an http servlet call environment. These
    *          are used to insert local arguments (e.g. the request, response or
@@ -559,8 +564,9 @@ public class AccessibleObjectResolver
    * @throws UnmarshallException if there is a problem unmarshalling the
    *           arguments.
    */
-  private static Object[] unmarshallArgs(Object context[], Class[] param,
-      JSONArray arguments, JSONSerializer serializer) throws UnmarshallException
+  private static Object[] unmarshallArgs(Object context[], Class<?>[] param,
+      JSONArray arguments, JSONSerializer serializer)
+      throws UnmarshallException
   {
     Object javaArgs[] = new Object[param.length];
     int i = 0, j = 0;
@@ -575,8 +581,8 @@ public class AccessibleObjectResolver
         }
         else
         {
-          javaArgs[i] = serializer.unmarshall(serializerState, param[i], arguments
-              .get(j++));
+          javaArgs[i] = serializer.unmarshall(serializerState, param[i],
+              arguments.get(j++));
         }
       }
     }
@@ -587,7 +593,8 @@ public class AccessibleObjectResolver
     }
     catch (UnmarshallException e)
     {
-      throw new UnmarshallException("arg " + (i + 1) + " could not unmarshall", e);
+      throw new UnmarshallException("arg " + (i + 1) + " could not unmarshall",
+          e);
     }
 
     return javaArgs;

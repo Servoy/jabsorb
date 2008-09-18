@@ -28,12 +28,14 @@ package org.jabsorb.client;
  */
 public class ErrorResponse extends ClientError
 {
-  private String trace;
+  /**
+   * Generated id
+   */
+  private static final long serialVersionUID = 1L;
 
   public ErrorResponse(Integer code, String message, String trace)
   {
     super(ErrorResponse.formatMessage(code, message, trace));
-    this.trace = trace;
   }
 
   private static String formatMessage(Integer code, String message, String trace)

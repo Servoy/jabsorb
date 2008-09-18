@@ -53,7 +53,7 @@ public class Strategy implements Serializable
     this.strategy = strategy;
     this.description = description;
   }
-
+  @Override
   public String toString()
   {
     return "strategy: " + strategy + " \"" + description + "\"";

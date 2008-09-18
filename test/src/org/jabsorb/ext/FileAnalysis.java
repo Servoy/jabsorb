@@ -71,13 +71,6 @@ public class FileAnalysis
    */
   private String type;
 
-  /** 
-   * Create a new, empty FileAnalysis object.
-   */ 
-  public FileAnalysis ()
-  {
-  }
-  
   /**
    * Get the unique id of this FileAnalyis object.
    * 

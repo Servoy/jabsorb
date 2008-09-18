@@ -54,6 +54,7 @@ public class URLConnectionSession implements Session
 
   public void close()
   {
+    //Nothing to do
   }
 
   public JSONObject sendAndReceive(JSONObject message)

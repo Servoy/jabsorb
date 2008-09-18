@@ -126,6 +126,7 @@ public class FailedResult extends JSONRPCResult
     this.error = error;
   }
 
+  @Override
   protected JSONObject createOutput() throws JSONException
   {
     JSONObject o = super._createOutput();

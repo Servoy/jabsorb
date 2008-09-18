@@ -23,13 +23,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * JSON-RPC call API for the ExtJS/project metrics jabsorb demo.
@@ -52,8 +49,8 @@ public class ProjectMetricsHandler
    * @param query query object that ExtJS will send us (we ignore it.)
    * @return A JSONArray containing one object for each project.
    */
-  public JSONArray getProjects(JSONObject query) 
-    throws SQLException,JSONException
+  public JSONArray getProjects() 
+    throws SQLException
   {
     // Quick n dirty way to get the results of some SQL directly as JSON.
     DataList list = new DataList(db.connection(),0,0,0,0,
@@ -72,8 +69,8 @@ public class ProjectMetricsHandler
    * @param query query object that ExtJS will send us (we ignore it.)
    * @return A JSONArray containing one object for each file extension type.
    */
-  public JSONArray getTypes(JSONObject query) 
-    throws SQLException,JSONException
+  public JSONArray getTypes() 
+    throws SQLException
   {
     // Quick n dirty way to get the results of some SQL directly as JSON.
     DataList list = new DataList(db.connection(),0,0,0,0,
@@ -111,7 +108,7 @@ public class ProjectMetricsHandler
 
         // dynamically build where clause based on query filter parameters
         StringBuffer whereClause = new StringBuffer();
-        List args = new ArrayList();
+        List<String> args = new ArrayList<String>();
 
         // build whereClause....
         addWhereParm(whereClause, args,
@@ -156,10 +153,8 @@ public class ProjectMetricsHandler
         
         FileAnalysis[] arr = new FileAnalysis[data.size()];
         int idx=0;
-        for (Iterator i= data.iterator(); i.hasNext();)
+        for (Map<Object,Object>m:data)
         {
-          Map m = (Map)i.next();
-
           FileAnalysis f = new FileAnalysis();
           
           f.setId(((Integer)m.get("ID")).intValue());
@@ -192,9 +187,9 @@ public class ProjectMetricsHandler
    * 
    * @param list list to add All choice to.
    */
-  private void addAllChoice(List list)
+  private void addAllChoice(DataList list)
   {
-    Map allChoice = new HashMap();
+    Map<Object,Object> allChoice = new HashMap<Object, Object>();
     allChoice.put("LABEL", "All");
     allChoice.put("VALUE","");
     list.add(0, allChoice);
@@ -210,8 +205,8 @@ public class ProjectMetricsHandler
    * @param operator query operator.
    * @param bindVar  optional bind variable. (if null or blank, it is not bound)
    */
-  private void addWhereParm(StringBuffer clause, List args, 
-      String field, String operator, Object bindVar)
+  private void addWhereParm(StringBuffer clause, List<String> args, 
+      String field, String operator, String bindVar)
   {
     // if the object being bound is blank or null, skip it
     if (blankOrNull(bindVar))

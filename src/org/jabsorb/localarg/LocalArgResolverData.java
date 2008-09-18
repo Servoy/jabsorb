@@ -40,13 +40,13 @@ class LocalArgResolverData
   /**
    * The class to be resolved locally
    */
-  private final Class argClazz;
+  private final Class<?> argClazz;
 
   /**
    * The type of transport Context object the callback is interested in eg.
    * HttpServletRequest.class for the servlet transport
    */
-  private final Class contextInterface;
+  private final Class<?> contextInterface;
 
   /**
    * Create a new data holder
@@ -58,14 +58,15 @@ class LocalArgResolverData
    *          is interested in eg. HttpServletRequest.class for the servlet
    *          transport
    */
-  public LocalArgResolverData(LocalArgResolver argResolver, Class argClazz,
-      Class contextInterface)
+  public LocalArgResolverData(LocalArgResolver argResolver, Class<?> argClazz,
+      Class<?> contextInterface)
   {
     this.argResolver = argResolver;
     this.argClazz = argClazz;
     this.contextInterface = contextInterface;
   }
 
+  @Override
   public boolean equals(Object o)
   {
     LocalArgResolverData cmp = (LocalArgResolverData) o;
@@ -74,6 +75,7 @@ class LocalArgResolverData
         .equals(cmp.contextInterface));
   }
 
+  @Override
   public int hashCode()
   {
     return argResolver.hashCode() * argClazz.hashCode()

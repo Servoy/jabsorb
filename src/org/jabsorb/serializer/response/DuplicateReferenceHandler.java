@@ -48,7 +48,7 @@ public interface DuplicateReferenceHandler
    *         JSONObject
    * @throws MarshallException
    */
-  public abstract Object duplicateFound(List originalLocation, Object ref,
+  public abstract Object duplicateFound(List<Object> originalLocation, Object ref,
       Object java) throws MarshallException;
 
 }

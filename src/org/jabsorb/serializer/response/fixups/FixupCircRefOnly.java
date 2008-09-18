@@ -12,14 +12,15 @@ import org.jabsorb.serializer.MarshallException;
  */
 public class FixupCircRefOnly extends UsingFixups
 {
-
-  public Object circularReferenceFound(List originalLocation, Object ref,
+  @Override
+  public Object circularReferenceFound(List<Object> originalLocation, Object ref,
       Object java) throws MarshallException
   {
     return this.addFixUp(originalLocation, ref);
   }
 
-  public Object duplicateFound(List originalLocation, Object ref, Object java)
+  @Override
+  public Object duplicateFound(List<Object> originalLocation, Object ref, Object java)
       throws MarshallException
   {
     return null;

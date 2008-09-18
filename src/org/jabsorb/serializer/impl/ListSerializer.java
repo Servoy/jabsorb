@@ -26,7 +26,6 @@
 
 package org.jabsorb.serializer.impl;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -58,26 +57,27 @@ public class ListSerializer extends AbstractSerializer
   /**
    * Classes that this can serialise.
    */
-  private static Class[] _serializableClasses = new Class[] { List.class,
+  private static Class<?>[] _serializableClasses = new Class[] { List.class,
       ArrayList.class, LinkedList.class, Vector.class };
 
   /**
    * Classes that this can serialise to.
    */
-  private static Class[] _JSONClasses = new Class[] { JSONObject.class };
+  private static Class<?>[] _JSONClasses = new Class[] { JSONObject.class };
 
-  public boolean canSerialize(Class clazz, Class jsonClazz)
+  @Override
+  public boolean canSerialize(Class<?> clazz, Class<?> jsonClazz)
   {
     return (super.canSerialize(clazz, jsonClazz) || ((jsonClazz == null || jsonClazz == JSONObject.class) && List.class
         .isAssignableFrom(clazz)));
   }
 
-  public Class[] getJSONClasses()
+  public Class<?>[] getJSONClasses()
   {
     return _JSONClasses;
   }
 
-  public Class[] getSerializableClasses()
+  public Class<?>[] getSerializableClasses()
   {
     return _serializableClasses;
   }
@@ -85,7 +85,7 @@ public class ListSerializer extends AbstractSerializer
   public Object marshall(SerializerState state, Object p, Object o)
       throws MarshallException
   {
-    List list = (List) o;
+    List<?> list = (List<?>) o;
     JSONObject obj = new JSONObject();
     JSONArray arr = new JSONArray();
 
@@ -114,7 +114,7 @@ public class ListSerializer extends AbstractSerializer
     int index = 0;
     try
     {
-      Iterator i = list.iterator();
+      Iterator<?> i = list.iterator();
       while (i.hasNext())
       {
         Object json = ser.marshall(state, arr, i.next(), new Integer(index));
@@ -137,7 +137,7 @@ public class ListSerializer extends AbstractSerializer
   // intermediate function.
   // TODO: Also cache the result somehow so that an unmarshall
   // following a tryUnmarshall doesn't do the same work twice!
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object o)
+  public ObjectMatch tryUnmarshall(SerializerState state, Class<?> clazz, Object o)
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
@@ -196,7 +196,7 @@ public class ListSerializer extends AbstractSerializer
     return m;
   }
 
-  public Object unmarshall(SerializerState state, Class clazz, Object o)
+  public Object unmarshall(SerializerState state, Class<?> clazz, Object o)
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
@@ -213,20 +213,20 @@ public class ListSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("no type hint");
     }
-    AbstractList al;
+    List<Object> al;
     if (java_class.equals("java.util.List")
         || java_class.equals("java.util.AbstractList")
         || java_class.equals("java.util.ArrayList"))
     {
-      al = new ArrayList();
+      al = new ArrayList<Object>();
     }
     else if (java_class.equals("java.util.LinkedList"))
     {
-      al = new LinkedList();
+      al = new LinkedList<Object>();
     }
     else if (java_class.equals("java.util.Vector"))
     {
-      al = new Vector();
+      al = new Vector<Object>();
     }
     else
     {

@@ -53,14 +53,14 @@ import org.json.JSONObject;
  */
 public class Test implements Serializable, ITest
 {
-  
-  
+
   private final static long serialVersionUID = 2;
 
   // Void test
 
   public void voidFunction()
   {
+    //Void function does nothing
   }
 
   // Exception tests
@@ -93,13 +93,13 @@ public class Test implements Serializable, ITest
   }
 
   // Type tests
-  
+
   public Object[] echoArray(Object[] object)
   {
     return object;
   }
 
-  public List echoList(List l)
+  public List<?> echoList(List<?> l)
   {
     return l;
   }
@@ -158,7 +158,7 @@ public class Test implements Serializable, ITest
   {
     return d;
   }
-  
+
   public java.sql.Date echoSQLDateObject(java.sql.Date d)
   {
     return d;
@@ -173,12 +173,12 @@ public class Test implements Serializable, ITest
   {
     return o;
   }
-  
+
   public String echoOverloadedObject(Number i)
   {
     return "number method";
   }
-  
+
   public String echoOverloadedObject(Boolean s)
   {
     return "boolean method";
@@ -201,9 +201,9 @@ public class Test implements Serializable, ITest
     return arr;
   }
 
-  public ArrayList anArrayList()
+  public ArrayList<Integer> anArrayList()
   {
-    ArrayList al = new ArrayList();
+    ArrayList<Integer> al = new ArrayList<Integer>();
     for (int i = 10; i < 20; i++)
     {
       al.add(new Integer(i));
@@ -211,9 +211,9 @@ public class Test implements Serializable, ITest
     return al;
   }
 
-  public Vector aVector()
+  public Vector<Integer> aVector()
   {
-    Vector v = new Vector();
+    Vector<Integer> v = new Vector<Integer>();
     for (int i = 20; i < 30; i++)
     {
       v.add(new Integer(i));
@@ -221,9 +221,9 @@ public class Test implements Serializable, ITest
     return v;
   }
 
-  public List aList()
+  public List<Integer> aList()
   {
-    List l = new Vector();
+    List<Integer> l = new Vector<Integer>();
     for (int i = 20; i < 30; i++)
     {
       l.add(new Integer(i));
@@ -231,9 +231,9 @@ public class Test implements Serializable, ITest
     return l;
   }
 
-  public Set aSet()
+  public Set<Integer> aSet()
   {
-    Set s = new HashSet();
+    Set<Integer> s = new HashSet<Integer>();
     for (int i = 0; i < 5; i++)
     {
       s.add(new Integer(i));
@@ -241,9 +241,9 @@ public class Test implements Serializable, ITest
     return s;
   }
 
-  public Hashtable aHashtable()
+  public Hashtable<Integer, ITest.Wiggle> aHashtable()
   {
-    Hashtable ht = new Hashtable();
+    Hashtable<Integer, ITest.Wiggle> ht = new Hashtable<Integer, ITest.Wiggle>();
     for (int i = 0; i < 3; i++)
     {
       ITest.Wiggle w = new ITest.Wiggle();
@@ -269,35 +269,34 @@ public class Test implements Serializable, ITest
     return beanA;
   }
 
-  public Map aCircRefMap()
+  public Map<String, Object> aCircRefMap()
   {
-    Map m = new HashMap();
-    m.put("me",m);
+    Map<String, Object> m = new HashMap<String, Object>();
+    m.put("me", m);
     return m;
   }
-  
-  public List aCircRefList()
+
+  public List<Object> aCircRefList()
   {
-    ArrayList list = new ArrayList();
+    List<Object> list = new ArrayList<Object>();
     list.add(new Integer(0));
     Integer one = new Integer(1);
     list.add(one);
     Integer two = new Integer(2);
     list.add(two);
 
-    Map m = new HashMap();
+    Map<Object, Object> m = new HashMap<Object, Object>();
     m.put(new Integer(0), "zero");
     m.put(one, "one");
     m.put(two, "two");
-    m.put("buckle_my_shoe",list);
-
+    m.put("buckle_my_shoe", list);
 
     BeanA beanA = new BeanA();
     BeanB beanB = new BeanB();
     beanB.setBeanA(beanA);
     beanA.setBeanB(beanB);
 
-    m.put("aBean",beanA);
+    m.put("aBean", beanA);
 
     list.add(beanB);
     list.add(m);
@@ -305,14 +304,14 @@ public class Test implements Serializable, ITest
   }
 
   /**
-   * Test more than one duplicate, to make sure the fixups they generate
-   * all refer to the same object 
+   * Test more than one duplicate, to make sure the fixups they generate all
+   * refer to the same object
+   * 
    * @return a List with some duplicates.
    */
-  public List aDupDup()
+  public List<Object> aDupDup()
   {
-    List list = new ArrayList();
-
+    List<Object> list = new ArrayList<Object>();
 
     BeanA a = new BeanA();
     BeanB b = new BeanB();
@@ -333,29 +332,30 @@ public class Test implements Serializable, ITest
 
   /**
    * Another duplicate with substantial savings to be gained by fixing it up
+   * 
    * @return aList with duplicates.
    */
-  public List aDupDupDup()
+  public List<Map<String, Object>> aDupDupDup()
   {
-    Map m = new HashMap();
-    m.put("drink","soda");
-    m.put("tree","oak");
-    m.put("planet","jupiter");
-    m.put("art","painting");
-    m.put("animal","tiger");
-    List list = new ArrayList();
+    Map<String, Object> m = new HashMap<String, Object>();
+    m.put("drink", "soda");
+    m.put("tree", "oak");
+    m.put("planet", "jupiter");
+    m.put("art", "painting");
+    m.put("animal", "tiger");
+    List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 
     list.add(m);
     list.add(m);
     list.add(m);
     list.add(m);
 
-    Map m2 = new TreeMap();
-    m2.put("map",m);
-    m2.put("dup",m);
-    m2.put("copy",m);
-    m2.put("ditto",m);
-    m2.put("extra",m);
+    Map<String, Object> m2 = new TreeMap<String, Object>();
+    m2.put("map", m);
+    m2.put("dup", m);
+    m2.put("copy", m);
+    m2.put("ditto", m);
+    m2.put("extra", m);
 
     list.add(m2);
     return list;
@@ -363,11 +363,12 @@ public class Test implements Serializable, ITest
 
   /**
    * Test of duplicate Strings
+   * 
    * @return a List with 3 duplicate Strings.
    */
-  public List aStringListDup()
+  public List<String> aStringListDup()
   {
-    List list = new ArrayList();
+    List<String> list = new ArrayList<String>();
 
     String dup = "Supercalifragilisticexpialidocious";
     list.add(dup);
@@ -390,7 +391,7 @@ public class Test implements Serializable, ITest
     arr[2] = dup;
     return arr;
   }
-  
+
   /**
    * Test an array of 3 duplicate Beans.
    * 
@@ -409,13 +410,14 @@ public class Test implements Serializable, ITest
   }
 
   /**
-   * Return a List that has several Strings and a few nulls.
-   * We want make sure that the null objects don't get fixed up (as duplicates...)
+   * Return a List that has several Strings and a few nulls. We want make sure
+   * that the null objects don't get fixed up (as duplicates...)
+   * 
    * @return a List that has several Strings and a few nulls.
    */
-  public List listNull()
+  public List<String> listNull()
   {
-    List l = new ArrayList();
+    List<String> l = new ArrayList<String>();
     l.add("one");
     l.add("two");
     l.add(null);
@@ -431,7 +433,7 @@ public class Test implements Serializable, ITest
 
   public String[] twice(String string)
   {
-    return new String[]{string, string};
+    return new String[] { string, string };
   }
 
   public String concat(String msg1, String msg2)
@@ -451,9 +453,9 @@ public class Test implements Serializable, ITest
     return waggle;
   }
 
-  public ArrayList aWiggleArrayList(int numWiggles)
+  public ArrayList<ITest.Wiggle> aWiggleArrayList(int numWiggles)
   {
-    ArrayList al = new ArrayList();
+    ArrayList<ITest.Wiggle> al = new ArrayList<ITest.Wiggle>();
     for (int i = 0; i < numWiggles; i++)
     {
       al.add(new ITest.Wiggle(i));
@@ -461,9 +463,9 @@ public class Test implements Serializable, ITest
     return al;
   }
 
-  public ArrayList aWaggleArrayList(int numWaggles)
+  public ArrayList<ITest.Waggle> aWaggleArrayList(int numWaggles)
   {
-    ArrayList al = new ArrayList();
+    ArrayList<ITest.Waggle> al = new ArrayList<ITest.Waggle>();
     for (int i = 0; i < numWaggles; i++)
     {
       al.add(new ITest.Waggle(i));
@@ -471,9 +473,9 @@ public class Test implements Serializable, ITest
     return al;
   }
 
-  public String wigOrWag(ArrayList al)
+  public String wigOrWag(ArrayList<?> al)
   {
-    Iterator i = al.iterator();
+    Iterator<?> i = al.iterator();
     StringBuffer buf = new StringBuffer();
     while (i.hasNext())
     {
@@ -497,12 +499,13 @@ public class Test implements Serializable, ITest
   }
 
   // Reference Tests
-  static public class CallableRefTest implements Serializable, Comparable
+  static public class CallableRefTest implements Serializable,
+      Comparable<Object>
   {
 
     private final static long serialVersionUID = 2;
 
-    private static Test.RefTest    ref              = new Test.RefTest("a secret");
+    private static Test.RefTest ref = new Test.RefTest("a secret");
 
     public String ping()
     {
@@ -525,62 +528,65 @@ public class Test implements Serializable, ITest
     }
   }
 
-
   static public class RefTest implements Serializable
   {
 
     private final static long serialVersionUID = 2;
 
-    private String            s;
+    private String s;
 
     public RefTest(String s)
     {
       this.s = s;
     }
 
+    @Override
     public String toString()
     {
       return s;
     }
   }
 
-
-private static CallableRefTest callableRef = new CallableRefTest();
+  private static CallableRefTest callableRef = new CallableRefTest();
 
   public CallableRefTest getCallableRef()
   {
     return callableRef;
   }
-  
-  public Vector getCallableRefVector()
+
+  public Vector<CallableRefTest> getCallableRefVector()
   {
-    Vector v = new Vector();
+    Vector<CallableRefTest> v = new Vector<CallableRefTest>();
     v.add(callableRef);
     v.add(callableRef);
     return v;
   }
-  public Vector getCallableRefInnerVector()
+
+  public Vector<Vector<CallableRefTest>> getCallableRefInnerVector()
   {
-    Vector v1 = new Vector();
-    Vector v = new Vector();
+    Vector<Vector<CallableRefTest>> v1 = new Vector<Vector<CallableRefTest>>();
+    Vector<CallableRefTest> v = new Vector<CallableRefTest>();
     v.add(callableRef);
     v.add(callableRef);
-    v1.add(v);    
+    v1.add(v);
     return v1;
   }
-  public Map getCallableRefMap()
+
+  public Map<String, CallableRefTest> getCallableRefMap()
   {
-    Map m = new TreeMap();
-    m.put("a",callableRef);
-    m.put("b",callableRef);
+    Map<String, CallableRefTest> m = new TreeMap<String, CallableRefTest>();
+    m.put("a", callableRef);
+    m.put("b", callableRef);
     return m;
   }
-  public Set getCallableRefSet()
+
+  public Set<CallableRefTest> getCallableRefSet()
   {
-    Set s = new TreeSet();
+    Set<CallableRefTest> s = new TreeSet<CallableRefTest>();
     s.add(callableRef);
     return s;
   }
+
   // Callback tests
 
   public void setCallback(JSONRPCBridge bridge, boolean flag)
@@ -601,14 +607,14 @@ private static CallableRefTest callableRef = new CallableRefTest();
     private final static long serialVersionUID = 2;
 
     public void preInvoke(Object context, Object instance, AccessibleObject m,
-                          Object arguments[]) throws Exception
+        Object arguments[]) throws Exception
     {
       System.out.print("Test.preInvoke");
       if (instance != null)
       {
         System.out.print(" instance=" + instance);
       }
-      System.out.print(" method=" + ((Method)m).getName());
+      System.out.print(" method=" + ((Method) m).getName());
       for (int i = 0; i < arguments.length; i++)
       {
         System.out.print(" arg[" + i + "]=" + arguments[i]);
@@ -617,28 +623,28 @@ private static CallableRefTest callableRef = new CallableRefTest();
     }
 
     public void postInvoke(Object context, Object instance, AccessibleObject m,
-                           Object result) throws Exception
+        Object result) throws Exception
     {
+      //Nothing done
     }
   };
-  
+
   /**
    * Count the number of true booleans in the Map.
    * 
    * @param input map.
    * @return number of booleans in the map that were set to true.
    */
-  public int trueBooleansInMap (Map in)
+  public int trueBooleansInMap(Map<Object, Object> in)
   {
     int numTrue = 0;
-    Set keys = in.keySet();
-    for (Iterator i=keys.iterator(); i.hasNext();)
+    for (Iterator<Object> i = in.keySet().iterator(); i.hasNext();)
     {
       Object key = i.next();
       Object value = in.get(key);
       if (value instanceof Boolean && ((Boolean) value).booleanValue())
       {
-        numTrue ++;
+        numTrue++;
       }
     }
     return numTrue;

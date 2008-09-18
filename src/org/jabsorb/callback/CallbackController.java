@@ -29,7 +29,6 @@ package org.jabsorb.callback;
 import java.io.Serializable;
 import java.lang.reflect.AccessibleObject;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -50,19 +49,19 @@ public class CallbackController implements Serializable
    * The log used for this class.
    */
   private final static Logger log = LoggerFactory
-    .getLogger(CallbackController.class);
+      .getLogger(CallbackController.class);
 
   /**
    * Holds all callbacks registered with this controller. Type: CallbackData
    */
-  private Set callbackSet;
+  private final Set<CallbackData> callbackSet;
 
   /**
    * Default constructor.
    */
   public CallbackController()
   {
-    callbackSet = new HashSet();
+    callbackSet = new HashSet<CallbackData>();
   }
 
   /**
@@ -79,10 +78,8 @@ public class CallbackController implements Serializable
   {
     synchronized (callbackSet)
     {
-      Iterator i = callbackSet.iterator();
-      while (i.hasNext())
+      for (CallbackData cbdata : callbackSet)
       {
-        CallbackData cbdata = (CallbackData) i.next();
         if (cbdata.understands(context)
             && (cbdata.getCallback() instanceof ErrorInvocationCallback))
         {
@@ -117,10 +114,8 @@ public class CallbackController implements Serializable
   {
     synchronized (callbackSet)
     {
-      Iterator i = callbackSet.iterator();
-      while (i.hasNext())
+      for (CallbackData cbdata : callbackSet)
       {
-        CallbackData cbdata = (CallbackData) i.next();
         if (cbdata.understands(context))
         {
           cbdata.getCallback().postInvoke(context, instance, accessibleObject,
@@ -145,10 +140,8 @@ public class CallbackController implements Serializable
   {
     synchronized (callbackSet)
     {
-      Iterator i = callbackSet.iterator();
-      while (i.hasNext())
+      for (CallbackData cbdata : callbackSet)
       {
-        CallbackData cbdata = (CallbackData) i.next();
         if (cbdata.understands(context))
         {
           cbdata.getCallback().preInvoke(context, instance, accessibleObject,
@@ -167,7 +160,7 @@ public class CallbackController implements Serializable
    *          servlet transport.
    */
   public void registerCallback(InvocationCallback callback,
-      Class contextInterface)
+      Class<?> contextInterface)
   {
 
     synchronized (callbackSet)
@@ -189,7 +182,7 @@ public class CallbackController implements Serializable
    *          interface.
    */
   public void unregisterCallback(InvocationCallback callback,
-      Class contextInterface)
+      Class<?> contextInterface)
   {
 
     synchronized (callbackSet)

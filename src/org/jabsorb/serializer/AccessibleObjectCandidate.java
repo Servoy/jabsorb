@@ -46,7 +46,7 @@ public class AccessibleObjectCandidate
   /**
    * The parameters of the accessibleObject
    */
-  final private Class[] parameterTypes;
+  final private Class<?>[] parameterTypes;
 
   /**
    * Creatse a new MethodCandidate
@@ -56,7 +56,7 @@ public class AccessibleObjectCandidate
    * @param matches How well this matches the requested method/constructor
    */
   public AccessibleObjectCandidate(AccessibleObject accessibleObject,
-      Class[] parameterTypes, ObjectMatch[] matches)
+      Class<?>[] parameterTypes, ObjectMatch[] matches)
   {
     if (parameterTypes.length != matches.length)
     {
@@ -101,7 +101,7 @@ public class AccessibleObjectCandidate
    * Gets the parameter types for the method/constructor
    * @return The parameter types
    */
-  public Class[] getParameterTypes()
+  public Class<?>[] getParameterTypes()
   {
     return parameterTypes;
   }

@@ -183,6 +183,7 @@ public class JSONRPCServlet extends HttpServlet
    * @param config ServletConfig from container.
    * @throws ServletException if something goes wrong during initialization.
    */
+  @Override
   public void init(ServletConfig config) throws ServletException
   {
     super.init(config);
@@ -228,6 +229,7 @@ public class JSONRPCServlet extends HttpServlet
    *
    * @throws IOException if an IOException occurs during processing.
    */
+  @Override
   public void service(HttpServletRequest request, HttpServletResponse response)
     throws IOException
   {

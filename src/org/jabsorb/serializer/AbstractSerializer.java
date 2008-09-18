@@ -55,11 +55,11 @@ public abstract class AbstractSerializer implements Serializer
    * @return true If this Serializer can serialize/deserialize the given
    *         java,json pair.
    */
-  public boolean canSerialize(Class clazz, Class jsonClazz)
+  public boolean canSerialize(Class<?> clazz, Class<?> jsonClazz)
   {
     boolean canJava = false, canJSON = false;
 
-    Class serializableClasses[] = getSerializableClasses();
+    Class<?> serializableClasses[] = getSerializableClasses();
     for (int i = 0; i < serializableClasses.length; i++)
     {
       if (clazz == serializableClasses[i])
@@ -74,7 +74,7 @@ public abstract class AbstractSerializer implements Serializer
     }
     else
     {
-      Class jsonClasses[] = getJSONClasses();
+      Class<?> jsonClasses[] = getJSONClasses();
       for (int i = 0; i < jsonClasses.length; i++)
       {
         if (jsonClazz == jsonClasses[i])

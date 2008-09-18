@@ -48,7 +48,7 @@ public interface CircularReferenceHandler
    *         JSONObject
    * @throws MarshallException
    */
-  public abstract Object circularReferenceFound(List originalLocation,
+  public abstract Object circularReferenceFound(List<Object> originalLocation,
       Object ref, Object java) throws MarshallException;
 
 }

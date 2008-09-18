@@ -25,6 +25,7 @@ package org.jabsorb.client;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A registry of transports serving JSON-RPC-Client
@@ -33,10 +34,6 @@ public class TransportRegistry
 {
 
   private static TransportRegistry singleton;
-
-  public TransportRegistry()
-  {
-  }
 
   /**
    * Use this function when there is no IOC container to rely on creating the
@@ -53,43 +50,23 @@ public class TransportRegistry
     return singleton;
   }
 
-  /**
-   * Downgrading to Java 1.4: manual specialization of HashMap<String,
-   * SessionFactory>
-   */
-  static class RegistryMap
-  {
-    HashMap rep;
-
-    public RegistryMap()
-    {
-      rep = new HashMap();
-    }
-
-    public SessionFactory get(String key)
-    {
-      return (SessionFactory) rep.get(key);
-    }
-
-    public SessionFactory put(String key, SessionFactory value)
-    {
-      return (SessionFactory) rep.put(key, value);
-    }
-  }
-
-  private RegistryMap registry = new RegistryMap();
+  private final Map<String, SessionFactory> registry;
 
   /**
-   * A factory used to create transport sessions. 
-   * Register with #registerTransport.
+   * A factory used to create transport sessions. Register with
+   * #registerTransport.
    */
   public interface SessionFactory
   {
     /**
-     * @param uri
-     *          URI used to open this session
+     * @param uri URI used to open this session
      */
     Session newSession(URI uri);
+  }
+
+  public TransportRegistry()
+  {
+    this.registry = new HashMap<String, SessionFactory>();
   }
 
   public void registerTransport(String scheme, SessionFactory factory)
@@ -110,11 +87,8 @@ public class TransportRegistry
       {
         return found.newSession(uri);
       }
-      else
-      {
-        // Fallback
-        return new URLConnectionSession(uri.toURL());
-      }
+      // Fallback
+      return new URLConnectionSession(uri.toURL());
     }
     catch (Exception e)
     {

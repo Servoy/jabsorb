@@ -33,7 +33,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -44,13 +43,14 @@ public class Browser implements Serializable
   protected static class BrowserStore
   {
 
-    private Set userAgents = new TreeSet();
+    private Set<String> userAgents = new TreeSet<String>();
+
     private String dataFile;
 
     protected BrowserStore(String suffix)
     {
-      dataFile = System.getProperty("user.home")
-        + "/.json-rpc-java-browsers-" + suffix + ".txt";
+      dataFile = System.getProperty("user.home") + "/.json-rpc-java-browsers-"
+          + suffix + ".txt";
       try
       {
         load();
@@ -74,12 +74,11 @@ public class Browser implements Serializable
 
     protected synchronized void save() throws IOException
     {
-      PrintWriter out = new PrintWriter(new BufferedWriter(
-        new FileWriter(dataFile)));
-      Iterator i = userAgents.iterator();
-      while (i.hasNext())
+      PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(
+          dataFile)));
+      for (String userAgent : userAgents)
       {
-        out.println(i.next());
+        out.println(userAgent);
       }
       out.close();
     }
@@ -95,7 +94,7 @@ public class Browser implements Serializable
       return false;
     }
 
-    protected Set getUserAgents()
+    protected Set<String> getUserAgents()
     {
       return userAgents;
     }
@@ -103,21 +102,27 @@ public class Browser implements Serializable
   }
 
   private static BrowserStore passStore = new BrowserStore("pass");
+
   private static BrowserStore failStore = new BrowserStore("fail");
 
   public String userAgent;
+
   public boolean gotSession = false;
+
   public boolean firstRun = true;
+
   public boolean failed = false;
+
   public boolean passed = false;
+
   public boolean addNotify = false;
 
   /*
-  * private static String makeKey() { byte b[] = new byte[8]; new
-  * Random().nextBytes(b); StringBuffer sb = new StringBuffer(); for(int i=0;
-  * i < 8; i++) { sb.append(b[i] & 0x0f + 'a'); sb.append((b[i] >> 4) & 0x0f +
-  * 'a'); } return sb.toString(); }
-  */
+   * private static String makeKey() { byte b[] = new byte[8]; new
+   * Random().nextBytes(b); StringBuffer sb = new StringBuffer(); for(int i=0; i
+   * < 8; i++) { sb.append(b[i] & 0x0f + 'a'); sb.append((b[i] >> 4) & 0x0f +
+   * 'a'); } return sb.toString(); }
+   */
 
   public synchronized void passUserAgent() throws IOException
   {
@@ -141,12 +146,12 @@ public class Browser implements Serializable
     failed = true;
   }
 
-  public synchronized Set getPassedUserAgents() throws IOException
+  public synchronized Set<String> getPassedUserAgents()
   {
     return passStore.getUserAgents();
   }
 
-  public synchronized Set getFailedUserAgents() throws IOException
+  public synchronized Set<String> getFailedUserAgents()
   {
     return failStore.getUserAgents();
   }

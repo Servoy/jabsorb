@@ -57,12 +57,12 @@ public class ReferenceSerializer extends AbstractSerializer
   /**
    * Classes that this can serialise.
    */
-  private static Class[] _serializableClasses = new Class[] {};
+  private static Class<?>[] _serializableClasses = new Class[] {};
 
   /**
    * Classes that this can serialise to.
    */
-  private static Class[] _JSONClasses = new Class[] {};
+  private static Class<?>[] _JSONClasses = new Class[] {};
 
   /**
    * A reference to the bridge
@@ -81,18 +81,19 @@ public class ReferenceSerializer extends AbstractSerializer
     this.bridge = bridge;
   }
 
-  public boolean canSerialize(Class clazz, Class jsonClazz)
+  @Override
+  public boolean canSerialize(Class<?> clazz, Class<?> jsonClazz)
   {
     return (!clazz.isArray() && !clazz.isPrimitive() && !clazz.isInterface()
         && (bridge.isReference(clazz) || bridge.isCallableReference(clazz)) && (jsonClazz == null || jsonClazz == JSONObject.class));
   }
 
-  public Class[] getJSONClasses()
+  public Class<?>[] getJSONClasses()
   {
     return _JSONClasses;
   }
 
-  public Class[] getSerializableClasses()
+  public Class<?>[] getSerializableClasses()
   {
     return _serializableClasses;
   }
@@ -100,7 +101,7 @@ public class ReferenceSerializer extends AbstractSerializer
   public Object marshall(SerializerState state, Object p, Object o)
       throws MarshallException
   {
-    Class clazz = o.getClass();
+    Class<?> clazz = o.getClass();
     Integer identity = new Integer(System.identityHashCode(o));
     if (bridge.isReference(clazz))
     {
@@ -150,14 +151,14 @@ public class ReferenceSerializer extends AbstractSerializer
     return null;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object o)
+  public ObjectMatch tryUnmarshall(SerializerState state, Class<?> clazz, Object o)
       throws UnmarshallException
   {
     state.setSerialized(o, ObjectMatch.OKAY);
     return ObjectMatch.OKAY;
   }
 
-  public Object unmarshall(SerializerState state, Class clazz, Object o)
+  public Object unmarshall(SerializerState state, Class<?> clazz, Object o)
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;

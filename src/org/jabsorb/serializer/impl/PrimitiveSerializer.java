@@ -45,22 +45,22 @@ public class PrimitiveSerializer extends AbstractSerializer
   /**
    * Classes that this can serialise.
    */
-  private static Class[] _serializableClasses = new Class[] { int.class,
+  private static Class<?>[] _serializableClasses = new Class[] { int.class,
       byte.class, short.class, long.class, float.class, double.class };
 
   /**
    * Classes that this can serialise to.
    */
-  private static Class[] _JSONClasses = new Class[] { Integer.class,
+  private static Class<?>[] _JSONClasses = new Class[] { Integer.class,
       Byte.class, Short.class, Long.class, Float.class, Double.class,
       String.class };
 
-  public Class[] getSerializableClasses()
+  public Class<?>[] getSerializableClasses()
   {
     return _serializableClasses;
   }
 
-  public Class[] getJSONClasses()
+  public Class<?>[] getJSONClasses()
   {
     return _JSONClasses;
   }
@@ -74,7 +74,7 @@ public class PrimitiveSerializer extends AbstractSerializer
    * @throws NumberFormatException If clazz is numeric and jso does not parse
    *           into a number.
    */
-  public Object toPrimitive(Class clazz, Object jso)
+  public Object toPrimitive(Class<?> clazz, Object jso)
       throws NumberFormatException
   {
     // TODO: is there a better way of doing this instead of all the if elses?
@@ -173,7 +173,7 @@ public class PrimitiveSerializer extends AbstractSerializer
     return null;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
+  public ObjectMatch tryUnmarshall(SerializerState state, Class<?> clazz,
       Object jso) throws UnmarshallException
   {
     try
@@ -190,7 +190,7 @@ public class PrimitiveSerializer extends AbstractSerializer
     return ObjectMatch.OKAY;
   }
 
-  public Object unmarshall(SerializerState state, Class clazz, Object jso)
+  public Object unmarshall(SerializerState state, Class<?> clazz, Object jso)
       throws UnmarshallException
   {
     try

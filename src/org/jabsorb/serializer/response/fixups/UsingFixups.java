@@ -1,6 +1,7 @@
 package org.jabsorb.serializer.response.fixups;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jabsorb.serializer.MarshallException;
@@ -22,7 +23,7 @@ public abstract class UsingFixups extends NoCircRefsOrDupes
    * A List of FixUp objects that are generated during processing for circular
    * references and/or duplicate references.
    */
-  private final List fixups = new ArrayList();
+  private final Collection<FixUp> fixups = new ArrayList<FixUp>();
 
   /**
    * Adds a fixup to the list of known fixups.
@@ -31,7 +32,7 @@ public abstract class UsingFixups extends NoCircRefsOrDupes
    * @param ref The reference by which the current object is denoted.
    * @return The object to put in the place of the current object.
    */
-  protected Object addFixUp(List originalLocation, Object ref)
+  protected Object addFixUp(List<Object> originalLocation, Object ref)
   {
     currentLocation.add(ref);
     fixups.add(new FixUp(currentLocation, originalLocation));
@@ -47,6 +48,7 @@ public abstract class UsingFixups extends NoCircRefsOrDupes
     return JSONObject.NULL;
   }
 
+  @Override
   public SuccessfulResult createResult(Object requestId, Object json)
   {
     return new FixupsResult(requestId, json, fixups);
@@ -68,7 +70,7 @@ public abstract class UsingFixups extends NoCircRefsOrDupes
       return true; // extra safety check- null is considered primitive too
     }
 
-    Class c = o.getClass();
+    Class<?> c = o.getClass();
 
     for (int i = 0, j = duplicatePrimitiveTypes.length; i < j; i++)
     {
@@ -84,7 +86,7 @@ public abstract class UsingFixups extends NoCircRefsOrDupes
    * The list of class types that are considered primitives that should not be
    * fixed up when fixupDuplicatePrimitives is false.
    */
-  private static Class[] duplicatePrimitiveTypes = { String.class,
+  private static Class<?>[] duplicatePrimitiveTypes = { String.class,
       Integer.class, Boolean.class, Long.class, Byte.class, Double.class,
       Float.class, Short.class };
 

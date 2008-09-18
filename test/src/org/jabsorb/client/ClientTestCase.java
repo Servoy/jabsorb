@@ -40,14 +40,11 @@ import org.jabsorb.test.ITest;
 public class ClientTestCase extends ServerTestBase
 {
 
-  HttpState         state;
+  HttpState state;
 
   TransportRegistry registry;
-  
-  public ClientTestCase() {
-	  
-  }
 
+  @Override
   protected void setUp() throws Exception
   {
     super.setUp(); // Makes sure jabsorb server tests are running at this URL
@@ -65,8 +62,10 @@ public class ClientTestCase extends ServerTestBase
   /**
    * JSON-RPC tests need this setup to operate propely. This call invokes
    * registerObject("test", ...) from the JSP
+   * 
    * @deprecated since we are running the server in-process
    */
+  @Deprecated
   void setupServerTestEnvironment(String url) throws HttpException, IOException
   {
     HttpClient client = new HttpClient();
@@ -106,32 +105,34 @@ public class ClientTestCase extends ServerTestBase
     ITest test = (ITest) client.openProxy("test", ITest.class);
     basicClientTest(test);
   }
-  
-  HTTPSession newHTTPSession(String url) {
-	  try {
-		  TransportRegistry reg= getRegistry();
-		  // Note: HTTPSession is not registered by default. Normally you would
-		  // register during initialization. In this test, we are testing different
-		  // states of the registry, hence we register it here and clean up afterwards
-		  HTTPSession.register(reg);		
-		  // Note: will not work without registering HTTPSession, see #setUp() 
-	      return (HTTPSession) getRegistry().createSession(url);
-	  }
-      finally
-      {
-        // Modified the registry; let's clean up after ourselves. Next call
-    	// to getRegistry will create a new one
-        registry = null;
-      }
+
+  HTTPSession newHTTPSession(String url)
+  {
+    try
+    {
+      TransportRegistry reg = getRegistry();
+      // Note: HTTPSession is not registered by default. Normally you would
+      // register during initialization. In this test, we are testing different
+      // states of the registry, hence we register it here and clean up afterwards
+      HTTPSession.register(reg);
+      // Note: will not work without registering HTTPSession, see #setUp() 
+      return (HTTPSession) getRegistry().createSession(url);
+    }
+    finally
+    {
+      // Modified the registry; let's clean up after ourselves. Next call
+      // to getRegistry will create a new one
+      registry = null;
+    }
   }
-  
+
   public void testHTTPSession()
   {
-      Client client = new Client(newHTTPSession(getServiceURL()));
-      ITest test = (ITest) client.openProxy("test", ITest.class);
-      basicClientTest(test);
+    Client client = new Client(newHTTPSession(getServiceURL()));
+    ITest test = (ITest) client.openProxy("test", ITest.class);
+    basicClientTest(test);
   }
-  
+
   void basicClientTest(ITest test)
   {
     test.voidFunction();
@@ -158,22 +159,27 @@ public class ClientTestCase extends ServerTestBase
 
   // TODO run embedded proxy server (is  Jetty capable of working like a proxy?) to really test proxy.
   // Right now, we are just testing that the proxy parameters are being set
-  public void testProxyConfiguration() {
-	  HTTPSession proxiedSession= newHTTPSession(getServiceURL());
-	  int proxyPort= 40888;	// hopefully, the port is unused
-	  proxiedSession.getHostConfiguration().setProxy("localhost", proxyPort);
-	  Client client = new Client(proxiedSession);
-	  ITest proxyObject= (ITest)client.openProxy("test", ITest.class);
-	  try {
-		  proxyObject.voidFunction();
-	  } catch(ClientError ex) {
-		  if ( !(ex.getCause() instanceof ConnectException) )
-			  fail("expected ConnectException, got " + ex.getCause().getClass().getName());
-	  }
+  public void testProxyConfiguration()
+  {
+    HTTPSession proxiedSession = newHTTPSession(getServiceURL());
+    int proxyPort = 40888; // hopefully, the port is unused
+    proxiedSession.getHostConfiguration().setProxy("localhost", proxyPort);
+    Client client = new Client(proxiedSession);
+    ITest proxyObject = (ITest) client.openProxy("test", ITest.class);
+    try
+    {
+      proxyObject.voidFunction();
+    }
+    catch (ClientError ex)
+    {
+      if (!(ex.getCause() instanceof ConnectException))
+        fail("expected ConnectException, got "
+            + ex.getCause().getClass().getName());
+    }
   }
 
-
-  String getServiceURL() {
-	  return getServiceRootURL() + "/JSON-RPC";
+  String getServiceURL()
+  {
+    return getServiceRootURL() + "/JSON-RPC";
   }
 }

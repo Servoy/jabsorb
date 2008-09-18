@@ -30,7 +30,6 @@ import java.io.Serializable;
 import java.lang.reflect.AccessibleObject;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -129,7 +128,7 @@ public class JSONRPCBridge implements Serializable
     /**
      * The class the object is of
      */
-    private final Class clazz;
+    private final Class<?> clazz;
 
     /**
      * Creates a new ObjectInstance
@@ -148,7 +147,7 @@ public class JSONRPCBridge implements Serializable
      * @param object The object for the instance
      * @param clazz The class the object is of
      */
-    public ObjectInstance(Object object, Class clazz)
+    public ObjectInstance(Object object, Class<?> clazz)
     {
       if (!clazz.isInstance(object))
       {
@@ -164,7 +163,7 @@ public class JSONRPCBridge implements Serializable
      * 
      * @return The class the object is of
      */
-    public Class getClazz()
+    public Class<?> getClazz()
     {
       return clazz;
     }
@@ -265,8 +264,8 @@ public class JSONRPCBridge implements Serializable
    *          is interested in eg. HttpServletRequest.class for the servlet
    *          transport
    */
-  public static void registerLocalArgResolver(Class argClazz,
-      Class contextInterface, LocalArgResolver argResolver)
+  public static void registerLocalArgResolver(Class<?> argClazz,
+      Class<?> contextInterface, LocalArgResolver argResolver)
   {
     LocalArgController.registerLocalArgResolver(argClazz, contextInterface,
         argResolver);
@@ -280,8 +279,8 @@ public class JSONRPCBridge implements Serializable
    * @param contextInterface The previously registered transport Context
    *          interface.
    */
-  public static void unregisterLocalArgResolver(Class argClazz,
-      Class contextInterface, LocalArgResolver argResolver)
+  public static void unregisterLocalArgResolver(Class<?> argClazz,
+      Class<?> contextInterface, LocalArgResolver argResolver)
   {
     LocalArgController.unregisterLocalArgResolver(argClazz, contextInterface,
         argResolver);
@@ -297,13 +296,13 @@ public class JSONRPCBridge implements Serializable
    * @param prefix prefix to append to each method name found in the methodMap.
    * @param methodMap a HashMap containing MethodKey keys specifying methods.
    */
-  private static void uniqueMethods(Set m, String prefix, Map methodMap)
+  private static void uniqueMethods(Set<String> m, String prefix,
+      Map<AccessibleObjectKey, Set<AccessibleObject>> methodMap)
   {
-    Iterator i = methodMap.entrySet().iterator();
-    while (i.hasNext())
+    for (Map.Entry<AccessibleObjectKey, Set<AccessibleObject>> mentry : methodMap
+        .entrySet())
     {
-      Map.Entry mentry = (Map.Entry) i.next();
-      AccessibleObjectKey mk = (AccessibleObjectKey) mentry.getKey();
+      AccessibleObjectKey mk = mentry.getKey();
       m.add(prefix + mk.getMethodName());
     }
   }
@@ -321,17 +320,17 @@ public class JSONRPCBridge implements Serializable
   /**
    * key "exported class name", val Class
    */
-  private final Map classMap;
+  private final Map<String, Class<?>> classMap;
 
   /**
    * key "exported instance name", val ObjectInstance
    */
-  private final Map objectMap;
+  private final Map<Object, ObjectInstance> objectMap;
 
   /**
    * key Integer hashcode, object held as reference
    */
-  private final Map referenceMap;
+  private final Map<Integer, Object> referenceMap;
 
   /**
    * ReferenceSerializer if enabled
@@ -341,12 +340,12 @@ public class JSONRPCBridge implements Serializable
   /**
    * key clazz, classes that should be returned as References
    */
-  private final Set referenceSet;
+  private final Set<Class<?>> referenceSet;
 
   /**
    * key clazz, classes that should be returned as CallableReferences
    */
-  private final Set callableReferenceSet;
+  private final Set<Class<?>> callableReferenceSet;
 
   /**
    * Whether references will be used on the bridge
@@ -374,12 +373,12 @@ public class JSONRPCBridge implements Serializable
       e.printStackTrace();
     }
 
-    classMap = new HashMap();
-    objectMap = new HashMap();
-    referenceMap = new HashMap();
+    classMap = new HashMap<String, Class<?>>();
+    objectMap = new HashMap<Object, ObjectInstance>();
+    referenceMap = new HashMap<Integer, Object>();
     referenceSerializer = new ReferenceSerializer(this);
-    referenceSet = new HashSet();
-    callableReferenceSet = new HashSet();
+    referenceSet = new HashSet<Class<?>>();
+    callableReferenceSet = new HashSet<Class<?>>();
     referencesEnabled = false;
     this.requestParser = new FixupsCircularReferenceHandler();
   }
@@ -487,7 +486,7 @@ public class JSONRPCBridge implements Serializable
 
     // #5: Get the object to act upon and the possible method that could be 
     // called on it
-    final Map methodMap;
+    final Map<AccessibleObjectKey, Set<AccessibleObject>> methodMap;
     final Object javascriptObject;
     final AccessibleObject ao;
     try
@@ -566,7 +565,7 @@ public class JSONRPCBridge implements Serializable
    * @param clazz The class object to check is a callable reference.
    * @return true if it is, false otherwise
    */
-  public boolean isCallableReference(Class clazz)
+  public boolean isCallableReference(Class<?> clazz)
   {
     if (this == globalBridge)
     {
@@ -583,7 +582,7 @@ public class JSONRPCBridge implements Serializable
 
     // check if the class implements any interface that is
     // registered as a callable reference...
-    Class[] interfaces = clazz.getInterfaces();
+    Class<?>[] interfaces = clazz.getInterfaces();
     for (int i = 0; i < interfaces.length; i++)
     {
       if (callableReferenceSet.contains(interfaces[i]))
@@ -593,7 +592,7 @@ public class JSONRPCBridge implements Serializable
     }
 
     // check super classes as well...
-    Class superClass = clazz.getSuperclass();
+    Class<?> superClass = clazz.getSuperclass();
     while (superClass != null)
     {
       if (callableReferenceSet.contains(superClass))
@@ -615,7 +614,7 @@ public class JSONRPCBridge implements Serializable
    * @param clazz The class object to check is a reference.
    * @return true if it is, false otherwise.
    */
-  public boolean isReference(Class clazz)
+  public boolean isReference(Class<?> clazz)
   {
     if (this == globalBridge)
     {
@@ -638,11 +637,11 @@ public class JSONRPCBridge implements Serializable
    * @param name The registered name of the class to lookup.
    * @return the class for the name
    */
-  public Class lookupClass(String name)
+  public Class<?> lookupClass(String name)
   {
     synchronized (classMap)
     {
-      return (Class) classMap.get(name);
+      return classMap.get(name);
     }
   }
 
@@ -656,7 +655,7 @@ public class JSONRPCBridge implements Serializable
   {
     synchronized (objectMap)
     {
-      ObjectInstance oi = (ObjectInstance) objectMap.get(key);
+      ObjectInstance oi = objectMap.get(key);
       if (oi != null)
       {
         return oi.getObject();
@@ -694,7 +693,7 @@ public class JSONRPCBridge implements Serializable
    *          reference.
    * @throws Exception if this method is called on the global bridge.
    */
-  public void registerCallableReference(Class clazz) throws Exception
+  public void registerCallableReference(Class<?> clazz) throws Exception
   {
     if (this == globalBridge)
     {
@@ -724,7 +723,7 @@ public class JSONRPCBridge implements Serializable
    *          servlet transport.
    */
   public void registerCallback(InvocationCallback callback,
-      Class contextInterface)
+      Class<?> contextInterface)
   {
     if (cbc == null)
     {
@@ -744,11 +743,11 @@ public class JSONRPCBridge implements Serializable
    * @param clazz The class to export static methods from.
    * @throws Exception If a class is already registed with this name
    */
-  public void registerClass(String name, Class clazz) throws Exception
+  public void registerClass(String name, Class<?> clazz) throws Exception
   {
     synchronized (classMap)
     {
-      Class exists = (Class) classMap.get(name);
+      Class<?> exists = classMap.get(name);
       if (exists != null && exists != clazz)
       {
         throw new Exception("different class registered as " + name);
@@ -803,7 +802,7 @@ public class JSONRPCBridge implements Serializable
    *          <p/> This can be used to restrict the exported methods to the
    *          methods defined in a specific superclass or interface.
    */
-  public void registerObject(Object key, Object o, Class interfaceClass)
+  public void registerObject(String key, Object o, Class<?> interfaceClass)
   {
     ObjectInstance oi = new ObjectInstance(o, interfaceClass);
     synchronized (objectMap)
@@ -839,7 +838,7 @@ public class JSONRPCBridge implements Serializable
    * @param clazz The class object that should be marshalled as a reference.
    * @throws Exception if this method is called on the global bridge.
    */
-  public void registerReference(Class clazz) throws Exception
+  public void registerReference(Class<?> clazz) throws Exception
   {
     if (this == globalBridge)
     {
@@ -900,7 +899,7 @@ public class JSONRPCBridge implements Serializable
    *          interface.
    */
   public void unregisterCallback(InvocationCallback callback,
-      Class contextInterface)
+      Class<?> contextInterface)
   {
     if (cbc == null)
     {
@@ -920,7 +919,7 @@ public class JSONRPCBridge implements Serializable
   {
     synchronized (classMap)
     {
-      Class clazz = (Class) classMap.get(name);
+      Class<?> clazz = classMap.get(name);
       if (clazz != null)
       {
         classMap.remove(name);
@@ -943,7 +942,7 @@ public class JSONRPCBridge implements Serializable
   {
     synchronized (objectMap)
     {
-      ObjectInstance oi = (ObjectInstance) objectMap.get(key);
+      ObjectInstance oi = objectMap.get(key);
       if (oi.getObject() != null)
       {
         objectMap.remove(key);
@@ -961,21 +960,19 @@ public class JSONRPCBridge implements Serializable
    * 
    * @param m HashSet to add all static methods to.
    */
-  private void allInstanceMethods(Set m)
+  private void allInstanceMethods(Set<String> m)
   {
     synchronized (objectMap)
     {
-      Iterator i = objectMap.entrySet().iterator();
-      while (i.hasNext())
+      for (Map.Entry<Object, ObjectInstance> oientry : objectMap.entrySet())
       {
-        Map.Entry oientry = (Map.Entry) i.next();
         Object key = oientry.getKey();
         if (!(key instanceof String))
         {
           continue;
         }
         String name = (String) key;
-        ObjectInstance oi = (ObjectInstance) oientry.getValue();
+        ObjectInstance oi = oientry.getValue();
         ClassData cd = ClassAnalyzer.getClassData(oi.getClazz());
         uniqueMethods(m, name + ".", cd.getMethodMap());
         uniqueMethods(m, name + ".", cd.getStaticMethodMap());
@@ -988,15 +985,12 @@ public class JSONRPCBridge implements Serializable
    * 
    * @param m Set to add all methods to.
    */
-  private void allCallableReferences(Set m)
+  private void allCallableReferences(Set<String> m)
   {
     synchronized (callableReferenceSet)
     {
-      Iterator i = callableReferenceSet.iterator();
-      while (i.hasNext())
+      for (Class<?> clazz : callableReferenceSet)
       {
-        Class clazz = (Class) i.next();
-
         ClassData cd = ClassAnalyzer.getClassData(clazz);
 
         uniqueMethods(m, CALLABLE_REFERENCE_METHOD_PREFIX + "["
@@ -1013,16 +1007,14 @@ public class JSONRPCBridge implements Serializable
    * 
    * @param m HashSet to add all static methods to.
    */
-  private void allStaticMethods(Set m)
+  private void allStaticMethods(Set<String> m)
   {
     synchronized (classMap)
     {
-      Iterator i = classMap.entrySet().iterator();
-      while (i.hasNext())
+      for (Map.Entry<String, Class<?>> cdentry : classMap.entrySet())
       {
-        Map.Entry cdentry = (Map.Entry) i.next();
-        String name = (String) cdentry.getKey();
-        Class clazz = (Class) cdentry.getValue();
+        String name = cdentry.getKey();
+        Class<?> clazz = cdentry.getValue();
         ClassData cd = ClassAnalyzer.getClassData(clazz);
         uniqueMethods(m, name + ".", cd.getStaticMethodMap());
       }
@@ -1039,12 +1031,13 @@ public class JSONRPCBridge implements Serializable
    * @return A map of AccessibleObjectKeys to a Collection of AccessibleObjects
    * @throws NoSuchMethodException
    */
-  private Map getAccessibleObjectMap(final int objectID,
+  private Map<AccessibleObjectKey, Set<AccessibleObject>> getAccessibleObjectMap(final int objectID,
       final String className, final String methodName)
       throws NoSuchMethodException
 
   {
-    final Map methodMap = new HashMap();
+    final Map<AccessibleObjectKey, Set<AccessibleObject>> methodMap = 
+      new HashMap<AccessibleObjectKey, Set<AccessibleObject>>();
     // if it is not an object
     if (objectID == 0)
     {
@@ -1139,12 +1132,12 @@ public class JSONRPCBridge implements Serializable
    */
   private ClassData resolveClass(String className)
   {
-    Class clazz;
+    Class<?> clazz;
     ClassData cd = null;
 
     synchronized (classMap)
     {
-      clazz = (Class) classMap.get(className);
+      clazz = classMap.get(className);
     }
 
     if (clazz != null)
@@ -1186,7 +1179,7 @@ public class JSONRPCBridge implements Serializable
     ObjectInstance oi;
     synchronized (objectMap)
     {
-      oi = (ObjectInstance) objectMap.get(key);
+      oi = objectMap.get(key);
     }
     if (log.isDebugEnabled() && oi != null)
     {
@@ -1208,7 +1201,7 @@ public class JSONRPCBridge implements Serializable
    */
   private JSONArray systemListMethods()
   {
-    Set m = new TreeSet();
+    Set<String> m = new TreeSet<String>();
     globalBridge.allInstanceMethods(m);
     if (globalBridge != this)
     {
@@ -1218,13 +1211,12 @@ public class JSONRPCBridge implements Serializable
     allStaticMethods(m);
     allInstanceMethods(m);
     allCallableReferences(m);
-    JSONArray methods = new JSONArray();
-    Iterator i = m.iterator();
-    while (i.hasNext())
+    JSONArray methodNames = new JSONArray();
+    for (String methodName : m)
     {
-      methods.put(i.next());
+      methodNames.put(methodName);
     }
-    return methods;
+    return methodNames;
   }
 
 }

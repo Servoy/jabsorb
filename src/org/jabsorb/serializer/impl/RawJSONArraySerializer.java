@@ -47,19 +47,19 @@ public class RawJSONArraySerializer extends AbstractSerializer
   /**
    * Classes that this can serialise.
    */
-  private static Class[] _serializableClasses = new Class[] { JSONArray.class };
+  private static Class<?>[] _serializableClasses = new Class[] { JSONArray.class };
 
   /**
    * Classes that this can serialise to.
    */
-  private static Class[] _JSONClasses = new Class[] { JSONArray.class };
+  private static Class<?>[] _JSONClasses = new Class[] { JSONArray.class };
 
-  public Class[] getJSONClasses()
+  public Class<?>[] getJSONClasses()
   {
     return _JSONClasses;
   }
 
-  public Class[] getSerializableClasses()
+  public Class<?>[] getSerializableClasses()
   {
     return _serializableClasses;
   }
@@ -93,14 +93,14 @@ public class RawJSONArraySerializer extends AbstractSerializer
     return jsonOut;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
+  public ObjectMatch tryUnmarshall(SerializerState state, Class<?> clazz,
       Object jso) throws UnmarshallException
   {
     state.setSerialized(jso, ObjectMatch.OKAY);
     return ObjectMatch.OKAY;
   }
 
-  public Object unmarshall(SerializerState state, Class clazz, Object jso)
+  public Object unmarshall(SerializerState state, Class<?> clazz, Object jso)
       throws UnmarshallException
   {
     state.setSerialized(jso, jso);

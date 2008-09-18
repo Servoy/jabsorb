@@ -26,7 +26,6 @@
 
 package org.jabsorb.serializer.impl;
 
-import java.util.AbstractSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -57,26 +56,27 @@ public class SetSerializer extends AbstractSerializer
   /**
    * Classes that this can serialise.
    */
-  private static Class[] _serializableClasses = new Class[] { Set.class,
+  private static Class<?>[] _serializableClasses = new Class[] { Set.class,
       HashSet.class, TreeSet.class, LinkedHashSet.class };
 
   /**
    * Classes that this can serialise to.
    */
-  private static Class[] _JSONClasses = new Class[] { JSONObject.class };
+  private static Class<?>[] _JSONClasses = new Class[] { JSONObject.class };
 
-  public boolean canSerialize(Class clazz, Class jsonClazz)
+  @Override
+  public boolean canSerialize(Class<?> clazz, Class<?> jsonClazz)
   {
     return (super.canSerialize(clazz, jsonClazz) || ((jsonClazz == null || jsonClazz == JSONObject.class) && Set.class
         .isAssignableFrom(clazz)));
   }
 
-  public Class[] getJSONClasses()
+  public Class<?>[] getJSONClasses()
   {
     return _JSONClasses;
   }
 
-  public Class[] getSerializableClasses()
+  public Class<?>[] getSerializableClasses()
   {
     return _serializableClasses;
   }
@@ -84,7 +84,7 @@ public class SetSerializer extends AbstractSerializer
   public Object marshall(SerializerState state, Object p, Object o)
       throws MarshallException
   {
-    Set set = (Set) o;
+    Set<?> set = (Set<?>) o;
 
     JSONObject obj = new JSONObject();
     JSONObject setdata = new JSONObject();
@@ -109,7 +109,7 @@ public class SetSerializer extends AbstractSerializer
       throw new MarshallException("Could not set 'set': " + e.getMessage(), e);
     }
     Object key = null;
-    Iterator i = set.iterator();
+    Iterator<?> i = set.iterator();
 
     try
     {
@@ -136,7 +136,7 @@ public class SetSerializer extends AbstractSerializer
     return obj;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object o)
+  public ObjectMatch tryUnmarshall(SerializerState state, Class<?> clazz, Object o)
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
@@ -178,7 +178,7 @@ public class SetSerializer extends AbstractSerializer
 
     ObjectMatch m = new ObjectMatch(-1);
     state.setSerialized(o, m);
-    Iterator i = jsonset.keys();
+    Iterator<?> i = jsonset.keys();
     String key = null;
 
     try
@@ -200,7 +200,7 @@ public class SetSerializer extends AbstractSerializer
     return m;
   }
 
-  public Object unmarshall(SerializerState state, Class clazz, Object o)
+  public Object unmarshall(SerializerState state, Class<?> clazz, Object o)
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
@@ -217,20 +217,20 @@ public class SetSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("no type hint");
     }
-    AbstractSet abset = null;
+    Set<Object> abset = null;
     if (java_class.equals("java.util.Set")
         || java_class.equals("java.util.AbstractSet")
         || java_class.equals("java.util.HashSet"))
     {
-      abset = new HashSet();
+      abset = new HashSet<Object>();
     }
     else if (java_class.equals("java.util.TreeSet"))
     {
-      abset = new TreeSet();
+      abset = new TreeSet<Object>();
     }
     else if (java_class.equals("java.util.LinkedHashSet"))
     {
-      abset = new LinkedHashSet();
+      abset = new LinkedHashSet<Object>();
     }
     else
     {
@@ -251,14 +251,14 @@ public class SetSerializer extends AbstractSerializer
       throw new UnmarshallException("set missing");
     }
 
-    Iterator i = jsonset.keys();
+    Iterator<String> i = jsonset.keys();
     String key = null;
     state.setSerialized(o, abset);
     try
     {
       while (i.hasNext())
       {
-        key = (String) i.next();
+        key = i.next();
         Object setElement = jsonset.get(key);
         abset.add(ser.unmarshall(state, null, setElement));
       }

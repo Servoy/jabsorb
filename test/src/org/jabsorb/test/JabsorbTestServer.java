@@ -65,11 +65,6 @@ public class JabsorbTestServer
   }
 
   /**
-   * The port the server runs on
-   */
-  private final int          port;
-
-  /**
    * The web server
    */
   private Server             server;
@@ -82,8 +77,6 @@ public class JabsorbTestServer
    */
   public JabsorbTestServer(int port)
   {
-    this.port = port;
-
     try
     {
       this.server = new Server(port);

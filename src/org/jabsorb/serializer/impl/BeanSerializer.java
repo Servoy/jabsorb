@@ -67,12 +67,12 @@ public class BeanSerializer extends AbstractSerializer
     /**
      * The readable properties of the bean.
      */
-    public Map readableProps;
+    public Map<String,Method> readableProps;
 
     /**
      * The writable properties of the bean.
      */
-    public Map writableProps;
+    public Map<String,Method> writableProps;
   }
 
   /**
@@ -89,21 +89,21 @@ public class BeanSerializer extends AbstractSerializer
   /**
    * Caches analysed beans
    */
-  private static HashMap beanCache = new HashMap();
+  private static Map<Class<?>,BeanData> beanCache = new HashMap<Class<?>, BeanData>();
 
   /**
    * Classes that this can serialise.
    * 
    * TODO: Yay for bloat!
    */
-  private static Class[] _serializableClasses = new Class[] {};
+  private static Class<?>[] _serializableClasses = new Class[] {};
 
   /**
    * Classes that this can serialise to.
    * 
    * TODO: Yay for bloat!
    */
-  private static Class[] _JSONClasses = new Class[] {};
+  private static Class<?>[] _JSONClasses = new Class[] {};
 
   /**
    * Analyses a bean, returning a BeanData with the data extracted from it.
@@ -113,14 +113,14 @@ public class BeanSerializer extends AbstractSerializer
    * @throws IntrospectionException If a problem occurs during getting the bean
    *           info.
    */
-  public static BeanData analyzeBean(Class clazz) throws IntrospectionException
+  public static BeanData analyzeBean(Class<?> clazz) throws IntrospectionException
   {
     log.info("analyzing " + clazz.getName());
     BeanData bd = new BeanData();
     bd.beanInfo = Introspector.getBeanInfo(clazz, Object.class);
     PropertyDescriptor props[] = bd.beanInfo.getPropertyDescriptors();
-    bd.readableProps = new HashMap();
-    bd.writableProps = new HashMap();
+    bd.readableProps = new HashMap<String, Method>();
+    bd.writableProps = new HashMap<String, Method>();
     for (int i = 0; i < props.length; i++)
     {
       //This is declared by enums and shouldn't be shown.
@@ -148,12 +148,12 @@ public class BeanSerializer extends AbstractSerializer
    * @throws IntrospectionException If a problem occurs during getting the bean
    *           info.
    */
-  public static BeanData getBeanData(Class clazz) throws IntrospectionException
+  public static BeanData getBeanData(Class<?> clazz) throws IntrospectionException
   {
     BeanData bd;
     synchronized (beanCache)
     {
-      bd = (BeanData) beanCache.get(clazz);
+      bd = beanCache.get(clazz);
       if (bd == null)
       {
         bd = analyzeBean(clazz);
@@ -163,17 +163,18 @@ public class BeanSerializer extends AbstractSerializer
     return bd;
   }
 
-  public boolean canSerialize(Class clazz, Class jsonClazz)
+  @Override
+  public boolean canSerialize(Class<?> clazz, Class<?> jsonClazz)
   {
     return (!clazz.isArray() && !clazz.isPrimitive() && !clazz.isInterface() && (jsonClazz == null || jsonClazz == JSONObject.class));
   }
 
-  public Class[] getJSONClasses()
+  public Class<?>[] getJSONClasses()
   {
     return _JSONClasses;
   }
 
-  public Class[] getSerializableClasses()
+  public Class<?>[] getSerializableClasses()
   {
     return _serializableClasses;
   }
@@ -205,14 +206,12 @@ public class BeanSerializer extends AbstractSerializer
           "JSONException: " + e.getMessage(), e);
       }
     }
-    Iterator i = bd.readableProps.entrySet().iterator();
     Object args[] = new Object[0];
     Object result;
-    while (i.hasNext())
+    for(Map.Entry<String, Method> ent:bd.readableProps.entrySet())
     {
-      Map.Entry ent = (Map.Entry) i.next();
-      String prop = (String) ent.getKey();
-      Method getMethod = (Method) ent.getValue();
+      String prop = ent.getKey();
+      Method getMethod = ent.getValue();
       if (log.isDebugEnabled())
       {
         log.debug("invoking " + getMethod.getName() + "()");
@@ -256,7 +255,7 @@ public class BeanSerializer extends AbstractSerializer
     return val;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object o)
+  public ObjectMatch tryUnmarshall(SerializerState state, Class<?> clazz, Object o)
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
@@ -272,11 +271,9 @@ public class BeanSerializer extends AbstractSerializer
 
     int match = 0;
     int mismatch = 0;
-    Iterator i = bd.writableProps.entrySet().iterator();
-    while (i.hasNext())
+    for(Map.Entry<String, Method> ent:bd.writableProps.entrySet())
     {
-      Map.Entry ent = (Map.Entry) i.next();
-      String prop = (String) ent.getKey();
+      String prop = ent.getKey();
       if (jso.has(prop))
       {
         match++;
@@ -297,16 +294,16 @@ public class BeanSerializer extends AbstractSerializer
 
     ObjectMatch m = null;
     ObjectMatch tmp;
-    i = jso.keys();
+    Iterator<String> i = jso.keys();
     while (i.hasNext())
     {
-      String field = (String) i.next();
-      Method setMethod = (Method) bd.writableProps.get(field);
+      String field = i.next();
+      Method setMethod = bd.writableProps.get(field);
       if (setMethod != null)
       {
         try
         {
-          Class param[] = setMethod.getParameterTypes();
+          Class<?> param[] = setMethod.getParameterTypes();
           if (param.length != 1)
           {
             throw new UnmarshallException("bean " + clazz.getName()
@@ -352,7 +349,7 @@ public class BeanSerializer extends AbstractSerializer
     return returnValue;
   }
 
-  public Object unmarshall(SerializerState state, Class clazz, Object o)
+  public Object unmarshall(SerializerState state, Class<?> clazz, Object o)
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
@@ -397,16 +394,16 @@ public class BeanSerializer extends AbstractSerializer
     state.setSerialized(o, instance);
     Object invokeArgs[] = new Object[1];
     Object fieldVal;
-    Iterator i = jso.keys();
+    Iterator<String> i = jso.keys();
     while (i.hasNext())
     {
-      String field = (String) i.next();
-      Method setMethod = (Method) bd.writableProps.get(field);
+      String field = i.next();
+      Method setMethod = bd.writableProps.get(field);
       if (setMethod != null)
       {
         try
         {
-          Class param[] = setMethod.getParameterTypes();
+          Class<?> param[] = setMethod.getParameterTypes();
           fieldVal = ser.unmarshall(state, param[0], jso.get(field));
         }
         catch (UnmarshallException e)

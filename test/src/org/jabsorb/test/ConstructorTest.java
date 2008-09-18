@@ -30,58 +30,74 @@ import java.io.Serializable;
 
 public class ConstructorTest implements Serializable
 {
+  /**
+   * Generated Id
+   */
+  private static final long serialVersionUID = 1L;
+
   public static void main(String args[])
   {
     ConstructorTest c = new ConstructorTest(123);
     System.out.println(c.message);
   }
-  public ConstructorTest(int i,String s)
+
+  public ConstructorTest(@SuppressWarnings("unused") int i,
+      @SuppressWarnings("unused") String s)
   {
-    message="int,String";
-  }
-  public ConstructorTest(int i,int j)
-  {
-    message="int,int";
+    message = "int,String";
   }
 
-  public ConstructorTest(int i)
+  public ConstructorTest(@SuppressWarnings("unused") int i,
+      @SuppressWarnings("unused") int j)
   {
-    message="int";
+    message = "int,int";
   }
+
+  public ConstructorTest(@SuppressWarnings("unused") int i)
+  {
+    message = "int";
+  }
+
   final public String message;
+
   //Constructor Tests
   public ConstructorTest()
   {
-    message="default";
+    message = "default";
   }
- //adding this makes it fail many tests!
-  /*public ConstructorTest(Integer i)
+
+  //adding this makes it fail many tests!
+  /*
+   * public ConstructorTest(Integer i) { message="int"; }
+   */
+  public ConstructorTest(@SuppressWarnings("unused") long l)
   {
-    message="int";
-  }*/
-  public ConstructorTest(long l)
-  {
-    message="long";
+    message = "long";
   }
-  public ConstructorTest(float l)
+
+  public ConstructorTest(@SuppressWarnings("unused") float l)
   {
-    message="float";
+    message = "float";
   }
-  public ConstructorTest(double l)
+
+  public ConstructorTest(@SuppressWarnings("unused") double l)
   {
-    message="double";
+    message = "double";
   }
-  public ConstructorTest(boolean b)
+
+  public ConstructorTest(@SuppressWarnings("unused") boolean b)
   {
-    message="boolean";
+    message = "boolean";
   }
-  public ConstructorTest(String s)
+
+  public ConstructorTest(@SuppressWarnings("unused") String s)
   {
-    message="String";
+    message = "String";
   }
-  public ConstructorTest(Object o)
+
+  public ConstructorTest(@SuppressWarnings("unused") Object o)
   {
-    message="Object";
+    message = "Object";
   }
 
   public String getMessage()

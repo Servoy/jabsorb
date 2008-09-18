@@ -30,24 +30,26 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.jabsorb.JSONSerializer;
-import org.jabsorb.reflect.ClassAnalyzer;
-import org.jabsorb.serializer.AccessibleObjectResolver;
-import org.jabsorb.serializer.Serializer;
-import org.jabsorb.test.ConstructorTest;
-import org.json.JSONArray;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.jabsorb.JSONSerializer;
+import org.jabsorb.reflect.AccessibleObjectKey;
+import org.jabsorb.reflect.ClassAnalyzer;
+import org.jabsorb.serializer.AccessibleObjectResolver;
+import org.jabsorb.test.ConstructorTest;
+import org.json.JSONArray;
+
 public class AccessibleObjectResolverTestCase extends TestCase {
   AccessibleObjectResolver resolver;
-  Map methodMap;
+  Map<AccessibleObjectKey, Set<AccessibleObject>> methodMap;
   JSONSerializer serializer;
 
+  @Override
   protected void setUp() throws Exception {
     resolver= new AccessibleObjectResolver();
-    methodMap = new HashMap();
+    methodMap = new HashMap<AccessibleObjectKey, Set<AccessibleObject>>();
         methodMap.putAll(ClassAnalyzer.getClassData(ConstructorTest.class).getMethodMap());
         methodMap.putAll(ClassAnalyzer.getClassData(ConstructorTest.class).getConstructorMap());
         serializer = new JSONSerializer();
@@ -57,8 +59,9 @@ public class AccessibleObjectResolverTestCase extends TestCase {
   public void testResolution() {
     JSONArray args= new JSONArray();
     args.put(1);
-    Constructor methodInt= (Constructor)resolver.resolveMethod(methodMap, "$constructor", args, serializer);
-    Class[] params= methodInt.getParameterTypes();
+    Constructor<?> methodInt = (Constructor<?>) AccessibleObjectResolver
+        .resolveMethod(methodMap, "$constructor", args, serializer);
+    Class<?>[] params= methodInt.getParameterTypes();
     assertNotNull(params);
     assertEquals(1, params.length);
     assertEquals(Integer.TYPE, params[0]);

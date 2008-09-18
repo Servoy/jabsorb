@@ -49,19 +49,19 @@ public class RawJSONObjectSerializer extends AbstractSerializer
   /**
    * Classes that this can serialise.
    */
-  private static Class[] _serializableClasses = new Class[] { JSONObject.class };
+  private static Class<?>[] _serializableClasses = new Class[] { JSONObject.class };
 
   /**
    * Classes that this can serialise to.
    */
-  private static Class[] _JSONClasses = new Class[] { JSONObject.class };
+  private static Class<?>[] _JSONClasses = new Class[] { JSONObject.class };
 
-  public Class[] getJSONClasses()
+  public Class<?>[] getJSONClasses()
   {
     return _JSONClasses;
   }
 
-  public Class[] getSerializableClasses()
+  public Class<?>[] getSerializableClasses()
   {
     return _serializableClasses;
   }
@@ -75,10 +75,10 @@ public class RawJSONObjectSerializer extends AbstractSerializer
     String key = null;
     try
     {
-      Iterator i = jsonIn.keys();
+      Iterator<String> i = jsonIn.keys();
       while (i.hasNext())
       {
-        key = (String) i.next();
+        key = i.next();
 
         Object j = ser.marshall(state, o, jsonIn.get(key), key);
         jsonOut.put(key, j);
@@ -95,14 +95,14 @@ public class RawJSONObjectSerializer extends AbstractSerializer
     return jsonOut;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
+  public ObjectMatch tryUnmarshall(SerializerState state, Class<?> clazz,
       Object jso) throws UnmarshallException
   {
     state.setSerialized(jso, ObjectMatch.OKAY);
     return ObjectMatch.OKAY;
   }
 
-  public Object unmarshall(SerializerState state, Class clazz, Object jso)
+  public Object unmarshall(SerializerState state, Class<?> clazz, Object jso)
       throws UnmarshallException
   {
     state.setSerialized(jso, jso);

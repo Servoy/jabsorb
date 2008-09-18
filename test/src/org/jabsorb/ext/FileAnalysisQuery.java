@@ -59,13 +59,6 @@ public class FileAnalysisQuery
   private String type;
 
   /**
-   * Create a new, empty FileAnalysisQuery.
-   */
-  public FileAnalysisQuery()
-  {
-  }
-
-  /**
    * Get the sort direction.  This will be either ASC|DESC.
    * @return the sort direction.
    */

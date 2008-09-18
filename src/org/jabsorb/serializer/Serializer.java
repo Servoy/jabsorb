@@ -46,7 +46,7 @@ public interface Serializer extends Serializable
    * @param jsonClazz json Class wrapper type.
    * @return true if this serializer can serialize/deserialize the given pair.
    */
-  public boolean canSerialize(Class clazz, Class jsonClazz);
+  public boolean canSerialize(Class<?> clazz, Class<?> jsonClazz);
 
   /**
    * Get the json java classes that this Serializer is able to serialize from
@@ -56,7 +56,7 @@ public interface Serializer extends Serializable
    * @return json side java classes that can be serialized/deserialized by this
    *         serializer.
    */
-  public Class[] getJSONClasses();
+  public Class<?>[] getJSONClasses();
 
   /**
    * Get the java classes that this Serializer is able to serialize from java
@@ -65,7 +65,7 @@ public interface Serializer extends Serializable
    * @return java side classes that can be serialized/deserialized by this
    *         serializer.
    */
-  public Class[] getSerializableClasses();
+  public Class<?>[] getSerializableClasses();
 
   /**
    * Marshall a java object into an equivalent json object.
@@ -97,7 +97,7 @@ public interface Serializer extends Serializable
    * @return An ObjectMatch denoting whether the object matches the class (?)
    * @throws UnmarshallException
    */
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
+  public ObjectMatch tryUnmarshall(SerializerState state, Class<?> clazz,
       Object json) throws UnmarshallException;
 
   /**
@@ -111,6 +111,6 @@ public interface Serializer extends Serializable
    * @throws UnmarshallException if there is a problem unmarshalling json to
    *           java.
    */
-  public Object unmarshall(SerializerState state, Class clazz, Object json)
+  public Object unmarshall(SerializerState state, Class<?> clazz, Object json)
       throws UnmarshallException;
 }

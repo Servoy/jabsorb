@@ -27,40 +27,37 @@
 package org.jabsorb.test;
 
 import java.util.HashMap;
-
-import org.jabsorb.JSONSerializer;
-import org.jabsorb.serializer.SerializerState;
-import org.jabsorb.test.ITest.Waggle;
-import org.json.JSONObject;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.jabsorb.JSONSerializer;
+import org.jabsorb.serializer.SerializerState;
+import org.json.JSONObject;
+
 public class TestSerializer extends TestCase
 {
-  static class TestMap1 extends HashMap /* <Integer, String> */
-  {
-  }
-
-  static final TestMap1 TEST_MAP1         = new TestMap1();
+  static final Map<Integer, String> TEST_MAP1 = new HashMap<Integer, String>();
   static
   {
     TEST_MAP1.put(new Integer(1), "1");
     TEST_MAP1.put(new Integer(2), "2");
   }
 
-  JSONSerializer        ser;
+  JSONSerializer ser;
 
-  SerializerState       marshallerState   ;
+  SerializerState marshallerState;
 
-  SerializerState       unmarshallerState ;
+  SerializerState unmarshallerState;
 
+  @Override
   protected void setUp() throws Exception
   {
     ser = new JSONSerializer();
     ser.registerDefaultSerializers();
     ser.setMarshallClassHints(true);
-    marshallerState= ser.createSerializerState();
-    unmarshallerState= ser.createSerializerState();
+    marshallerState = ser.createSerializerState();
+    unmarshallerState = ser.createSerializerState();
   }
 
   public void dontTestExtendedMaps() throws Exception
@@ -69,15 +66,12 @@ public class TestSerializer extends TestCase
         TEST_MAP1, "testMap1");
     System.out.println("Serialized: ");
     System.out.println(json.toString(2));
-    TestMap1 unmarshalled = (TestMap1) ser.unmarshall(unmarshallerState,
-        TestMap1.class, json);
+    HashMap<Integer, String> unmarshalled = (HashMap<Integer, String>) ser
+        .unmarshall(unmarshallerState, HashMap.class, json);
     assertEquals(TEST_MAP1, unmarshalled);
   }
 
-  static final HashMap /* <Integer, String> */TEST_MAP2 = new HashMap/*
-                                                                     * <Integer,
-                                                                     * String>
-                                                                     */();
+  static final HashMap<Integer, String> TEST_MAP2 = new HashMap<Integer, String>();
   static
   {
     TEST_MAP2.put(new Integer(1), "1");
@@ -90,23 +84,23 @@ public class TestSerializer extends TestCase
         TEST_MAP2, "testMap2");
     System.out.println("Serialized: ");
     System.out.println(json.toString(2));
-    HashMap/* <Integer, String> */unmarshalled = (HashMap/* <Integer, String> */) ser
+    HashMap<Integer, String> unmarshalled = (HashMap<Integer, String>) ser
         .unmarshall(unmarshallerState, HashMap.class, json);
     assertEquals(TEST_MAP2, unmarshalled);
   }
 
   public void testWaggle() throws Exception
   {
-    SerializerState marshallerState = ser.createSerializerState();
-    SerializerState unmarshallerState = ser.createSerializerState();
+    SerializerState _marshallerState = ser.createSerializerState();
+    SerializerState _unmarshallerState = ser.createSerializerState();
     ITest.Waggle waggle = new ITest.Waggle(1);
-    JSONObject json1 = (JSONObject) ser.marshall(marshallerState, null, waggle,
+    JSONObject json1 = (JSONObject) ser.marshall(_marshallerState, null, waggle,
         "waggle");
-    ITest.Waggle unmarshalled = (ITest.Waggle) ser.unmarshall(unmarshallerState,
-        ITest.Waggle.class, json1);
+    ITest.Waggle unmarshalled = (ITest.Waggle) ser.unmarshall(
+        _unmarshallerState, ITest.Waggle.class, json1);
     assertEquals(waggle.toString(), unmarshalled.toString());
-    marshallerState = ser.createSerializerState();
-    JSONObject json2 = (JSONObject) ser.marshall(marshallerState, null,
+    _marshallerState = ser.createSerializerState();
+    JSONObject json2 = (JSONObject) ser.marshall(_marshallerState, null,
         unmarshalled, "waggle");
     assertEquals(json1.toString(), json2.toString());
   }

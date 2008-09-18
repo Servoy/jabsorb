@@ -11,7 +11,8 @@ import org.jabsorb.serializer.MarshallException;
  */
 public class FixupNonPrimitiveDupesOnly extends FixupDupesOnly
 {
-  public Object duplicateFound(List originalLocation, Object ref, Object java)
+  @Override
+  public Object duplicateFound(List<Object> originalLocation, Object ref, Object java)
       throws MarshallException
   {
     if (!isPrimitive(java))

@@ -48,7 +48,7 @@ public class CallbackData implements Serializable
    * The type of transport Context interface the callback is interested in eg.
    * HttpServletRequest.class for the servlet transport.
    */
-  private final Class contextInterface;
+  private final Class<?> contextInterface;
 
   /**
    * Creates a new Callback data holder
@@ -58,7 +58,7 @@ public class CallbackData implements Serializable
    *          callback is interested in eg. HttpServletRequest.class for the
    *          servlet transport.
    */
-  public CallbackData(InvocationCallback cb, Class contextInterface)
+  public CallbackData(InvocationCallback cb, Class<?> contextInterface)
   {
     this.cb = cb;
     this.contextInterface = contextInterface;
@@ -70,6 +70,7 @@ public class CallbackData implements Serializable
    * @param o The object to compare with this one.
    * @return true If they share the same callback and contextInterface
    */
+  @Override
   public boolean equals(Object o)
   {
     CallbackData cmp = (CallbackData) o;
@@ -91,6 +92,7 @@ public class CallbackData implements Serializable
    * 
    * @return a unique key.
    */
+  @Override
   public int hashCode()
   {
     return cb.hashCode() * contextInterface.hashCode();

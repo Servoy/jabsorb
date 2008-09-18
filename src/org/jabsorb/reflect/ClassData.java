@@ -26,8 +26,10 @@
 
 package org.jabsorb.reflect;
 
+import java.lang.reflect.AccessibleObject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Information on the public methods of a class as reflected from the Class
@@ -39,25 +41,25 @@ public class ClassData
   /**
    * The class that this ClassData maps.
    */
-  private final Class clazz;
+  private final Class<?> clazz;
 
   /**
    * Map of public instance methods. Key is a AccessibleObjectKey object, value
    * is an List of Method.
    */
-  private final Map methodMap;
+  private final Map<AccessibleObjectKey, Set<AccessibleObject>> methodMap;
 
   /**
    * Map of public static methods. Key is a AccessibleObjectKey object, value is
    * an List of Method.
    */
-  private final Map staticMethodMap;
+  private final Map<AccessibleObjectKey, Set<AccessibleObject>> staticMethodMap;
 
   /**
    * Map of public constructors. Key is a AccessibleObjectKey object, value is
    * an List of Constructor.
    */
-  private final Map constructorMap;
+  private final Map<AccessibleObjectKey, Set<AccessibleObject>> constructorMap;
 
   /**
    * Creates a new ClassData
@@ -71,14 +73,19 @@ public class ClassData
    * @param constructorMap Map of public constructors. Key is a
    *          AccessibleObjectKey object, value is an List of Constructor.
    */
-  public ClassData(Class clazz, Map methodMap, Map staticMethodMap,
-      Map constructorMap)
+  public ClassData(Class<?> clazz,
+      Map<AccessibleObjectKey, Set<AccessibleObject>> methodMap,
+      Map<AccessibleObjectKey, Set<AccessibleObject>> staticMethodMap,
+      Map<AccessibleObjectKey, Set<AccessibleObject>> constructorMap)
   {
     this.clazz = clazz;
-    this.methodMap = new HashMap(methodMap);
+    this.methodMap = new HashMap<AccessibleObjectKey, Set<AccessibleObject>>(
+        methodMap);
     this.methodMap.putAll(staticMethodMap);
-    this.staticMethodMap = new HashMap(staticMethodMap);
-    this.constructorMap = new HashMap(constructorMap);
+    this.staticMethodMap = new HashMap<AccessibleObjectKey, Set<AccessibleObject>>(
+        staticMethodMap);
+    this.constructorMap = new HashMap<AccessibleObjectKey, Set<AccessibleObject>>(
+        constructorMap);
   }
 
   /**
@@ -86,7 +93,7 @@ public class ClassData
    * 
    * @return the class that this ClassData maps.
    */
-  public Class getClazz()
+  public Class<?> getClazz()
   {
     return clazz;
   }
@@ -98,7 +105,7 @@ public class ClassData
    * 
    * @return Map of static methods that can be invoked for the class.
    */
-  public Map getConstructorMap()
+  public Map<AccessibleObjectKey, Set<AccessibleObject>> getConstructorMap()
   {
     return constructorMap;
   }
@@ -113,7 +120,7 @@ public class ClassData
    * @return Map of public instance methods which can be invoked for the class.
    *         this ClassData.
    */
-  public Map getMethodMap()
+  public Map<AccessibleObjectKey, Set<AccessibleObject>> getMethodMap()
   {
     return methodMap;
   }
@@ -125,7 +132,7 @@ public class ClassData
    * 
    * @return Map of static methods that can be invoked for the class.
    */
-  public Map getStaticMethodMap()
+  public Map<AccessibleObjectKey, Set<AccessibleObject>> getStaticMethodMap()
   {
     return staticMethodMap;
   }

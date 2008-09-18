@@ -34,6 +34,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Simple Java Dict Client (RFC2229)
@@ -50,8 +51,8 @@ public class DictClient implements Serializable
   private String host;
   private int port;
 
-  private transient ArrayList strategies = null;
-  private transient ArrayList databases = null;
+  private transient List<Strategy> strategies = null;
+  private transient List<Database> databases = null;
 
   private transient String ident = null;
   private transient Socket sock = null;
@@ -114,6 +115,7 @@ public class DictClient implements Serializable
       + port + " ident=\"" + ident + "\"");
   }
 
+  @Override
   public void finalize()
   {
     close();
@@ -191,6 +193,7 @@ public class DictClient implements Serializable
       }
       catch (IOException e)
       {
+        //Do nothing
       }
       sock = null;
       in = null;
@@ -199,7 +202,7 @@ public class DictClient implements Serializable
     }
   }
 
-  public synchronized ArrayList getDatabases() throws IOException,
+  public synchronized List<Database> getDatabases() throws IOException,
     DictClientException
   {
     if (databases == null)
@@ -222,7 +225,7 @@ public class DictClient implements Serializable
       throw new DictClientException(r);
     }
 
-    databases = new ArrayList();
+    databases = new ArrayList<Database>();
     String line;
     while (true)
     {
@@ -244,7 +247,7 @@ public class DictClient implements Serializable
     }
   }
 
-  public synchronized ArrayList getStrategies() throws IOException,
+  public synchronized List<Strategy> getStrategies() throws IOException,
     DictClientException
   {
     if (strategies == null)
@@ -267,7 +270,7 @@ public class DictClient implements Serializable
       throw new DictClientException(r);
     }
 
-    strategies = new ArrayList();
+    strategies = new ArrayList<Strategy>();
     String line;
     while (true)
     {
@@ -289,7 +292,7 @@ public class DictClient implements Serializable
     }
   }
 
-  public synchronized ArrayList matchWord(String db, String strategy,
+  public synchronized List<Match> matchWord(String db, String strategy,
                                           String word) throws IOException, DictClientException
   {
     checkConnection();
@@ -300,7 +303,7 @@ public class DictClient implements Serializable
         + strategy + "\", \"" + word + "\")");
     }
 
-    ArrayList matches = new ArrayList();
+    List<Match> matches = new ArrayList<Match>();
 
     out.print("MATCH " + db + " " + strategy + " \"" + word + "\"\n");
     out.flush();
@@ -331,13 +334,10 @@ public class DictClient implements Serializable
     {
       return matches;
     }
-    else
-    {
-      throw new DictClientException(r);
-    }
+    throw new DictClientException(r);
   }
 
-  public synchronized ArrayList defineWord(String db, String word)
+  public synchronized List<Definition> defineWord(String db, String word)
     throws IOException, DictClientException
   {
     checkConnection();
@@ -348,7 +348,7 @@ public class DictClient implements Serializable
         + word + "\")");
     }
 
-    ArrayList definitions = new ArrayList();
+    List<Definition> definitions = new ArrayList<Definition>();
 
     out.print("DEFINE " + db + " \"" + word + "\"\n");
     out.flush();

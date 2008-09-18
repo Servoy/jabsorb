@@ -80,7 +80,7 @@ public class DictCommandResult
       msg = "Can't parse status line";
     }
   }
-
+  @Override
   public String toString()
   {
     return "code=" + code + " msg=\"" + msg + "\"";

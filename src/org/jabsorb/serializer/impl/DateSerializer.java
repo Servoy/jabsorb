@@ -50,20 +50,20 @@ public class DateSerializer extends AbstractSerializer
   /**
    * Classes that this can serialise.
    */
-  private static Class[] _serializableClasses = new Class[] { Date.class,
+  private static Class<?>[] _serializableClasses = new Class[] { Date.class,
       Timestamp.class, java.sql.Date.class };
 
   /**
    * Classes that this can serialise to.
    */
-  private static Class[] _JSONClasses = new Class[] { JSONObject.class };
+  private static Class<?>[] _JSONClasses = new Class[] { JSONObject.class };
 
-  public Class[] getJSONClasses()
+  public Class<?>[] getJSONClasses()
   {
     return _JSONClasses;
   }
 
-  public Class[] getSerializableClasses()
+  public Class<?>[] getSerializableClasses()
   {
     return _serializableClasses;
   }
@@ -97,7 +97,7 @@ public class DateSerializer extends AbstractSerializer
     return obj;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz, Object o)
+  public ObjectMatch tryUnmarshall(SerializerState state, Class<?> clazz, Object o)
       throws UnmarshallException
   {
     JSONObject jso = (JSONObject) o;
@@ -124,10 +124,10 @@ public class DateSerializer extends AbstractSerializer
     return ObjectMatch.OKAY;
   }
 
-  public Object unmarshall(SerializerState state, Class clazz, Object o)
+  public Object unmarshall(SerializerState state, Class<?> clazz, Object o)
       throws UnmarshallException
   {
-    Class realClazz = clazz;
+    Class<?> realClazz = clazz;
     JSONObject jso = (JSONObject) o;
     long time;
     try

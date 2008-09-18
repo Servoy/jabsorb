@@ -43,7 +43,7 @@ public class Client implements InvocationHandler
   /**
    * Maps proxy keys to proxies
    */
-  private final Map proxyMap;
+  private final Map<Object,String> proxyMap;
 
   /**
    * The serializer instance to use.
@@ -65,7 +65,7 @@ public class Client implements InvocationHandler
     try
     {
       this.session = session;
-      this.proxyMap = new HashMap();
+      this.proxyMap = new HashMap<Object, String>();
       this.serializer = new JSONSerializer();
       this.serializer.registerDefaultSerializers();
     }
@@ -104,7 +104,7 @@ public class Client implements InvocationHandler
       return proxyObj.getClass().getName() + '@'
           + Integer.toHexString(proxyObj.hashCode());
     }
-    return invoke((String) proxyMap.get(proxyObj), method.getName(), args,
+    return invoke(proxyMap.get(proxyObj), method.getName(), args,
         method.getReturnType());
   }
 
@@ -115,7 +115,7 @@ public class Client implements InvocationHandler
    * @param klass the class of the interface the remote object should adhere to
    * @return created proxy
    */
-  public Object openProxy(String key, Class klass)
+  public Object openProxy(String key, Class<?> klass)
   {
     Object result = java.lang.reflect.Proxy.newProxyInstance(klass
         .getClassLoader(), new Class[] { klass }, this);
@@ -157,7 +157,7 @@ public class Client implements InvocationHandler
    *           invoking the method may be thrown.
    */
   private Object invoke(String objectTag, String methodName, Object[] args,
-      Class returnType) throws Exception
+      Class<?> returnType) throws Exception
   {
     JSONObject message = new JSONObject();
     String methodTag = objectTag == null ? "" : objectTag + ".";

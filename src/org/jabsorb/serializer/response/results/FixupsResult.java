@@ -26,13 +26,14 @@
 
 package org.jabsorb.serializer.response.results;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.Collection;
 
 import org.jabsorb.serializer.response.FixUp;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+
 
 /**
  * A successful result that contains fixups.
@@ -48,7 +49,7 @@ public class FixupsResult extends SuccessfulResult
    * 
    * @see FixUp
    */
-  private final List fixUps;
+  private final Collection<FixUp> fixUps;
 
   /**
    * Creates a new FixupsResult
@@ -57,21 +58,21 @@ public class FixupsResult extends SuccessfulResult
    * @param o The main data to return.
    * @param fixups The fixups to return.
    */
-  public FixupsResult(Object id, Object o, List fixups)
+  public FixupsResult(Object id, Object o, Collection<FixUp> fixups)
   {
     super(id, o);
     this.fixUps = fixups;
   }
 
+  @Override
   public JSONObject createOutput() throws JSONException
   {
     JSONObject o = super.createOutput();
     if (fixUps != null && fixUps.size() > 0)
     {
       JSONArray fixups = new JSONArray();
-      for (Iterator i = fixUps.iterator(); i.hasNext();)
+      for (FixUp fixup :fixUps)
       {
-        FixUp fixup = (FixUp) i.next();
         fixups.put(fixup.toJSONArray());
       }
       o.put("fixups", fixups);
