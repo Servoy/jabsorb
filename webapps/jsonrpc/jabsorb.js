@@ -804,8 +804,7 @@ var jabsorb = function()
     //Then add all the cached methods to it.
     for (name in prv.knownClasses[javaClass])
     {
-      //Change the this to the object that will be calling it
-      cp.pub[name]=prv.knownClasses[javaClass][name];
+      cp.pub[name] = prv.knownClasses[javaClass][name];
     }
     return cp.pub;
   };
@@ -821,7 +820,6 @@ var jabsorb = function()
     //This function is what the user calls.
     //This function uses a closure on methodName to ensure that the function
     //always has the same name, but can take different arguments each call.
-    //Each time it is added to an object this should be set with bind()
     var serverMethodCaller= function()
     {
       var args = [],
