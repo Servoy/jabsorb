@@ -2,6 +2,11 @@ CHANGES log
 
 200x-xx-xx jabsorb 1.4-rc1 release
 
+* Bug 30: The version number is now only stored in one place. Ant now copies 
+  _header.jspinc to header.jspinc for inclusion into jsps.
+
+* Code now java 1.5 compatible: Added generics and annotations
+
 * Removed all references to Fixups from top level classes and put it into 
   classes that extend SerializerState. A SerializerState is now created via 
   JSONSerializer.createSerializerState()
