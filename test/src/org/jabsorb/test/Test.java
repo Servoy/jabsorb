@@ -429,6 +429,14 @@ public class Test implements Serializable, ITest
     return l;
   }
 
+  public Map<Object,Object> nullKeyedMap()
+  {
+    Map<Object,Object>m=new HashMap<Object, Object>();
+    m.put("normalKey", "normal value");
+    m.put(null, "Null value");
+    return m;
+  }
+  
   // Misc tests
 
   public String[] twice(String string)

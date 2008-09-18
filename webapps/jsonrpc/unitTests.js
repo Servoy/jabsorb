@@ -444,7 +444,10 @@ var unitTests={
       },
       { code: 'jsonrpc.test.trueBooleansInMap({ javaClass:"java.util.HashMap", map: {"yo": false, "ho": true, "bottle": false, "rum":true}})',
         test: 'result === 2'
-      } 
+      },
+      { code: 'jsonrpc.test.nullKeyedMap()',
+        test: 'result.map.normalKey=="normal value"&&result.map.null=="Null value"'
+      }
     ]
   },
   "Exceptions":

@@ -116,7 +116,15 @@ public class MapSerializer extends AbstractSerializer
       {
         Map.Entry<?,?> ent = (Map.Entry<?,?>) i.next();
         key = ent.getKey();
-        String keyString = key.toString();  // only support String keys
+        final String keyString;
+        if(key==null)
+        {
+          keyString = "null";
+        }
+        else
+        {
+          keyString = key.toString();  // only support String keys
+        }
 
         Object json = ser.marshall(state, mapdata, ent.getValue(), keyString);
 

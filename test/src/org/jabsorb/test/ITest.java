@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -207,6 +208,12 @@ public interface ITest
 
   Hashtable<?,?> aHashtable();
 
+  /**
+   * Checks bug #18 is fixed
+   * @return A map with a null key.
+   */
+  Map<?,?> nullKeyedMap();
+  
   String[] twice(String string);
 
   String concat(String msg1, String msg2);
