@@ -58,7 +58,7 @@
 
   <target name="compile" depends="init,init-build,copy-dependencies" description="Compiles the source into the build directory">
   	<mkdir dir="${build.classes}"/>
-  	<javac debug="true" source="6" srcdir="${src}" destdir="${build.classes}">
+  	<javac debug="true" source="5" srcdir="${src}" destdir="${build.classes}">
       <classpath refid="default-classpath" />
     </javac>
   </target>
@@ -107,7 +107,13 @@
 	
   <!-- this target does not currently work on JDK 1.4 right now due to maven dependancy/repository issues -->
   <target name="compile.test" depends="test.init, dist, init" description="Compiles the testing classes">
-    <javac debug="true" source="6" srcdir="${test.src}" destdir="${test.classes}">
+  	<copy filtering="on" file="${webapp}/_header.jspinc" toFile="${webapp}/header.jspinc">
+  	  <filterset>
+  	  	<filter token="APPNAME" value="${app}"/>
+  	  	<filter token="VERSION" value="${version}"/>
+  	  </filterset>
+  	</copy>
+    <javac debug="true" source="5" srcdir="${test.src}" destdir="${test.classes}">
       <classpath>
         <path refid="jarClasspath" />
         <path refid="test-classpath" />
@@ -179,7 +185,7 @@
 
   <target name="docs" depends="init,copy-dependencies" description="Creates the javadoc api documentation">
     <echo message="Making docs to ${webapp}/docs" />
-    <javadoc source="6" sourcepath="${src}"
+    <javadoc source="5" sourcepath="${src}"
              destdir="${webapp}/docs"
              public="true"
              nodeprecated="true"
