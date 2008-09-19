@@ -244,6 +244,8 @@
     <delete file="${webapp}/jsonrpc-min.js" />
     <delete file="${webapp}/jsonrpc-min.js.gz" />
 
+  	<delete file="${webapp}/header.jspinc" />
+    	
     <delete>
       <fileset dir="." defaultexcludes="no">
         <include name="**/*~" />
@@ -329,15 +331,16 @@
     <delete file="${release}/${app-prefix}-minimal.tar.gz"/>
     <delete file="${release}/${app-prefix}-javadoc.zip"/>
     <delete file="${release}/${app-prefix}-javadoc.tar.gz"/>
+    <delete includeEmptyDirs="true" quiet="false" failonerror="false">
+      <fileset dir="${release}" />
+    </delete>
   </target>
 
   <target name="release" depends="init,cleanrelease,clean,release-src,docs,dist,test.dist,release-prep-clean"
           description="make complete release distributions for unix and windows">
-
-    <!-- build FULL release which contains the completely built javadoc, war and .jar
+  	<!-- build FULL release which contains the completely built javadoc, war and .jar
          along with the source code -->
-
-    <zip destfile="${release}/${app-prefix}-full.zip">
+  	<zip destfile="${release}/${app-prefix}-full.zip">
       <zipfileset dir="." prefix="${app-prefix}"
           excludes="*.zip,*.tar.gz,*.iml,*.ipr,*.iws,**/.svn/**"/>
     </zip>
@@ -383,6 +386,8 @@
 
   <!-- create src release -->
   <target name="release-src">
+  	<mkdir dir="${release}" />
+  	    
     <zip destfile="${release}/${app-prefix}-src.zip">
       <zipfileset dir="." prefix="${app-prefix}"
           excludes="${lib-ext}/*,*.zip,*.tar.gz,*.iml,*.ipr,*.iws,**/.svn/**"/>
