@@ -92,6 +92,29 @@ public class JSONSerializer implements Serializable
       .getLogger(JSONSerializer.class);
 
   /**
+   * A list of good serializers that are used when no others are given. 
+   */
+  public final static List<Serializer> defaultSerializers;
+  
+  static
+  {
+    defaultSerializers = new ArrayList<Serializer>(13);
+    defaultSerializers.add(new RawJSONArraySerializer());
+    defaultSerializers.add(new RawJSONObjectSerializer());
+    defaultSerializers.add(new BeanSerializer());
+    defaultSerializers.add(new ArraySerializer());
+    defaultSerializers.add(new DictionarySerializer());
+    defaultSerializers.add(new MapSerializer());
+    defaultSerializers.add(new SetSerializer());
+    defaultSerializers.add(new ListSerializer());
+    defaultSerializers.add(new DateSerializer());
+    defaultSerializers.add(new StringSerializer());
+    defaultSerializers.add(new NumberSerializer());
+    defaultSerializers.add(new BooleanSerializer());
+    defaultSerializers.add(new PrimitiveSerializer());
+  }
+  
+  /**
    * Key: Serializer
    */
   private final Set<Serializer> serializerSet;
@@ -393,7 +416,7 @@ public class JSONSerializer implements Serializable
     registerSerializer(new BooleanSerializer());
     registerSerializer(new PrimitiveSerializer());
   }
-
+  
   /**
    * Register a new type specific serializer. The order of registration is
    * important. More specific serializers should be added after less specific

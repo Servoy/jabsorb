@@ -26,10 +26,15 @@
 
 package org.jabsorb;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.Serializable;
 import java.lang.reflect.AccessibleObject;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -252,7 +257,7 @@ public class JSONRPCBridge implements Serializable
   {
     return ser;
   }
-
+  
   /**
    * Registers a Class to be removed from the exported method signatures and
    * instead be resolved locally using context information from the transport.
@@ -286,8 +291,44 @@ public class JSONRPCBridge implements Serializable
         argResolver);
   }
 
-  /* Implementation */
-
+  /**
+   * Loads serializer objects from a file.
+   * 
+   * @param filename The name of a file which has a list of serializer classes
+   *          to load, through the Class.forName() mechanism. One class name
+   *          should occur per line
+   * @return A list of serializers to be loaded at the construction of the
+   *         bridge.
+   */
+  private static List<Serializer> getInitSerializers(final String filename)
+  {
+    if (filename != null)
+    {
+      final File serializersFile = new File(filename);
+      try
+      {
+        if (serializersFile.exists())
+        {
+          BufferedReader reader = new BufferedReader(new FileReader(
+              serializersFile));
+          String line;
+          final List<Serializer> serializers = new ArrayList<Serializer>();
+          while ((line = reader.readLine()) != null)
+          {
+            log.info("Creating Serializer: "+line);
+            serializers.add((Serializer) Class.forName(line).newInstance());
+          }
+          return serializers;
+        }
+      }
+      catch (Exception e)
+      {
+        //fall through and return default serializers
+      }
+    }
+    return JSONSerializer.defaultSerializers;
+  }
+  
   /**
    * Create unique method names by appending the given prefix to the keys from
    * the given HashMap and adding them all to the given HashSet.
@@ -363,10 +404,35 @@ public class JSONRPCBridge implements Serializable
    */
   public JSONRPCBridge()
   {
+    this("serializers.txt");
+  }
+
+  /**
+   * Creates a new bridge.
+   * 
+   * @param serializersFilename The name of a file which has a list of
+   *          serializer classes to load, through the Class.forName() mechanism.
+   *          One class name should occur per line
+   */
+  public JSONRPCBridge(final String serializersFilename)
+  {
+    this(getInitSerializers(serializersFilename));
+  }
+  
+  /**
+   * Creates a new bridge.
+   * 
+   * @param serializers The serializers to load on this bridge.
+   */
+  public JSONRPCBridge(List<Serializer> serializers)
+  {
     ser = new JSONSerializer();
     try
     {
-      ser.registerDefaultSerializers();
+      for (Serializer s : serializers)
+      {
+        ser.registerSerializer(s);
+      }
     }
     catch (Exception e)
     {
@@ -1031,7 +1097,7 @@ public class JSONRPCBridge implements Serializable
    * @return A map of AccessibleObjectKeys to a Collection of AccessibleObjects
    * @throws NoSuchMethodException
    */
-  private Map<AccessibleObjectKey, Set<AccessibleObject>> getAccessibleObjectMap(final int objectID,
+  private Map<AccessibleObjectKey, Set<AccessibleObject>> getAccessibleObjectMap(final int objectID, 
       final String className, final String methodName)
       throws NoSuchMethodException
 
