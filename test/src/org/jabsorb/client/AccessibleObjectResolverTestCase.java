@@ -38,6 +38,7 @@ import org.jabsorb.JSONSerializer;
 import org.jabsorb.reflect.AccessibleObjectKey;
 import org.jabsorb.reflect.ClassAnalyzer;
 import org.jabsorb.serializer.AccessibleObjectResolver;
+import org.jabsorb.serializer.response.fixups.FixupCircRefAndNonPrimitiveDupes;
 import org.jabsorb.test.ConstructorTest;
 import org.json.JSONArray;
 
@@ -52,7 +53,7 @@ public class AccessibleObjectResolverTestCase extends TestCase {
     methodMap = new HashMap<AccessibleObjectKey, Set<AccessibleObject>>();
         methodMap.putAll(ClassAnalyzer.getClassData(ConstructorTest.class).getMethodMap());
         methodMap.putAll(ClassAnalyzer.getClassData(ConstructorTest.class).getConstructorMap());
-        serializer = new JSONSerializer();
+        serializer = new JSONSerializer(FixupCircRefAndNonPrimitiveDupes.class);
         serializer.registerDefaultSerializers();
   }
 
