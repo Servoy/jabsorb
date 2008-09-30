@@ -93,7 +93,8 @@ function onLoad()
   showSuccessesNode.onclick=updateAllTestsVisibility;
   hideUnrunNode.onclick=updateAllTestsVisibility;
   
-  jsonrpc = jabsorb(function(){
+//  jsonrpc = jabsorb(function(){
+  jsonrpc = jabsorb_circrefs(function(){    
       //add the tests table
       var displayTable = createShowTestsTable(); 
       document.getElementById("results").appendChild(displayTable);
@@ -623,7 +624,7 @@ function postResults(name,i, result, e, profile)
   {
     if (typeof result == "object")
     {
-      var tmp = jsonrpc.toJSON(result);
+      var tmp = jsonrpc.toJSON(result,"result");
       var done={};
       var toString=function(o)
       {

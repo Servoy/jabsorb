@@ -29,26 +29,17 @@
  */
 var jabsorb = function()
 {
-  /** Assign private variables to this */
-  var prv={};
-  
   /** Assign public variables to this */
   var pub={};
 
+  /** Assign protected variables to this */
+  var pro={};
+  
+  /** Assign private variables to this */
+  var prv={};
+  
   /* *************************** PUBLIC VARIABLES *************************** */
   
-  /**
-   * if this is true, circular references in the object graph are fixed up
-   * if this is false, circular references cause an exception to be thrown
-   */
-  pub.fixupCircRefs = true;
-  
-  /**
-   * if this is true, duplicate objects in the object graph are optimized
-   * if it's false, then duplicate objects are "re-serialized"
-   */
-  pub.fixupDuplicates = true;
-
   /** The number of requests that can occur at once*/
   pub.max_req_active = 1;
   
@@ -85,12 +76,9 @@ var jabsorb = function()
    */
   prv.JSONRPCCallableProxy=function(objectID,javaclass)
   {
-    this.prv=prv;
-    this.pub=pub;
-    
-    this.prv.objectID = objectID;
-    this.pub.javaClass = javaclass;
-    this.prv.JSONRPCType = "CallableReference";
+    this.objectID = objectID;
+    this.javaClass = javaclass;
+    this.JSONRPCType = "CallableReference";
   }
     
   /**
@@ -195,7 +183,7 @@ var jabsorb = function()
     prv.serverURL = arguments[argShift];
     prv.user = arguments[argShift + 1];
     prv.pass = arguments[argShift + 2];
-    prv.objectID=0;
+    this.objectID=0;
   
     if (doListMethods)
     {
@@ -287,276 +275,50 @@ var jabsorb = function()
     }
     alert(str);
   };    
-
+  
   /**
-   * Marshall an object to JSON format.
-   * Circular references can be handled if the parameter 
-   * jabsorb.fixupCircRefs is true.  If the parameter is false,
-   * an exception will be thrown if a circular reference is detected.
-   *
-   * if the parameter, jabsorb.fixupDuplicates is true then duplicate objects in
-   * the object graph are also combined except for Strings
-   *
-   * (todo: it wouldn't be too hard to optimize strings as well, but probably a threshold
-   *  should be provided, so that only strings over a certain length would be optimized)
-   * This would be worth doing on the upload (on the download it's not so important, because
-   * gzip handles this)
-   * if it's false, then duplicate objects are "re-serialized"
-   *
-   * @param o The object being converted to json
-   *
-   * @return an object, { 'json': jsonString, 'fixups': fixupString } or
-   *            just { 'json' : jsonString }  if there were no fixups found.
+   * Converts data from json to objects used by jabsorb.
+   * 
+   * @param data The object which contains the json
+   * @param key  The key in which the json is stored.
+   * 
+   * @return An object used by jabsorb.
    */
-  pub.toJSON=function (o)
+  pub.fromJSON=function(data,key)
   {
-    // to detect circular references and duplicate objects, each object has a special marker
-    // added to it as we go along.
-  
-    // therefore we know if the object is either a duplicate or circular ref if the object
-    // already has this marker in it before we process it.
-  
-    // the marker object itself contains two pointers-- one to the last object processed
-    // and another to the parent object
-    // therefore we can rapidly detect if an object is a circular reference
-    // by following the chain of parent pointer objects to see if we find the same object again.
-  
-    // if we don't find the same object again in the parent recursively, then we know that it's a
-    // duplicate instead of a circular reference
-  
-    // the pointer to the last object processed is used to link all processed objects together
-    // so that the marker objects can be removed when the operation is complete
-  
-    // once all objects are processed, we can traverse the linked list, removing all the markers
-  
-    // the special name for the marker object
-    // try to pick a name that would never be used for any other purpose, so
-    // it won't conflict with anything else
-    var marker="$_$jabsorbed$813492";
-  
-    // the head of the marker object chain
-    var markerHead;
-  
-    // fixups detected as we go along, both for circular references and duplicates
-    var fixups = [];
-  
-    // unlink the whole chain of marker objects that were added to objects when processing
-    function removeMarkers()
+    var r=data[key];
+    /* Handle CallableProxy */
+    if (r) 
     {
-      var next;
-      while (markerHead)
-      {
-        next = markerHead[marker].prev;
-        delete markerHead[marker];
-        markerHead = next;
-      }
-    }
-  
-    // special object used to indicate that an object should be omitted
-    // because it was found to be a circular reference or duplicate
-    var omitCircRefOrDuplicate = {};
-  
-    // temp variable to hold json while processing
-    var json;
-  
-    /**
-     * Do the work of converting an individual "sub" object to JSON.
-     * Each object that is processed has a special marker object attached to it, 
-     * to quickly detect if it has already been processed and thus handle 
-     * circular references and duplicates.
-     *
-     * @param o   object being converted into JSON.
-     * 
-     * @param p   the parent of the object being processed, it should be null or
-     *            undefined if it's the root object.
-     * 
-     * @param ref the "reference" of the object in the parent that is being 
-     *            converted such that p[ref] === o.
-     * 
-     * @return A string containing the JSON representation of the object o, but 
-     *         with duplicates and circular references removed (according to the 
-     *         option settings jabsorb.fixupCircRefs and 
-     *         jabsorb.fixupDuplicates. 
-     */
-    function subObjToJSON(o,p,ref)
-    {
-      var v = [],
-          // list of references to get to the fixup entry
-          fixup,
-          // list of reference to get to the original location
-          original,
-          parent,
-          circRef,
-          i;
-          
-      if (o === null || o === undefined)
-      {
-        return "null";  // it's null or undefined, so serialize it as null
-      }
-      else if (typeof o === 'string')
-      {
-        //todo: handle duplicate strings!  but only if they are over a certain threshold size...
-        return prv.escapeJSONString(o);
-      }
-      else if (typeof o === 'number')
-      {
-        return o.toString();
-      }
-      else if (typeof o === 'boolean')
-      {
-        return o.toString();
+      if(r.objectID && r.JSONRPCType == "CallableReference")
+      {  
+        return prv.createCallableProxy(r.objectID,r.javaClass);
       }
       else
       {
-        // must be an object type
-  
-        // look for an already existing marker which would mean this object has already been processed
-        // at least once and therefore either a circular ref or dup has been found!!
-        if (o[marker])
-        {
-          // determine if it's a circular reference
-          fixup = [ref];
-          parent = p;
-  
-          // walk up the parent chain till we find null
-          while (parent)
-          {
-            // if a circular reference was found somewhere along the way,
-            // calculate the path to it as we are going
-            if (original)
-            {
-              original.unshift (parent[marker].ref);
-            }
-  
-            // if we find ourself, then we found a circular reference!
-            if (parent===o)
-            {
-              circRef=parent;
-              original = [circRef[marker].ref];
-            }
-  
-            fixup.unshift(parent[marker].ref);
-            parent = parent[marker].parent;
-          }
-  
-          // if we found ourselves in the parent chain then this is a circular 
-          // reference
-          if (circRef)
-          {
-            //either save off the circular reference or throw an exception, 
-            //depending on the client setting
-            if (pub.fixupCircRefs)
-            {
-              // remove last redundant unshifted reference
-              fixup.shift();
-              original.shift();
-  
-              //todo: (LATER) if multiple fixups go to the same original, this 
-              // could be optimized somewhat
-              fixups.push([fixup, original]);
-              return omitCircRefOrDuplicate;
-            }
-            else
-            {
-              removeMarkers();
-              throw new Error("circular reference detected!");
-            }
-          }
-          else
-          {
-            // otherwise it's a dup!
-            if (pub.fixupDuplicates)
-            {
-              // find the original path of the dup
-              original = [o[marker].ref];
-              parent = o[marker].parent;
-              while (parent)
-              {
-                original.unshift(parent[marker].ref);
-                parent = parent[marker].parent;
-              }
-              //todo: (LATER) if multiple fixups go to the same original, this 
-              // could be optimized somewhat
-  
-              // remove last redundant unshifted reference
-              fixup.shift();
-              original.shift();
-  
-              fixups.push([fixup, original]);
-              return omitCircRefOrDuplicate;
-            }
-          }
-        }
-        else
-        {
-          // mark this object as visited/processed and set up the parent link 
-          // and prev link
-          o[marker] = {parent:p, prev:markerHead, ref:ref};
-  
-          // adjust the "marker" head pointer so the prev pointer on the next 
-          // object processed can be set
-          markerHead = o;
-        }
-  
-        if (o.constructor === Date)
-        {
-          return '{javaClass: "java.util.Date", time: ' + o.valueOf() + '}';
-        }
-        else if (o.constructor === Array)
-        {
-          for (i = 0; i < o.length; i++)
-          {
-            json = subObjToJSON(o[i], o, i);
-  
-            // if it's a dup/circ ref, put a slot where the object would have 
-            // been, otherwise put the json data here
-            v.push(json===omitCircRefOrDuplicate?null:json);
-          }
-          return "[" + v.join(", ") + "]";
-        }
-        else
-        {
-          for (var attr in o)
-          {
-            if (attr === marker)
-            {
-               /* skip */
-            }
-            else if (o[attr] === null || o[attr] === undefined)
-            {
-              v.push("\"" + attr + "\": null");
-            }
-            else if (typeof o[attr] == "function")
-            {
-               /* skip */
-            }
-            else
-            {
-              json = subObjToJSON(o[attr], o, attr);
-              if (json !== omitCircRefOrDuplicate)
-              {
-                v.push(prv.escapeJSONString(attr) + ": " + json);
-              }
-            }
-          }
-          return "{" + v.join(", ") + "}";
-        }
+        r=prv.extractCallableReferences(pub.transformDates ? prv.transformDate(r) : r);
+        r=pro.postJSON(r,data)
       }
     }
-  
-    json = subObjToJSON(o, null, "root");
-  
-    removeMarkers();
-  
-    // only return the fixups if one or more were found
-    if (fixups.length)
-    {
-      return {json: json, fixups: fixups};
-    }
-    else
-    {
-      return {json: json};
-    }
+    return r;
+  }
+
+  /**
+   * Marshall an object to JSON format.
+   * 
+   * An exception will be thrown if a circular reference is detected.
+   *
+   * @param o The object being converted to json
+   *
+   * @return an object, { "<resultKey>": jsonString }
+   */
+  pub.toJSON=function (o,resultKey)
+  {  
+    // temp variable to hold json while processing
+    var json  = pro.simpleToJSON(o, null, "root"),
+        result={};
+    result[resultKey]=json
+    return result;
   }
 
   /**
@@ -569,94 +331,6 @@ var jabsorb = function()
    */
   pub.unmarshallResponse=function(data)
   {
-    /**
-     * Apply fixups.
-     * 
-     * @param obj    root object to apply fixups against.
-     * @param fixups array of fixups to apply. Each element of the array is a 2 
-     *               element array, containing the array with the fixup location 
-     *               followed by an array with the original location to fix up 
-     *               into the fixup location.
-     */
-    function applyFixups(obj, fixups)
-    {
-      function findOriginal(ob, original)
-      {
-        for (var i=0,j=original.length;i<j;i++)
-        {
-          ob = ob[original[i]];
-        }
-        return ob;
-      }
-      function applyFixup(ob, fixups, value)
-      {
-        var j=fixups.length-1;
-        for (var i=0;i<j;i++)
-        {
-          ob = ob[fixups[i]];
-        }
-        ob[fixups[j]] = value;
-      }
-      for (var i = 0,j = fixups.length; i < j; i++)
-      {
-        applyFixup(obj,fixups[i][0],findOriginal(obj,fixups[i][1]));
-      }
-    }
-    
-    /**
-     * Traverse the resulting object graph and replace serialized date objects with javascript dates. An object is 
-     * replaced with a JS date when any of the following conditions is true:
-     *   The object has a class hint, and the value of the hint is 'java.util.Date'
-     *   The object does not have a class hint, and the ONE AND ONLY property is 'time'
-     * Note that the traversal creates an infinite loop if the object graph is not a DAG, so do not call this function 
-     * after fixing up circular refs.
-     * 
-     * @param obj root of the object graph where dates should be replaces.
-     * @return object graph where serialized date objects are replaced by javascript dates.
-     */
-    function transformDate(obj) 
-    {
-      var hint,foo,num,i,jsDate
-      if (obj && typeof obj === 'object')
-      {
-        hint = obj.hasOwnProperty('javaClass');
-        foo = hint ? obj.javaClass === 'java.util.Date' : obj.hasOwnProperty('time');
-        num = 0;
-        // if there is no class hint but the object has 'time' property, count its properties
-        if (!hint && foo)
-        {
-          for (i in obj) 
-          {
-            if (obj.hasOwnProperty(i)) 
-            {
-              num++;
-            }
-          }
-        }
-        // if class hint is java.util.Date or no class hint set, but the only property is named 'time', we create jsdate
-        if (hint && foo || foo && num === 1) 
-        {
-          jsDate = new Date(obj.time);
-          return jsDate;
-        } 
-        else
-        {
-          for (i in obj) 
-          { 
-            if (obj.hasOwnProperty(i))
-            {
-              obj[i] = transformDate(obj[i]);
-            }
-          }
-          return obj;
-        }
-      } 
-      else 
-      {
-        return obj;
-      }
-    } 
-  
     var obj;
     try
     {
@@ -670,35 +344,211 @@ var jabsorb = function()
     {
       throw new prv.Exception (obj.error);
     }
-    console.log(data)
-    console.log(obj.result)
-    var x = obj;
-    var r = x.result;
-    console.log(r)
     
-    // look for circular reference/duplicates fixups and execute them 
-    // if they are there
-    
-    var i,tmp;
-      
-    /* Handle CallableProxy */
-    if (r) 
+    return pub.fromJSON(obj,"result");
+  };
+  
+  /* ************************** PROTECTED METHODS *************************** */
+  
+  /** 
+   * Encodes a string into JSON format
+   * 
+   * @param s the string to escape
+   * @return The escaped json string 
+   */
+  pro.escapeJSONString=function(s)
+  {
+    /* The following should suffice but Safari's regex is b0rken
+        (doesn't support callback substitutions)
+        return "\"" + s.replace(/([^\u0020-\u007f]|[\\\"])/g,
+        escapeJSONChar) + "\"";
+     */
+  
+    /* Rather inefficient way to do it */
+    var parts = s.split("");
+    for (var i = 0; i < parts.length; i++)
     {
-      if(r.objectID && r.JSONRPCType == "CallableReference")
-      {  
-        return prv.createCallableProxy(r.objectID,r.javaClass);
+      parts[i] = prv.escapeJSONChar(parts[i]);
+    }
+    return "\"" + parts.join("") + "\"";
+  }
+  
+  /**
+   * Creates a callable reference on an object if it fits the form:
+   * 
+   * {"objectID":x "javaClass":y "JSONRPCType":"CallableReference"}
+   * 
+   * @param Value The object to make the callable reference from
+   * @return The callable reference or null, if it couldn't be created.
+   */
+  pro.makeCallableReference = function(value)
+  {
+    if(value && value.objectID && value.javaClass && value.JSONRPCType == "CallableReference")
+    {
+      return prv.createCallableProxy(value.objectID,value.javaClass);
+    }
+    return null;
+  };  
+  
+  /**
+   * Method called by fromJSON() to do any final adjustments to a json object.
+   * This can be overridden to do extend this to handle circular references.
+   * 
+   * @param value The json value
+   * @param data An object which holds the json
+   * @return The adjusted valued.
+   */
+  pro.postJSON=function(value,data)
+  {
+    return value;
+  }
+  
+  /**
+   * Converts a simple object to JSON. Throws an exception if a circular 
+   * reference is found.
+   *
+   * @param o     The object being converted into JSON.
+   * 
+   * @return A string containing the JSON representation of the object o
+   */
+  pro.simpleToJSON=function(o,helper)
+  {
+    if(!helper)
+    {
+      helper={};
+      var state;
+      helper.pre=function(o)
+      {
+        if(!state)
+        {
+          state=[];
+        }
+      }
+      helper.markerFound=function(o)
+      {
+        //Remove markers, and throw exception.
+        var i;
+        for(i=0;i<state.length;i++)
+        {
+          delete state[i][pro.simpleToJSON.marker];
+        }
+        throw new prv.Exception({ code: 550, 
+          message: "circular reference found" });
+      }
+      helper.markerNotFound=function(o)
+      {
+        o[pro.simpleToJSON.marker]=1;
+        state.push(o);
+      }
+      helper.post=function(o,v)
+      {
+        //We are done dealing with object, pop it off the state and remove the 
+        //marker
+        state.pop();
+        delete o[pro.simpleToJSON.marker];
+        return "{" + v.join(", ") + "}";
+      }
+    }
+    /**
+     * Does the work of converting an object to json
+     * @param o The object to convet
+     * @param helper This tells the system what to do when a circ ref is found.
+     *               It should be an object with 4 functions mapped to 
+     *               "pre","markerFound","markerNotFound","post". The first 
+     *               three takes o as a parameter, post also takes a vector of 
+     *               the processed objects and should return the result of the 
+     *               function (the json).
+     * @param p The parent of the current object
+     * @param ref The reference to o in p
+     * @return The object converted to json
+     */
+    var _simpleToJSON= function(o,helper,p,ref)
+    {
+      var v = [],
+          i,
+          json;
+      helper.pre(o);  
+      if (o === null || o === undefined)
+      {
+        return "null";  // it's null or undefined, so serialize it as null
+      }
+      else if (typeof o === 'string')
+      {
+        return pro.escapeJSONString(o);
+      }
+      else if (typeof o === 'number')
+      {
+        return o.toString();
+      }
+      else if (typeof o === 'boolean')
+      {
+        return o.toString();
+      }
+      else if (o.constructor === Date)
+      {
+        return '{javaClass: "java.util.Date", time: ' + o.valueOf() + '}';
       }
       else
       {
-        r=prv.extractCallableReferences(pub.transformDates ? transformDate(r) : r);
-        if (obj.fixups)
+        //Here we put a marker on each object we come across, to check for 
+        //circular references. We do this since we can't do identity hash codes. 
+        //We could compare to each element in state but this is quicker.
+        
+        //If it already has a marker, its a circ ref.
         {
-          applyFixups(r,obj.fixups);
+          if(o[pro.simpleToJSON.marker])
+          {
+            json=helper.markerFound(o,p,ref);
+          }
+          else
+          {
+            json=helper.markerNotFound(o,p,ref);
+          }
+          if(json)
+          {
+            return json;
+          }
+        }
+        if (o.constructor === Array)
+        {
+          for (i = 0; i < o.length; i++)
+          {
+            json = _simpleToJSON(o[i],helper,o,i);
+            v.push(json);
+          }
+          return "[" + v.join(", ") + "]";
+        }
+        else
+        {
+          for (var attr in o)
+          {
+            if ((attr===pro.simpleToJSON.marker)||(typeof o[attr] === "function"))
+            {
+               /* skip */
+              continue;
+            }
+            if (o[attr] === null || o[attr] === undefined)
+            {
+              v.push("\"" + attr + "\": null");
+            }
+            else
+            {
+              json = _simpleToJSON(o[attr],helper,o,attr);
+              v.push(pro.escapeJSONString(attr) + ": " + json);
+            }
+          }
+          return helper.post(o,v);
         }
       }
     }
-    return r;
-  };
+    return _simpleToJSON(o,helper,null,"root");
+  }
+  
+  /**
+   * A marker that can be put on objects to show they have been already 
+   * serialised that may be used in the helper functions
+   */
+  pro.simpleToJSON.marker="$_$jabsorbed$813492";
   
   /* *************************** PRIVATE METHODS **************************** */
   
@@ -788,7 +638,7 @@ var jabsorb = function()
   
     return methods;
   };  
-  
+
   /**
    * Creates a new callable proxy (reference). 
    *
@@ -804,9 +654,11 @@ var jabsorb = function()
     //Then add all the cached methods to it.
     for (name in prv.knownClasses[javaClass])
     {
-      cp.pub[name] = prv.knownClasses[javaClass][name];
+      //TODO: DO these get added to this's cp.pub alone or everyones??
+      //I Think it may be the latter
+      cp[name] = prv.knownClasses[javaClass][name];
     }
-    return cp.pub;
+    return cp;
   };
 
   /**
@@ -832,7 +684,7 @@ var jabsorb = function()
       {
         callback = args.shift();
       }
-      var req = comms.makeRequest(methodName, args, prv.objectID,callback);
+      var req = comms.makeRequest(methodName, args, this.objectID,callback);
       if (!callback)
       {
         return comms.sendRequest(req);
@@ -882,30 +734,6 @@ var jabsorb = function()
     };
   }();
   
-  /** 
-   * Encodes a string into JSON format
-   * 
-   * @param s the string to escape
-   * @return The escaped json string 
-   */
-  prv.escapeJSONString=function(s)
-  {
-    /* The following should suffice but Safari's regex is b0rken
-        (doesn't support callback substitutions)
-        return "\"" + s.replace(/([^\u0020-\u007f]|[\\\"])/g,
-        escapeJSONChar) + "\"";
-     */
-  
-    /* Rather inefficient way to do it */
-    var parts = s.split("");
-    for (var i = 0; i < parts.length; i++)
-    {
-      parts[i] = prv.escapeJSONChar(parts[i]);
-    }
-    return "\"" + parts.join("") + "\"";
-  }  
-  
-  
   /**
    * Recursivly extracts objects in the form:
    *
@@ -924,7 +752,7 @@ var jabsorb = function()
     {
       if(typeof(root[i])=="object")
       {
-        tmp=prv.makeCallableReference(root[i]);
+        tmp=pro.makeCallableReference(root[i]);
         if(tmp)
         {
           root[i]=tmp;
@@ -937,7 +765,7 @@ var jabsorb = function()
       }
       if(typeof(i)=="object")
       {
-        tmp=prv.makeCallableReference(i);
+        tmp=pro.makeCallableReference(i);
         if(tmp)
         {
           value=root[i];
@@ -955,25 +783,62 @@ var jabsorb = function()
     }
     return root;
   };
-
-  /**
-   * Creates a callable reference on an object if it fits the form:
-   * 
-   * {"objectID":x "javaClass":y "JSONRPCType":"CallableReference"}
-   * 
-   * @param Value The object to make the callable reference from
-   * @return The callable reference or null, if it couldn't be created.
-   */
-  prv.makeCallableReference = function(value)
-  {
-    if(value && value.objectID && value.javaClass && value.JSONRPCType == "CallableReference")
-    {
-      return prv.createCallableProxy(value.objectID,value.javaClass);
-    }
-    return null;
-  };
   
-  /* **************************** HIDDEN MODELES **************************** */
+  /**
+   * Traverse the resulting object graph and replace serialized date objects with javascript dates. An object is 
+   * replaced with a JS date when any of the following conditions is true:
+   *   The object has a class hint, and the value of the hint is 'java.util.Date'
+   *   The object does not have a class hint, and the ONE AND ONLY property is 'time'
+   * Note that the traversal creates an infinite loop if the object graph is not a DAG, so do not call this function 
+   * after fixing up circular refs.
+   * 
+   * @param obj root of the object graph where dates should be replaces.
+   * @return object graph where serialized date objects are replaced by javascript dates.
+   */
+  prv.transformDate=function(obj) 
+  {
+    var hint,foo,num,i,jsDate
+    if (obj && typeof obj === 'object')
+    {
+      hint = obj.hasOwnProperty('javaClass');
+      foo = hint ? obj.javaClass === 'java.util.Date' : obj.hasOwnProperty('time');
+      num = 0;
+      // if there is no class hint but the object has 'time' property, count its properties
+      if (!hint && foo)
+      {
+        for (i in obj) 
+        {
+          if (obj.hasOwnProperty(i)) 
+          {
+            num++;
+          }
+        }
+      }
+      // if class hint is java.util.Date or no class hint set, but the only property is named 'time', we create jsdate
+      if (hint && foo || foo && num === 1) 
+      {
+        jsDate = new Date(obj.time);
+        return jsDate;
+      } 
+      else
+      {
+        for (i in obj) 
+        { 
+          if (obj.hasOwnProperty(i))
+          {
+            obj[i] = transformDate(obj[i]);
+          }
+        }
+        return obj;
+      }
+    } 
+    else 
+    {
+      return obj;
+    }
+  }
+  
+  /* **************************** HIDDEN MODULES **************************** */
   
   /**
    * This object holds functions that deal with data communications with the server
@@ -1080,19 +945,6 @@ var jabsorb = function()
       return false;
     };
   
-    /* ************************** PRIVATE METHODS *************************** */
-    
-    /**
-     * Calls the asyncHandler right away.
-     */
-    comms_prv.kickAsync = function ()
-    {
-      if (!comms_prv.asyncTimeout)
-      {
-        comms_prv.asyncTimeout = setTimeout(comms_prv.asyncHandler, 0);
-      }
-    };
-  
     /**
      * Makes a request to send to the server.
      * @param methodName    The method to call on the server
@@ -1103,20 +955,40 @@ var jabsorb = function()
      */
     comms_pub.makeRequest = function (methodName, args,objectID,cb)
     {
-      var req = {};
+      /**
+       * Combines objects passed as arguments to a json string 
+       */
+      function combineObjectsToJSON()
+      {
+        var v=[],
+            argIndex,
+            key;
+        
+        for(argIndex=0;argIndex<arguments.length;argIndex++)
+        {
+          for(key in arguments[argIndex])
+          {
+            v.push("\""+key+"\": "+arguments[argIndex][key]);
+          }
+        }
+        return "{" + v.join(", ") + "}";
+      }
+      
+      
+      var req = {},
+      obj = {};
       req.requestId = pub.requestId++;
-    
-      var obj = "{id:"+req.requestId+",method:";
-    
+      obj.id = req.requestId;
       if ((objectID)&&(objectID>0))
       {
-        obj += "\".obj[" + objectID + "]." + methodName +"\"";
+        obj.method= pro.escapeJSONString(".obj[" + objectID + "]." + methodName);
       }
       else
       {
-        obj += "\"" + methodName + "\"";
+        obj.method= pro.escapeJSONString(methodName);
       }
     
+      req.data = combineObjectsToJSON(pub.toJSON(args,"params"),obj);
       if (cb)
       {
         req.cb = cb;
@@ -1125,26 +997,9 @@ var jabsorb = function()
       {
         req.profile = {submit: new Date() };
       }
-    
-      // use p as an alias for params to save space in the fixups
-      var j= pub.toJSON(args);
-    
-      obj += ",params:" + j.json;
-     
-      // only attach duplicates/fixups if they are found
-      // this is to provide graceful backwards compatibility to the json-rpc spec.
-      if (j.fixups)
-      {
-        // todo: the call to toJSON here to turn the fixups into json is a bit 
-        // inefficient, since there will never be fixups in the fixups... but
-        // it saves us from writing some additional code at this point...
-        obj += ",fixups:" + pub.toJSON(j.fixups).json;  
-      }
-    
-      req.data = obj + "}";
-    
       return req;
     };
+    
     /**
      * Sends a request to the server.
      * 
@@ -1242,6 +1097,19 @@ var jabsorb = function()
         return comms_prv.handleResponse(http);
       }
       return null;
+    };
+    
+    /* ************************** PRIVATE METHODS *************************** */
+    
+    /**
+     * Calls the asyncHandler right away.
+     */
+    comms_prv.kickAsync = function ()
+    {
+      if (!comms_prv.asyncTimeout)
+      {
+        comms_prv.asyncTimeout = setTimeout(comms_prv.asyncHandler, 0);
+      }
     };
     
     /**
@@ -1477,7 +1345,7 @@ var jabsorb = function()
   
   // Call the constructor
   prv.init.apply(this,arguments);
-  
+  this.pro=pro;
   // Give access to public variables
   return pub;
 };
