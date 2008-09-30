@@ -72,7 +72,8 @@ public interface Serializer extends Serializable
    * 
    * @param state can be used to hold state while unmarshalling through
    *          recursive levels.
-   * @param p parent of java object being marshalled into json (can be null if the object is the root object being marshalled.
+   * @param p parent of java object being marshalled into json (can be null if
+   *          the object is the root object being marshalled.
    * @param o java object to marhsall into json.
    * @return that JSONObject or JSONArray that contains the json representation
    *         of the java object that was marshalled.
@@ -95,7 +96,8 @@ public interface Serializer extends Serializable
    * @param clazz The class to unmarhall to
    * @param json The object to unmarshal
    * @return An ObjectMatch denoting whether the object matches the class (?)
-   * @throws UnmarshallException
+   * @throws UnmarshallException If something unexpected happens as while trying
+   *           to unmarshall.
    */
   public ObjectMatch tryUnmarshall(SerializerState state, Class<?> clazz,
       Object json) throws UnmarshallException;

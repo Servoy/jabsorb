@@ -30,7 +30,11 @@ import org.json.JSONArray;
  */
 public class FixUp
 {
+  /**
+   * The field in which fixups are held in json messages
+   */
   public static final String FIXUPS_FIELD = "fixups";
+
   /**
    * A List of String|Integer's representing references to locate the place
    * where this fixup entry needs to be created.
@@ -48,7 +52,6 @@ public class FixUp
    * 
    * @param fixupLocation a List of String|Integer's representing references to
    *          locate the place where this fixup entry needs to be created.
-   * 
    * @param originalLocation List of String|Integer's representing references to
    *          locate the original location of the circular reference or
    *          duplicate that this FixUp applies to.

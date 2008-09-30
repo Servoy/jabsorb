@@ -46,9 +46,10 @@ public interface CircularReferenceHandler
    * @param java The object which is refered to from within itself.
    * @return The object to put in the place of the circular reference in the
    *         JSONObject
-   * @throws MarshallException
+   * @throws MarshallException May be thrown if a circular reference is found
+   *           and cannot be handled
    */
-  public abstract Object circularReferenceFound(List<Object> originalLocation,
+  public Object circularReferenceFound(List<Object> originalLocation,
       Object ref, Object java) throws MarshallException;
 
 }

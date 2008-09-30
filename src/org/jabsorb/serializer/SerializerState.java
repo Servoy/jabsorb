@@ -35,7 +35,6 @@ import org.jabsorb.serializer.response.results.SuccessfulResult;
  */
 public interface SerializerState
 {
-
   /**
    * Creates a result to be returned to the jabsorb client.
    * 
@@ -44,7 +43,8 @@ public interface SerializerState
    * @param json The serialized object
    * @return Some kind of SuccessfulResult
    */
-  public SuccessfulResult createResult(Object requestId, Object object,Object json);
+  public SuccessfulResult createResult(Object requestId, Object object,
+      Object json);
 
   /**
    * Checks whether the current object being parsed needs action taken upon it
@@ -61,8 +61,8 @@ public interface SerializerState
    * @throws MarshallException if a scope error occurs (this won't normally
    *           occur.
    */
-  public Object checkObject(Object parent, Object currentObject,
-      Object ref) throws MarshallException;
+  public Object checkObject(Object parent, Object currentObject, Object ref)
+      throws MarshallException;
 
   /**
    * Pop off one level from the scope stack of the current location during
@@ -85,6 +85,7 @@ public interface SerializerState
    * @param ref reference to object within parent-- should be a String if parent
    *          is an object, and Integer if parent is an array. Can be null if
    *          this is the root object that is being pushed/processed.
+   * @return The object that was pushed
    */
   public Object push(Object parent, Object obj, Object ref);
 
@@ -125,5 +126,12 @@ public interface SerializerState
    */
   public void store(Object obj);
 
+  /**
+   * Tells the serializer state that marshalling for the given object has been
+   * completed
+   * 
+   * @param marshalledObject What the object was marshalled into
+   * @param java The object that was marshalled
+   */
   public void setMarshalled(Object marshalledObject, Object java);
 }

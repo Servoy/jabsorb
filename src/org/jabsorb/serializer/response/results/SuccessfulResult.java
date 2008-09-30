@@ -55,6 +55,11 @@ public class SuccessfulResult extends JSONRPCResult
     this.result = result;
   }
 
+  /**
+   * Gets the result of the call.
+   * 
+   * @return The result of the call
+   */
   protected Object getResult()
   {
     return this.result;

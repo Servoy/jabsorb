@@ -19,7 +19,6 @@
  */
 package org.jabsorb.serializer;
 
-
 /**
  * Represents an object that has been already processed by the JSONSerializer
  * this is stored in the SerializerState in order to detect circular references
@@ -34,6 +33,13 @@ public class ProcessedObject
    */
   private final Object object;
 
+  /**
+   * Creates a new ProcessedObject
+   * 
+   * @param object The processed incoming object. When marshalling, this is the
+   *          java object that is being marshalled to json, when unmarshalling,
+   *          this is the json object being marshalled to java.
+   */
   public ProcessedObject(Object object)
   {
     this.object = object;

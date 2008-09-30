@@ -31,10 +31,18 @@ import org.jabsorb.serializer.ProcessedObject;
  */
 public class FixupProcessedObject extends ProcessedObject
 {
-  public FixupProcessedObject(Object object,FixupProcessedObject parent)
+  /**
+   * Create a new FixupProcessedObject
+   * 
+   * @param object The processed incoming object. When marshalling, this is the
+   *          java object that is being marshalled to json, when unmarshalling,
+   *          this is the json object being marshalled to java.
+   * @param parent The object which contains the parameter "object"
+   */
+  public FixupProcessedObject(Object object, FixupProcessedObject parent)
   {
     super(object);
-    this.parent=parent;
+    this.parent = parent;
   }
 
   /**
@@ -61,7 +69,6 @@ public class FixupProcessedObject extends ProcessedObject
   {
     return parent;
   }
-
 
   /**
    * Get the reference name String | Integer of this ProcessedObject. This is

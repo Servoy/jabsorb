@@ -46,9 +46,9 @@ public interface DuplicateReferenceHandler
    * @param java The object which appears twice
    * @return The object to put in the place of the duplicate reference in the
    *         JSONObject
-   * @throws MarshallException
+   * @throws MarshallException Thrown if the given object cannot be marshalled
    */
-  public abstract Object duplicateFound(List<Object> originalLocation, Object ref,
-      Object java) throws MarshallException;
+  public Object duplicateFound(List<Object> originalLocation,
+      Object ref, Object java) throws MarshallException;
 
 }
