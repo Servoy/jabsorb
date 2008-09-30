@@ -55,12 +55,6 @@ import org.jabsorb.serializer.impl.RawJSONObjectSerializer;
 import org.jabsorb.serializer.impl.ReferenceSerializer;
 import org.jabsorb.serializer.impl.SetSerializer;
 import org.jabsorb.serializer.impl.StringSerializer;
-import org.jabsorb.serializer.response.NoCircRefsOrDupes;
-import org.jabsorb.serializer.response.fixups.FixupCircRefAndDup;
-import org.jabsorb.serializer.response.fixups.FixupCircRefAndNonPrimitiveDupes;
-import org.jabsorb.serializer.response.fixups.FixupCircRefOnly;
-import org.jabsorb.serializer.response.fixups.FixupDupesOnly;
-import org.jabsorb.serializer.response.fixups.FixupNonPrimitiveDupesOnly;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,9 +70,24 @@ import org.slf4j.LoggerFactory;
 public class JSONSerializer implements Serializable
 {
   /**
+   * A list of good serializers that are used when no others are given.
+   */
+  public final static List<Serializer> defaultSerializers;
+
+  /**
+   * The name of the field which holds the id of the message.
+   */
+  public static final String ID_FIELD = "id";
+
+  /**
    * The key in which json objects should keep their java class
    */
   public static final String JAVA_CLASS_FIELD = "javaClass";
+
+  /**
+   * The name of the field which holds the name of the method being called.
+   */
+  public static final String METHOD_FIELD = "method";
 
   /**
    * The name of the field which holds method parameters.
@@ -91,30 +100,15 @@ public class JSONSerializer implements Serializable
   public static final String RESULT_FIELD = "result";
 
   /**
-   * The name of the field which holds the id of the message.
-   */
-  public static final String ID_FIELD = "id";
-
-  /**
-   * The name of the field which holds the name of the method being called.
-   */
-  public static final String METHOD_FIELD = "method";
-
-  /**
-   * Unique serialisation id.
-   */
-  private final static long serialVersionUID = 2;
-
-  /**
    * The logger for this class
    */
   private final static Logger log = LoggerFactory
       .getLogger(JSONSerializer.class);
 
   /**
-   * A list of good serializers that are used when no others are given.
+   * Unique serialisation id.
    */
-  public final static List<Serializer> defaultSerializers;
+  private final static long serialVersionUID = 2;
 
   static
   {
@@ -135,21 +129,6 @@ public class JSONSerializer implements Serializable
   }
 
   /**
-   * Key: Serializer
-   */
-  private final Set<Serializer> serializerSet;
-
-  /**
-   * key: Class, value: Serializer
-   */
-  private transient final Map<Class<?>, Serializer> serializableMap;
-
-  /**
-   * List for reverse registration order search
-   */
-  private final List<Serializer> serializerList;
-
-  /**
    * Should serializers defined in this object include the fully qualified class
    * name of objects being serialized? This can be helpful when unmarshalling,
    * though if not needed can be left out in favor of increased performance and
@@ -164,150 +143,57 @@ public class JSONSerializer implements Serializable
   private boolean marshallNullAttributes = true;
 
   /**
-   * Are FixUps are generated to handle circular references found during
-   * marshalling? If false, an exception is thrown if a circular reference is
-   * found during serialization.
+   * key: Class, value: Serializer
    */
-  private boolean fixupCircRefs = true;
+  private transient final Map<Class<?>, Serializer> serializableMap;
 
   /**
-   * Are FixUps are generated for duplicate objects found during marshalling? If
-   * false, the duplicates are re-serialized.
+   * List for reverse registration order search
    */
-  private boolean fixupDuplicates = true;
+  private final List<Serializer> serializerList;
 
   /**
-   * Are FixUps are generated for primitive objects (classes of type String,
-   * Boolean, Integer, Boolean, Long, Byte, Double, Float and Short) This flag
-   * will have no effect if fixupDuplicates is false.
+   * Key: Serializer
    */
-  private boolean fixupDuplicatePrimitives = false;
+  private final Set<Serializer> serializerSet;
 
-  public JSONSerializer()
+  /**
+   * The serializer state's class which will be created by
+   * createSerializerState().
+   */
+  private final Class<? extends SerializerState> serializerStateClass;
+
+  /**
+   * Creates a new JSONSerializer
+   * 
+   * @param serializerStateClass The serializer state's class which will be
+   *          created by createSerializerState().
+   */
+  public JSONSerializer(Class<? extends SerializerState> serializerStateClass)
   {
     this.serializerSet = new HashSet<Serializer>();
     this.serializerList = new ArrayList<Serializer>();
     this.serializableMap = new HashMap<Class<?>, Serializer>();
-
+    this.serializerStateClass = serializerStateClass;
   }
 
   /**
-   * Creates a new serializer state for the given serializer. TODO: improve
-   * dependency injection method
+   * Creates a new serializer state for the given serializer.
    * 
-   * @return A new serializer state which has the appropriate marshalling rules
-   *         for the serializer.
+   * @return A new serializer state, as given to the constructor, or null if it
+   *         cannot be instantiated.
    */
   public SerializerState createSerializerState()
   {
-    final SerializerState toReturn;
-    if (this.getFixupCircRefs())
+    try
     {
-      if (this.getFixupDuplicates())
-      {
-        if (this.getFixupDuplicatePrimitives())
-        {
-          toReturn = new FixupCircRefAndDup();
-        }
-        else
-        {
-          toReturn = new FixupCircRefAndNonPrimitiveDupes();
-        }
-      }
-      else
-      {
-        toReturn = new FixupCircRefOnly();
-      }
-
+      return this.serializerStateClass.newInstance();
     }
-    else if (this.getFixupDuplicates())
+    catch (Exception e)
     {
-      if (this.getFixupDuplicatePrimitives())
-      {
-        toReturn = new FixupDupesOnly();
-      }
-      else
-      {
-        toReturn = new FixupNonPrimitiveDupesOnly();
-      }
+      //If it can't be instantiated (which should not happen!)
+      return null;
     }
-    else
-    {
-      toReturn = new NoCircRefsOrDupes();
-    }
-    return toReturn;
-  }
-
-  /**
-   * Get the fixupCircRefs flag. If true, FixUps are generated to handle
-   * circular references found during marshalling. If false, an exception is
-   * thrown if a circular reference is found during serialization.
-   * 
-   * @return the fixupCircRefs flag.
-   */
-  public boolean getFixupCircRefs()
-  {
-    return fixupCircRefs;
-  }
-
-  /**
-   * Set the fixupCircRefs flag. If true, FixUps are generated to handle
-   * circular references found during marshalling. If false, an exception is
-   * thrown if a circular reference is found during serialization.
-   * 
-   * @param fixupCircRefs the fixupCircRefs flag.
-   */
-  public void setFixupCircRefs(boolean fixupCircRefs)
-  {
-    this.fixupCircRefs = fixupCircRefs;
-  }
-
-  /**
-   * Get the fixupDuplicates flag. If true, FixUps are generated for duplicate
-   * objects found during marshalling. If false, the duplicates are
-   * re-serialized.
-   * 
-   * @return the fixupDuplicates flag.
-   */
-  public boolean getFixupDuplicates()
-  {
-    return fixupDuplicates;
-  }
-
-  /**
-   * Set the fixupDuplicates flag. If true, FixUps are generated for duplicate
-   * objects found during marshalling. If false, the duplicates are
-   * re-serialized.
-   * 
-   * @param fixupDuplicates the fixupDuplicates flag.
-   */
-  public void setFixupDuplicates(boolean fixupDuplicates)
-  {
-    this.fixupDuplicates = fixupDuplicates;
-  }
-
-  /**
-   * Get the fixupDuplicatePrimitives flag. If true (and fixupDuplicates is also
-   * true), FixUps are generated for duplicate primitive objects found during
-   * marshalling. If false, the duplicates are re-serialized.
-   * 
-   * @return the fixupDuplicatePrimitives flag.
-   */
-  public boolean getFixupDuplicatePrimitives()
-  {
-    return fixupDuplicatePrimitives;
-  }
-
-  /**
-   * Set the fixupDuplicatePrimitives flag. If true (and fixupDuplicates is also
-   * true), FixUps are generated for duplicate primitive objects found during
-   * marshalling. If false, the duplicates are re-serialized.
-   * 
-   * @param fixupDuplicatePrimitives the fixupDuplicatePrimitives flag.
-   */
-  public void setFixupDuplicatePrimitives(boolean fixupDuplicatePrimitives)
-  {
-    this.fixupDuplicatePrimitives = fixupDuplicatePrimitives;
   }
 
   /**
@@ -414,7 +300,7 @@ public class JSONSerializer implements Serializable
         //Give the state the option of returning something different from the 
         //actual serialized value.
         ProcessedObject po = state.getProcessedObject(java);
-        if(po!=null)
+        if (po != null)
         {
           po.setSerialized(marshalledObject);
           return po.getSerialized();
@@ -426,6 +312,31 @@ public class JSONSerializer implements Serializable
     finally
     {
       state.pop();
+    }
+  }
+
+  /**
+   * Ensures the reference serializer is registered for the given class
+   * 
+   * @param clazz The java class that should be serialized with the reference
+   *          serializer
+   */
+  public void registerCallableReference(Class<?> clazz)
+  {
+    // TODO: speed this code up!
+    ReferenceSerializer ser = null;
+    for (int i = 0; i < serializerList.size(); i++)
+    {
+      Serializer s = serializerList.get(i);
+      if (s.getClass().equals(ReferenceSerializer.class))
+      {
+        ser = (ReferenceSerializer) s;
+        break;
+      }
+    }
+    if (ser != null)
+    {
+      serializableMap.put(clazz, ser);
     }
   }
 
@@ -502,31 +413,6 @@ public class JSONSerializer implements Serializable
           serializableMap.put(classes[j], s);
         }
       }
-    }
-  }
-
-  /**
-   * Ensures the reference serializer is registered for the given class
-   * 
-   * @param clazz The java class that should be serialized with the reference
-   *          serializer
-   */
-  public void registerCallableReference(Class<?> clazz)
-  {
-    // TODO: speed this code up!
-    ReferenceSerializer ser = null;
-    for (int i = 0; i < serializerList.size(); i++)
-    {
-      Serializer s = serializerList.get(i);
-      if (s.getClass().equals(ReferenceSerializer.class))
-      {
-        ser = (ReferenceSerializer) s;
-        break;
-      }
-    }
-    if (ser != null)
-    {
-      serializableMap.put(clazz, ser);
     }
   }
 

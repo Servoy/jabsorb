@@ -26,9 +26,12 @@
 
 package org.jabsorb;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.AccessibleObject;
 import java.util.ArrayList;
@@ -36,6 +39,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
@@ -49,9 +53,11 @@ import org.jabsorb.reflect.ClassAnalyzer;
 import org.jabsorb.reflect.ClassData;
 import org.jabsorb.serializer.AccessibleObjectResolver;
 import org.jabsorb.serializer.Serializer;
+import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.impl.ReferenceSerializer;
 import org.jabsorb.serializer.request.RequestParser;
 import org.jabsorb.serializer.request.fixups.FixupsCircularReferenceHandler;
+import org.jabsorb.serializer.response.fixups.FixupCircRefAndNonPrimitiveDupes;
 import org.jabsorb.serializer.response.results.FailedResult;
 import org.jabsorb.serializer.response.results.JSONRPCResult;
 import org.jabsorb.serializer.response.results.SuccessfulResult;
@@ -126,14 +132,14 @@ public class JSONRPCBridge implements Serializable
     private final static long serialVersionUID = 2;
 
     /**
-     * The object for the instance
-     */
-    private final Object object;
-
-    /**
      * The class the object is of
      */
     private final Class<?> clazz;
+
+    /**
+     * The object for the instance
+     */
+    private final Object object;
 
     /**
      * Creates a new ObjectInstance
@@ -195,14 +201,42 @@ public class JSONRPCBridge implements Serializable
   public static final String CONSTRUCTOR_FLAG = "$constructor";
 
   /**
+   * The default location of the properties file which is looked for in the
+   * constructor
+   */
+  public static final String DEFAULT_PROPERTIES_LOCATION = "jabsorb.prop";
+
+  /**
+   * The logger for this class
+   */
+  public final static Logger log;
+
+  /**
    * The prefix for objects, as sent in messages
    */
   public static final String OBJECT_METHOD_PREFIX = ".obj";
 
   /**
-   * Unique serialisation id.
+   * The key in the properties file in which the request parser class should be
+   * put
    */
-  private final static long serialVersionUID = 2;
+  public static final String REQUEST_PARSER_KEY = "RequestParser";
+
+  /**
+   * The key in the properties file in which the serializer state class should
+   * be put
+   */
+  public static final String SERIALIZER_STATE_CLASS_KEY = "SerializerStateClass";
+
+  /**
+   * The default file which should contain a list of serializers to load
+   */
+  public static final String SERIALIZERS_FILE = "serializers.txt";
+
+  /**
+   * Global bridge (for exporting to all users)
+   */
+  private final static JSONRPCBridge globalBridge;
 
   /**
    * A simple transformer that makes no change
@@ -221,20 +255,15 @@ public class JSONRPCBridge implements Serializable
   };
 
   /**
-   * The logger for this class
+   * Unique serialisation id.
    */
-  private final static Logger log = LoggerFactory
-      .getLogger(JSONRPCBridge.class);
+  private final static long serialVersionUID = 2;
 
-  /**
-   * Global bridge (for exporting to all users)
-   */
-  private final static JSONRPCBridge globalBridge = new JSONRPCBridge();
-
-  /**
-   * Local JSONSerializer instance
-   */
-  private JSONSerializer ser = new JSONSerializer();
+  static
+  {
+    log = LoggerFactory.getLogger(JSONRPCBridge.class);
+    globalBridge = new JSONRPCBridge();
+  }
 
   /**
    * This method retrieves the global bridge singleton. <p/> It should be used
@@ -248,16 +277,6 @@ public class JSONRPCBridge implements Serializable
     return globalBridge;
   }
 
-  /**
-   * Get the global JSONSerializer object.
-   * 
-   * @return the global JSONSerializer object.
-   */
-  public JSONSerializer getSerializer()
-  {
-    return ser;
-  }
-  
   /**
    * Registers a Class to be removed from the exported method signatures and
    * instead be resolved locally using context information from the transport.
@@ -292,6 +311,39 @@ public class JSONRPCBridge implements Serializable
   }
 
   /**
+   * Gets the request parser for the constructor
+   * 
+   * @param properties The properties file which should have a key
+   *          <REQUEST_PARSER_KEY>
+   * @return A request parser as described by the properties file or the
+   *         FixupsCircularReferenceHandler if nothing is found
+   */
+  private static RequestParser getInitRequestParser(Properties properties)
+  {
+    final String className = properties.getProperty(REQUEST_PARSER_KEY);
+    if (className != null)
+    {
+      try
+      {
+        final Class<?> clazz = Class.forName(className);
+        Class<?> interfaces[] = clazz.getInterfaces();
+        for (Class<?> c : interfaces)
+        {
+          if (c.equals(RequestParser.class))
+          {
+            return (RequestParser) clazz.newInstance();
+          }
+        }
+      }
+      catch (Exception e)
+      {
+        //let it fall through to the return
+      }
+    }
+    return new FixupsCircularReferenceHandler();
+  }
+
+  /**
    * Loads serializer objects from a file.
    * 
    * @param filename The name of a file which has a list of serializer classes
@@ -315,7 +367,7 @@ public class JSONRPCBridge implements Serializable
           final List<Serializer> serializers = new ArrayList<Serializer>();
           while ((line = reader.readLine()) != null)
           {
-            log.info("Creating Serializer: "+line);
+            log.info("Creating Serializer: " + line);
             serializers.add((Serializer) Class.forName(line).newInstance());
           }
           return serializers;
@@ -328,7 +380,62 @@ public class JSONRPCBridge implements Serializable
     }
     return JSONSerializer.defaultSerializers;
   }
-  
+
+  /**
+   * Gets the serializer state for the constructor
+   * 
+   * @param properties The properties file which should have a key
+   *          <SERIALIZER_STATE_CLASS_KEY>
+   * @return A serializer state class as described by the properties file or the
+   *         FixupCircRefAndNonPrimitiveDupes.class if nothing is found
+   */
+  private static Class<? extends SerializerState> getInitSerializerStateClass(
+      Properties properties)
+  {
+    final String className = properties.getProperty(SERIALIZER_STATE_CLASS_KEY);
+    if (className != null)
+    {
+      try
+      {
+        final Class<?> clazz = Class.forName(className);
+        Class<?> interfaces[] = clazz.getInterfaces();
+        for (Class<?> c : interfaces)
+        {
+          if (c.equals(SerializerState.class))
+          {
+            return (Class<? extends SerializerState>) clazz;
+          }
+        }
+      }
+      catch (Exception e)
+      {
+        //let it fall through to the return
+      }
+    }
+    return FixupCircRefAndNonPrimitiveDupes.class;
+  }
+
+  /**
+   * Creates and loads a java.util.Properties from a file.
+   * 
+   * @param propertiesFilename The name of the file to load the properties from.
+   * @return An initialised properties.
+   */
+  private static Properties loadProperties(final String propertiesFilename)
+  {
+    final Properties p = new Properties();
+    try
+    {
+      p.load(new BufferedInputStream(new FileInputStream(propertiesFilename)));
+    }
+    catch (IOException e)
+    {
+      //If we have an exception here we don't want to throw it up to the 
+      //constructors, so just swallow it.
+    }
+    return p;
+  }
+
   /**
    * Create unique method names by appending the given prefix to the keys from
    * the given HashMap and adding them all to the given HashSet.
@@ -349,9 +456,9 @@ public class JSONRPCBridge implements Serializable
   }
 
   /**
-   * The functor used to convert exceptions
+   * key clazz, classes that should be returned as CallableReferences
    */
-  private ExceptionTransformer exceptionTransformer = IDENTITY_EXCEPTION_TRANSFORMER;
+  private final Set<Class<?>> callableReferenceSet;
 
   /**
    * The callback controller
@@ -364,6 +471,11 @@ public class JSONRPCBridge implements Serializable
   private final Map<String, Class<?>> classMap;
 
   /**
+   * The functor used to convert exceptions
+   */
+  private ExceptionTransformer exceptionTransformer = IDENTITY_EXCEPTION_TRANSFORMER;
+
+  /**
    * key "exported instance name", val ObjectInstance
    */
   private final Map<Object, ObjectInstance> objectMap;
@@ -372,6 +484,11 @@ public class JSONRPCBridge implements Serializable
    * key Integer hashcode, object held as reference
    */
   private final Map<Integer, Object> referenceMap;
+
+  /**
+   * Whether references will be used on the bridge
+   */
+  private boolean referencesEnabled;
 
   /**
    * ReferenceSerializer if enabled
@@ -384,49 +501,57 @@ public class JSONRPCBridge implements Serializable
   private final Set<Class<?>> referenceSet;
 
   /**
-   * key clazz, classes that should be returned as CallableReferences
-   */
-  private final Set<Class<?>> callableReferenceSet;
-
-  /**
-   * Whether references will be used on the bridge
-   */
-  private boolean referencesEnabled;
-
-  /**
    * Responsible for marshalling/unmarshalling any circular references in
    * messages received.
    */
   private final RequestParser requestParser;
 
   /**
+   * Local JSONSerializer instance
+   */
+  private final JSONSerializer ser;
+
+  /**
    * Creates a new bridge.
    */
   public JSONRPCBridge()
   {
-    this("serializers.txt");
+    this(DEFAULT_PROPERTIES_LOCATION);
   }
 
   /**
    * Creates a new bridge.
    * 
-   * @param serializersFilename The name of a file which has a list of
-   *          serializer classes to load, through the Class.forName() mechanism.
-   *          One class name should occur per line
-   */
-  public JSONRPCBridge(final String serializersFilename)
-  {
-    this(getInitSerializers(serializersFilename));
-  }
-  
-  /**
-   * Creates a new bridge.
-   * 
    * @param serializers The serializers to load on this bridge.
+   * @param requestParser The request parser to use
+   * @param serializerStateClass The serializer state to use
    */
-  public JSONRPCBridge(List<Serializer> serializers)
+  public JSONRPCBridge(final List<Serializer> serializers,
+      final RequestParser requestParser,
+      final Class<? extends SerializerState> serializerStateClass)
   {
-    ser = new JSONSerializer();
+    //    if (JSONRPCBridge.log != null)
+    {
+      if (serializerStateClass == null)
+      {
+        JSONRPCBridge.log.info("Using default serializer state");
+      }
+      else
+      {
+        JSONRPCBridge.log.info("Using serializer state: "
+            + serializerStateClass.getCanonicalName());
+      }
+      if (requestParser == null)
+      {
+        JSONRPCBridge.log.info("Using default request parser");
+      }
+      else
+      {
+        JSONRPCBridge.log.info("Using request parser: "
+            + requestParser.getClass().getCanonicalName());
+      }
+    }
+    ser = new JSONSerializer(serializerStateClass);
     try
     {
       for (Serializer s : serializers)
@@ -446,7 +571,30 @@ public class JSONRPCBridge implements Serializable
     referenceSet = new HashSet<Class<?>>();
     callableReferenceSet = new HashSet<Class<?>>();
     referencesEnabled = false;
-    this.requestParser = new FixupsCircularReferenceHandler();
+    this.requestParser = requestParser;
+  }
+
+  /**
+   * Creates a new bridge.
+   * 
+   * @param properties Contains properties to initialize the bridge with.
+   */
+  public JSONRPCBridge(final Properties properties)
+  {
+    this(getInitSerializers(properties.getProperty(SERIALIZERS_FILE)),
+        getInitRequestParser(properties),
+        getInitSerializerStateClass(properties));
+  }
+
+  /**
+   * Creates a new bridge.
+   * 
+   * @param propertiesFilename The name of a file which has a properties to
+   *          load, through the Properties.load() mechanism.
+   */
+  public JSONRPCBridge(final String propertiesFilename)
+  {
+    this(loadProperties(propertiesFilename));
   }
 
   /**
@@ -623,6 +771,16 @@ public class JSONRPCBridge implements Serializable
     {
       return referenceMap.get(new Integer(objectId));
     }
+  }
+
+  /**
+   * Get the global JSONSerializer object.
+   * 
+   * @return the global JSONSerializer object.
+   */
+  public JSONSerializer getSerializer()
+  {
+    return ser;
   }
 
   /**
@@ -1022,6 +1180,27 @@ public class JSONRPCBridge implements Serializable
   }
 
   /**
+   * Add all methods on registered callable references to a HashSet.
+   * 
+   * @param m Set to add all methods to.
+   */
+  private void allCallableReferences(Set<String> m)
+  {
+    synchronized (callableReferenceSet)
+    {
+      for (Class<?> clazz : callableReferenceSet)
+      {
+        ClassData cd = ClassAnalyzer.getClassData(clazz);
+
+        uniqueMethods(m, CALLABLE_REFERENCE_METHOD_PREFIX + "["
+            + clazz.getName() + "].", cd.getStaticMethodMap());
+        uniqueMethods(m, CALLABLE_REFERENCE_METHOD_PREFIX + "["
+            + clazz.getName() + "].", cd.getMethodMap());
+      }
+    }
+  }
+
+  /**
    * Add all instance methods that can be invoked on this bridge to a HashSet.
    * 
    * @param m HashSet to add all static methods to.
@@ -1042,27 +1221,6 @@ public class JSONRPCBridge implements Serializable
         ClassData cd = ClassAnalyzer.getClassData(oi.getClazz());
         uniqueMethods(m, name + ".", cd.getMethodMap());
         uniqueMethods(m, name + ".", cd.getStaticMethodMap());
-      }
-    }
-  }
-
-  /**
-   * Add all methods on registered callable references to a HashSet.
-   * 
-   * @param m Set to add all methods to.
-   */
-  private void allCallableReferences(Set<String> m)
-  {
-    synchronized (callableReferenceSet)
-    {
-      for (Class<?> clazz : callableReferenceSet)
-      {
-        ClassData cd = ClassAnalyzer.getClassData(clazz);
-
-        uniqueMethods(m, CALLABLE_REFERENCE_METHOD_PREFIX + "["
-            + clazz.getName() + "].", cd.getStaticMethodMap());
-        uniqueMethods(m, CALLABLE_REFERENCE_METHOD_PREFIX + "["
-            + clazz.getName() + "].", cd.getMethodMap());
       }
     }
   }
@@ -1095,15 +1253,14 @@ public class JSONRPCBridge implements Serializable
    *          objectID==0
    * @param methodName The name of method in the request
    * @return A map of AccessibleObjectKeys to a Collection of AccessibleObjects
-   * @throws NoSuchMethodException
+   * @throws NoSuchMethodException If methods cannot be found for the class
    */
-  private Map<AccessibleObjectKey, Set<AccessibleObject>> getAccessibleObjectMap(final int objectID, 
-      final String className, final String methodName)
+  private Map<AccessibleObjectKey, Set<AccessibleObject>> getAccessibleObjectMap(
+      final int objectID, final String className, final String methodName)
       throws NoSuchMethodException
 
   {
-    final Map<AccessibleObjectKey, Set<AccessibleObject>> methodMap = 
-      new HashMap<AccessibleObjectKey, Set<AccessibleObject>>();
+    final Map<AccessibleObjectKey, Set<AccessibleObject>> methodMap = new HashMap<AccessibleObjectKey, Set<AccessibleObject>>();
     // if it is not an object
     if (objectID == 0)
     {
