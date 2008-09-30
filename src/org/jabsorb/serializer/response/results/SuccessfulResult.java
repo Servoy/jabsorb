@@ -26,6 +26,7 @@
 
 package org.jabsorb.serializer.response.results;
 
+import org.jabsorb.JSONSerializer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -54,11 +55,16 @@ public class SuccessfulResult extends JSONRPCResult
     this.result = result;
   }
 
+  protected Object getResult()
+  {
+    return this.result;
+  }
+
   @Override
   public JSONObject createOutput() throws JSONException
   {
-    JSONObject o = super._createOutput();
-    o.put("result", result);
+    JSONObject o = this._createOutput();
+    o.put(JSONSerializer.RESULT_FIELD, this.result);
     return o;
   }
 

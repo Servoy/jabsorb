@@ -27,6 +27,7 @@
 package org.jabsorb.serializer.impl;
 
 import org.jabsorb.JSONRPCBridge;
+import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
@@ -115,7 +116,7 @@ public class ReferenceSerializer extends AbstractSerializer
       try
       {
         jso.put("JSONRPCType", "Reference");
-        jso.put("javaClass", clazz.getName());
+        jso.put(JSONSerializer.JAVA_CLASS_FIELD, clazz.getName());
         jso.put("objectID", identity);
       }
       catch (JSONException e)
@@ -137,8 +138,9 @@ public class ReferenceSerializer extends AbstractSerializer
       JSONObject jso = new JSONObject();
       try
       {
+        //TODO: get rid of these strings.
         jso.put("JSONRPCType", "CallableReference");
-        jso.put("javaClass", clazz.getName());
+        jso.put(JSONSerializer.JAVA_CLASS_FIELD, clazz.getName());
         jso.put("objectID", identity);
       }
       catch (JSONException e)

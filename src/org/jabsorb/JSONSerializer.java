@@ -78,7 +78,27 @@ public class JSONSerializer implements Serializable
   /**
    * The key in which json objects should keep their java class
    */
-  public static final String JAVA_CLASS_KEY = "javaClass";
+  public static final String JAVA_CLASS_FIELD = "javaClass";
+
+  /**
+   * The name of the field which holds method parameters.
+   */
+  public static final String PARAMETER_FIELD = "params";
+
+  /**
+   * The name of the field which holds the result of the method.
+   */
+  public static final String RESULT_FIELD = "result";
+
+  /**
+   * The name of the field which holds the id of the message.
+   */
+  public static final String ID_FIELD = "id";
+
+  /**
+   * The name of the field which holds the name of the method being called.
+   */
+  public static final String METHOD_FIELD = "method";
 
   /**
    * Unique serialisation id.
@@ -92,10 +112,10 @@ public class JSONSerializer implements Serializable
       .getLogger(JSONSerializer.class);
 
   /**
-   * A list of good serializers that are used when no others are given. 
+   * A list of good serializers that are used when no others are given.
    */
   public final static List<Serializer> defaultSerializers;
-  
+
   static
   {
     defaultSerializers = new ArrayList<Serializer>(13);
@@ -113,7 +133,7 @@ public class JSONSerializer implements Serializable
     defaultSerializers.add(new BooleanSerializer());
     defaultSerializers.add(new PrimitiveSerializer());
   }
-  
+
   /**
    * Key: Serializer
    */
@@ -180,27 +200,42 @@ public class JSONSerializer implements Serializable
    */
   public SerializerState createSerializerState()
   {
+    final SerializerState toReturn;
     if (this.getFixupCircRefs())
     {
       if (this.getFixupDuplicates())
       {
         if (this.getFixupDuplicatePrimitives())
         {
-          return new FixupCircRefAndDup();
+          toReturn = new FixupCircRefAndDup();
         }
-        return new FixupCircRefAndNonPrimitiveDupes();
+        else
+        {
+          toReturn = new FixupCircRefAndNonPrimitiveDupes();
+        }
       }
-      return new FixupCircRefOnly();
+      else
+      {
+        toReturn = new FixupCircRefOnly();
+      }
+
     }
-    if (this.getFixupDuplicates())
+    else if (this.getFixupDuplicates())
     {
       if (this.getFixupDuplicatePrimitives())
       {
-        return new FixupDupesOnly();
+        toReturn = new FixupDupesOnly();
       }
-      return new FixupNonPrimitiveDupesOnly();
+      else
+      {
+        toReturn = new FixupNonPrimitiveDupesOnly();
+      }
     }
-    return new NoCircRefsOrDupes();
+    else
+    {
+      toReturn = new NoCircRefsOrDupes();
+    }
+    return toReturn;
   }
 
   /**
@@ -374,7 +409,17 @@ public class JSONSerializer implements Serializable
       Serializer s = getSerializer(java.getClass(), null);
       if (s != null)
       {
-        return s.marshall(state, parent, java);
+        Object marshalledObject = s.marshall(state, parent, java);
+        state.setMarshalled(marshalledObject, java);
+        //Give the state the option of returning something different from the 
+        //actual serialized value.
+        ProcessedObject po = state.getProcessedObject(java);
+        if(po!=null)
+        {
+          po.setSerialized(marshalledObject);
+          return po.getSerialized();
+        }
+        return marshalledObject;
       }
       throw new MarshallException("can't marshall " + java.getClass().getName());
     }
@@ -416,7 +461,7 @@ public class JSONSerializer implements Serializable
     registerSerializer(new BooleanSerializer());
     registerSerializer(new PrimitiveSerializer());
   }
-  
+
   /**
    * Register a new type specific serializer. The order of registration is
    * important. More specific serializers should be added after less specific
@@ -517,8 +562,7 @@ public class JSONSerializer implements Serializable
    * Convert a Java objects (or tree of Java objects) into a string in JSON
    * format. Note that this method will remove any circular references /
    * duplicates and not handle the potential fixups that could be generated.
-   * (unless duplicates/circular references are turned off. TODO: have some way
-   * to transmit the fixups back to the caller of this method.
+   * (unless duplicates/circular references are turned off.
    * 
    * @param obj the object to be converted to JSON.
    * @param state holds any information that isn't returned in the json, eg
@@ -530,10 +574,7 @@ public class JSONSerializer implements Serializable
   public String toJSON(Object obj, SerializerState state)
       throws MarshallException
   {
-    // todo: what do we do about fix ups here?
-    Object json = marshall(state, null, obj, "result");
-
-    // todo: fixups will be in state.getFixUps() if someone wants to do something with them...
+    Object json = marshall(state, null, obj, JSONSerializer.RESULT_FIELD);
     return json.toString();
   }
 
@@ -568,19 +609,21 @@ public class JSONSerializer implements Serializable
   {
     Class<?> _clazz = clazz;
     // check for duplicate objects or circular references
-    ProcessedObject p = state.getProcessedObject(json);
-
-    // if this object hasn't been seen before, mark it as seen and continue forth
-
-    if (p == null)
     {
-      p = state.store(json);
-    }
-    else
-    {
-      // get original serialized version
-      // to recreate circular reference / duplicate object on the java side
-      return (ObjectMatch) p.getSerialized();
+      final ProcessedObject p = state.getProcessedObject(json);
+
+      // if this object hasn't been seen before, mark it as seen and continue forth
+
+      if (p == null)
+      {
+        state.store(json);
+      }
+      else
+      {
+        // get original serialized version
+        // to recreate circular reference / duplicate object on the java side
+        return (ObjectMatch) p.getSerialized();
+      }
     }
 
     /*
@@ -588,7 +631,7 @@ public class JSONSerializer implements Serializable
      * 'clazz', then override 'clazz' with the hint class.
      */
     if (_clazz != null && json instanceof JSONObject
-        && ((JSONObject) json).has(JSONSerializer.JAVA_CLASS_KEY)
+        && ((JSONObject) json).has(JSONSerializer.JAVA_CLASS_FIELD)
         && _clazz.isAssignableFrom(getClassFromHint(json)))
     {
       _clazz = getClassFromHint(json);
@@ -650,25 +693,26 @@ public class JSONSerializer implements Serializable
   {
     Class<?> _clazz = clazz;
     // check for duplicate objects or circular references
-    ProcessedObject p = state.getProcessedObject(json);
-
-    // if this object hasn't been seen before, mark it as seen and continue forth
-
-    if (p == null)
     {
-      p = state.store(json);
-    }
-    else
-    {
-      // get original serialized version
-      // to recreate circular reference / duplicate object on the java side
-      return p.getSerialized();
-    }
+      final ProcessedObject p = state.getProcessedObject(json);
 
+      // if this object hasn't been seen before, mark it as seen and continue forth
+
+      if (p == null)
+      {
+        state.store(json);
+      }
+      else
+      {
+        // get original serialized version
+        // to recreate circular reference / duplicate object on the java side
+        return p.getSerialized();
+      }
+    }
     // If we have a JSON object class hint that is a sub class of the
     // signature 'clazz', then override 'clazz' with the hint class.
     if (_clazz != null && json instanceof JSONObject
-        && ((JSONObject) json).has(JSONSerializer.JAVA_CLASS_KEY)
+        && ((JSONObject) json).has(JSONSerializer.JAVA_CLASS_FIELD)
         && _clazz.isAssignableFrom(getClassFromHint(json)))
     {
       _clazz = getClassFromHint(json);
@@ -748,7 +792,7 @@ public class JSONSerializer implements Serializable
       String className = "(unknown)";
       try
       {
-        className = ((JSONObject) o).getString(JSONSerializer.JAVA_CLASS_KEY);
+        className = ((JSONObject) o).getString(JSONSerializer.JAVA_CLASS_FIELD);
         return Class.forName(className);
       }
       catch (Exception e)

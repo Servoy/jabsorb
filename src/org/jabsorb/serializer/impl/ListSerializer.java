@@ -32,6 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
+import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
@@ -95,7 +96,7 @@ public class ListSerializer extends AbstractSerializer
     {
       try
       {
-        obj.put("javaClass", o.getClass().getName());
+        obj.put(JSONSerializer.JAVA_CLASS_FIELD, o.getClass().getName());
       }
       catch (JSONException e)
       {
@@ -104,8 +105,8 @@ public class ListSerializer extends AbstractSerializer
     }
     try
     {
-      obj.put("list", arr);
-      state.push(o, arr, "list");
+      obj.put("list", state.push(o,arr,"list"));
+      state.getProcessedObject(arr).setSerialized(arr);
     }
     catch (JSONException e)
     {
@@ -144,7 +145,7 @@ public class ListSerializer extends AbstractSerializer
     String java_class;
     try
     {
-      java_class = jso.getString("javaClass");
+      java_class = jso.getString(JSONSerializer.JAVA_CLASS_FIELD);
     }
     catch (JSONException e)
     {
@@ -203,7 +204,7 @@ public class ListSerializer extends AbstractSerializer
     String java_class;
     try
     {
-      java_class = jso.getString("javaClass");
+      java_class = jso.getString(JSONSerializer.JAVA_CLASS_FIELD);
     }
     catch (JSONException e)
     {

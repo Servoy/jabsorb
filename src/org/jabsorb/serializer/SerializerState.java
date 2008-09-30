@@ -26,10 +26,6 @@
 
 package org.jabsorb.serializer;
 
-import java.util.IdentityHashMap;
-import java.util.LinkedList;
-import java.util.Map;
-
 import org.jabsorb.serializer.response.results.SuccessfulResult;
 
 /**
@@ -37,40 +33,18 @@ import org.jabsorb.serializer.response.results.SuccessfulResult;
  * keeps track of all Objects encountered during processing for the purpose of
  * detecting circular references and/or duplicates.
  */
-public abstract class SerializerState
+public interface SerializerState
 {
-  /**
-   * Creates a new SerializerState
-   */
-  protected SerializerState()
-  {
-    processedObjects = new IdentityHashMap<Object, ProcessedObject>();
-    currentLocation = new LinkedList<Object>();
-  }
-
-  /**
-   * The key is the processed object. The value is a ProcessedObject instance
-   * which contains both the object that was processed, and other information
-   * about the object used for generating fixups when marshalling.
-   */
-  private final Map<Object,ProcessedObject> processedObjects;
-
-  /**
-   * Represents the current json location that we are at during processing. Each
-   * time we go one layer deeper in processing, the reference is pushed onto the
-   * stack And each time we recurse out of that layer, it is popped off the
-   * stack.
-   */
-  protected final LinkedList<Object> currentLocation;
 
   /**
    * Creates a result to be returned to the jabsorb client.
    * 
    * @param requestId The id of the request for which this result is to be mad e
-   * @param json The data to send
+   * @param object The object to send
+   * @param json The serialized object
    * @return Some kind of SuccessfulResult
    */
-  public abstract SuccessfulResult createResult(Object requestId, Object json);
+  public SuccessfulResult createResult(Object requestId, Object object,Object json);
 
   /**
    * Checks whether the current object being parsed needs action taken upon it
@@ -87,26 +61,8 @@ public abstract class SerializerState
    * @throws MarshallException if a scope error occurs (this won't normally
    *           occur.
    */
-  public abstract Object checkObject(Object parent, Object currentObject,
+  public Object checkObject(Object parent, Object currentObject,
       Object ref) throws MarshallException;
-
-  /**
-   * If the given object has already been processed, return the ProcessedObject
-   * wrapper for that object which will indicate the original location from
-   * where that Object was processed from.
-   * 
-   * @param object Object to check.
-   * @return ProcessedObject wrapper for the given object or null if the object
-   *         hasn't been processed yet in this SerializerState.
-   */
-  public ProcessedObject getProcessedObject(Object object)
-  {
-    // get unique key for this object
-    // this is the basis for determining if we have already processed the object or not.
-    return processedObjects.get(object);
-  }
-
-  
 
   /**
    * Pop off one level from the scope stack of the current location during
@@ -115,16 +71,7 @@ public abstract class SerializerState
    * 
    * @throws MarshallException If called when currentLocation is empty
    */
-  public void pop() throws MarshallException
-  {
-    if (currentLocation.size() == 0)
-    {
-      // this is a sanity check
-      throw new MarshallException(
-          "scope error, attempt to pop too much off the scope stack.");
-    }
-    currentLocation.removeLast();
-  }
+  public void pop() throws MarshallException;
 
   /**
    * Record the given object as a ProcessedObject and push into onto the scope
@@ -139,33 +86,7 @@ public abstract class SerializerState
    *          is an object, and Integer if parent is an array. Can be null if
    *          this is the root object that is being pushed/processed.
    */
-  public void push(Object parent, Object obj, Object ref)
-  {
-    ProcessedObject parentProcessedObject = null;
-
-    if (parent != null)
-    {
-      parentProcessedObject = getProcessedObject(parent);
-
-      if (parentProcessedObject == null)
-      {
-        // this is a sanity check-- it should never occur
-        throw new IllegalArgumentException(
-            "attempt to process an object with an unprocessed parent");
-      }
-    }
-
-    ProcessedObject p = new ProcessedObject();
-    p.setParent(parentProcessedObject);
-    p.setObject(obj);
-
-    processedObjects.put(obj, p);
-    if (ref != null)
-    {
-      p.setRef(ref);
-      currentLocation.add(ref);
-    }
-  }
+  public Object push(Object parent, Object obj, Object ref);
 
   /**
    * Associate the incoming source object being serialized to it's serialized
@@ -182,22 +103,18 @@ public abstract class SerializerState
    *           stored within a ProcessedObject.
    */
   public void setSerialized(Object source, Object target)
-      throws UnmarshallException
-  {
-    if (source == null)
-    {
-      throw new UnmarshallException("source object may not be null");
-    }
-    ProcessedObject p = getProcessedObject(source);
-    if (p == null)
-    {
-      // this should normally never happen- it's a sanity check.
-      throw new UnmarshallException(
-          "source object must be already registered as a ProcessedObject "
-              + source);
-    }
-    p.setSerialized(target);
-  }
+      throws UnmarshallException;
+
+  /**
+   * If the given object has already been processed, return the ProcessedObject
+   * wrapper for that object which will indicate the original location from
+   * where that Object was processed from.
+   * 
+   * @param object Object to check.
+   * @return ProcessedObject wrapper for the given object or null if the object
+   *         hasn't been processed yet in this SerializerState.
+   */
+  public ProcessedObject getProcessedObject(Object object);
 
   /**
    * Much simpler version of push to just account for the fact that an object
@@ -205,43 +122,8 @@ public abstract class SerializerState
    * circ refs and duplicates and not generate fixups.)
    * 
    * @param obj Object to account for as being processed.
-   * @return ProcessedObject wrapper for the accounted for object.
    */
-  public ProcessedObject store(Object obj)
-  {
-    ProcessedObject p = new ProcessedObject();
-    p.setObject(obj);
+  public void store(Object obj);
 
-    processedObjects.put(obj, p);
-    return p;
-  }
-
-  /**
-   * Determine if a duplicate child object of the given parentis a circular
-   * reference with the given ProcessedObject. We know it's a circular reference
-   * if we can walk up the parent chain and find the ProcessedObject. If instead
-   * we find null, then it's a duplicate instead of a circular ref.
-   * 
-   * @param dup the duplicate object that might also be the original reference
-   *          in a circular reference.
-   * @param parent the parent of an object that might be a circular reference.
-   * @return true if the duplicate is a circular reference or false if it's a
-   *         duplicate only.
-   */
-  protected boolean isAncestor(ProcessedObject dup, Object parent)
-  {
-    // walk up the ancestry chain until we either find the duplicate
-    // (which would mean it's a circular ref)
-    // or we find null (the end of the chain) which would mean it's a duplicate only.
-    ProcessedObject ancestor = getProcessedObject(parent);
-    while (ancestor != null)
-    {
-      if (dup == ancestor)
-      {
-        return true;
-      }
-      ancestor = ancestor.getParent();
-    }
-    return false;
-  }
+  public void setMarshalled(Object marshalledObject, Object java);
 }

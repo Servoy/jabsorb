@@ -180,7 +180,7 @@ public class AccessibleObjectResolver
           .createSerializerState();
       final Object json = serializer.marshall(serializerState, null, returnObj,
           "r");
-      result = serializerState.createResult(requestId, json);
+      result = serializerState.createResult(requestId, returnObj,json);
 
       // Handle exceptions creating exception results and
       // calling error callbacks

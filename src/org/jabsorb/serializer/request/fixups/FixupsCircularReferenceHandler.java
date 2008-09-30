@@ -26,6 +26,7 @@
 
 package org.jabsorb.serializer.request.fixups;
 
+import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.request.RequestParser;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,7 +42,7 @@ public class FixupsCircularReferenceHandler implements RequestParser
   public JSONArray unmarshallArguments(final JSONObject jsonReq)
       throws JSONException
   {
-    final JSONArray arguments = jsonReq.getJSONArray("params");
+    final JSONArray arguments = jsonReq.getJSONArray(JSONSerializer.PARAMETER_FIELD);
     final JSONArray fixups = jsonReq.optJSONArray("fixups");
 
     // apply the fixups (if any) to the parameters. This will result

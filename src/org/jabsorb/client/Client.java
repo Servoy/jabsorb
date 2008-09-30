@@ -162,7 +162,7 @@ public class Client implements InvocationHandler
     JSONObject message = new JSONObject();
     String methodTag = objectTag == null ? "" : objectTag + ".";
     methodTag += methodName;
-    message.put("method", methodTag);
+    message.put(JSONSerializer.METHOD_FIELD, methodTag);
 
     JSONArray params = new JSONArray();
     if (args != null)
@@ -175,14 +175,14 @@ public class Client implements InvocationHandler
             new Integer(argNo)));
       }
     }
-    message.put("params", params);
-    message.put("id", 1);
+    message.put(JSONSerializer.PARAMETER_FIELD, params);
+    message.put(JSONSerializer.ID_FIELD, 1);
 
     JSONObject responseMessage = session.sendAndReceive(message);
 
-    if (!responseMessage.has("result"))
+    if (!responseMessage.has(JSONSerializer.RESULT_FIELD))
       processException(responseMessage);
-    Object rawResult = responseMessage.get("result");
+    Object rawResult = responseMessage.get(JSONSerializer.RESULT_FIELD);
     if (rawResult == null)
     {
       processException(responseMessage);

@@ -32,6 +32,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
@@ -92,7 +93,7 @@ public class SetSerializer extends AbstractSerializer
     {
       try
       {
-        obj.put("javaClass", o.getClass().getName());
+        obj.put(JSONSerializer.JAVA_CLASS_FIELD, o.getClass().getName());
       }
       catch (JSONException e)
       {
@@ -101,8 +102,8 @@ public class SetSerializer extends AbstractSerializer
     }
     try
     {
-      obj.put("set", setdata);
-      state.push(o, setdata,"set");
+      obj.put("set", state.push(o, setdata,"set"));
+      state.getProcessedObject(setdata).setSerialized(setdata);
     }
     catch (JSONException e)
     {
@@ -143,7 +144,7 @@ public class SetSerializer extends AbstractSerializer
     String java_class;
     try
     {
-      java_class = jso.getString("javaClass");
+      java_class = jso.getString(JSONSerializer.JAVA_CLASS_FIELD);
     }
     catch (JSONException e)
     {
@@ -207,7 +208,7 @@ public class SetSerializer extends AbstractSerializer
     String java_class;
     try
     {
-      java_class = jso.getString("javaClass");
+      java_class = jso.getString(JSONSerializer.JAVA_CLASS_FIELD);
     }
     catch (JSONException e)
     {

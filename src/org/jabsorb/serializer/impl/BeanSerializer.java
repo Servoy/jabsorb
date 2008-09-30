@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
@@ -198,7 +199,7 @@ public class BeanSerializer extends AbstractSerializer
     {
       try
       {
-        val.put("javaClass", o.getClass().getName());
+        val.put(JSONSerializer.JAVA_CLASS_FIELD, o.getClass().getName());
       }
       catch (JSONException e)
       {

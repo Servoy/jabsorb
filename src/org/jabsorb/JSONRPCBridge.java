@@ -479,8 +479,8 @@ public class JSONRPCBridge implements Serializable
     final JSONArray arguments;
     try
     {
-      encodedMethod = jsonReq.getString("method");
-      requestId = jsonReq.opt("id");
+      encodedMethod = jsonReq.getString(JSONSerializer.METHOD_FIELD);
+      requestId = jsonReq.opt(JSONSerializer.ID_FIELD);
       arguments = requestParser.unmarshallArguments(jsonReq);
     }
     catch (JSONException e)

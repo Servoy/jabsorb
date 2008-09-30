@@ -29,6 +29,7 @@ package org.jabsorb.serializer.impl;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
@@ -86,7 +87,7 @@ public class DateSerializer extends AbstractSerializer
     {
       if (ser.getMarshallClassHints())
       {
-        obj.put("javaClass", o.getClass().getName());
+        obj.put(JSONSerializer.JAVA_CLASS_FIELD, o.getClass().getName());
       }
       obj.put("time", time);
     }
@@ -104,7 +105,7 @@ public class DateSerializer extends AbstractSerializer
     String java_class;
     try
     {
-      java_class = jso.getString("javaClass");
+      java_class = jso.getString(JSONSerializer.JAVA_CLASS_FIELD);
     }
     catch (JSONException e)
     {
@@ -138,11 +139,11 @@ public class DateSerializer extends AbstractSerializer
     {
       throw new UnmarshallException("Could not get the time in date serialiser", e);
     }
-    if (jso.has("javaClass"))
+    if (jso.has(JSONSerializer.JAVA_CLASS_FIELD))
     {
       try
       {
-        realClazz = Class.forName(jso.getString("javaClass"));
+        realClazz = Class.forName(jso.getString(JSONSerializer.JAVA_CLASS_FIELD));
       }
       catch (ClassNotFoundException e)
       {

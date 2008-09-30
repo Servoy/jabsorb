@@ -26,6 +26,7 @@
 
 package org.jabsorb.serializer.response.results;
 
+import org.jabsorb.JSONSerializer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -69,7 +70,7 @@ public abstract class JSONRPCResult
   protected JSONObject _createOutput() throws JSONException
   {
     JSONObject o = new JSONObject();
-    o.put("id", id);
+    o.put(JSONSerializer.ID_FIELD, id);
     return o;
   }
 

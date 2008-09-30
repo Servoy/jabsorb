@@ -31,6 +31,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.AbstractSerializer;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.ObjectMatch;
@@ -89,10 +90,10 @@ public class DictionarySerializer extends AbstractSerializer
     {
       if (ser.getMarshallClassHints())
       {
-        obj.put("javaClass", o.getClass().getName());
+        obj.put(JSONSerializer.JAVA_CLASS_FIELD, o.getClass().getName());
       }
-      obj.put("map", mapdata);
-      state.push(o,mapdata,"map");
+      obj.put("map", state.push(o,mapdata,"map"));
+      state.getProcessedObject(mapdata).setSerialized(mapdata);
     }
     catch (JSONException e)
     {
@@ -138,7 +139,7 @@ public class DictionarySerializer extends AbstractSerializer
     String java_class;
     try
     {
-      java_class = jso.getString("javaClass");
+      java_class = jso.getString(JSONSerializer.JAVA_CLASS_FIELD);
     }
     catch (JSONException e)
     {
@@ -198,7 +199,7 @@ public class DictionarySerializer extends AbstractSerializer
     String java_class;
     try
     {
-      java_class = jso.getString("javaClass");
+      java_class = jso.getString(JSONSerializer.JAVA_CLASS_FIELD);
     }
     catch (JSONException e)
     {
