@@ -35,6 +35,8 @@ import java.util.List;
 
 import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.UnmarshallException;
+import org.jabsorb.serializer.response.NoCircRefsOrDupes;
+import org.jabsorb.serializer.response.fixups.FixupCircRefAndNonPrimitiveDupes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,18 +157,17 @@ public class ProjectMetricsDatabase
   /**
    * Create a serializer for loading json objects from files.
    */
-  private static JSONSerializer serializer = new JSONSerializer();
+  private static final JSONSerializer serializer;
 
   /**
    * Use the default serializers and disable fixups.
    */
   static 
   {
+    serializer = new JSONSerializer(NoCircRefsOrDupes.class);
     try 
     {
       serializer.registerDefaultSerializers();
-      serializer.setFixupDuplicates(false);
-      serializer.setFixupCircRefs(false);
     }
     catch (Exception e) 
     {

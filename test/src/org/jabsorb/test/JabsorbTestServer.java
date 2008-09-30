@@ -27,6 +27,7 @@
 package org.jabsorb.test;
 
 import org.apache.jasper.servlet.JspServlet;
+import org.jabsorb.JSONRPCBridge;
 import org.jabsorb.JSONRPCServlet;
 import org.jabsorb.ext.InitializationServlet;
 import org.mortbay.jetty.Server;
