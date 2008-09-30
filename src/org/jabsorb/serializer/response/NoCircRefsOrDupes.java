@@ -69,7 +69,6 @@ public class NoCircRefsOrDupes implements SerializerState,
     currentLocation = new LinkedList<Object>();
   }
 
-  @Override
   public Object checkObject(Object parent, Object java, Object ref)
       throws MarshallException
   {
@@ -114,7 +113,6 @@ public class NoCircRefsOrDupes implements SerializerState,
     throw new MarshallException("Circular Reference");
   }
 
-  @Override
   public SuccessfulResult createResult(Object requestId, Object object,
       Object json)
   {
@@ -173,7 +171,6 @@ public class NoCircRefsOrDupes implements SerializerState,
     return obj;
   }
 
-  @Override
   public void setMarshalled(Object marshalledObject, Object java)
   {
     //Nothing to do
@@ -197,7 +194,6 @@ public class NoCircRefsOrDupes implements SerializerState,
     p.setSerialized(target);
   }
 
-  @Override
   public void store(Object obj)
   {
     FixupProcessedObject p = new FixupProcessedObject(obj, null);
