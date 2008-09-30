@@ -28,6 +28,9 @@ package org.jabsorb.test;
 
 import java.io.Serializable;
 
+/**
+ * Used for constructor unit tests
+ */
 public class ConstructorTest implements Serializable
 {
   /**
@@ -35,74 +38,125 @@ public class ConstructorTest implements Serializable
    */
   private static final long serialVersionUID = 1L;
 
-  public static void main(String args[])
-  {
-    ConstructorTest c = new ConstructorTest(123);
-    System.out.println(c.message);
-  }
+  /**
+   * Stores the message that is set in the constructor
+   */
+  private final String message;
 
-  public ConstructorTest(@SuppressWarnings("unused") int i,
-      @SuppressWarnings("unused") String s)
-  {
-    message = "int,String";
-  }
-
-  public ConstructorTest(@SuppressWarnings("unused") int i,
-      @SuppressWarnings("unused") int j)
-  {
-    message = "int,int";
-  }
-
-  public ConstructorTest(@SuppressWarnings("unused") int i)
-  {
-    message = "int";
-  }
-
-  final public String message;
-
-  //Constructor Tests
+  /**
+   * A default constructor
+   */
   public ConstructorTest()
   {
     message = "default";
   }
 
-  //adding this makes it fail many tests!
-  /*
-   * public ConstructorTest(Integer i) { message="int"; }
+  /**
+   * Test a boolean constructor
+   * 
+   * @param b unused
    */
-  public ConstructorTest(@SuppressWarnings("unused") long l)
-  {
-    message = "long";
-  }
-
-  public ConstructorTest(@SuppressWarnings("unused") float l)
-  {
-    message = "float";
-  }
-
-  public ConstructorTest(@SuppressWarnings("unused") double l)
-  {
-    message = "double";
-  }
-
-  public ConstructorTest(@SuppressWarnings("unused") boolean b)
+  public ConstructorTest(boolean b)
   {
     message = "boolean";
   }
 
-  public ConstructorTest(@SuppressWarnings("unused") String s)
+  /**
+   * Test a double constructor
+   * 
+   * @param l unused
+   */
+  public ConstructorTest(double l)
   {
-    message = "String";
+    message = "double";
   }
 
-  public ConstructorTest(@SuppressWarnings("unused") Object o)
+  /**
+   * Test a float constructor
+   * 
+   * @param l unused
+   */
+  public ConstructorTest(float l)
+  {
+    message = "float";
+  }
+
+  /**
+   * Used for testing argument overloading
+   * 
+   * @param i not used
+   */
+
+  public ConstructorTest(int i)
+  {
+    message = "int";
+  }
+
+  /**
+   * Used for testing multiple argument overloading
+   * 
+   * @param i not used
+   * @param j not used
+   */
+  public ConstructorTest(int i, int j)
+  {
+    message = "int,int";
+  }
+
+  /**
+   * Used for testing multiple argument overloading
+   * 
+   * @param i not used
+   * @param s not used
+   */
+  public ConstructorTest(int i, String s)
+  {
+    message = "int,String";
+  }
+
+  //TODO: adding this makes it fail many tests!
+  /*
+   * public ConstructorTest(Integer i) { message="int"; }
+   */
+
+  /**
+   * Test a long constructor
+   * 
+   * @param l unused
+   */
+  public ConstructorTest(long l)
+  {
+    message = "long";
+  }
+
+  /**
+   * Test an object constructor
+   * 
+   * @param o unused
+   */
+  public ConstructorTest(Object o)
   {
     message = "Object";
   }
 
+  /**
+   * Test a string constructor
+   * 
+   * @param s unused
+   */
+  public ConstructorTest(String s)
+  {
+    message = "String";
+  }
+
+  /**
+   * Gets the message produced by the constructor
+   * 
+   * @return A message that specifies what the arguments were that were given to
+   *         the constructor
+   */
   public String getMessage()
   {
     return message;
   }
-  /**/
 }

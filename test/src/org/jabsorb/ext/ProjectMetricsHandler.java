@@ -29,73 +29,66 @@ import java.util.Map;
 import org.json.JSONArray;
 
 /**
- * JSON-RPC call API for the ExtJS/project metrics jabsorb demo.
- * The public methods in this class can be called directly from the browser.
- * Objects passed and returned are passed to the JavaScript side via JSON-RPC.
+ * JSON-RPC call API for the ExtJS/project metrics jabsorb demo. The public
+ * methods in this class can be called directly from the browser. Objects passed
+ * and returned are passed to the JavaScript side via JSON-RPC.
  * 
  * @author Arthur Blake
  */
 public class ProjectMetricsHandler
 {
-  // interface to Apache Derby embedded database
-  private static final ProjectMetricsDatabase db = new ProjectMetricsDatabase(); 
+  /** interface to Apache Derby embedded database */
+  private static final ProjectMetricsDatabase db = new ProjectMetricsDatabase();
 
   /**
-   * Get the list of all projects as a JSON array.
-   *
-   * This demonstrates an alternative way to interact with the client and DB
-   * without having to define intermediate Data Transformation Objects.
-   *
-   * @param query query object that ExtJS will send us (we ignore it.)
+   * Get the list of all projects as a JSON array. This demonstrates an
+   * alternative way to interact with the client and DB without having to define
+   * intermediate Data Transformation Objects.
+   * 
    * @return A JSONArray containing one object for each project.
+   * @throws SQLException if problems occur talking to the database
    */
-  public JSONArray getProjects() 
-    throws SQLException
+  public JSONArray getProjects() throws SQLException
   {
     // Quick n dirty way to get the results of some SQL directly as JSON.
-    DataList list = new DataList(db.connection(),0,0,0,0,
-        "SELECT DISTINCT PROJECT as LABEL, " +
-        "PROJECT as VALUE FROM FILEANALYSIS ORDER BY LABEL",null);
+    DataList list = new DataList(db.connection(), 0, 0, 0, 0,
+        "SELECT DISTINCT PROJECT as LABEL, "
+            + "PROJECT as VALUE FROM FILEANALYSIS ORDER BY LABEL", null);
     addAllChoice(list);
     return list.toJSON();
   }
 
   /**
-   * Get the list of all file extension types as a JSON array.
+   * Get the list of all file extension types as a JSON array. This demonstrates
+   * an alternative way to interact with the client and DB without having to
+   * define intermediate Data Transformation Objects.
    * 
-   * This demonstrates an alternative way to interact with the client and DB
-   * without having to define intermediate Data Transformation Objects.
-   *
-   * @param query query object that ExtJS will send us (we ignore it.)
    * @return A JSONArray containing one object for each file extension type.
+   * @throws SQLException if problems occur talking to the database
    */
-  public JSONArray getTypes() 
-    throws SQLException
+  public JSONArray getTypes() throws SQLException
   {
     // Quick n dirty way to get the results of some SQL directly as JSON.
-    DataList list = new DataList(db.connection(),0,0,0,0,
-        "SELECT DISTINCT TYPE as LABEL, " +
-        "TYPE as VALUE FROM FILEANALYSIS ORDER BY LABEL",null);
+    DataList list = new DataList(db.connection(), 0, 0, 0, 0,
+        "SELECT DISTINCT TYPE as LABEL, "
+            + "TYPE as VALUE FROM FILEANALYSIS ORDER BY LABEL", null);
     addAllChoice(list);
     return list.toJSON();
   }
-  
+
   /**
-   * Translate a FileAnalysisQuery object coming from the ExtJS proxy 
-   * into a SQL query, run the query, and return the results.
-   * 
-   * Note:  This method is called directly from the browser over jabsorb's
-   * JSON-RPC proxy.
-   * 
-   * This uses DTOs (Data Transformation Objects), FileAnalysisQuery
-   * and FileAnalysisQueryResults to move data back and forth from the 
-   * browser.
+   * Translate a FileAnalysisQuery object coming from the ExtJS proxy into a SQL
+   * query, run the query, and return the results. Note: This method is called
+   * directly from the browser over jabsorb's JSON-RPC proxy. This uses DTOs
+   * (Data Transformation Objects), FileAnalysisQuery and
+   * FileAnalysisQueryResults to move data back and forth from the browser.
    * 
    * @param query requested search
    * @return QueryResults object containing the requested results.
+   * @throws SQLException if problems occur talking to the database
    */
   public FileAnalysisQueryResults queryRecords(FileAnalysisQuery query)
-    throws SQLException
+      throws SQLException
   {
     FileAnalysisQueryResults results = new FileAnalysisQueryResults();
 
@@ -111,25 +104,20 @@ public class ProjectMetricsHandler
         List<String> args = new ArrayList<String>();
 
         // build whereClause....
-        addWhereParm(whereClause, args,
-            "PROJECT", "=", query.getProject());
-        
-        addWhereParm(whereClause, args,
-            "PATH", "LIKE", query.getPath());
+        addWhereParm(whereClause, args, "PROJECT", "=", query.getProject());
 
-        addWhereParm(whereClause, args,
-            "NAME", "LIKE", query.getName());
+        addWhereParm(whereClause, args, "PATH", "LIKE", query.getPath());
 
-        addWhereParm(whereClause, args,
-            "TYPE", "=", query.getType());
+        addWhereParm(whereClause, args, "NAME", "LIKE", query.getName());
+
+        addWhereParm(whereClause, args, "TYPE", "=", query.getType());
 
         // get bind variables
         Object[] bindVars = args.toArray();
 
         // make a query to count how many results
-        CountQuery count = 
-          new CountQuery(c, "SELECT COUNT(*) FROM FILEANALYSIS"
-              + whereClause, bindVars);
+        CountQuery count = new CountQuery(c,
+            "SELECT COUNT(*) FROM FILEANALYSIS" + whereClause, bindVars);
 
         // order results based on user's sort request
         whereClause.append(" ORDER BY ");
@@ -144,28 +132,28 @@ public class ProjectMetricsHandler
           whereClause.append(" DESC");
         }
 
-        DataList data = new DataList(c, query.getStart(), query.getLimit(), 
-            0, 0, 
-          "SELECT ID,PROJECT,PATH,NAME,TYPE,SRC,SIZE,LINES FROM FILEANALYSIS" 
-            + whereClause, bindVars);
-        
+        DataList data = new DataList(c, query.getStart(), query.getLimit(), 0,
+            0,
+            "SELECT ID,PROJECT,PATH,NAME,TYPE,SRC,SIZE,LINES FROM FILEANALYSIS"
+                + whereClause, bindVars);
+
         results.setTotalCount(count.getCount());
-        
+
         FileAnalysis[] arr = new FileAnalysis[data.size()];
-        int idx=0;
-        for (Map<Object,Object>m:data)
+        int idx = 0;
+        for (Map<Object, Object> m : data)
         {
           FileAnalysis f = new FileAnalysis();
-          
-          f.setId(((Integer)m.get("ID")).intValue());
-          f.setProject((String)m.get("PROJECT"));
-          f.setPath((String)m.get("PATH"));
-          f.setName((String)m.get("NAME"));
-          f.setType((String)m.get("TYPE"));
-          f.setSrc(integerToBool((Integer)m.get("SRC")));
-          f.setSize(((Long)m.get("SIZE")).longValue());
-          f.setLines(((Integer)m.get("LINES")).intValue());
-          
+
+          f.setId(((Integer) m.get("ID")).intValue());
+          f.setProject((String) m.get("PROJECT"));
+          f.setPath((String) m.get("PATH"));
+          f.setName((String) m.get("NAME"));
+          f.setType((String) m.get("TYPE"));
+          f.setSrc(integerToBool((Integer) m.get("SRC")));
+          f.setSize(((Long) m.get("SIZE")).longValue());
+          f.setLines(((Integer) m.get("LINES")).intValue());
+
           arr[idx++] = f;
         }
         results.setResults(arr);
@@ -182,30 +170,30 @@ public class ProjectMetricsHandler
   }
 
   /**
-   * Insert an "All" choice at the drop of a List used to construct 
-   * a dropdown combobox for the client.
+   * Insert an "All" choice at the drop of a List used to construct a dropdown
+   * combobox for the client.
    * 
    * @param list list to add All choice to.
    */
   private void addAllChoice(DataList list)
   {
-    Map<Object,Object> allChoice = new HashMap<Object, Object>();
+    Map<Object, Object> allChoice = new HashMap<Object, Object>();
     allChoice.put("LABEL", "All");
-    allChoice.put("VALUE","");
+    allChoice.put("VALUE", "");
     list.add(0, allChoice);
   }
 
   /**
-   * Add a where parameter to a where clause that is being built up.
-   * If the object being bound is null or blank, then skip it.
-   *  
+   * Add a where parameter to a where clause that is being built up. If the
+   * object being bound is null or blank, then skip it.
+   * 
    * @param clause StringBuffer to hold where clause being built up.
-   * @param args   List to hold SQL bind variables.
-   * @param field  database field being bound.
+   * @param args List to hold SQL bind variables.
+   * @param field database field being bound.
    * @param operator query operator.
-   * @param bindVar  optional bind variable. (if null or blank, it is not bound)
+   * @param bindVar optional bind variable. (if null or blank, it is not bound)
    */
-  private void addWhereParm(StringBuffer clause, List<String> args, 
+  private void addWhereParm(StringBuffer clause, List<String> args,
       String field, String operator, String bindVar)
   {
     // if the object being bound is blank or null, skip it
@@ -213,18 +201,18 @@ public class ProjectMetricsHandler
     {
       return;
     }
-    
+
     int size = args.size();
-    if (size==0)
+    if (size == 0)
     {
       clause.append(" WHERE ");
     }
-    
-    if (size>0)
+
+    if (size > 0)
     {
       clause.append(" AND ");
     }
-    
+
     clause.append(field);
     clause.append(" ");
     clause.append(operator);
@@ -239,7 +227,7 @@ public class ProjectMetricsHandler
       args.add(bindVar);
     }
   }
-  
+
   /**
    * Convenience method to determine if an object is null, or it's String
    * representation is blank or null.
@@ -249,7 +237,8 @@ public class ProjectMetricsHandler
    */
   private boolean blankOrNull(Object obj)
   {
-    return obj==null || obj.toString()==null || obj.toString().length()==0;
+    return obj == null || obj.toString() == null
+        || obj.toString().length() == 0;
   }
 
   /**
@@ -261,6 +250,6 @@ public class ProjectMetricsHandler
    */
   private boolean integerToBool(Integer i)
   {
-    return i!=null && i.intValue()==1;
+    return i != null && i.intValue() == 1;
   }
 }
