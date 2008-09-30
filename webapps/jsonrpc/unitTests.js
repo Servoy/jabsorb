@@ -194,7 +194,7 @@ var unitTests={
         test: '(result.map["a"].ping() == "ping pong") && (result.map["b"].ping() == "ping pong")'
       },
       { code: 'jsonrpc.test.getCallableRefSet();',
-        test: 'function(){for(a in result.set){if(result.set[a].ping() != "ping pong")return false;}return true;}() '
+        test: 'function(){var a;for(a in result.set){var ok=(result.set[a].ping()==="ping pong");if(!ok){return false;}}return true;}() '
       }
     ]
   },
