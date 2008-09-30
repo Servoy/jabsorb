@@ -30,6 +30,7 @@ import org.json.JSONArray;
  */
 public class FixUp
 {
+  public static final String FIXUPS_FIELD = "fixups";
   /**
    * A List of String|Integer's representing references to locate the place
    * where this fixup entry needs to be created.

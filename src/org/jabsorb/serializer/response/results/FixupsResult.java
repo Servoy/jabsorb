@@ -33,8 +33,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
-
 /**
  * A successful result that contains fixups.
  * 
@@ -75,7 +73,7 @@ public class FixupsResult extends SuccessfulResult
       {
         fixups.put(fixup.toJSONArray());
       }
-      o.put("fixups", fixups);
+      o.put(FixUp.FIXUPS_FIELD, fixups);
     }
     return o;
   }

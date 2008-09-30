@@ -28,6 +28,7 @@ package org.jabsorb.serializer.request.fixups;
 
 import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.request.RequestParser;
+import org.jabsorb.serializer.response.FixUp;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,7 +44,7 @@ public class FixupsCircularReferenceHandler implements RequestParser
       throws JSONException
   {
     final JSONArray arguments = jsonReq.getJSONArray(JSONSerializer.PARAMETER_FIELD);
-    final JSONArray fixups = jsonReq.optJSONArray("fixups");
+    final JSONArray fixups = jsonReq.optJSONArray(FixUp.FIXUPS_FIELD);
 
     // apply the fixups (if any) to the parameters. This will result
     // in a JSONArray that might have circular references-- so
