@@ -77,7 +77,7 @@ public class EnumSerializer extends AbstractSerializer
     return null;
   }
 
-  public ObjectMatch tryUnmarshall(SerializerState state, Class clazz,
+  public ObjectMatch tryUnmarshall(SerializerState state, Class<?> clazz,
       Object json) throws UnmarshallException
   {
 
