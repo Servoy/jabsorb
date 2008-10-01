@@ -204,7 +204,7 @@ public class JSONRPCBridge implements Serializable
    * The default location of the properties file which is looked for in the
    * constructor
    */
-  public static final String DEFAULT_PROPERTIES_LOCATION = "jabsorb.prop";
+  public static final String DEFAULT_PROPERTIES_LOCATION = "jabsorb.properties";
 
   /**
    * The logger for this class
