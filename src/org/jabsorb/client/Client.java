@@ -30,6 +30,7 @@ import java.util.Map;
 
 import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.SerializerState;
+import org.jabsorb.serializer.response.fixups.FixupCircRefAndNonPrimitiveDupes;
 import org.jabsorb.serializer.response.results.FailedResult;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,7 +67,8 @@ public class Client implements InvocationHandler
     {
       this.session = session;
       this.proxyMap = new HashMap<Object, String>();
-      this.serializer = new JSONSerializer();
+      //TODO: this might need a better way of initialising it
+      this.serializer = new JSONSerializer(FixupCircRefAndNonPrimitiveDupes.class);
       this.serializer.registerDefaultSerializers();
     }
     catch (Exception e)
@@ -78,7 +80,7 @@ public class Client implements InvocationHandler
   /**
    * Dispose of the proxy that is no longer needed
    * 
-   * @param proxy
+   * @param proxy The proxy to close
    */
   public void closeProxy(Object proxy)
   {
