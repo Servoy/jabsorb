@@ -18,7 +18,7 @@
 }
 
 
-.test_th {
+.test_th,.profile_th {
     border:1px solid navy;
     color: navy;
     background-color: #ffffcc;
@@ -29,7 +29,9 @@
     padding: 2px;
 }
 
-.test_td {
+
+
+.test_td,.profile_td {
     border-right:1px solid navy;
     border-left:1px solid navy;
     vertical-align: text-top;

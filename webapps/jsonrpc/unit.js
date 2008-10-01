@@ -60,8 +60,129 @@ Function.prototype.bindAsEventListener = function() {
 //shorthand to save typing
 function $n(nodeType)
 {
+  if(nodeType.constructor === Array)
+  {
+    var x = document.createElement(nodeType[0]);
+    x.type=nodeType[1];
+    return x;
+  }
   return document.createElement(nodeType);
 }
+function $t(text)
+{
+  return document.createTextNode(text);
+}
+var valueKey="__value";
+function addElementInCell(obj,type,data,parent,key)
+{
+  addElement(obj,"td",data.cellAttributes,parent,"cell");
+  addElement(obj,type,data,obj.cell,key);
+}
+function addElement(obj,type,data,parent,key)
+{
+  var k;
+  var createdObj = $n(type);
+  var usedKey;
+  if(key)
+  {
+    usedKey=key;
+  }
+  else
+  {
+    usedKey=valueKey;
+  }
+  obj[usedKey] = createdObj;
+  if(data)
+  {
+    for(k in data)
+    {
+      if(k=="cellAttributes")
+      {
+        continue;
+      }
+      obj[usedKey][k]=data[k];
+    }
+  }
+  if(parent)
+  {
+    if(parent[valueKey])
+    {
+      parent[valueKey].appendChild(createdObj);
+    }
+    else
+    {
+      parent.appendChild(createdObj);
+    }
+  }
+}
+function addText(obj,text,parent,key)
+{
+  var createdObj = $t(text);
+  var usedKey;
+  if(key)
+  {
+    usedKey=key;
+  }
+  else
+  {
+    usedKey=valueKey;
+  }
+  obj[usedKey] = createdObj;
+  if(parent)
+  {
+    if(parent[valueKey])
+    {
+      parent[valueKey].appendChild(createdObj);
+    }
+    else
+    {
+      parent.appendChild(createdObj);
+    }
+  }
+}
+
+function changeCss(theClass,element,value) {
+  //Last Updated on May 21, 2008
+  //documentation for this script at
+  //http://www.shawnolson.net/a/503/altering-css-class-attributes-with-javascript.html
+  var cssRules;
+  if (document.all) 
+  {
+   cssRules = 'rules';
+  }
+  else if (document.getElementById) 
+  {
+   cssRules = 'cssRules';
+  }
+  var added = false;
+  for (var S = 0; S < document.styleSheets.length; S++)
+  {
+    for (var R = 0; R < document.styleSheets[S][cssRules].length; R++) 
+    {
+      if (document.styleSheets[S][cssRules][R].selectorText == theClass) 
+      {
+        if(document.styleSheets[S][cssRules][R].style[element])
+        {
+          document.styleSheets[S][cssRules][R].style[element] = value;
+          added=true;
+          break;
+        }
+      }
+    }
+    if(!added)
+    {
+      if(document.styleSheets[S].insertRule)
+      {
+        document.styleSheets[S].insertRule(theClass+' { '+element+': '+value+'; }',document.styleSheets[S][cssRules].length);
+      } 
+      else if (document.styleSheets[S].addRule) 
+      {
+        document.styleSheets[S].addRule(theClass,element+': '+value+';');
+      }
+    }
+  }
+}
+
 //removes all elements of the array "name", from an object
 function clearChildren(node,name)
 {
@@ -85,28 +206,186 @@ var tbody,asyncNode,profileNode,maxRequestNode,showSuccessesNode,hideUnrunNode;
 //loads page
 function onLoad()
 {
-  asyncNode = document.getElementById("async");
-  profileNode = document.getElementById("profile");
-  maxRequestNode = document.getElementById("max_requests");
-  showSuccessesNode = document.getElementById("showSuccesses");
-  hideUnrunNode = document.getElementById("hideUnrun");
+  
+  var menu = createMenu();
+  document.getElementById("actionMenu").appendChild(menu[valueKey]);
+  
+  asyncNode = menu.firstRow.options.async[valueKey];
+  profileNode = menu.firstRow.options.profile[valueKey];
+  showSuccessesNode = menu.firstRow.options.showSuccesses[valueKey];
+  hideUnrunNode = menu.firstRow.options.hideUnrun[valueKey];
+  maxRequestNode = menu.secondRow.options.maxRequests[valueKey];
+
   showSuccessesNode.onclick=updateAllTestsVisibility;
   hideUnrunNode.onclick=updateAllTestsVisibility;
+  profileNode.onclick=updateAllTestsVisibility;
+  var libraries=menu.secondRow.options.library[valueKey];
   
-//  jsonrpc = jabsorb(function(){
-  jsonrpc = jabsorb_circrefs(function(){    
-      //add the tests table
-      var displayTable = createShowTestsTable(); 
-      document.getElementById("results").appendChild(displayTable);
-    },
-    jsonurl);
+  selectJabsorbConstructor({target:{value:libraries.item(libraries.selectedIndex).value}});
+}
 
+function selectJabsorbConstructor(e)
+{
+  var name=e.target.value;
+  var results = document.getElementById("results");
+  var i;
+  for(i=0;i<results.childNodes.length;i++)
+  {
+    results.removeChild(results.childNodes.item(i));
+  }
+  window[name](function(jabsorb){
+    //add the tests table
+    jsonrpc=jabsorb;
+    var displayTable = createShowTestsTable();
+    results.appendChild(displayTable);
+    updateAllTestsVisibility();
+  },
+  jsonurl);
+}
+
+function createMenu()
+{
+  var table={};
   
+  addElement(table,"table",
+      {
+        cellpadding:0,
+        cellspacing:0,
+        border:0,
+        width:"100%"
+      });
+  
+  addElement(table,"tbody",{},table,"body");
+  
+  table.firstRow={};
+  addElement(table.firstRow,"tr",{},table.body);
+  
+  table.secondRow={};
+  addElement(table.secondRow,"tr",{},table.body);
+
+  table.firstRow.runAllTests={};
+  addElementInCell(
+      table.firstRow.runAllTests,["input","button"],
+      {
+        cellAttributes:{align:"left"},
+        value:"Run All Tests",
+        onclick:runAllTests
+      },
+      table.firstRow);
+  
+  table.firstRow.clearAllResults={};
+  addElementInCell(
+      table.firstRow.clearAllResults,["input","button"],
+      {
+        cellAttributes:{align:"left"},
+        value:"Clear All Results",
+        onclick:clearAllResults
+      },
+      table.firstRow);
+
+  table.secondRow.expandAll={};
+  addElementInCell(
+      table.secondRow.expandAll,["input","button"],
+      {
+        cellAttributes:{align:"left"},
+        value:"Expand All",
+        onclick:expandAllResults
+      },
+      table.secondRow);
+  
+  table.secondRow.collapseAll={};
+  addElementInCell(
+      table.secondRow.collapseAll,["input","button"],
+      {
+        cellAttributes:{align:"left"},
+        value:"Collapse All",
+        onclick:collapseAllResults
+      },
+      table.secondRow);
+
+  table.firstRow.options={}
+  addElementInCell(table.firstRow.options,"div",{cellAttributes:{align:"right"},},table.firstRow);
+  
+  table.firstRow.options.showSuccesses={}
+  addElement(table.firstRow.options.showSuccesses,
+      ["input","checkbox"],{id:"showSuccesses",checked:"1",},
+      table.firstRow.options);
+  addText(table.firstRow.options.showSuccesses,
+     "Show Successes |",table.firstRow.options,"text");
+  
+  table.firstRow.options.hideUnrun={}
+  addElement(table.firstRow.options.hideUnrun,
+      ["input","checkbox"],{id:"hideUnrun"},
+      table.firstRow.options);
+  addText(table.firstRow.options.hideUnrun,
+      "Hide Unrun |",table.firstRow.options,"text");
+
+  table.firstRow.options.profile={}
+  addElement(table.firstRow.options.profile,
+      ["input","checkbox"],{id:"profile"},
+      table.firstRow.options);
+  addText(table.firstRow.options.hideUnrun,
+      "Profile  |",table.firstRow.options,"text");
+
+  table.firstRow.options.async={}
+  addElement(table.firstRow.options.async,
+      ["input","checkbox"],{id:"async",checked:"0"},
+      table.firstRow.options);
+  addText(table.firstRow.options.hideUnrun,
+      "Asynchronous )",table.firstRow.options,"text");
+
+  table.secondRow.options={};
+  addElementInCell(table.secondRow.options,"div",{cellAttributes:{align:"right"},},table.secondRow);
+
+  table.secondRow.options.maxRequests={};
+  addText(table.secondRow.options.maxRequests,
+      "Max parallel async requests",table.secondRow.options,"text");
+  addElement(table.secondRow.options.maxRequests,
+      ["input","text"],{id:"max_requests",value:8,size:2},
+      table.secondRow.options);
+
+  table.secondRow.options.library={};
+  addText(table.secondRow.options.library,
+      "Library",table.secondRow.options,"text");
+  addElement(table.secondRow.options.library,
+      "select",{id:"librarySelector",onchange:selectJabsorbConstructor},
+      table.secondRow.options);
+  table.secondRow.options.library.options={};
+  var x,i=0,jabsorbs=[];
+  for(x in window)
+  {
+    if(x.substring(0,"jabsorb".length)==="jabsorb")
+    {
+      jabsorbs.push(x);
+    }
+  }
+  jabsorbs.reverse();
+  for(i =0;i< jabsorbs.length;i++)
+  {
+    table.secondRow.options.library.options[i]={};
+    addElement(table.secondRow.options.library.options[i],
+      "option",{id:("library-"+i)},table.secondRow.options.library);    
+    addText(table.secondRow.options.library.options[i],
+        jabsorbs[i],table.secondRow.options.library.options[i],"text");
+  }
+  return table;
 }
 
 function updateAllTestsVisibility()
 {
   var name;
+  if(profileNode.checked)
+  {
+    changeCss(".profile_heading","display","block");
+    changeCss(".profile_td","display","table-cell");
+    changeCss(".profile_th","display","table-cell");
+  }
+  else
+  {
+    changeCss(".profile_heading","display","none");
+    changeCss(".profile_td","display","none");
+    changeCss(".profile_th","display","none");  
+  }
   for(name in unitTests)
   { 
     updateTestSetVisibility(name);
@@ -241,7 +520,7 @@ function createShowTestsTable()
   {
     cell = $n("th");
     cell.className="test_th";
-    cell.appendChild(document.createTextNode(headingTexts[i]));
+    cell.appendChild($t(headingTexts[i]));
     headerRow.appendChild(cell);
   }
   
@@ -281,7 +560,7 @@ function createShowTestsTable()
       {
         textVal="-";
       }
-      text = document.createTextNode(textVal);
+      text = $t(textVal);
       //The first one needs the expand/collapse thing and the title,
       //The others are all simple
       if(i===0)
@@ -293,7 +572,7 @@ function createShowTestsTable()
         downArrowDiv.title="expand";
         downArrowDiv.className="expandcollapse";
 
-        downArrowDiv.appendChild(document.createTextNode("\u25bc"));
+        downArrowDiv.appendChild($t("\u25bc"));
         downArrowDiv.down=true;
         downArrowDiv.onclick=
         function(e,name)
@@ -362,10 +641,11 @@ function createDisplayTestSetTable(name)
   table=$n("table");  
   table.className="innerTests_table";
 
-  classes=["code_heading","result_heading","expected_heading","pass_heading"];
-  innerTexts=["Code","Result","Expected","Pass"];
+  classes=["code_heading","result_heading","expected_heading","pass_heading","profile_heading"];
+  thClasses=["test_th","test_th","test_th","test_th","profile_th"];
+  innerTexts=["Code","Result","Expected","Pass","Profile"];
   
-  for(i=0;i<4;i++)
+  for(i=0;i<innerTexts.length;i++)
   {
     cell = $n("col");
     table.appendChild(cell);
@@ -376,13 +656,13 @@ function createDisplayTestSetTable(name)
   
   row = $n("tr");
   thead.appendChild(row);
-  for(i=0;i<4;i++)
+  for(i=0;i<innerTexts.length;i++)
   {
     cell = $n("th");
-    cell.className="test_th";
+    cell.className=thClasses[i];
     div = $n("div");
     div.className=classes[i];
-    text = document.createTextNode(innerTexts[i]);
+    text = $t(innerTexts[i]);
     div.appendChild(text);
     cell.appendChild(div);
     row.appendChild(cell);
@@ -391,8 +671,8 @@ function createDisplayTestSetTable(name)
   var tBody = $n("tbody");
   table.appendChild(tBody);
   
-  var ids=["code.","result.","expected.","pass."];
-    
+  var ids=["code.","expected.","result.","pass.","profile."];
+  var cellClasses=["test_td","test_td","test_td","test_td","profile_td"];
   for (i = 0; i < unitTests[name].tests.length; i++)
   {
     //if this row has not yet been created
@@ -413,7 +693,7 @@ function createDisplayTestSetTable(name)
     {
       cell = $n("td");
       row.appendChild(cell);
-      cell.className = "test_td";
+      cell.className = cellClasses[j];
 
       //Don't change this line without changing the id in postResults()
       cell.id = name+ids[j]+i;
@@ -424,7 +704,7 @@ function createDisplayTestSetTable(name)
         href = $n("a");
         href.href="#";
         href.onclick=runTest.bind(this,name,i);
-        text = document.createTextNode(unitTests[name].tests[i].code);
+        text = $t(unitTests[name].tests[i].code);
         href.appendChild(text);
         div.appendChild(href);
         cell.appendChild(div);
@@ -465,7 +745,7 @@ function runTestSet(name)
     alert("Max requests should be between 1 and 99");
     return;
   }
-  jabsorb.max_req_active = maxRequestNode.value;
+  jsonrpc.max_req_active = maxRequestNode.value;
 
   clearResultSet(name);
   if (profileNode.checked)
@@ -474,7 +754,7 @@ function runTestSet(name)
   }
   if (asyncNode.checked)
   {
-    jabsorb.profile_async = profileNode.checked;
+    jsonrpc.profile_async = profileNode.checked;
     cb = [];
     for (i = 0; i < unitTests[name].tests.length; i++)
     {
@@ -505,7 +785,7 @@ function runTest(name,i)
   unitTests[name].tests[i].running=true;
   if (asyncNode.checked)
   {
-    jabsorb.profile_async = profileNode.checked;
+    jsonrpc.profile_async = profileNode.checked;
     cb = [];
     runTestAsync(name,i);
   }
@@ -586,18 +866,19 @@ function runTestSync(name,i)
  * @param i the index of the test within the test set
  * @param result the string containing the result of the test
  * @param e any exception thrown when making the result
- * @param profile boolean saying whether profiling data should be shown
+ * @param profile profile data (if it exists)(submit, start, end, dispatch)
  */ 
 function postResults(name,i, result, e, profile)
 {
   var nodes=[
        document.getElementById(name+"result." + i),
        document.getElementById(name+"expected." + i),
-       document.getElementById(name+"pass." + i)
+       document.getElementById(name+"pass." + i),
+       document.getElementById(name+"profile." + i)
       ],
       resultText,
       pass = false,
-      actualResultText;
+      profileText;
   
   if (e)
   {
@@ -684,7 +965,7 @@ function postResults(name,i, result, e, profile)
   }
   if (profile)
   {
-    actualResultText="submit=" + (profile.submit - tests_start) +
+    profileText="submit=" + (profile.submit - tests_start) +
                ", start=" + (profile.start - tests_start) +
                ", end=" + (profile.end - tests_start) +
                ", dispatch=" + (profile.dispatch - tests_start) +
@@ -692,10 +973,10 @@ function postResults(name,i, result, e, profile)
   }
   else
   {
-    actualResultText=resultText;
+    profileText="";
   }
-  var testValues = [actualResultText,unitTests[name].tests[i].test,(pass?"pass":"FAIL")];
-  var classes = ["result_cell","result_cell",(pass?"pass_cell":"fail_cell")];
+  var testValues = [unitTests[name].tests[i].test,resultText,(pass?"pass":"FAIL"),profileText];
+  var classes = ["result_cell","result_cell",(pass?"pass_cell":"fail_cell"),"result_cell"];
 
   
   unitTests[name].tests[i].pass=pass;
@@ -710,9 +991,9 @@ function postResults(name,i, result, e, profile)
     nodes[j].style.display="";
     var div = $n("div");
     div.className = classes[j];
-    div.appendChild(document.createTextNode(testValues[j]));
+    div.appendChild($t(testValues[j]));
     nodes[j].appendChild(div);
-    //nodes[j].appendChild(document.createTextNode(testValues[j]));
+    //nodes[j].appendChild($t(testValues[j]));
   }
   
   
@@ -737,10 +1018,10 @@ function postResults(name,i, result, e, profile)
   
   var successDiv=document.getElementById(name+"successCount");
   clearChildren(successDiv,"childNodes");
-  successDiv.appendChild(document.createTextNode(successCount));
+  successDiv.appendChild($t(successCount));
   var failDiv=document.getElementById(name+"failCount");
   clearChildren(failDiv,"childNodes");
-  failDiv.appendChild(document.createTextNode(failCount));
+  failDiv.appendChild($t(failCount));
 }
 
 //Clears all displayed test results
@@ -759,10 +1040,10 @@ function clearResultSet(name)
 {  
   var successDiv=document.getElementById(name+"successCount");
   clearChildren(successDiv,"childNodes");
-  successDiv.appendChild(document.createTextNode("-"));
+  successDiv.appendChild($t("-"));
   var failDiv=document.getElementById(name+"failCount");
   clearChildren(failDiv,"childNodes");
-  failDiv.appendChild(document.createTextNode("-"));
+  failDiv.appendChild($t("-"));
   for(var i =0;i< unitTests[name].tests.length;i++)
   {
     clearResult(name,i);
@@ -775,7 +1056,8 @@ function clearResult(name,i)
   var j,nodes = [
     document.getElementById(name+"result." + i),
     document.getElementById(name+"expected." + i),
-    document.getElementById(name+"pass." + i)
+    document.getElementById(name+"pass." + i),
+    document.getElementById(name+"profile." + i)
   ];
   
   unitTests[name].tests[i].completed=false;
