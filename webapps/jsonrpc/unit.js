@@ -1,5 +1,3 @@
-var jsonurl = "JSON-RPC";
-
 //bridge reference
 var jsonrpc = null;
 
@@ -240,7 +238,7 @@ function selectJabsorbConstructor(e)
     results.appendChild(displayTable);
     updateAllTestsVisibility();
   },
-  jsonurl);
+  j_absorbLibraries[name.replace("_","-")]);
 }
 
 function createMenu()
