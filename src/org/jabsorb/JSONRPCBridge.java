@@ -378,7 +378,7 @@ public class JSONRPCBridge implements Serializable
         //fall through and return default serializers
       }
     }
-    return JSONSerializer.defaultSerializers;
+    return JSONSerializer.getDefaultSerializers();
   }
 
   /**
@@ -504,12 +504,12 @@ public class JSONRPCBridge implements Serializable
    * Responsible for marshalling/unmarshalling any circular references in
    * messages received.
    */
-  private final RequestParser requestParser;
+  private RequestParser requestParser;
 
   /**
    * Local JSONSerializer instance
    */
-  private final JSONSerializer ser;
+  private JSONSerializer ser;
 
   /**
    * Creates a new bridge.
@@ -530,7 +530,6 @@ public class JSONRPCBridge implements Serializable
       final RequestParser requestParser,
       final Class<? extends SerializerState> serializerStateClass)
   {
-    //    if (JSONRPCBridge.log != null)
     {
       if (serializerStateClass == null)
       {
@@ -556,7 +555,14 @@ public class JSONRPCBridge implements Serializable
     {
       for (Serializer s : serializers)
       {
-        ser.registerSerializer(s);
+        if (s.getClass().equals(ReferenceSerializer.class))
+        {
+          ser.registerSerializer(this.referenceSerializer);
+        }
+        else
+        {
+          ser.registerSerializer(s);
+        }
       }
     }
     catch (Exception e)
@@ -1116,6 +1122,29 @@ public class JSONRPCBridge implements Serializable
   }
 
   /**
+   * Allow the request parser to be set after construction. This is necessary
+   * for beans.
+   * 
+   * @param requestParser The request parser to use.
+   */
+  public void setRequestParser(RequestParser requestParser)
+  {
+    this.requestParser = requestParser;
+  }
+
+  /**
+   * Allow serializer state class to be set after construction. This is
+   * necessary for beans.
+   * 
+   * @param serializerStateClass The serializer state class to use.
+   */
+  public void setSerializerStateClass(
+      Class<? extends SerializerState> serializerStateClass)
+  {
+    this.ser.setSerializerStateClass(serializerStateClass);
+  }
+
+  /**
    * Unregisters a callback
    * 
    * @param callback The previously registered InvocationCallback object
@@ -1302,7 +1331,7 @@ public class JSONRPCBridge implements Serializable
       final ObjectInstance oi = resolveObject(new Integer(objectID));
       if (oi == null)
       {
-        throw new NoSuchMethodException();
+        throw new NoSuchMethodException("Object not found");
       }
       ClassData cd = ClassAnalyzer.getClassData(oi.getClazz());
       methodMap.putAll(cd.getMethodMap());

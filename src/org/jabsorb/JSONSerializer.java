@@ -70,11 +70,6 @@ import org.slf4j.LoggerFactory;
 public class JSONSerializer implements Serializable
 {
   /**
-   * A list of good serializers that are used when no others are given.
-   */
-  public final static List<Serializer> defaultSerializers;
-
-  /**
    * The name of the field which holds the id of the message.
    */
   public static final String ID_FIELD = "id";
@@ -110,9 +105,14 @@ public class JSONSerializer implements Serializable
    */
   private final static long serialVersionUID = 2;
 
-  static
+  /**
+   * A list of good serializers that are used when no others are given.
+   * @return A newly created list. This enables multiple bridges to call this
+   *         method and not have the serializers duplicated.
+   */
+  public final static List<Serializer> getDefaultSerializers()
   {
-    defaultSerializers = new ArrayList<Serializer>(13);
+    final List<Serializer> defaultSerializers = new ArrayList<Serializer>(13);
     defaultSerializers.add(new RawJSONArraySerializer());
     defaultSerializers.add(new RawJSONObjectSerializer());
     defaultSerializers.add(new BeanSerializer());
@@ -126,6 +126,7 @@ public class JSONSerializer implements Serializable
     defaultSerializers.add(new NumberSerializer());
     defaultSerializers.add(new BooleanSerializer());
     defaultSerializers.add(new PrimitiveSerializer());
+    return defaultSerializers;
   }
 
   /**
@@ -161,7 +162,7 @@ public class JSONSerializer implements Serializable
    * The serializer state's class which will be created by
    * createSerializerState().
    */
-  private final Class<? extends SerializerState> serializerStateClass;
+  private Class<? extends SerializerState> serializerStateClass;
 
   /**
    * Creates a new JSONSerializer
@@ -442,6 +443,19 @@ public class JSONSerializer implements Serializable
   public void setMarshallNullAttributes(boolean marshallNullAttributes)
   {
     this.marshallNullAttributes = marshallNullAttributes;
+  }
+
+  /**
+   * Allow serializer state class to be set after construction. This is
+   * necessary for beans to construct JSONRPCBridge.
+   * 
+   * @param serializerStateClass The serializer state class to use.
+   */
+  public void setSerializerStateClass(
+      Class<? extends SerializerState> serializerStateClass)
+  {
+    this.serializerStateClass = serializerStateClass;
+
   }
 
   /**
