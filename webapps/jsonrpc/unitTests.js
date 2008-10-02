@@ -252,9 +252,6 @@ var unitTests={
       { code: 'jsonrpc.test.concat("a","b")',
         test: 'result == "a and b"'
       },
-      { code: 'jsonrpc.test.aBean()',
-        test: 'result != null'
-      },
       { code: 'jsonrpc.test.echoObject({ "javaClass": "org.jabsorb.test.ITest$Waggle", "bang": "foo", "baz": 9, "bork": 5 })',
         test: 'result.javaClass == "org.jabsorb.test.ITest$Waggle" && result.bang =="foo" && result.baz == 9 && result.bork == 5'
       },
