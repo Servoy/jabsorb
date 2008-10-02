@@ -143,16 +143,22 @@ var unitTests={
       { code: 'jsonrpc.test.echoRawJSON(dup2)',
         test: 'result.arthur.mother===result.diana && result.diana.son===result.arthur'},
 
+      // Array of duplicate Beans
+      { code: 'jsonrpc.test.aBeanArrayDup()',
+        test: 'result[0]===result[1] && result[1]===result[2]'}
+    ]
+  },
+  
+  "Duplicates":
+  {
+     tests:
+     [
       // List of duplicate Strings
       { code: 'jsonrpc.test.aStringListDup()',
         test: 'result.list[0]===result.list[1] && result.list[1]===result.list[2]'},
 
       // Array of duplicate Strings
       { code: 'jsonrpc.test.aStringArrayDup()',
-        test: 'result[0]===result[1] && result[1]===result[2]'},
-
-      // Array of duplicate Beans
-      { code: 'jsonrpc.test.aBeanArrayDup()',
         test: 'result[0]===result[1] && result[1]===result[2]'},
 
       // the following 3 tests don't really have a good way to test if they pass/fail (need server side support)
@@ -169,7 +175,7 @@ var unitTests={
       //a list with some nulls in it
       { code: 'jsonrpc.test.listNull()',
         test: 'true'}
-    ]
+     ]
   },
 
   "Callable References":
