@@ -105,10 +105,25 @@ public class JabsorbTestServer
     context.addServlet(jspServlet, "*.jsp");
 
     // do static content
-    ServletHolder jsonRpcServlet = new ServletHolder(new JSONRPCServlet());
-    jsonRpcServlet.setInitParameter("auto-session-bridge", "0");
-    context.addServlet(jsonRpcServlet, "/JSON-RPC/*");
-
+    {
+      ServletHolder jsonRpcServlet = new ServletHolder(new JSONRPCServlet(
+          "JSONRPCBridge_Default"));
+      jsonRpcServlet.setInitParameter("auto-session-bridge", "0");
+      context.addServlet(jsonRpcServlet, "/JSON-RPC-Default/*");
+      
+    }
+    {
+      ServletHolder jsonRpcServlet = new ServletHolder(new JSONRPCServlet(
+          "JSONRPCBridge_CircRefs"));
+      jsonRpcServlet.setInitParameter("auto-session-bridge", "0");
+      context.addServlet(jsonRpcServlet, "/JSON-RPC/*");
+    }
+    {
+      ServletHolder jsonRpcServlet = new ServletHolder(new JSONRPCServlet(
+          "JSONRPCBridge_Flat"));
+      jsonRpcServlet.setInitParameter("auto-session-bridge", "0");
+      context.addServlet(jsonRpcServlet, "/JSON-RPC-Flat/*");
+    }
     // do other initialization that normally happens in web.xml
     ServletHolder initServlet = new ServletHolder(new InitializationServlet());
     context.addServlet(initServlet, null);
