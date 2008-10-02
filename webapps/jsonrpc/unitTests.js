@@ -108,7 +108,7 @@ var unitTests={
     [
       // circular reference from server
       { code: 'jsonrpc.test.aBean()',
-        test: 'result != null'
+        test: 'result.beanB.beanA == result'
       },
 
       //server circ ref test of a Map
