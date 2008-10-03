@@ -46,6 +46,7 @@ import org.jabsorb.serializer.impl.BeanSerializer;
 import org.jabsorb.serializer.impl.BooleanSerializer;
 import org.jabsorb.serializer.impl.DateSerializer;
 import org.jabsorb.serializer.impl.DictionarySerializer;
+import org.jabsorb.serializer.impl.EnumSerializer;
 import org.jabsorb.serializer.impl.ListSerializer;
 import org.jabsorb.serializer.impl.MapSerializer;
 import org.jabsorb.serializer.impl.NumberSerializer;
@@ -126,6 +127,7 @@ public class JSONSerializer implements Serializable
     defaultSerializers.add(new NumberSerializer());
     defaultSerializers.add(new BooleanSerializer());
     defaultSerializers.add(new PrimitiveSerializer());
+    defaultSerializers.add(new EnumSerializer());
     return defaultSerializers;
   }
 
