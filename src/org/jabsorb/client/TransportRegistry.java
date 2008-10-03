@@ -33,6 +33,24 @@ import java.util.Map;
 public class TransportRegistry
 {
 
+  /**
+   * A factory used to create transport sessions. Register with
+   * #registerTransport.
+   */
+  public interface SessionFactory
+  {
+    /**
+     * Creates the new session
+     * 
+     * @param uri URI used to open this session
+     * @return The new session
+     */
+    Session newSession(URI uri);
+  }
+
+  /**
+   * Maintains singleton instance of this class
+   */
   private static TransportRegistry singleton;
 
   /**
@@ -50,32 +68,24 @@ public class TransportRegistry
     return singleton;
   }
 
+  /**
+   * Maps schemes (eg "http") to session factories
+   */
   private final Map<String, SessionFactory> registry;
 
   /**
-   * A factory used to create transport sessions. Register with
-   * #registerTransport.
+   * Creates a new TransportRegistry
    */
-  public interface SessionFactory
-  {
-    /**
-     * @param uri URI used to open this session
-     */
-    Session newSession(URI uri);
-  }
-
   public TransportRegistry()
   {
     this.registry = new HashMap<String, SessionFactory>();
   }
 
-  public void registerTransport(String scheme, SessionFactory factory)
-  {
-    registry.put(scheme, factory);
-  }
-
   /**
    * Create a session from 'uriString' using one of registered transports.
+   * 
+   * @param uriString The uri of the session
+   * @return a URLConnectionSession
    */
   public Session createSession(String uriString)
   {
@@ -94,6 +104,17 @@ public class TransportRegistry
     {
       throw new ClientError(e);
     }
+  }
+
+  /**
+   * Register a factory for a transport type
+   * 
+   * @param scheme The transport type
+   * @param factory The session factory for the scheme
+   */
+  public void registerTransport(String scheme, SessionFactory factory)
+  {
+    registry.put(scheme, factory);
   }
 
 }

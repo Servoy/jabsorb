@@ -33,8 +33,7 @@ public interface Session
   /**
    * Synchronously send JSON message and receive the result
    * 
-   * @param message
-   *          A JSON message to send
+   * @param message A JSON message to send
    * @return the JSON result message
    */
   JSONObject sendAndReceive(JSONObject message);
