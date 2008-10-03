@@ -200,7 +200,12 @@ public class Test implements Serializable, ITest
     }
     return arr;
   }
-
+  public enum Suit { CLUBS, DIAMONDS, HEARTS, SPADES }
+  
+  public Enum<?> anEnum()
+  {
+    return Suit.CLUBS;
+  }
   public ArrayList<Integer> anArrayList()
   {
     ArrayList<Integer> al = new ArrayList<Integer>();

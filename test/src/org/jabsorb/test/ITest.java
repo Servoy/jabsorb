@@ -206,6 +206,8 @@ public interface ITest
 
   BeanA aBean();
 
+  Enum<?> anEnum();
+  
   Hashtable<?,?> aHashtable();
 
   /**

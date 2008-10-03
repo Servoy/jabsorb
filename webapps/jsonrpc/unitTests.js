@@ -496,6 +496,16 @@ var unitTests={
     ]
   },
   
+  "Enums":
+  {  
+    tests:
+    [
+      { code: function(cb){return jsonrpc.test.anEnum(cb)},
+        test: function(result){ return result == "CLUBS";}
+      }
+    ]
+  },
+  
   "Maps":
   {  
     tests:
