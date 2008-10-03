@@ -1,9 +1,6 @@
 //bridge reference
 var jsonrpc = null;
 
-//callback function
-var cb;
-
 //when the tests started
 var tests_start;
 
@@ -753,7 +750,6 @@ function runTestSet(name)
   if (asyncNode.checked)
   {
     jsonrpc.profile_async = profileNode.checked;
-    cb = [];
     for (i = 0; i < unitTests[name].tests.length; i++)
     {
       runTestAsync(name,i);
@@ -784,7 +780,6 @@ function runTest(name,i)
   if (asyncNode.checked)
   {
     jsonrpc.profile_async = profileNode.checked;
-    cb = [];
     runTestAsync(name,i);
   }
   else
@@ -805,25 +800,10 @@ function testAsyncCB(name,i)
 //Run a test in async mode
 function runTestAsync(name,i)
 {
-  var cb,code,str;
   try
   {
     // insert post results callback into first argument and submit test
-    cb = testAsyncCB(name,i);
-    //If it contains specific code to do the async calls then use this
-    if(unitTests[name].tests[i].asyncCode)
-    {
-      code = unitTests[name].tests[i].asyncCode;
-    }
-    //Otherwise find every method call, ie: "()" and put cb in it.
-    else
-    {
-      code = unitTests[name].tests[i].code;
-      code = code.replace(/\(([^\)])/, "(cb, $1");
-      code = code.replace(/\(\)/, "(cb)");
-    }
-    // run the test
-    eval(code);
+    unitTests[name].tests[i].code(testAsyncCB(name,i));
   }
   catch (e)
   {
@@ -844,7 +824,7 @@ function runTestSync(name,i)
   }
   try
   {
-    eval("result = " + unitTests[name].tests[i].code);
+    result = unitTests[name].tests[i].code(jsonrpc.doSync);
   }
   catch (e)
   {
@@ -892,7 +872,7 @@ function postResults(name,i, result, e, profile)
     {
       try
       {
-        eval("pass = " + unitTests[name].tests[i].test);
+        pass = unitTests[name].tests[i].test(result,e);
       }
       catch(e)
       {
@@ -949,7 +929,7 @@ function postResults(name,i, result, e, profile)
     }
     try
     {
-      eval("pass = " + unitTests[name].tests[i].test);
+      pass=unitTests[name].tests[i].test(result);
     }
     catch(e)
     {
