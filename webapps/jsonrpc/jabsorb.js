@@ -242,10 +242,7 @@ var jabsorb = function()
     {
       args.push(arguments[i]);
     }
-    if (typeof args[0] == "function")
-    {
-      callback = args.shift();
-    }
+    callback = prv.extractCallback(args);
     constructorName = args[0] + ".$constructor";
     constructorArgs = args[1];
 
@@ -274,6 +271,12 @@ var jabsorb = function()
     alert(str);
   };
 
+  /**
+   * A method which can be used in the place of a callback, which will cause the
+   * call to be synchronous instead of asynchronous.
+   */
+  pub.doSync = function(){}
+  
   /**
    * Converts data from json to objects used by jabsorb.
    * 
@@ -672,7 +675,7 @@ var jabsorb = function()
     }
     return cp;
   };
-
+  
   /**
    * This creates a method that points to the serverMethodCaller and binds it
    * with the correct methodName.
@@ -687,15 +690,12 @@ var jabsorb = function()
     // always has the same name, but can take different arguments each call.
     var serverMethodCaller = function()
     {
-      var args = [], callback;
+      var args = [];
       for ( var i = 0; i < arguments.length; i++)
       {
         args.push(arguments[i]);
       }
-      if (typeof args[0] == "function")
-      {
-        callback = args.shift();
-      }
+      var callback=prv.extractCallback(args);
       var req = comms.makeRequest(methodName, args, this.objectID, callback);
       if (!callback)
       {
@@ -798,6 +798,57 @@ var jabsorb = function()
     }
     return root;
   };
+
+  /**
+   * Extracts the callback method from a list of arguments to a method. The 
+   * callback must be in either the first or last position, but not both. If 
+   * pub.doSync() is passed, then this will return null.
+   * 
+   * @param args the list of arguments to a method which may contain a callback
+   *             in the first or last position
+   *             
+   * @return The callback if it exists, or null if no callback is found or the 
+   *         callback is pub.doSync().
+   * @throws a prv.Exception if both the first and last methods are callbacks.
+   */
+  prv.extractCallback=function(args)
+  {
+    var callback=null;
+    var typeofFirst=(typeof args[0] == "function");
+    var typeofLast;
+    if(args.length>1)
+    {
+      typeofLast=(typeof args[args.length-1] == "function");
+    }
+    else
+    {
+      typeofLast=null;
+    }
+    if (typeofFirst||typeofLast)
+    {
+      if(typeofFirst&&typeofLast)
+      {
+        throw new prv.Exception( {
+          code :prv.Exception.CODE_ERR_CLIENT,
+          message :"A method was put in both the first and last positions, " +
+              "but should only by put in one"
+        });
+      }
+      if(typeofFirst)
+      {
+        callback = args.shift();
+      }
+      else
+      {
+        callback = args.pop();
+      }
+      if(callback==pub.doSync)
+      {
+        callback=null;
+      }
+    }
+    return callback;
+  }
 
   /**
    * Traverse the resulting object graph and replace serialized date objects
