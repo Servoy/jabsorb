@@ -2,19 +2,46 @@ CHANGES log
 
 200x-xx-xx jabsorb 1.4-rc1 release
 
+TODO: 
+
+* run all combos of tests: 3 constructors sync/async
+* key map serializer (breaks json??)
+
+MAYBE DO:
+
+* Separate out sync code in client?? Is necessary with allowSyncCalls variable?
+* comet integration??
+
+Done:
+
 * Code now java 1.5 compatible: Added generics and annotations
 
 * Refactored jsonrpc.js and renamed it jabsorb.js. Fixups are now in 
   jabsorb-circrefs.js. Flat serialization is in jabsorb-flat.js
 
+* Sync calls may only occur when jabsorb.allowSyncCalls is true. 
+  This is set to false by default to prevent accidental calling of sync 
+  calls in code. 
+
 * Added Flat Serialization of data.
+
+* Added EnumSerializer and accompanying unit tests
 
 * Removed all references to Fixups from top level classes and put it into 
   classes that extend SerializerState. A SerializerState is now created via 
   JSONSerializer.createSerializerState()
 
+* Callbacks may be the last argument method calls, instead of the first
+  (You may use either option, but not both)
+
 * Unit tests can select between different loaded versions of jabsorb. 
   JabsorbTestServer now runs 3 different bridges, one for each version. 
+  Unit tests are all functions, not strings that are evaled.
+
+* Added optional parameter to unit tests, functionTests, which allow for 
+  callable proxies to be tested in either sync or async mode.
+  
+* Added enum unit tests
 
 * Bug 30: The version number is now only stored in one place. Ant now copies 
   _header.jspinc to header.jspinc for inclusion into jsps.
