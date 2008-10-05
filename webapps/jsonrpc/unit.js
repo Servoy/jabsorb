@@ -793,7 +793,7 @@ function testAsyncCB(name,i)
 {
   return function (result, e, profile)
   {
-    postResults(name,i, result, e, profile);
+    postResults(name,i, result, e, profile,true);
   };
 }
 
@@ -834,7 +834,49 @@ function runTestSync(name,i)
   {
     profile.end = profile.dispatch = new Date();
   }
-  postResults(name,i, result, exception, profile);
+  postResults(name,i, result, exception, profile,false);
+}
+
+function resultToString(o)
+{
+  var done={};
+  var _toString=function(o)
+  {
+    var str,x;
+    if (typeof o == "object")
+    {
+      if(done[o])
+      {
+        return "circRef";
+      }
+      done[o]="";
+      if(o.constructor === Array)
+      {
+        str="[";
+        for(x in o)
+        {
+          str+=toString(o[x])+", ";
+        }  
+        str+="]";
+      }
+      else
+      {
+        str="{";
+        for(x in o)
+        {
+          str+=_toString(x)+": "+_toString(o[x])+", ";
+        }  
+        str+="}";
+      }
+      return str;
+      
+    }
+    else
+    {
+      return o.toString();
+    }
+  };
+  return _toString(o);
 }
 
 /**
@@ -846,123 +888,49 @@ function runTestSync(name,i)
  * @param e any exception thrown when making the result
  * @param profile profile data (if it exists)(submit, start, end, dispatch)
  */ 
-function postResults(name,i, result, e, profile)
+function postResults(name,i, result, e, profile,resultsAsync)
 {
-  var nodes=[
-       document.getElementById(name+"result." + i),
-       document.getElementById(name+"expected." + i),
-       document.getElementById(name+"pass." + i),
-       document.getElementById(name+"profile." + i)
-      ],
-      resultText,
-      pass = false,
-      profileText;
+  function resultPosted(pass,resultText)
+  {
+    var    profileText="";
+    if (profile)
+    {
+      profileText =  "submit="   + (profile.submit -   tests_start)   +
+                   ", start="    + (profile.start -    tests_start)   +
+                   ", end="      + (profile.end -      tests_start)   +
+                   ", dispatch=" + (profile.dispatch - tests_start)   +
+                   " (rtt="      + (profile.end -      profile.start) + ")";
+    }
+    
+    unitTests[name].tests[i].pass=pass;
+    unitTests[name].tests[i].completed=true;
+    unitTests[name].tests[i].running=false;
   
+    updateTestSetVisibility(name);
+    updateTestStyle(name,i,pass,resultText,profileText);
+    updateSuccessFailCount(name);
+  }
+
   if (e)
   {
-    if (e.message)
-    {
-      resultText = e.message;
-    }
-    else
-    {
-      resultText = e.toString();
-    }
-    if (unitTests[name].tests[i].exception)
-    {
-      try
-      {
-        pass = unitTests[name].tests[i].test(result,e);
-      }
-      catch(e)
-      {
-      }
-    }
+    postException(unitTests[name].tests[i],result,e,resultPosted,resultsAsync);
   }
   else
   {
-    if (typeof result == "object")
-    {
-      var tmp = jsonrpc.toJSON(result,"result");
-      var done={};
-      var toString=function(o)
-      {
-        var str,x;
-        if (typeof o == "object")
-        {
-          if(done[o])
-          {
-            return "circRef";
-          }
-          done[o]="";
-          if(o.constructor === Array)
-          {
-            str="[";
-            for(x in o)
-            {
-              str+=toString(o[x])+", ";
-            }  
-            str+="]";
-          }
-          else
-          {
-            str="{";
-            for(x in o)
-            {
-              str+=toString(x)+": "+toString(o[x])+", ";
-            }  
-            str+="}";
-          }
-          return str;
-          
-        }
-        else
-        {
-          return o.toString();
-        }
-      };
-      resultText= toString(tmp);
-    }
-    else
-    {
-      resultText = result;
-    }
-    try
-    {
-      pass=unitTests[name].tests[i].test(result);
-    }
-    catch(e)
-    {
-      var tmp="";
-      for(var aa in e)
-      {
-        tmp+=aa+" "+e[aa]+"\t";
-      }
-      resultText=tmp;
-    }
+    postNonException(unitTests[name].tests[i],result,resultPosted,resultsAsync)
   }
-  if (profile)
-  {
-    profileText="submit=" + (profile.submit - tests_start) +
-               ", start=" + (profile.start - tests_start) +
-               ", end=" + (profile.end - tests_start) +
-               ", dispatch=" + (profile.dispatch - tests_start) +
-               " (rtt=" + (profile.end - profile.start)+")";
-  }
-  else
-  {
-    profileText="";
-  }
-  var testValues = [unitTests[name].tests[i].test,resultText,(pass?"pass":"FAIL"),profileText];
+}
+
+function updateTestStyle(name,i,pass,resultText,profileText)
+{
+  var nodes=[
+             document.getElementById(name+"result." + i),
+             document.getElementById(name+"expected." + i),
+             document.getElementById(name+"pass." + i),
+             document.getElementById(name+"profile." + i)
+            ];
+  var testValues = [getTestValue(unitTests[name].tests[i]),resultText,(pass?"pass":"FAIL"),profileText];
   var classes = ["result_cell","result_cell",(pass?"pass_cell":"fail_cell"),"result_cell"];
-
-  
-  unitTests[name].tests[i].pass=pass;
-  unitTests[name].tests[i].completed=true;
-  unitTests[name].tests[i].running=false;
-
-  updateTestSetVisibility(name);
-
   for(var j=0;j<nodes.length;j++)
   {
     clearChildren(nodes[j],"childNodes");
@@ -971,10 +939,41 @@ function postResults(name,i, result, e, profile)
     div.className = classes[j];
     div.appendChild($t(testValues[j]));
     nodes[j].appendChild(div);
-    //nodes[j].appendChild($t(testValues[j]));
   }
-  
-  
+}
+function getTestValue(test)
+{
+  var text="";
+  if(test.test)
+  {
+    text+=test.test.toString();
+  }
+  if(test.functionTest)
+  {
+    var i;
+    var j;
+    if(test.test)
+    {
+      text+=" &&";
+    }
+    for(i=0;i<test.functionTest.length;i++)
+    {
+      text+=" result";
+      for(j=0;j<test.functionTest[i][0].length;j++)
+      {
+        text+="."+test.functionTest[i][0][j];
+      }
+      text+="=="+test.functionTest[i][1];
+      if(i!=test.functionTest.length-1)
+      {
+        text+=" && ";
+      }
+    }
+  }
+  return text;
+}
+function updateSuccessFailCount(name)
+{
   //Update the global success/fail count for this test set
   var successCount=0;
   var failCount=0;
@@ -1001,7 +1000,125 @@ function postResults(name,i, result, e, profile)
   clearChildren(failDiv,"childNodes");
   failDiv.appendChild($t(failCount));
 }
-
+function postNonException(test,result,resultPosted,async)
+{
+  var pass=true,resultText;
+  var totalTests=0
+  var testsPerformed=0;
+  function _rp(pass)
+  {
+    resultPosted(pass,resultText)
+  }
+  function oneResult(desiredResult)
+  {
+    return function(actualResult)
+    {
+      var pass=actualResult!=desiredResult;
+      if(actualResult!=desiredResult)
+      {
+        resultPosted(false,resultText);
+      }
+      else
+      {
+        testsPerformed++;
+      }
+      if(testsPerformed===totalTests)
+      {
+        resultPosted(true,resultText);
+      }
+      return pass;
+    };
+  }
+  if (typeof result == "object")
+  {
+    var tmp = jsonrpc.toJSON(result,"result");
+    resultText= resultToString(tmp);
+  }
+  else
+  {
+    resultText = result;
+  }
+  try
+  {
+    if(test.test)
+    {
+      pass=test.test(result);
+    }
+    if(!pass)
+    {
+      resultPosted(false,resultText);
+    }
+    else if(test.functionTest)
+    {
+      totalTests=test.functionTest.length;
+      var i;
+      var j;
+      var func,old;
+      for(i=0;i<test.functionTest.length;i++)
+      {
+        func=result;
+        for(j=0;j<test.functionTest[i][0].length;j++)
+        {
+          old=func;
+          func=func[test.functionTest[i][0][j]];
+          if(typeof func === "function")
+          {
+            if(async)
+            {
+              func.apply(old,[oneResult(test.functionTest[i][1])]);
+            }
+            else
+            {
+              func=oneResult(test.functionTest[i][1])(func());
+              if(!func)
+              {
+                j=test.functionTest[i][0].length
+                i=test.functionTest.length;
+              }
+            }
+          }
+        }
+      }
+    }
+    else
+    {
+      resultPosted(true,resultText);
+    }
+  }
+  catch(e)
+  {
+    var tmp="";
+    for(var aa in e)
+    {
+      tmp+=aa+" "+e[aa]+"\t";
+    }
+    resultText=tmp;
+  }
+  
+}
+function postException(test,result,e,resultPosted)
+{
+  var pass=false,resultText;
+  if (e.message)
+  {
+    resultText = e.message;
+  }
+  else
+  {
+    resultText = e.toString();
+  }
+  if (test.exception)
+  {
+    try
+    {
+      pass = test.test(result,e);
+    }
+    catch(e)
+    {
+    }
+  }
+  resultPosted(pass,resultText);
+}
 //Clears all displayed test results
 function clearAllResults()
 {

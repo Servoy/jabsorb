@@ -195,8 +195,8 @@ var unitTests={
     tests:
     [
       { code: function(cb){return jsonrpc.test.getCallableRefVector(cb)},
-        test: function(result){ return (result.list[0].ping() == "ping pong") 
-                   && (result.list[1].ping() == "ping pong");}
+        functionTest: [[["list",0,"ping"],"ping pong"],
+                       [["list",1,"ping"],"ping pong"]]
       },
     /*{ code:             'function(){ var callableRef = jsonrpc.test.getCallableRef(); return ({ oid:callableRef.objectID, ping:callableRef.ping(), refoid:callableRef.getRef().objectID, inside:callableRef.whatsInside(callableRef.getRef()) })}()',
         asyncCode: 'var __=function(){ var callableRef = jsonrpc.test.getCallableRef(); cb     ({ oid:callableRef.objectID, ping:callableRef.ping(), refoid:callableRef.getRef().objectID, inside:callableRef.whatsInside(callableRef.getRef()) })}()',
@@ -207,28 +207,17 @@ var unitTests={
         test: 'result.ping == "ping pong"'
       },*/
       { code: function(cb){return jsonrpc.test.getCallableRefInnerVector(cb)},
-        test: function(result){ return (result.list[0].list[0].ping() == "ping pong") 
-                   && (result.list[0].list[1].ping() == "ping pong");}
+        functionTest: [[["list",0,"list",0,"ping"],"ping pong"], 
+                       [["list",0,"list",1,"ping"],"ping pong"]]
       },
       { code: function(cb){return jsonrpc.test.getCallableRefMap(cb)},
-        test: function(result){ return (result.map["a"].ping() == "ping pong") 
-                   && (result.map["b"].ping() == "ping pong");}
+        functionTest: [[["map","a","ping"],"ping pong"], 
+                       [["map","b","ping"],"ping pong"]]
       },
+/*    This is too hard to test since we don't know what the keys will be  
       { code: function(cb){return jsonrpc.test.getCallableRefSet(cb)},
-        test: function(result)
-              {
-                var a;
-                for(a in result.set)
-                {
-                  var ok=(result.set[a].ping()==="ping pong");
-                  if(!ok)
-                  {
-                    return false;
-                  }
-                }
-                return true;
-              } 
-      }
+        functionTest: [[["set",0,"ping"],"ping pong"]]
+      }*/
     ]
   },
   
@@ -336,61 +325,60 @@ var unitTests={
     tests:
     [
       { code: function(cb){return jsonrpc.createObject("ConstructorTest",[],cb)},
-        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest" 
-                   && result.getMessage() == "default";}
+        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest";},
+        functionTest: [[["getMessage"],"default"]]
       },
       { code: function(cb){return jsonrpc.createObject("ConstructorTest",[1],cb)},
-        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest" 
-                   && result.getMessage() == "int";}
+        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest";},
+        functionTest: [[["getMessage"],"int"]]
       },
       { code: function(cb){return jsonrpc.createObject("ConstructorTest",[-1],cb)},
-        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest" 
-                   && result.getMessage() == "int";}
+        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest";},
+        functionTest: [[["getMessage"],"int"]]
       },
       { code: function(cb){return jsonrpc.createObject("ConstructorTest",[5000000000],cb)},
-        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest" 
-                   && result.getMessage() == "long";}
+        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest";},
+        functionTest: [[["getMessage"],"long"]]
       },
       { code: function(cb){return jsonrpc.createObject("ConstructorTest",[-5000000000],cb)},
-        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest" 
-                   && result.getMessage() == "long";}
+        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest";},
+        functionTest: [[["getMessage"],"long"]]
       },
       { code: function(cb){return jsonrpc.createObject("ConstructorTest",[3.4E37],cb)},
-        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest" 
-                   && result.getMessage() == "float";}
+        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest";},
+        functionTest: [[["getMessage"],"float"]]
       },      
       { code: function(cb){return jsonrpc.createObject("ConstructorTest",[-3.4E37],cb)},
-        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest" 
-                   && result.getMessage() == "float";}
+        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest";},
+        functionTest: [[["getMessage"],"float"]]
       },      
       { code: function(cb){return jsonrpc.createObject("ConstructorTest",[3.4E39],cb)},
-        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest" 
-                   && result.getMessage() == "double";}
+        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest";},
+        functionTest: [[["getMessage"],"double"]]
       },      
       { code: function(cb){return jsonrpc.createObject("ConstructorTest",[-3.4E39],cb)},
-        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest" 
-                   && result.getMessage() == "double";}
+        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest";},
+        functionTest: [[["getMessage"],"double"]]
       },      
       { code: function(cb){return jsonrpc.createObject("ConstructorTest",[true],cb)},
-        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest" 
-                   && result.getMessage() == "boolean";}
+        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest";},
+        functionTest: [[["getMessage"],"boolean"]]
       },      
       { code: function(cb){return jsonrpc.createObject("ConstructorTest",[false],cb)},
-        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest" 
-                   && result.getMessage() == "boolean";}
+        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest";},
+        functionTest: [[["getMessage"],"boolean"]]
       },      
       { code: function(cb){return jsonrpc.createObject("ConstructorTest",["hello world"],cb)},
-        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest" 
-                   && result.getMessage() == "String";}
-      
+        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest";},
+        functionTest: [[["getMessage"],"String"]]
       },
       { code: function(cb){return jsonrpc.createObject("ConstructorTest",[321,"hello world"],cb)},
-        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest" 
-                   && result.getMessage() == "int,String";}
+        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest";},
+        functionTest: [[["getMessage"],"int,String"]]
       },
       { code: function(cb){return jsonrpc.createObject("ConstructorTest",[321,321],cb)},
-        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest" 
-                   && result.getMessage() == "int,int";}
+        test: function(result){ return result.javaClass == "org.jabsorb.test.ConstructorTest";},
+        functionTest: [[["getMessage"],"int,int"]]
       }
     ]
   },
