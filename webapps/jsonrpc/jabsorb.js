@@ -55,6 +55,13 @@ var jabsorb = function()
    */
   pub.transformDates = false;
 
+  /**
+   * Set this to true to allow synchronous (blocking) calls. This exists to 
+   * prevent accidentally creating synchronous code. Otherwise all methods 
+   * must have a callback function as the first or last argument.  
+   */
+  pub.allowSyncCalls = false;
+  
   /* ************************** PRIVATE VARIABLES *************************** */
 
   /** Private static final variables */
@@ -159,28 +166,33 @@ var jabsorb = function()
    */
   prv.init = function()
   {
-    var argShift = 0, callbackPos = 0, req, callbackArgType = (typeof arguments[callbackPos]), doListMethods = true, readyCB;
-
-    // If a call back is being used grab it
-    if (callbackArgType === "function")
+    var argShift = 0, 
+        req, 
+        doListMethods = true, 
+        readyCB,
+        args = [];
+    
+    for ( var i = 0; i < arguments.length; i++)
     {
-      readyCB = arguments[callbackPos];
-      argShift++;
+      args.push(arguments[i]);
     }
-    // if it's an array then just do add methods directly
-    else if (arguments[callbackPos] && callbackArgType === "object"
-        && arguments[0].length)
+    // if the first element is an array then just do add methods directly
+    if (arguments[0] && typeof arguments[9] === "object" && arguments[0].length)
     {
       // go ahead and add the methods directly
-      prv.addMethods(pub, arguments[callbackPos]);
+      prv.addMethods(pub, arguments[0]);
       argShift++;
       doListMethods = false;
     }
+    else
+    {
+      readyCB = prv.extractCallback(args);
+    }
 
     // The next 3 args are passed to the http request
-    prv.serverURL = arguments[argShift];
-    prv.user = arguments[argShift + 1];
-    prv.pass = arguments[argShift + 2];
+    prv.serverURL = args[argShift];
+    prv.user = args[argShift + 1];
+    prv.pass = args[argShift + 2];
     this.objectID = 0;
 
     if (doListMethods)
@@ -846,6 +858,14 @@ var jabsorb = function()
       {
         callback=null;
       }
+    }
+    if((callback==null)&&(!pub.allowSyncCalls))
+    {
+      throw new prv.Exception( {
+        code :prv.Exception.CODE_ERR_CLIENT,
+        message :"A synchronous call was made. To enable sync calls set " +
+        		"allowSyncCalls to true"
+      });
     }
     return callback;
   }
