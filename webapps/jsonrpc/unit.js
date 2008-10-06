@@ -11,8 +11,6 @@ if(!window.console)
 //bridge reference
 var jsonrpcs = [];
 
-var currentJsonrpc = null;
-
 //when the tests started
 var tests_start;
 
@@ -242,7 +240,6 @@ function selectJabsorbConstructor_cb(name,callback)
     loadingJabsorbs.shift();
     //add the tests table
     jsonrpcs.push(jabsorb);
-    currentJsonrpc=jabsorb;
     var displayTable = createShowTestsTable(jabsorb,name);
     var results = document.getElementById("results");
     results.appendChild(displayTable);
