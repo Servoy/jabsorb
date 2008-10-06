@@ -314,6 +314,7 @@ public class JSONRPCServlet extends HttpServlet
 
     if (log.isDebugEnabled())
     {
+      log.debug("receive on: "+bridgeLocation);
       log.debug("receive: " + receiveString);
       log.debug("receive: " + prettyPrintJson(receiveString));
     }
