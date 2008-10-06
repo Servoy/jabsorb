@@ -177,7 +177,7 @@ var jabsorb = function()
       args.push(arguments[i]);
     }
     // if the first element is an array then just do add methods directly
-    if (arguments[0] && typeof arguments[9] === "object" && arguments[0].length)
+    if (arguments[0] && typeof arguments[0] === "object" && arguments[0].length)
     {
       // go ahead and add the methods directly
       prv.addMethods(pub, arguments[0]);
@@ -220,7 +220,6 @@ var jabsorb = function()
       }
     }
   }
-
   /* **************************** PUBLIC METHODS **************************** */
 
   /**
@@ -940,9 +939,9 @@ var jabsorb = function()
   {
 
     /** Private variables */
-    comms_pub = {};
+    var comms_pub = {};
     /** Public variables */
-    comms_prv = {};
+    var comms_prv = {};
 
     /* Async queue globals */
 
@@ -1342,13 +1341,13 @@ var jabsorb = function()
     /**
      * XMLHttpRequest wrapper
      */
-    xhr = function()
+    var xhr = function()
     {
       /** Public data */
-      xhr_pub = {};
+      var xhr_pub = {};
 
       /** Private data */
-      xhr_prv = {};
+      var xhr_prv = {};
 
       /* ************************ PRIVATE VARIABLES ************************* */
 
