@@ -1,5 +1,17 @@
+if(!window.console)
+{
+  window.console={};
+  window.console.log=function(s)
+  {
+    document.getElementById("console").appendChild($t(s));
+    document.getElementById("console").appendChild($n(br))
+  }
+}
+
 //bridge reference
-var jsonrpc = null;
+var jsonrpcs = [];
+
+var currentJsonrpc = null;
 
 //when the tests started
 var tests_start;
@@ -198,10 +210,13 @@ function clearChildren(node,name)
 // some variables to hold stuff
 var tbody,asyncNode,profileNode,maxRequestNode,showSuccessesNode,hideUnrunNode;
 
+//holds the loaded jabsorbs
+var j_absorbs;
+
 //loads page
 function onLoad()
 {
-  
+  j_absorbs=getLoadedJabsorbs();
   var menu = createMenu();
   document.getElementById("actionMenu").appendChild(menu[valueKey]);
   
@@ -216,26 +231,68 @@ function onLoad()
   profileNode.onclick=updateAllTestsVisibility;
   var libraries=menu.secondRow.options.library[valueKey];
   
-  selectJabsorbConstructor({target:{value:libraries.item(libraries.selectedIndex).value}});
+  selectJabsorbConstructor(
+      libraries.item(libraries.selectedIndex).value);
+}
+var loadingJabsorbs=[];
+function selectJabsorbConstructor_cb(name,callback)
+{
+  var cb=function(jabsorb){
+    jabsorb.name=name;
+    loadingJabsorbs.shift();
+    //add the tests table
+    jsonrpcs.push(jabsorb);
+    currentJsonrpc=jabsorb;
+    var displayTable = createShowTestsTable(jabsorb,name);
+    var results = document.getElementById("results");
+    results.appendChild(displayTable);
+    updateAllTestsVisibility(name);
+    if(callback){
+      callback(jabsorb);
+    }
+    if(loadingJabsorbs.length>0)
+    {
+      window[loadingJabsorbs[0].name](
+          loadingJabsorbs[0],
+          j_absorbLibraries[loadingJabsorbs[0].name.replace("_","-")])
+    }
+  }
+  cb.name=name;
+  return cb;
+};
+
+function selectJabsorbConstructor(name,keepOthers,callback)
+{
+  if(name==="All libraries")
+  {
+    var i;
+    clearAllResultGroups();
+    for(i=0;i<j_absorbs.length;i++)
+    {
+      selectJabsorbConstructor(j_absorbs[i],true);
+    }
+  }
+  else
+  {
+    if(!keepOthers)
+    {
+      clearAllResultGroups();
+    }
+    var cb=selectJabsorbConstructor_cb(name,callback)
+    loadingJabsorbs.push(cb);
+    
+    if(loadingJabsorbs.length==1)
+    {
+      window[name](
+        cb,
+        j_absorbLibraries[name.replace("_","-")]);
+    }
+  }
 }
 
-function selectJabsorbConstructor(e)
+function _selectJabsorbConstructor(e)
 {
-  var name=e.target.value;
-  var results = document.getElementById("results");
-  var i;
-  for(i=0;i<results.childNodes.length;i++)
-  {
-    results.removeChild(results.childNodes.item(i));
-  }
-  window[name](function(jabsorb){
-    //add the tests table
-    jsonrpc=jabsorb;
-    var displayTable = createShowTestsTable();
-    results.appendChild(displayTable);
-    updateAllTestsVisibility();
-  },
-  j_absorbLibraries[name.replace("_","-")]);
+  selectJabsorbConstructor(e.target.value);
 }
 
 function createMenu()
@@ -277,7 +334,7 @@ function createMenu()
         onclick:clearAllResults
       },
       table.firstRow);
-
+  
   table.secondRow.expandAll={};
   addElementInCell(
       table.secondRow.expandAll,["input","button"],
@@ -343,30 +400,27 @@ function createMenu()
   addText(table.secondRow.options.library,
       "Library",table.secondRow.options,"text");
   addElement(table.secondRow.options.library,
-      "select",{id:"librarySelector",onchange:selectJabsorbConstructor},
+      "select",{id:"librarySelector",onchange:_selectJabsorbConstructor},
       table.secondRow.options);
   table.secondRow.options.library.options={};
-  var x,i=0,jabsorbs=[];
-  for(x in window)
+  
+  table.secondRow.options.library.options[0]={};
+  addElement(table.secondRow.options.library.options[0],
+    "option",{id:"all-libraries"},table.secondRow.options.library);    
+  addText(table.secondRow.options.library.options[0],
+      "All libraries",table.secondRow.options.library.options[0],"text");
+  for(i =0;i< j_absorbs.length;i++)
   {
-    if(x.substring(0,"jabsorb".length)==="jabsorb")
-    {
-      jabsorbs.push(x);
-    }
-  }
-  jabsorbs.reverse();
-  for(i =0;i< jabsorbs.length;i++)
-  {
-    table.secondRow.options.library.options[i]={};
-    addElement(table.secondRow.options.library.options[i],
+    table.secondRow.options.library.options[i+1]={};
+    addElement(table.secondRow.options.library.options[i+1],
       "option",{id:("library-"+i)},table.secondRow.options.library);    
-    addText(table.secondRow.options.library.options[i],
-        jabsorbs[i],table.secondRow.options.library.options[i],"text");
+    addText(table.secondRow.options.library.options[i+1],
+        j_absorbs[i],table.secondRow.options.library.options[i+1],"text");
   }
   return table;
 }
 
-function updateAllTestsVisibility()
+function updateAllTestsVisibility(jsonrpcName)
 {
   var name;
   if(profileNode.checked)
@@ -383,10 +437,10 @@ function updateAllTestsVisibility()
   }
   for(name in unitTests)
   { 
-    updateTestSetVisibility(name);
+    updateTestSetVisibility(jsonrpcName,name);
   }
 }
-function updateTestSetVisibility(name)
+function updateTestSetVisibility(jsonrpcName,name)
 {
   var i,
     row,
@@ -395,7 +449,7 @@ function updateTestSetVisibility(name)
 
   for (i = 0; i < tests.length; i++)
   {
-    row = document.getElementById(name+"row." + i);
+    row = document.getElementById(jsonrpcName+name+"row." + i);
 
     if(tests[i].completed)
     {
@@ -427,16 +481,14 @@ function updateTestSetVisibility(name)
       viewableCounter++;
     }
   }
-  if((viewableCounter>0)&&(unitTests[name].tableExpanded))
+  if((viewableCounter>0)&&(unitTests[name][jsonrpcName].tableExpanded))
   {
-    displayTests(name);
+    displayTests(jsonrpcName,name);
   }
   else
   {
-    hideTests(name);
+    hideTests(jsonrpcName,name);
   }
-  unitTests[name].tableViewable=viewableCounter>0;
-
 }
 
 function showTableRow(row)
@@ -447,39 +499,64 @@ function hideTableRow(row)
 {
   row.style.display="none";
 }
-function expandAllResults()
+function expandAllResults(jsonrpc)
 {
-  for(var name in unitTests)
+  var list;
+  if((jsonrpc)&&(jsonrpc.constructor.toString().indexOf("vent")==-1))
   {
-    expandTestSet(name);
+    list=[jsonrpc];
+  }
+  else
+  {
+    list=jsonrpcs;
+  }
+  for(var i=0;i<list.length;i++)
+  {
+    for(var name in unitTests)
+    {
+      expandTestSet(list[i].name,name);
+    }
   }
 }
-function collapseAllResults()
+function collapseAllResults(jsonrpc)
 {
-  for(var name in unitTests)
+  var list;
+  if((jsonrpc)&&(jsonrpc.constructor.toString().indexOf("vent")==-1))
   {
-    collapseTestSet(name);
+    list=[jsonrpc];
+  }
+  else
+  {
+    list=jsonrpcs;
+  }
+  for(var i=0;i<list.length;i++)
+  {
+    for(var name in unitTests)
+    {
+      collapseTestSet(list[i].name,name);
+    }
   }
 }
-function expandTestSet(name)
+
+function expandTestSet(jsonrpcName,name)
 {
-  unitTests[name].expandIcon.childNodes[0].nodeValue="\u25b2";
+  unitTests[name][jsonrpcName].expandIcon.childNodes[0].nodeValue="\u25b2";
   //this.childNodes[0].src="images/red-collapse.gif";
-  unitTests[name].expandIcon.title="collapse";
-  unitTests[name].tableExpanded=true;
-  updateTestSetVisibility(name);
+  unitTests[name][jsonrpcName].expandIcon.title="collapse";
+  unitTests[name][jsonrpcName].tableExpanded=true;
+  updateTestSetVisibility(jsonrpcName,name);
 
 }
-function collapseTestSet(name)
+function collapseTestSet(jsonrpcName,name)
 {
-  unitTests[name].expandIcon.childNodes[0].nodeValue="\u25bc";
-  unitTests[name].expandIcon.title="expand";
-  unitTests[name].tableExpanded=false;
-  hideTests(name);
+  unitTests[name][jsonrpcName].expandIcon.childNodes[0].nodeValue="\u25bc";
+  unitTests[name][jsonrpcName].expandIcon.title="expand";
+  unitTests[name][jsonrpcName].tableExpanded=false;
+  hideTests(jsonrpcName,name);
 }
 
 //This shows the summary of all tests
-function createShowTestsTable()
+function createShowTestsTable(jsonrpc,jsonrpcName)
 {
   var table=$n("table"),
       thead,
@@ -500,7 +577,7 @@ function createShowTestsTable()
       text,
       altClass;
 
-  headingTexts=["Test Set","Tests","Successes","Failures"];
+  headingTexts=["Test Set - "+jsonrpcName,"Tests","Successes","Failures"];
   tableCellIds=["testName","testCount","successCount","failCount"];
 
   table.className="test_table";
@@ -516,6 +593,28 @@ function createShowTestsTable()
     cell = $n("th");
     cell.className="test_th";
     cell.appendChild($t(headingTexts[i]));
+    
+    if(i==0)
+    {
+      var commands=["Run All Tests","Clear All Results","Expand All","Collapse All"];
+      var shortCommands=["R","C","X","L"];
+      var actions=[function(){runAllTests(jsonrpc);return false;},
+                   function(){clearAllResults(jsonrpc);return false;},
+                   function(){expandAllResults(jsonrpc);return false;},
+                   function(){collapseAllResults(jsonrpc);return false;},
+                   ];
+      for(var j=0;j<commands.length;j++)
+      {
+        href = $n("a");
+        href.href="#";
+        href.className="testSetRunner";
+        href.onclick=actions[j];
+        href.appendChild($t(shortCommands[j]));
+        href.title=commands[j];
+        cell.appendChild($t(" "));
+        cell.appendChild(href);
+      }
+    }
     headerRow.appendChild(cell);
   }
   
@@ -574,30 +673,30 @@ function createShowTestsTable()
         {
           if(this.down)
           {
-            expandTestSet(name);
+            expandTestSet(jsonrpcName,name);
           }
           else
           {
-            collapseTestSet(name);
+            collapseTestSet(jsonrpcName,name);
           }          
           this.down=!this.down;
         }.bindAsEventListener(downArrowDiv,unitTestGroupName);
-
-        unitTests[unitTestGroupName].tableExpanded=false;
-        unitTests[unitTestGroupName].expandIcon=downArrowDiv;
+        unitTests[unitTestGroupName][jsonrpcName]={};
+        unitTests[unitTestGroupName][jsonrpcName].tableExpanded=false;
+        unitTests[unitTestGroupName][jsonrpcName].expandIcon=downArrowDiv;
         cell.appendChild(downArrowDiv);
         
         href = $n("a");
         href.href="#";
         href.className="testSetRunner";
-        href.onclick=runTestSet.bind(this,unitTestGroupName);
+        href.onclick=runTestSet.bind(this,jsonrpc,jsonrpcName,unitTestGroupName);
         href.appendChild(text);
         cell.appendChild(href);
       }
       else
       {
         div = $n("span");
-        div.id=unitTestGroupName+tableCellIds[i];
+        div.id=jsonrpcName+unitTestGroupName+tableCellIds[i];
         div.appendChild(text);
         cell.appendChild(div);
       }
@@ -612,17 +711,21 @@ function createShowTestsTable()
     detailedRow.appendChild(cell);
     cell.colSpan=4;
     div = $n("div");
-    unitTests[unitTestGroupName].viewer = 
-      createDisplayTestSetTable(unitTestGroupName);
-    div.appendChild(unitTests[unitTestGroupName].viewer);
-    unitTests[unitTestGroupName].viewer.style.display="none";
+    if(!unitTests[unitTestGroupName][jsonrpcName])
+    {
+      unitTests[unitTestGroupName][jsonrpcName]={};
+    }
+    unitTests[unitTestGroupName][jsonrpcName].viewer = 
+      createDisplayTestSetTable(jsonrpc,jsonrpcName,unitTestGroupName);
+    div.appendChild(unitTests[unitTestGroupName][jsonrpcName].viewer);
+    unitTests[unitTestGroupName][jsonrpcName].viewer.style.display="none";
     cell.appendChild(div);
   }
   return table;
 }
 
 //Creates the detailed analysis of each test case
-function createDisplayTestSetTable(name)
+function createDisplayTestSetTable(jsonrpc,jsonrpcName,name)
 {
   var table,
       thead,
@@ -682,7 +785,7 @@ function createDisplayTestSetTable(name)
     }
     clearChildren(row,"childNodes");
     row.className = "tr" + i%2;
-    row.id = name + "row."+ i;
+    row.id = jsonrpcName+name + "row."+ i;
 
     for(j=0;j<ids.length;j++)
     {
@@ -691,14 +794,14 @@ function createDisplayTestSetTable(name)
       cell.className = cellClasses[j];
 
       //Don't change this line without changing the id in postResults()
-      cell.id = name+ids[j]+i;
+      cell.id = jsonrpcName+name+ids[j]+i;
       if(j===0)
       {
         div = $n("div");
         div.className ="code_cell";
         href = $n("a");
         href.href="#";
-        href.onclick=runTest.bind(this,name,i);
+        href.onclick=runTest.bind(this,jsonrpc,name,i);
         text = $t(unitTests[name].tests[i].code);
         href.appendChild(text);
         div.appendChild(href);
@@ -711,28 +814,68 @@ function createDisplayTestSetTable(name)
 }
 
 //Show a detail table
-function displayTests(name)
+function displayTests(jsonrpcName,name)
 {
-  unitTests[name].viewer.style.display="";
+  unitTests[name][jsonrpcName].viewer.style.display="";
 }
 
 //Hide a detail table
-function hideTests(name)
+function hideTests(jsonrpcName,name)
 {
-  unitTests[name].viewer.style.display="none";
+  unitTests[name][jsonrpcName].viewer.style.display="none";
+}
+
+function getLoadedJabsorbs()
+{
+  var x,i=0,jabsorbs=[];
+  for(x in window)
+  {
+    if(x.substring(0,"jabsorb".length)==="jabsorb")
+    {
+      jabsorbs.push(x);
+    }
+  }
+  jabsorbs.reverse();
+  return jabsorbs;
+}
+
+function testAllCombos()
+{
+  var i;
+  clearAllResultGroups();
+  function loaded(_jabsorb)
+  {
+    runAllTests(_jabsorb);//jsonrpcs[i])
+  }
+  for(i=0;i<j_absorbs.length;i++)
+  {
+    selectJabsorbConstructor(j_absorbs[i],true,loaded);
+  }
 }
 
 //Runs all the tests
-function runAllTests()
+function runAllTests(jsonrpc)
 {
-  for(var name in unitTests)
+  var list;
+  if((jsonrpc)&&(jsonrpc.constructor.toString().indexOf("vent")==-1))
   {
-    runTestSet(name);
+    list=[jsonrpc];
+  }
+  else
+  {
+    list=jsonrpcs;
+  }
+  for(var i=0;i<list.length;i++)
+  {
+    for(var name in unitTests)
+    {
+      runTestSet(list[i],list[i].name,name);
+    }
   }
 }
 
 //Runs all the tests for a specific set
-function runTestSet(name)
+function runTestSet(jsonrpc,jsonrpcName,name)
 {
   var i;
   if (maxRequestNode.value < 1 || maxRequestNode.value > 99)
@@ -742,7 +885,7 @@ function runTestSet(name)
   }
   jsonrpc.max_req_active = maxRequestNode.value;
 
-  clearResultSet(name);
+  clearResultSet(jsonrpcName,name);
   if (profileNode.checked)
   {
     tests_start = new Date();
@@ -752,23 +895,23 @@ function runTestSet(name)
     jsonrpc.profile_async = profileNode.checked;
     for (i = 0; i < unitTests[name].tests.length; i++)
     {
-      runTestAsync(name,i);
+      runTestAsync(jsonrpc,name,i);
     }
   }
   else
   {
     for (i = 0; i < unitTests[name].tests.length; i++)
     {
-      runTestSync(name,i);
+      runTestSync(jsonrpc,name,i);
     }
   }
 }
 
 //Runs a test and determines which mode (sync/async) to run it in.
 //Also looks after profiling
-function runTest(name,i)
+function runTest(jsonrpc,name,i)
 {
-  clearResult(name,i);
+  clearResult(jsonrpc.name,name,i);
   if (profileNode.checked)
   {
     //Global
@@ -780,39 +923,39 @@ function runTest(name,i)
   if (asyncNode.checked)
   {
     jsonrpc.profile_async = profileNode.checked;
-    runTestAsync(name,i);
+    runTestAsync(jsonrpc,name,i);
   }
   else
   {
-    runTestSync(name,i);
+    runTestSync(jsonrpc,name,i);
   }
 }
 
 //This is the callback function used with async tests
-function testAsyncCB(name,i)
+function testAsyncCB(jsonrpc,name,i)
 {
   return function (result, e, profile)
   {
-    postResults(name,i, result, e, profile,true);
+    postResults(jsonrpc,jsonrpc.name,name,i, result, e, profile,true);
   };
 }
 
 //Run a test in async mode
-function runTestAsync(name,i)
+function runTestAsync(jsonrpc,name,i)
 {
   try
   {
     // insert post results callback into first argument and submit test
-    unitTests[name].tests[i].code(testAsyncCB(name,i));
+    unitTests[name].tests[i].code(jsonrpc,testAsyncCB(jsonrpc,name,i));
   }
   catch (e)
   {
-    testAsyncCB(name,i)(null,e,false);
+    testAsyncCB(jsonrpc,name,i)(null,e,false);
   }
 }
 
 //Runs a test in sync mode
-function runTestSync(name,i)
+function runTestSync(jsonrpc,name,i)
 {
   var result;
   var exception;
@@ -824,7 +967,7 @@ function runTestSync(name,i)
   }
   try
   {
-    result = unitTests[name].tests[i].code(jsonrpc.doSync);
+    result = unitTests[name].tests[i].code(jsonrpc,jsonrpc.doSync);
   }
   catch (e)
   {
@@ -834,7 +977,7 @@ function runTestSync(name,i)
   {
     profile.end = profile.dispatch = new Date();
   }
-  postResults(name,i, result, exception, profile,false);
+  postResults(jsonrpc,jsonrpc.name,name,i, result, exception, profile,false);
 }
 
 function resultToString(o)
@@ -888,7 +1031,7 @@ function resultToString(o)
  * @param e any exception thrown when making the result
  * @param profile profile data (if it exists)(submit, start, end, dispatch)
  */ 
-function postResults(name,i, result, e, profile,resultsAsync)
+function postResults(jsonrpc,jsonrpcName,name,i, result, e, profile,resultsAsync)
 {
   function resultPosted(pass,resultText)
   {
@@ -906,9 +1049,9 @@ function postResults(name,i, result, e, profile,resultsAsync)
     unitTests[name].tests[i].completed=true;
     unitTests[name].tests[i].running=false;
   
-    updateTestSetVisibility(name);
-    updateTestStyle(name,i,pass,resultText,profileText);
-    updateSuccessFailCount(name);
+    updateTestSetVisibility(jsonrpcName,name);
+    updateTestStyle(jsonrpcName,name,i,pass,resultText,profileText);
+    updateSuccessFailCount(jsonrpcName,name);
   }
 
   if (e)
@@ -917,17 +1060,17 @@ function postResults(name,i, result, e, profile,resultsAsync)
   }
   else
   {
-    postNonException(unitTests[name].tests[i],result,resultPosted,resultsAsync)
+    postNonException(jsonrpc,unitTests[name].tests[i],result,resultPosted,resultsAsync)
   }
 }
 
-function updateTestStyle(name,i,pass,resultText,profileText)
+function updateTestStyle(jsonrpcName,name,i,pass,resultText,profileText)
 {
   var nodes=[
-             document.getElementById(name+"result." + i),
-             document.getElementById(name+"expected." + i),
-             document.getElementById(name+"pass." + i),
-             document.getElementById(name+"profile." + i)
+             document.getElementById(jsonrpcName+name+"result." + i),
+             document.getElementById(jsonrpcName+name+"expected." + i),
+             document.getElementById(jsonrpcName+name+"pass." + i),
+             document.getElementById(jsonrpcName+name+"profile." + i)
             ];
   var testValues = [getTestValue(unitTests[name].tests[i]),resultText,(pass?"pass":"FAIL"),profileText];
   var classes = ["result_cell","result_cell",(pass?"pass_cell":"fail_cell"),"result_cell"];
@@ -972,7 +1115,7 @@ function getTestValue(test)
   }
   return text;
 }
-function updateSuccessFailCount(name)
+function updateSuccessFailCount(jsonrpcName,name)
 {
   //Update the global success/fail count for this test set
   var successCount=0;
@@ -993,14 +1136,14 @@ function updateSuccessFailCount(name)
     }
   }
   
-  var successDiv=document.getElementById(name+"successCount");
+  var successDiv=document.getElementById(jsonrpcName+name+"successCount");
   clearChildren(successDiv,"childNodes");
   successDiv.appendChild($t(successCount));
-  var failDiv=document.getElementById(name+"failCount");
+  var failDiv=document.getElementById(jsonrpcName+name+"failCount");
   clearChildren(failDiv,"childNodes");
   failDiv.appendChild($t(failCount));
 }
-function postNonException(test,result,resultPosted,async)
+function postNonException(jsonrpc,test,result,resultPosted,async)
 {
   var pass=true,resultText;
   var totalTests=0
@@ -1119,40 +1262,63 @@ function postException(test,result,e,resultPosted)
   }
   resultPosted(pass,resultText);
 }
-//Clears all displayed test results
-function clearAllResults()
+
+function clearAllResultGroups()
 {
-  var tests=[];
-  for(var name in unitTests)
+  var results = document.getElementById("results");
+  var i;
+  while(results.childNodes.length>0)
   {
-    clearResultSet(name);
+    results.removeChild(results.childNodes.item(0));
   }
-  updateAllTestsVisibility();
+  jsonrpcs=[];
+}
+
+//Clears all displayed test results
+function clearAllResults(jsonrpc)
+{
+  var list;
+  if((jsonrpc)&&(jsonrpc.constructor.toString().indexOf("vent")==-1))
+  {
+    list=[jsonrpc];
+  }
+  else
+  {
+    list=jsonrpcs;
+  }
+  for(var i=0;i<list.length;i++)
+  {
+    for(var name in unitTests)
+    {
+      clearResultSet(list[i].name,name);
+    }
+    updateAllTestsVisibility(list[i].name);
+  }
 }
 
 //clears all the posted results for a set of tests
-function clearResultSet(name)
+function clearResultSet(jsonrpcName,name)
 {  
-  var successDiv=document.getElementById(name+"successCount");
+  var successDiv=document.getElementById(jsonrpcName+name+"successCount");
   clearChildren(successDiv,"childNodes");
   successDiv.appendChild($t("-"));
-  var failDiv=document.getElementById(name+"failCount");
+  var failDiv=document.getElementById(jsonrpcName+name+"failCount");
   clearChildren(failDiv,"childNodes");
   failDiv.appendChild($t("-"));
   for(var i =0;i< unitTests[name].tests.length;i++)
   {
-    clearResult(name,i);
+    clearResult(jsonrpcName,name,i);
   }
 }
 
 //Clear the result for the ith test in the test set given by name
-function clearResult(name,i)
+function clearResult(jsonrpcName,name,i)
 {
   var j,nodes = [
-    document.getElementById(name+"result." + i),
-    document.getElementById(name+"expected." + i),
-    document.getElementById(name+"pass." + i),
-    document.getElementById(name+"profile." + i)
+    document.getElementById(jsonrpcName+name+"result." + i),
+    document.getElementById(jsonrpcName+name+"expected." + i),
+    document.getElementById(jsonrpcName+name+"pass." + i),
+    document.getElementById(jsonrpcName+name+"profile." + i)
   ];
   
   unitTests[name].tests[i].completed=false;
