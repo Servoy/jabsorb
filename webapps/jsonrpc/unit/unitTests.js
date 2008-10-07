@@ -389,7 +389,7 @@ var unitTests={
     tests:
     [
       { code: function(jsonrpc,cb){return jsonrpc.test.echoDateObject(new Date(1121689294000),cb)},
-        test: function(result)
+        test: function(result,jsonrpc)
               {
                 if(jsonrpc.transformDates)
                 {

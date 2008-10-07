@@ -52,7 +52,16 @@
   
   String head =
     "    <link rel=\"stylesheet\" type=\"text/css\" href=\"unit.css\">\n"+
+    "    <script type=\"text/javascript\" src=\"utils.js\"></script>\n"+    
     "    <script type=\"text/javascript\" src=\"unitTests.js\"></script>\n" +    
+    "    <script type=\"text/javascript\" src=\"clearResults.js\"></script>\n"+    
+    "    <script type=\"text/javascript\" src=\"menu.js\"></script>\n"+    
+    "    <script type=\"text/javascript\" src=\"postResults.js\"></script>\n"+    
+    "    <script type=\"text/javascript\" src=\"runTests.js\"></script>\n"+    
+    "    <script type=\"text/javascript\" src=\"testTable.js\"></script>\n"+    
+    "    <script type=\"text/javascript\" src=\"testVisibility.js\"></script>\n"+    
+    "    <script type=\"text/javascript\" src=\"testExpanding.js\"></script>\n"+    
+    "    <script type=\"text/javascript\" src=\"constructorSelector.js\"></script>\n"+    
     "    <script type=\"text/javascript\" src=\"unit.js\"></script>\n";
     
    String code="var j_absorbLibraries={};";
