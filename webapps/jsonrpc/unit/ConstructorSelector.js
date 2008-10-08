@@ -64,6 +64,7 @@ var ConstructorSelector=function(clearResults)
       if(!keepOthers)
       {
         clearResults.clearAllResultGroups();
+        prv.jsonrpcs=[];
       }
       var cb=prv.selectJabsorbConstructor_cb(name,callback)
       prv.loadingJabsorbs.push(cb);
