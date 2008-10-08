@@ -55,9 +55,13 @@ var RunTests=function(menu,postResults,clearResults)
       //Global
       tests_start = new Date();
     }
-    unitTests[name].tests[i].pass=false;
-    unitTests[name].tests[i].completed=false;
-    unitTests[name].tests[i].running=true;
+    if(!unitTests[name].tests[i][jsonrpc.name])
+    {
+      unitTests[name].tests[i][jsonrpc.name]={};
+    }
+    unitTests[name].tests[i][jsonrpc.name].pass=false;
+    unitTests[name].tests[i][jsonrpc.name].completed=false;
+    unitTests[name].tests[i][jsonrpc.name].running=true;
     if (menu.asyncNode.checked)
     {
       jsonrpc.profile_async = menu.profileNode.checked;

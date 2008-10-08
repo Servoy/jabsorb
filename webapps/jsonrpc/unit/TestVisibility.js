@@ -38,7 +38,7 @@ var TestVisibility=function(menu)
     {
       row = document.getElementById(jsonrpc.name+name+"row." + i);
   
-      if(tests[i].completed)
+      if(tests[i][jsonrpc.name]&&tests[i][jsonrpc.name].completed)
       {
         //if showing successes show the row
         if(menu.showSuccessesNode.checked)
@@ -80,6 +80,10 @@ var TestVisibility=function(menu)
   
   prv.showTableRow=function(row)
   {
+    if(row==null)
+    {
+      console.log("null row!")
+    }
     row.style.display="";
   }
   

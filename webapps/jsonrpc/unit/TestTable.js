@@ -1,13 +1,14 @@
-var TestTable=function(runTests,testExpanding,clearResults)
+var TestTable=function(runTests,testExpanding,clearResults,summary,jsonrpc)
 {
   var pub={};
   var prv={};
   
   //This shows the summary of all tests
-  pub.createShowTestsTable=function(jsonrpc)
+  prv.init=function(runTests,testExpanding,clearResults,summary,jsonrpc)
   {
-    var table=$n("table"),
-        thead,
+    prv.table=$n("table");
+    
+    var thead,
         headerRow,
         i,
         unitTestGroupName,
@@ -25,14 +26,25 @@ var TestTable=function(runTests,testExpanding,clearResults)
         text,
         altClass;
   
+    prv.table.addEventListener(
+        "DOMNodeRemoved",
+        function(e)
+        {
+          if(e.target==prv.table){
+            summary.subtractTestAmount(prv.getTestAmount());
+            clearResults.clearAllResults(jsonrpc);
+          }
+        },false
+    );
+    
     headingTexts=["Test Set - "+jsonrpc.name,"Tests","Successes","Failures"];
     tableCellIds=["testName","testCount","successCount","failCount"];
   
-    table.className="test_table";
+    prv.table.className="test_table";
   
     //create the header
     thead = $n("thead");
-    table.appendChild(thead);  
+    prv.table.appendChild(thead);  
     
     headerRow = $n("tr");
     thead.appendChild(headerRow);
@@ -71,14 +83,14 @@ var TestTable=function(runTests,testExpanding,clearResults)
     {
       tests = unitTests[unitTestGroupName].tests;
       tbody = $n("tbody");
-      table.appendChild(tbody);
+      prv.table.appendChild(tbody);
     
       //create the summary
       summaryRow = $n("tr");
       tbody.appendChild(summaryRow);
   
       //TODO: do this on the tbody instead
-      altClass = "tr" + table.tBodies.length%2;
+      altClass = "tr" + prv.table.tBodies.length%2;
       summaryRow.className = altClass;
       
       //create each cell in a row
@@ -169,9 +181,17 @@ var TestTable=function(runTests,testExpanding,clearResults)
       unitTests[unitTestGroupName][jsonrpc.name].viewer.style.display="none";
       cell.appendChild(div);
     }
-    return table;
+    summary.addTestAmount(prv.getTestAmount());
   }
-  
+  prv.getTestAmount=function()
+  {
+    var count=0;
+    for(var name in unitTests)
+    {
+      count+=unitTests[name].tests.length;
+    }
+    return count;
+  }
   //Creates the detailed analysis of each test case
   prv.createDisplayTestSetTable=function(jsonrpc,name)
   {
@@ -260,6 +280,10 @@ var TestTable=function(runTests,testExpanding,clearResults)
     }
     return table;
   }
-  
+  pub.getGui=function()
+  {
+    return prv.table;
+  }
+  prv.init.apply(this,arguments);
   return pub;
 }

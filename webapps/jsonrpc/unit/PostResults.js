@@ -1,4 +1,4 @@
-var PostResults=function(testVisibility)
+var PostResults=function(testVisibility,summary)
 {
   var pub={};
   var prv={};
@@ -28,9 +28,9 @@ var PostResults=function(testVisibility)
                      " (rtt="      + (profile.end -      profile.start) + ")";
       }
       
-      unitTests[name].tests[i].pass=pass;
-      unitTests[name].tests[i].completed=true;
-      unitTests[name].tests[i].running=false;
+      unitTests[name].tests[i][jsonrpc.name].pass=pass;
+      unitTests[name].tests[i][jsonrpc.name].completed=true;
+      unitTests[name].tests[i][jsonrpc.name].running=false;
     
       testVisibility.updateTestSetVisibility(jsonrpc,name);
       prv.updateTestStyle(jsonrpc,name,i,pass,resultText,profileText);
@@ -99,31 +99,41 @@ var PostResults=function(testVisibility)
   }
   prv.updateSuccessFailCount=function(jsonrpc,name)
   {
+    if(!unitTests[name].tests[jsonrpc.name])
+    {
+      unitTests[name].tests[jsonrpc.name]={};
+      unitTests[name].tests[jsonrpc.name].successCount=0;
+      unitTests[name].tests[jsonrpc.name].failCount=0;
+    }
+    summary.subtractSuccesses(unitTests[name].tests[jsonrpc.name].successCount);
+    summary.subtractFailures(unitTests[name].tests[jsonrpc.name].failCount);
+    unitTests[name].tests[jsonrpc.name].successCount=0;
+    unitTests[name].tests[jsonrpc.name].failCount=0;
     //Update the global success/fail count for this test set
-    var successCount=0;
-    var failCount=0;
     for(j=0;j<unitTests[name].tests.length;j++)
     {
       //Only count it if the test is not running and has been completed
-      if((!unitTests[name].tests[j].running) && (unitTests[name].tests[j].completed))
+      if((!unitTests[name].tests[j][jsonrpc.name].running) && (unitTests[name].tests[j][jsonrpc.name].completed))
       {
-        if(unitTests[name].tests[j].pass)
+        if(unitTests[name].tests[j][jsonrpc.name].pass)
         {
-          successCount++;
+          unitTests[name].tests[jsonrpc.name].successCount++;
         }
         else
         {
-          failCount++;
+          unitTests[name].tests[jsonrpc.name].failCount++;
         }
       }
     }
     
     var successDiv=document.getElementById(jsonrpc.name+name+"successCount");
     clearChildren(successDiv,"childNodes");
-    successDiv.appendChild($t(successCount));
+    successDiv.appendChild($t(unitTests[name].tests[jsonrpc.name].successCount));
     var failDiv=document.getElementById(jsonrpc.name+name+"failCount");
     clearChildren(failDiv,"childNodes");
-    failDiv.appendChild($t(failCount));
+    failDiv.appendChild($t(unitTests[name].tests[jsonrpc.name].failCount));
+    summary.addSuccesses(unitTests[name].tests[jsonrpc.name].successCount);
+    summary.addFailures(unitTests[name].tests[jsonrpc.name].failCount);
   }
   prv.postNonException=function(jsonrpc,test,result,resultPosted,async)
   {

@@ -1,4 +1,5 @@
 <h2><%=appName%> <%=title%></h2>
 <div id="actionMenu"></div>
+<div id="summary"></div>
 <div id="results"></div>
 <div id="console"></div>

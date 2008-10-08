@@ -1,12 +1,13 @@
 //loads page
 function onLoad()
 {
+  var summary = Summary();
   var testVisibility=TestVisibility();
   var testExpanding=TestExpanding(testVisibility);
-  var clearResults=ClearResults(testVisibility);
+  var clearResults=ClearResults(testVisibility,summary);
   var constructorSelector=ConstructorSelector(clearResults);
   var menu = Menu(constructorSelector);
-  var postResults=PostResults(testVisibility);
+  var postResults = PostResults(testVisibility,summary);
   var runTests = RunTests(menu,postResults,clearResults);
   
   testVisibility.setMenu(menu);
@@ -17,15 +18,16 @@ function onLoad()
   testExpanding.setIterator(constructorSelector.getIterator());
   
   menu.assignCallbacks(runTests,clearResults,testVisibility,testExpanding);
-  menu.addTo(document.getElementById("actionMenu"))
   
-  var testTable=TestTable(runTests,testExpanding,clearResults);
-  var libraries=menu.table.secondRow.options.library[valueKey];
+  document.getElementById("actionMenu").appendChild(menu.getGui());
+  document.getElementById("summary").appendChild(summary.getGui());
+  
   constructorSelector.getSelector.callback=function(jabsorb)
   {
-    var displayTable = testTable.createShowTestsTable(jabsorb);
+    var displayTable = TestTable(runTests,testExpanding,clearResults,
+        summary,jabsorb);
     var results = document.getElementById("results");
-    results.appendChild(displayTable);
+    results.appendChild(displayTable.getGui());
     testVisibility.updateAllTestsVisibility(jabsorb);
   }
   menu.selector.update();

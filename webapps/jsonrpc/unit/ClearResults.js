@@ -1,4 +1,4 @@
-var ClearResults=function(testVisibility)
+var ClearResults=function(testVisibility,summary)
 {
   var pub={};
   var prv={};
@@ -35,6 +35,7 @@ var ClearResults=function(testVisibility)
     {
       pub.clearResult(jsonrpc,name,i);
     }
+    prv.clearSummary(jsonrpc,name);
   }
   
   //Clear the result for the ith test in the test set given by name
@@ -46,14 +47,31 @@ var ClearResults=function(testVisibility)
       document.getElementById(jsonrpc.name+name+"pass." + i),
       document.getElementById(jsonrpc.name+name+"profile." + i)
     ];
-    
-    unitTests[name].tests[i].completed=false;
-    unitTests[name].tests[i].running=false;
+    if(!unitTests[name].tests[i][jsonrpc.name])
+    {
+      unitTests[name].tests[i][jsonrpc.name]={};
+    }
+    unitTests[name].tests[i][jsonrpc.name].completed=false;
+    unitTests[name].tests[i][jsonrpc.name].running=false;
   
     for(j=0;j<nodes.length;j++)
     {
       clearChildren(nodes[j],"childNodes");
     }
+  }
+  prv.clearSummary=function(jsonrpc)
+  {
+    var successes=0;
+    var failures=0;
+    if(unitTests[name].tests[jsonrpc.name]){
+    //Only count it if the test is not running and has been completed
+      successes+=unitTests[name].tests[jsonrpc.name].successCount;
+      failures+=unitTests[name].tests[jsonrpc.name].failCount;
+      unitTests[name].tests[jsonrpc.name].successCount=0;
+      unitTests[name].tests[jsonrpc.name].failCount=0;
+    }
+    summary.subtractSuccesses(successes);
+    summary.subtractFailures(failures);
   }
   return pub;
 }

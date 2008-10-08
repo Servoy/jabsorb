@@ -1,11 +1,12 @@
-.test_table {
-    width: 100%;
+.test_table,.summary_table {
     border:1px solid navy;
     margin:5px;
     border-collapse:collapse;
     background-color:white;
 }
-
+.test_table {
+    width: 100%;
+}
 .innerTests_table {
     width:auto;
     border:1px solid navy;

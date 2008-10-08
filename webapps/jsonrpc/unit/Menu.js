@@ -13,12 +13,11 @@ function Menu(constructorSelector)
     pub.hideUnrunNode.onclick=testVisibility.updateAllTestsVisibility;
     pub.profileNode.onclick=testVisibility.updateAllTestsVisibility;
   }
-  pub.addTo=function(domObj)
+  pub.getGui=function()
   {
-    domObj.appendChild(prv.table[valueKey]);
+    return prv.table[valueKey];
   }
-  pub.table={};
-  prv.table=pub.table;
+  prv.table={};
   prv.init=function()
   {
     addElement(prv.table,"table",

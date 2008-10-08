@@ -59,6 +59,7 @@
     "    <script type=\"text/javascript\" src=\"ClearResults.js\"></script>\n"+    
     "    <script type=\"text/javascript\" src=\"ConstructorSelector.js\"></script>\n"+    
     "    <script type=\"text/javascript\" src=\"Menu.js\"></script>\n"+    
+    "    <script type=\"text/javascript\" src=\"Summary.js\"></script>\n"+    
     "    <script type=\"text/javascript\" src=\"PostResults.js\"></script>\n"+    
     "    <script type=\"text/javascript\" src=\"RunTests.js\"></script>\n"+    
     "    <script type=\"text/javascript\" src=\"TestTable.js\"></script>\n"+    

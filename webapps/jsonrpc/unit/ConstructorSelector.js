@@ -52,6 +52,7 @@ var ConstructorSelector=function(clearResults)
   {
     if(name==="All libraries")
     {
+      prv.jsonrpcs=[];
       var i;
       clearResults.clearAllResultGroups();
       for(i=0;i<pub.getLoadedJabsorbs().length;i++)
