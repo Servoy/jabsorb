@@ -1,4 +1,4 @@
-var postResults=function(testVisibility)
+var PostResults=function(testVisibility)
 {
   var pub={};
   var prv={};

@@ -1,4 +1,4 @@
-var testVisibility=function(menu)
+var TestVisibility=function(menu)
 {
   var pub={};
   var prv={};

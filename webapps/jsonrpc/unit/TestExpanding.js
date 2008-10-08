@@ -1,4 +1,4 @@
-var testExpanding=function(testVisibility)
+var TestExpanding=function(testVisibility)
 {
   pub={};
   prv={};

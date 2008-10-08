@@ -54,14 +54,14 @@
     "    <link rel=\"stylesheet\" type=\"text/css\" href=\"unit.css\">\n"+
     "    <script type=\"text/javascript\" src=\"utils.js\"></script>\n"+    
     "    <script type=\"text/javascript\" src=\"unitTests.js\"></script>\n" +    
-    "    <script type=\"text/javascript\" src=\"clearResults.js\"></script>\n"+    
-    "    <script type=\"text/javascript\" src=\"menu.js\"></script>\n"+    
-    "    <script type=\"text/javascript\" src=\"postResults.js\"></script>\n"+    
-    "    <script type=\"text/javascript\" src=\"runTests.js\"></script>\n"+    
-    "    <script type=\"text/javascript\" src=\"testTable.js\"></script>\n"+    
-    "    <script type=\"text/javascript\" src=\"testVisibility.js\"></script>\n"+    
-    "    <script type=\"text/javascript\" src=\"testExpanding.js\"></script>\n"+    
-    "    <script type=\"text/javascript\" src=\"constructorSelector.js\"></script>\n"+    
+    "    <script type=\"text/javascript\" src=\"TestVisibility.js\"></script>\n"+    
+    "    <script type=\"text/javascript\" src=\"TestExpanding.js\"></script>\n"+    
+    "    <script type=\"text/javascript\" src=\"ClearResults.js\"></script>\n"+    
+    "    <script type=\"text/javascript\" src=\"ConstructorSelector.js\"></script>\n"+    
+    "    <script type=\"text/javascript\" src=\"Menu.js\"></script>\n"+    
+    "    <script type=\"text/javascript\" src=\"PostResults.js\"></script>\n"+    
+    "    <script type=\"text/javascript\" src=\"RunTests.js\"></script>\n"+    
+    "    <script type=\"text/javascript\" src=\"TestTable.js\"></script>\n"+    
     "    <script type=\"text/javascript\" src=\"unit.js\"></script>\n";
     
    String code="var j_absorbLibraries={};";

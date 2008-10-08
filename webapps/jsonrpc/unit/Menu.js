@@ -1,4 +1,4 @@
-function menu(constructorSelector)
+function Menu(constructorSelector)
 {
   var prv={};
   var pub={};

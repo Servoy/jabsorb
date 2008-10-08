@@ -1,18 +1,4 @@
-
-//function testAllCombos()
-//{
-//  var i;
-//  clearAllResultGroups();
-//  function loaded(_jabsorb)
-//  {
-//    runAllTests(_jabsorb);//jsonrpcs[i])
-//  }
-//  for(i=0;i<j_absorbs.length;i++)
-//  {
-//    selectJabsorbConstructor(j_absorbs[i],true,loaded);
-//  }
-//}
-var runTests=function(menu,postResults,clearResults)
+var RunTests=function(menu,postResults,clearResults)
 {
   var pub={};
   var prv={};
@@ -30,12 +16,12 @@ var runTests=function(menu,postResults,clearResults)
   pub.runTestSet=function(jsonrpc,name)
   {
     var i;
-    if (maxRequestNode.value < 1 || maxRequestNode.value > 99)
+    if (menu.maxRequestNode.value < 1 || menu.maxRequestNode.value > 99)
     {
       alert("Max requests should be between 1 and 99");
       return;
     }
-    jsonrpc.max_req_active = maxRequestNode.value;
+    jsonrpc.max_req_active = menu.maxRequestNode.value;
   
     clearResults.clearResultSet(jsonrpc,name);
     if (menu.profileNode.checked)

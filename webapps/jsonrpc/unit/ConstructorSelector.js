@@ -1,4 +1,4 @@
-var constructorSelector=function(clearResults)
+var ConstructorSelector=function(clearResults)
 {
   var pub={};
   var prv={};

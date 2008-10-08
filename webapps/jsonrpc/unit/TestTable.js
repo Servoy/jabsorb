@@ -1,4 +1,4 @@
-var testTable=function(runTests,testExpanding,clearResults)
+var TestTable=function(runTests,testExpanding,clearResults)
 {
   var pub={};
   var prv={};
