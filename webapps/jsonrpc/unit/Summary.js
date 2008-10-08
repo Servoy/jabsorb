@@ -61,8 +61,9 @@ var Summary = function()
   {
     prv.testAmount-=x;
     prv.update("cell_tests",prv.testAmount);
-    if(prv.testAmount==0)
+    if(prv.testAmount<=0)
     {
+      prv.testAmount=0;
       prv.successes=0;
       prv.failures=0;
       prv.update("cell_successes",prv.successes);
@@ -74,25 +75,31 @@ var Summary = function()
   pub.addSuccesses=function(x)
   {
     prv.successes+=x;
+    if(prv.successes<0)
+    {
+      prv.successes=0;
+    }
     prv.update("cell_successes",prv.successes);
     prv.updateTotal();
   }
   pub.subtractSuccesses=function(x)
   {
-    prv.successes-=x;
-    prv.update("cell_successes",prv.successes);
-    prv.updateTotal();
+    pub.addSuccesses(-x);
   }
   prv.failures=0;
   pub.addFailures=function(x)
   {
     prv.failures+=x;
+    if(prv.failures<0)
+    {
+      prv.failures=0;
+    }
     prv.update("cell_failures",prv.failures);
     prv.updateTotal();
   }
   pub.subtractFailures=function(x)
   {
-    prv.failures-=x;
+    pub.addFailures(-x);
     prv.update("cell_failures",prv.failures);
     prv.updateTotal();
   }  
