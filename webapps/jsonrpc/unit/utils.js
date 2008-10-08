@@ -252,6 +252,30 @@ function addText(obj,text,parent,key)
  */
 function addElementInCell(obj,type,data,parent,key)
 {
-  addElement(obj,"td",data.cellAttributes,parent,"cell");
+  var cellName;
+  if(data.cellAttributes.cellName)
+  {
+    cellName=data.cellAttributes.cellName;
+  }
+  else
+  {
+    cellName="cell";
+  }
+  addElement(obj,"td",data.cellAttributes,parent,cellName);
   addElement(obj,type,data,obj.cell,key);
+}
+
+function addTextInCell(obj,text,data,parent,key)
+{
+  var cellName;
+  if(data.cellAttributes.cellName)
+  {
+    cellName=data.cellAttributes.cellName;
+  }
+  else
+  {
+    cellName="cell";
+  }
+  addElement(obj,"td",data.cellAttributes,parent,cellName);
+  addText(obj,text,obj[cellName],key);
 }
