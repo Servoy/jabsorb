@@ -274,12 +274,19 @@ var jabsorb = function()
    */
   pub.default_ex_handler = function(e)
   {
-    var str = "";
-    for (a in e)
+    if(console&&console.log)
     {
-      str += a + "\t" + e[a] + "\n";
+      console.log(e);
     }
-    alert(str);
+    else
+    {
+      var str = "";
+      for (a in e)
+      {
+        str += a + "\t" + e[a] + "\n";
+      }
+      alert(str);
+    }
   };
 
   /**
