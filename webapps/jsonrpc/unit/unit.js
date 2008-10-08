@@ -1,14 +1,6 @@
 //when the tests started
 var tests_start;
 
-//The difference of the width of detail tables vs the main table
-var innerTableWidthDifference=30;
-
-// some variables to hold stuff
-var tbody;//,maxRequestNode,showSuccessesNode,hideUnrunNode;
-//asyncNode,profileNode,
-//holds the loaded jabsorbs
-
 //loads page
 function onLoad()
 {

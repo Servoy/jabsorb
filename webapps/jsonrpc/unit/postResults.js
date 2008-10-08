@@ -2,6 +2,8 @@ var postResults=function(testVisibility)
 {
   var pub={};
   var prv={};
+
+  prv.tests_start;
   
   /**
    * Displays the result of a test. Pass or Fail is calculated here.
@@ -19,10 +21,10 @@ var postResults=function(testVisibility)
       var    profileText="";
       if (profile)
       {
-        profileText =  "submit="   + (profile.submit -   tests_start)   +
-                     ", start="    + (profile.start -    tests_start)   +
-                     ", end="      + (profile.end -      tests_start)   +
-                     ", dispatch=" + (profile.dispatch - tests_start)   +
+        profileText =  "submit="   + (profile.submit -   prv.tests_start)   +
+                     ", start="    + (profile.start -    prv.tests_start)   +
+                     ", end="      + (profile.end -      prv.tests_start)   +
+                     ", dispatch=" + (profile.dispatch - prv.tests_start)   +
                      " (rtt="      + (profile.end -      profile.start) + ")";
       }
       
@@ -281,6 +283,10 @@ var postResults=function(testVisibility)
       }
     }
     resultPosted(pass,resultText);
+  }
+  pub.startTests=function()
+  {
+    prv.tests_start = new Date();
   }
   return pub;
 }

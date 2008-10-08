@@ -40,7 +40,7 @@ var runTests=function(menu,postResults,clearResults)
     clearResults.clearResultSet(jsonrpc,name);
     if (menu.profileNode.checked)
     {
-      tests_start = new Date();
+      postResults.startTests();
     }
     if (menu.asyncNode.checked)
     {
