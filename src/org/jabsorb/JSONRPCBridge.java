@@ -779,6 +779,10 @@ public class JSONRPCBridge implements Serializable
     }
   }
 
+  /**
+   * Gets the request parser in use.
+   * @return The request parser in use.
+   */
   public RequestParser getRequestParser()
   {
     return requestParser;
