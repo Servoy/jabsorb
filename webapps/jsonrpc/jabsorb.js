@@ -56,12 +56,12 @@ var jabsorb = function()
   pub.transformDates = false;
 
   /**
-   * Set this to true to allow synchronous (blocking) calls. This exists to 
-   * prevent accidentally creating synchronous code. Otherwise all methods 
-   * must have a callback function as the first or last argument.  
+   * Set this to true to allow synchronous (blocking) calls. This exists to
+   * prevent accidentally creating synchronous code. Otherwise all methods must
+   * have a callback function as the first or last argument.
    */
   pub.allowSyncCalls = false;
-  
+
   /* ************************** PRIVATE VARIABLES *************************** */
 
   /** Private static final variables */
@@ -73,6 +73,88 @@ var jabsorb = function()
    */
   prv.knownClasses = {};
 
+  /**
+   * The method creators that are iterated through in order in the addMethods()
+   * method.
+   */
+  prv.methodCreators = [];
+
+  /**
+   * A method creator which creates normal methods. It will always accept
+   * everything, so should be at the end of methodCreators.
+   */
+  prv.normalMethodCreator = function()
+  {
+    var pub = {};
+    pub.accept = function()
+    {
+      return true;
+    }
+    pub.createMethod = function(methodName, toAddTo, dontAdd)
+    {
+      // Create intervening objects in the path to the method name.
+      // For example with the method name "system.listMethods", we first
+      // create a new object called "system" and then add the "listMethod"
+      // function to that object.
+      var tmp = toAddTo;
+      var names = methodName.split(".");
+      var name;
+
+      for (n = 0; n < names.length - 1; n++)
+      {
+        name = names[n];
+        if (tmp[name])
+        {
+          tmp = tmp[name];
+        }
+        else
+        {
+          tmp[name] = {};
+          tmp = tmp[name];
+        }
+      }
+      name = names[names.length - 1];
+      var method = prv.createMethod(methodName);
+      // If it doesn't yet exist and it is to be added to this
+      if ((!toAddTo[name]) && (!dontAdd))
+      {
+        tmp[name] = method;
+      }
+    }
+    return pub;
+  }
+  
+  /**
+   * A method creator for callable references.
+   */
+  prv.callableMethodCreator = function()
+  {
+    var pub = {};
+    pub.accept = function(methodName)
+    {
+      var startIndex = methodName.indexOf("[");
+      var endIndex = methodName.indexOf("]");
+      return ((methodName.substring(0,
+          prv.CALLABLE_REFERENCE_METHOD_PREFIX.length) == prv.CALLABLE_REFERENCE_METHOD_PREFIX)
+          && (startIndex != -1) && (endIndex != -1) && (startIndex < endIndex));
+
+    }
+    pub.createMethod = function(methodName, toAddTo, dontAdd)
+    {
+      var startIndex = methodName.indexOf("[");
+      var endIndex = methodName.indexOf("]");
+      var javaClass = methodName.substring(startIndex + 1, endIndex);
+      var name = methodName.substring(endIndex + 2);
+      var method = prv.createMethod(name);
+      if (!prv.knownClasses[javaClass])
+      {
+        prv.knownClasses[javaClass] = {};
+      }
+      prv.knownClasses[javaClass][name] = method;
+      return method;
+    }
+    return pub;
+  }
   /* **************************** INNER CLASSES ***************************** */
   /**
    * Callable Proxy constructor
@@ -166,12 +248,12 @@ var jabsorb = function()
    */
   prv.init = function()
   {
-    var argShift = 0, 
-        req, 
-        doListMethods = true, 
+    var argShift = 0,
+        req,
+        doListMethods = true,
         readyCB,
         args = [];
-    
+
     for ( var i = 0; i < arguments.length; i++)
     {
       args.push(arguments[i]);
@@ -194,6 +276,9 @@ var jabsorb = function()
     prv.user = args[argShift + 1];
     prv.pass = args[argShift + 2];
     this.objectID = 0;
+
+    pro.addMethodCreator(prv.normalMethodCreator());
+    pro.addMethodCreator(prv.callableMethodCreator());
 
     if (doListMethods)
     {
@@ -274,7 +359,7 @@ var jabsorb = function()
    */
   pub.default_ex_handler = function(e)
   {
-    if(console&&console.log)
+    if (console && console.log)
     {
       console.log(e);
     }
@@ -293,8 +378,10 @@ var jabsorb = function()
    * A method which can be used in the place of a callback, which will cause the
    * call to be synchronous instead of asynchronous.
    */
-  pub.doSync = function(){}
-  
+  pub.doSync = function()
+  {
+  }
+
   /**
    * Converts data from json to objects used by jabsorb.
    * 
@@ -375,6 +462,22 @@ var jabsorb = function()
   };
 
   /* ************************** PROTECTED METHODS *************************** */
+
+  /**
+   * Adds a method creator to the list of known method creators. The new creator
+   * will have the highest priority.
+   * 
+   * @param methodCreator
+   *          The method Creator to add. It should be an object which has two
+   *          keys. The first should be "accept", take a method name and return
+   *          whether it is accepted. The second be "createMethod" and should
+   *          take the method name, the object it should add to and whether or
+   *          not it should be added and return the created method.
+   */
+  pro.addMethodCreator = function(methodCreator)
+  {
+    prv.methodCreators.unshift(methodCreator);
+  }
 
   /**
    * Encodes a string into JSON format
@@ -604,67 +707,18 @@ var jabsorb = function()
    */
   prv.addMethods = function(toAddTo, methodNames, dontAdd)
   {
-    var name, names, n, method, methods = [], javaClass, tmpNames, startIndex, endIndex, tmp;
+    var methods = [], method, i, j;
 
-    for ( var i = 0; i < methodNames.length; i++)
+    for (i = 0; i < methodNames.length; i++)
     {
-      names = methodNames[i].split(".");
-      startIndex = methodNames[i].indexOf("[");
-      endIndex = methodNames[i].indexOf("]");
-      if ((methodNames[i].substring(0,
-          prv.CALLABLE_REFERENCE_METHOD_PREFIX.length) == prv.CALLABLE_REFERENCE_METHOD_PREFIX)
-          && (startIndex != -1) && (endIndex != -1) && (startIndex < endIndex))
+      for (j = 0; j < prv.methodCreators.length; j++)
       {
-        javaClass = methodNames[i].substring(startIndex + 1, endIndex);
-      }
-      else
-      {
-        // Create intervening objects in the path to the method name.
-        // For example with the method name "system.listMethods", we first
-        // create a new object called "system" and then add the "listMethod"
-        // function to that object.
-        tmp = toAddTo;
-        for (n = 0; n < names.length - 1; n++)
+        if (prv.methodCreators[j].accept(methodNames[i]))
         {
-          name = names[n];
-          if (tmp[name])
-          {
-            tmp = tmp[name];
-          }
-          else
-          {
-            tmp[name] = {};
-            tmp = tmp[name];
-          }
+          methods.push(prv.methodCreators[j].createMethod(methodNames[i],
+              toAddTo, dontAdd));
         }
       }
-      // The last part of the name is the actual functionName
-      name = names[names.length - 1];
-
-      // Create the method
-
-      if (javaClass)
-      {
-        method = prv.createMethod(name);
-        if (!prv.knownClasses[javaClass])
-        {
-          prv.knownClasses[javaClass] = {};
-        }
-        prv.knownClasses[javaClass][name] = method;
-      }
-      else
-      {
-        method = prv.createMethod(methodNames[i]);
-        // If it doesn't yet exist and it is to be added to this
-        if ((!toAddTo[name]) && (!dontAdd))
-        {
-          tmp[name] = method;
-        }
-        // maintain a list of all methods created so that
-        // methods[i]==methodNames[i]
-        methods.push(method);
-      }
-      javaClass = null;
     }
 
     return methods;
@@ -681,7 +735,7 @@ var jabsorb = function()
    */
   prv.createCallableProxy = function(objectID, javaClass)
   {
-    var cp, req, methodNames, name, i;
+    var cp, req, name, i;
 
     cp = new prv.JSONRPCCallableProxy(objectID, javaClass);
     // Then add all the cached methods to it.
@@ -693,7 +747,7 @@ var jabsorb = function()
     }
     return cp;
   };
-  
+
   /**
    * This creates a method that points to the serverMethodCaller and binds it
    * with the correct methodName.
@@ -713,7 +767,7 @@ var jabsorb = function()
       {
         args.push(arguments[i]);
       }
-      var callback=prv.extractCallback(args);
+      var callback = prv.extractCallback(args);
       var req = comms.makeRequest(methodName, args, this.objectID, callback);
       if (!callback)
       {
@@ -818,41 +872,43 @@ var jabsorb = function()
   };
 
   /**
-   * Extracts the callback method from a list of arguments to a method. The 
-   * callback must be in either the first or last position, but not both. If 
+   * Extracts the callback method from a list of arguments to a method. The
+   * callback must be in either the first or last position, but not both. If
    * pub.doSync() is passed, then this will return null.
    * 
-   * @param args the list of arguments to a method which may contain a callback
-   *             in the first or last position
-   *             
-   * @return The callback if it exists, or null if no callback is found or the 
+   * @param args
+   *          the list of arguments to a method which may contain a callback in
+   *          the first or last position
+   * 
+   * @return The callback if it exists, or null if no callback is found or the
    *         callback is pub.doSync().
-   * @throws a prv.Exception if both the first and last methods are callbacks.
+   * @throws a
+   *           prv.Exception if both the first and last methods are callbacks.
    */
-  prv.extractCallback=function(args)
+  prv.extractCallback = function(args)
   {
-    var callback=null;
-    var typeofFirst=(typeof args[0] == "function");
+    var callback = null;
+    var typeofFirst = (typeof args[0] == "function");
     var typeofLast;
-    if(args.length>1)
+    if (args.length > 1)
     {
-      typeofLast=(typeof args[args.length-1] == "function");
+      typeofLast = (typeof args[args.length - 1] == "function");
     }
     else
     {
-      typeofLast=null;
+      typeofLast = null;
     }
-    if (typeofFirst||typeofLast)
+    if (typeofFirst || typeofLast)
     {
-      if(typeofFirst&&typeofLast)
+      if (typeofFirst && typeofLast)
       {
         throw new prv.Exception( {
           code :prv.Exception.CODE_ERR_CLIENT,
-          message :"A method was put in both the first and last positions, " +
-              "but should only by put in one"
+          message :"A method was put in both the first and last positions, "
+              + "but should only by put in one"
         });
       }
-      if(typeofFirst)
+      if (typeofFirst)
       {
         callback = args.shift();
       }
@@ -860,17 +916,17 @@ var jabsorb = function()
       {
         callback = args.pop();
       }
-      if(callback==pub.doSync)
+      if (callback == pub.doSync)
       {
-        callback=null;
+        callback = null;
       }
     }
-    if((callback==null)&&(!pub.allowSyncCalls))
+    if ((callback == null) && (!pub.allowSyncCalls))
     {
       throw new prv.Exception( {
         code :prv.Exception.CODE_ERR_CLIENT,
-        message :"A synchronous call was made. To enable sync calls set " +
-        		"allowSyncCalls to true"
+        message :"A synchronous call was made. To enable sync calls set "
+            + "allowSyncCalls to true"
       });
     }
     return callback;
