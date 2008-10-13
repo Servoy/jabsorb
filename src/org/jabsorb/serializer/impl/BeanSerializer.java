@@ -195,18 +195,7 @@ public class BeanSerializer extends AbstractSerializer
     }
 
     JSONObject val = new JSONObject();
-    if (ser.getMarshallClassHints())
-    {
-      try
-      {
-        val.put(JSONSerializer.JAVA_CLASS_FIELD, o.getClass().getName());
-      }
-      catch (JSONException e)
-      {
-        throw new MarshallException(
-          "JSONException: " + e.getMessage(), e);
-      }
-    }
+    marshallHints(val,o);
     Object args[] = new Object[0];
     Object result;
     for(Map.Entry<String, Method> ent:bd.readableProps.entrySet())

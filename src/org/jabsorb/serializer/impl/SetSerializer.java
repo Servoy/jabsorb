@@ -89,17 +89,7 @@ public class SetSerializer extends AbstractSerializer
 
     JSONObject obj = new JSONObject();
     JSONObject setdata = new JSONObject();
-    if (ser.getMarshallClassHints())
-    {
-      try
-      {
-        obj.put(JSONSerializer.JAVA_CLASS_FIELD, o.getClass().getName());
-      }
-      catch (JSONException e)
-      {
-        throw new MarshallException("javaClass not found!", e);
-      }
-    }
+    marshallHints(obj,o);
     try
     {
       obj.put("set", state.push(o, setdata,"set"));

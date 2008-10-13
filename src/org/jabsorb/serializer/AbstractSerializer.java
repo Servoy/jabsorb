@@ -1,32 +1,23 @@
 /*
  * jabsorb - a Java to JavaScript Advanced Object Request Broker
- * http://www.jabsorb.org
- *
- * Copyright 2007-2008 The jabsorb team
- *
- * based on original code from
- * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
- *
- * Copyright Metaparadigm Pte. Ltd. 2004.
- * Michael Clark <michael@metaparadigm.com>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
+ * http://www.jabsorb.org Copyright 2007-2008 The jabsorb team based on original
+ * code from JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
+ * Copyright Metaparadigm Pte. Ltd. 2004. Michael Clark
+ * <michael@metaparadigm.com> Licensed under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law
+ * or agreed to in writing, software distributed under the License is
+ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
  */
 
 package org.jabsorb.serializer;
 
 import org.jabsorb.JSONSerializer;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Convenience class for implementing Serializers providing default setOwner and
@@ -35,10 +26,10 @@ import org.jabsorb.JSONSerializer;
 public abstract class AbstractSerializer implements Serializer
 {
   /**
-   * Generated id. 
+   * Generated id.
    */
   private static final long serialVersionUID = 1L;
-  
+
   /**
    * Main serialiser
    */
@@ -51,7 +42,6 @@ public abstract class AbstractSerializer implements Serializer
    * 
    * @param clazz Java type to check if this Serializer can handle.
    * @param jsonClazz JSON type to check this Serializer can handle.
-   * 
    * @return true If this Serializer can serialize/deserialize the given
    *         java,json pair.
    */
@@ -96,4 +86,22 @@ public abstract class AbstractSerializer implements Serializer
   {
     this.ser = ser;
   }
+
+  protected JSONObject marshallHints(JSONObject obj, Object o)
+      throws MarshallException
+  {
+    if (ser.getMarshallClassHints())
+    {
+      try
+      {
+        obj.put(JSONSerializer.JAVA_CLASS_FIELD, o.getClass().getName());
+      }
+      catch (JSONException e)
+      {
+        throw new MarshallException("javaClass not found!", e);
+      }
+    }
+    return obj;
+  }
+
 }

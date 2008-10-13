@@ -83,12 +83,9 @@ public class DateSerializer extends AbstractSerializer
           + o.getClass());
     }
     JSONObject obj = new JSONObject();
+    marshallHints(obj,o);
     try
     {
-      if (ser.getMarshallClassHints())
-      {
-        obj.put(JSONSerializer.JAVA_CLASS_FIELD, o.getClass().getName());
-      }
       obj.put("time", time);
     }
     catch (JSONException e)

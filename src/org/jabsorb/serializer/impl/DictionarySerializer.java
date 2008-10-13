@@ -86,12 +86,9 @@ public class DictionarySerializer extends AbstractSerializer
     JSONObject obj = new JSONObject();
     JSONObject mapdata = new JSONObject();
 
+    marshallHints(obj,o);
     try
     {
-      if (ser.getMarshallClassHints())
-      {
-        obj.put(JSONSerializer.JAVA_CLASS_FIELD, o.getClass().getName());
-      }
       obj.put("map", state.push(o,mapdata,"map"));
       state.getProcessedObject(mapdata).setSerialized(mapdata);
     }
