@@ -781,6 +781,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Gets the request parser in use.
+   * 
    * @return The request parser in use.
    */
   public RequestParser getRequestParser()
@@ -1129,7 +1130,7 @@ public class JSONRPCBridge implements Serializable
   {
     this.exceptionTransformer = exceptionTransformer;
   }
-  
+
   /**
    * Allow the request parser to be set after construction. This is necessary
    * for beans.
