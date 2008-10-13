@@ -116,8 +116,7 @@ public class NoCircRefsOrDupes implements SerializerState,
     throw new MarshallException("Circular Reference");
   }
 
-  public SuccessfulResult createResult(Object requestId, Object object,
-      Object json)
+  public SuccessfulResult createResult(Object requestId, Object json)
   {
     return new SuccessfulResult(requestId, json);
   }

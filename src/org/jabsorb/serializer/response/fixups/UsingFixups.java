@@ -49,8 +49,7 @@ public abstract class UsingFixups extends NoCircRefsOrDupes
   }
 
   @Override
-  public SuccessfulResult createResult(Object requestId, Object object,
-      Object json)
+  public SuccessfulResult createResult(Object requestId, Object json)
   {
     return new FixupsResult(requestId, json, fixups);
   }

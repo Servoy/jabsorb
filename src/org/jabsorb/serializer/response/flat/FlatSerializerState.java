@@ -62,8 +62,7 @@ public class FlatSerializerState implements SerializerState
     return null;
   }
 
-  public SuccessfulResult createResult(Object requestId, Object object,
-      Object json)
+  public SuccessfulResult createResult(Object requestId, Object json)
   {
     return new FlatResult(requestId, json, this.marshalledObjects);
   }

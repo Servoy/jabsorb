@@ -39,12 +39,10 @@ public interface SerializerState
    * Creates a result to be returned to the jabsorb client.
    * 
    * @param requestId The id of the request for which this result is to be mad e
-   * @param object The object to send
    * @param json The serialized object
    * @return Some kind of SuccessfulResult
    */
-  public SuccessfulResult createResult(Object requestId, Object object,
-      Object json);
+  public SuccessfulResult createResult(Object requestId, Object json);
 
   /**
    * Checks whether the current object being parsed needs action taken upon it
