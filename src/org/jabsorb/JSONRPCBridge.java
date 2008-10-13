@@ -124,7 +124,7 @@ public class JSONRPCBridge implements Serializable
   /**
    * Container for objects of which instances have been made
    */
-  private static class ObjectInstance implements Serializable
+  protected static class ObjectInstance implements Serializable
   {
     /**
      * Unique serialisation id.
@@ -311,6 +311,25 @@ public class JSONRPCBridge implements Serializable
   }
 
   /**
+   * Create unique method names by appending the given prefix to the keys from
+   * the given HashMap and adding them all to the given HashSet.
+   * 
+   * @param m HashSet to add unique methods to.
+   * @param prefix prefix to append to each method name found in the methodMap.
+   * @param methodMap a HashMap containing MethodKey keys specifying methods.
+   */
+  protected static void uniqueMethods(Set<String> m, String prefix,
+      Map<AccessibleObjectKey, Set<AccessibleObject>> methodMap)
+  {
+    for (Map.Entry<AccessibleObjectKey, Set<AccessibleObject>> mentry : methodMap
+        .entrySet())
+    {
+      AccessibleObjectKey mk = mentry.getKey();
+      m.add(prefix + mk.getMethodName());
+    }
+  }
+
+  /**
    * Gets the request parser for the constructor
    * 
    * @param properties The properties file which should have a key
@@ -437,23 +456,9 @@ public class JSONRPCBridge implements Serializable
   }
 
   /**
-   * Create unique method names by appending the given prefix to the keys from
-   * the given HashMap and adding them all to the given HashSet.
-   * 
-   * @param m HashSet to add unique methods to.
-   * @param prefix prefix to append to each method name found in the methodMap.
-   * @param methodMap a HashMap containing MethodKey keys specifying methods.
+   * Whether references will be used on the bridge
    */
-  private static void uniqueMethods(Set<String> m, String prefix,
-      Map<AccessibleObjectKey, Set<AccessibleObject>> methodMap)
-  {
-    for (Map.Entry<AccessibleObjectKey, Set<AccessibleObject>> mentry : methodMap
-        .entrySet())
-    {
-      AccessibleObjectKey mk = mentry.getKey();
-      m.add(prefix + mk.getMethodName());
-    }
-  }
+  protected boolean referencesEnabled;
 
   /**
    * key clazz, classes that should be returned as CallableReferences
@@ -484,11 +489,6 @@ public class JSONRPCBridge implements Serializable
    * key Integer hashcode, object held as reference
    */
   private final Map<Integer, Object> referenceMap;
-
-  /**
-   * Whether references will be used on the bridge
-   */
-  private boolean referencesEnabled;
 
   /**
    * ReferenceSerializer if enabled
@@ -777,6 +777,11 @@ public class JSONRPCBridge implements Serializable
     {
       return referenceMap.get(new Integer(objectId));
     }
+  }
+
+  public RequestParser getRequestParser()
+  {
+    return requestParser;
   }
 
   /**
@@ -1120,7 +1125,7 @@ public class JSONRPCBridge implements Serializable
   {
     this.exceptionTransformer = exceptionTransformer;
   }
-
+  
   /**
    * Allow the request parser to be set after construction. This is necessary
    * for beans.
@@ -1206,6 +1211,32 @@ public class JSONRPCBridge implements Serializable
         }
       }
     }
+  }
+
+  /**
+   * Handle "system.listMethods" this is called by the browser side javascript
+   * when a new JSONRpcClient object is initialized.
+   * 
+   * @return A JSONArray containing the names of the system methods.
+   */
+  protected JSONArray systemListMethods()
+  {
+    Set<String> m = new TreeSet<String>();
+    globalBridge.allInstanceMethods(m);
+    if (globalBridge != this)
+    {
+      globalBridge.allStaticMethods(m);
+      globalBridge.allInstanceMethods(m);
+    }
+    allStaticMethods(m);
+    allInstanceMethods(m);
+    allCallableReferences(m);
+    JSONArray methodNames = new JSONArray();
+    for (String methodName : m)
+    {
+      methodNames.put(methodName);
+    }
+    return methodNames;
   }
 
   /**
@@ -1443,32 +1474,6 @@ public class JSONRPCBridge implements Serializable
       return globalBridge.resolveObject(key);
     }
     return oi;
-  }
-
-  /**
-   * Handle "system.listMethods" this is called by the browser side javascript
-   * when a new JSONRpcClient object is initialized.
-   * 
-   * @return A JSONArray containing the names of the system methods.
-   */
-  private JSONArray systemListMethods()
-  {
-    Set<String> m = new TreeSet<String>();
-    globalBridge.allInstanceMethods(m);
-    if (globalBridge != this)
-    {
-      globalBridge.allStaticMethods(m);
-      globalBridge.allInstanceMethods(m);
-    }
-    allStaticMethods(m);
-    allInstanceMethods(m);
-    allCallableReferences(m);
-    JSONArray methodNames = new JSONArray();
-    for (String methodName : m)
-    {
-      methodNames.put(methodName);
-    }
-    return methodNames;
   }
 
 }
