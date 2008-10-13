@@ -57,6 +57,11 @@ public class ObjectMatch
   public final static ObjectMatch ROUGHLY_SIMILAR = new ObjectMatch(-1);
   
   /**
+   * The object cannot be converted into similar types at all.
+   */
+  public final static ObjectMatch NO_MATCH = new ObjectMatch(Integer.MAX_VALUE);
+
+  /**
    * The object was null, and therefore matches any object,
    * (because any object reference could be null)
    */
