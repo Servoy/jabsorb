@@ -49,16 +49,12 @@ public class TestSerializer extends TestCase
 
   SerializerState marshallerState;
 
-  SerializerState unmarshallerState;
-
   @Override
   protected void setUp() throws Exception
   {
     ser = new JSONSerializer(FixupCircRefAndNonPrimitiveDupes.class);
     ser.registerDefaultSerializers();
     ser.setMarshallClassHints(true);
-    marshallerState = ser.createSerializerState();
-    unmarshallerState = ser.createSerializerState();
   }
 
   public void dontTestExtendedMaps() throws Exception
@@ -68,7 +64,7 @@ public class TestSerializer extends TestCase
     System.out.println("Serialized: ");
     System.out.println(json.toString(2));
     HashMap<Integer, String> unmarshalled = (HashMap<Integer, String>) ser
-        .unmarshall(unmarshallerState, HashMap.class, json);
+        .unmarshall(HashMap.class, json);
     assertEquals(TEST_MAP1, unmarshalled);
   }
 
@@ -86,22 +82,19 @@ public class TestSerializer extends TestCase
     System.out.println("Serialized: ");
     System.out.println(json.toString(2));
     HashMap<Integer, String> unmarshalled = (HashMap<Integer, String>) ser
-        .unmarshall(unmarshallerState, HashMap.class, json);
+        .unmarshall(HashMap.class, json);
     assertEquals(TEST_MAP2, unmarshalled);
   }
 
   public void testWaggle() throws Exception
   {
-    SerializerState _marshallerState = ser.createSerializerState();
-    SerializerState _unmarshallerState = ser.createSerializerState();
     ITest.Waggle waggle = new ITest.Waggle(1);
-    JSONObject json1 = (JSONObject) ser.marshall(_marshallerState, null, waggle,
-        "waggle");
+    JSONObject json1 = (JSONObject) ser.marshall(null,
+        waggle, "waggle");
     ITest.Waggle unmarshalled = (ITest.Waggle) ser.unmarshall(
-        _unmarshallerState, ITest.Waggle.class, json1);
+        ITest.Waggle.class, json1);
     assertEquals(waggle.toString(), unmarshalled.toString());
-    _marshallerState = ser.createSerializerState();
-    JSONObject json2 = (JSONObject) ser.marshall(_marshallerState, null,
+    JSONObject json2 = (JSONObject) ser.marshall(null,
         unmarshalled, "waggle");
     assertEquals(json1.toString(), json2.toString());
   }

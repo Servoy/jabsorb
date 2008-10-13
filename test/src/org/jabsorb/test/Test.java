@@ -663,4 +663,17 @@ public class Test implements Serializable, ITest
     return numTrue;
   }
 
+  public Map<?, ?> complexKeyedMap()
+  {
+    Map<CallableRefTest,CallableRefTest> map = new HashMap<CallableRefTest, CallableRefTest>();
+    
+    CallableRefTest a = new CallableRefTest();
+    CallableRefTest b = new CallableRefTest();
+    CallableRefTest c = new CallableRefTest();
+    CallableRefTest d = new CallableRefTest();
+    map.put(a, b);
+    map.put(c, d);
+    return map;
+  }
+
 }

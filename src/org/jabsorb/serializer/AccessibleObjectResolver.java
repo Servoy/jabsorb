@@ -290,7 +290,7 @@ public class AccessibleObjectResolver
         log.debug("looking for method " + methodName + "("
             + argSignature(arguments) + ")");
       }
-      for (AccessibleObject accessibleObject: accessibleObjects)
+      for (AccessibleObject accessibleObject : accessibleObjects)
       {
         Class<?>[] parameterTypes = null;
         if (accessibleObject instanceof Method)
@@ -299,7 +299,8 @@ public class AccessibleObjectResolver
         }
         else if (accessibleObject instanceof Constructor)
         {
-          parameterTypes = ((Constructor<?>) accessibleObject).getParameterTypes();
+          parameterTypes = ((Constructor<?>) accessibleObject)
+              .getParameterTypes();
         }
 
         try
@@ -324,7 +325,7 @@ public class AccessibleObjectResolver
       // now search through all the candidates and find one which matches
       // the json arguments the closest
       AccessibleObjectCandidate best = null;
-      for (AccessibleObjectCandidate c:candidates)
+      for (AccessibleObjectCandidate c : candidates)
       {
         if (best == null)
         {
@@ -468,9 +469,8 @@ public class AccessibleObjectResolver
         //isAssignableFrom() doesn't work between primitives.
         if (parameterClass.isPrimitive() && parameterClass1.isPrimitive())
         {
-          if ((primitiveRankings.get(parameterClass.getName()))
-              .intValue() < (primitiveRankings.get(parameterClass1
-              .getName())).intValue())
+          if ((primitiveRankings.get(parameterClass.getName())).intValue() < (primitiveRankings
+              .get(parameterClass1.getName())).intValue())
           {
             c++;
           }
@@ -520,7 +520,6 @@ public class AccessibleObjectResolver
       int nonLocalArgIndex = 0;
       for (; i < parameterTypes.length; i++)
       {
-        SerializerState serialiserState = serializer.createSerializerState();
         if (LocalArgController.isLocalArg(parameterTypes[i]))
         {
           // TODO: do this on the actual candidate?
@@ -528,8 +527,8 @@ public class AccessibleObjectResolver
         }
         else
         {
-          matches[i] = serializer.tryUnmarshall(serialiserState,
-              parameterTypes[i], arguments.get(nonLocalArgIndex++));
+          matches[i] = serializer.tryUnmarshall(parameterTypes[i], arguments
+              .get(nonLocalArgIndex++));
         }
       }
     }
@@ -574,15 +573,13 @@ public class AccessibleObjectResolver
     {
       for (; i < param.length; i++)
       {
-        SerializerState serializerState = serializer.createSerializerState();
         if (LocalArgController.isLocalArg(param[i]))
         {
           javaArgs[i] = LocalArgController.resolveLocalArg(context, param[i]);
         }
         else
         {
-          javaArgs[i] = serializer.unmarshall(serializerState, param[i],
-              arguments.get(j++));
+          javaArgs[i] = serializer.unmarshall(param[i], arguments.get(j++));
         }
       }
     }

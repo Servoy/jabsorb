@@ -50,6 +50,7 @@ import org.jabsorb.serializer.impl.EnumSerializer;
 import org.jabsorb.serializer.impl.ListSerializer;
 import org.jabsorb.serializer.impl.MapSerializer;
 import org.jabsorb.serializer.impl.NumberSerializer;
+import org.jabsorb.serializer.impl.ObjectKeyedMapSerializer;
 import org.jabsorb.serializer.impl.PrimitiveSerializer;
 import org.jabsorb.serializer.impl.RawJSONArraySerializer;
 import org.jabsorb.serializer.impl.RawJSONObjectSerializer;
@@ -108,6 +109,7 @@ public class JSONSerializer implements Serializable
 
   /**
    * A list of good serializers that are used when no others are given.
+   * 
    * @return A newly created list. This enables multiple bridges to call this
    *         method and not have the serializers duplicated.
    */
@@ -119,7 +121,7 @@ public class JSONSerializer implements Serializable
     defaultSerializers.add(new BeanSerializer());
     defaultSerializers.add(new ArraySerializer());
     defaultSerializers.add(new DictionarySerializer());
-    defaultSerializers.add(new MapSerializer());
+    defaultSerializers.add(new ObjectKeyedMapSerializer());
     defaultSerializers.add(new SetSerializer());
     defaultSerializers.add(new ListSerializer());
     defaultSerializers.add(new DateSerializer());
@@ -219,8 +221,7 @@ public class JSONSerializer implements Serializable
     {
       throw new UnmarshallException("couldn't parse JSON", e);
     }
-    SerializerState state = this.createSerializerState();
-    return unmarshall(state, null, json);
+    return unmarshall(null, json);
   }
 
   /**
@@ -249,6 +250,32 @@ public class JSONSerializer implements Serializable
   public boolean getMarshallNullAttributes()
   {
     return marshallNullAttributes;
+  }
+
+  /**
+   * Marshall java into an equivalent json representation (JSONObject or
+   * JSONArray.) <p/> This involves finding the correct Serializer for the class
+   * of the given java object and then invoking it to marshall the java object
+   * into json. <p/> The Serializer will invoke this method recursively while
+   * marshalling complex object graphs.
+   * 
+   * @param parent parent object of the object being converted. this can be null
+   *          if it's the root object being converted.
+   * @param java java object to convert into json.
+   * @param ref reference within the parent's point of view of the object being
+   *          serialized. this will be a String for JSONObjects and an Integer
+   *          for JSONArrays.
+   * @return the JSONObject or JSONArray (or primitive object) containing the
+   *         json for the marshalled java object or the special token Object,
+   *         JSONSerializer.CIRC_REF_OR_DUP to indicate to the caller that the
+   *         given Object has already been serialized and so therefore the
+   *         result should be ignored.
+   * @throws MarshallException if there is a problem marshalling java to json.
+   */
+  public Object marshall(Object parent, Object java, Object ref)
+      throws MarshallException
+  {
+    return this.marshall(this.createSerializerState(), parent, java, ref);
   }
 
   /**
@@ -496,6 +523,36 @@ public class JSONSerializer implements Serializable
    * method to call.
    * </p>
    * 
+   * @param clazz optional java class to unmarshall to- if set to null then it
+   *          will be looked for via the javaClass hinting mechanism.
+   * @param json JSONObject or JSONArray or primitive Object wrapper that
+   *          contains the json to unmarshall.
+   * @return an ObjectMatch indicating the degree to which the object matched
+   *         the class,
+   * @throws UnmarshallException if getClassFromHint() fails
+   */
+  public ObjectMatch tryUnmarshall(final Class<?> clazz, final Object json)
+      throws UnmarshallException
+  {
+    return tryUnmarshall(this.createSerializerState(), clazz, json);
+  }
+
+  /**
+   * <p>
+   * Determine if a given JSON object matches a given class type, and to what
+   * degree it matches. An ObjectMatch instance is returned which contains a
+   * number indicating the number of fields that did not match. Therefore when a
+   * given parameter could potentially match in more that one way, this is a
+   * metric to compare these ObjectMatches to determine which one matches more
+   * closely.
+   * </p>
+   * <p>
+   * This is only used when there are overloaded method names that are being
+   * called from JSON-RPC to determine which call signature the method call
+   * matches most closely and therefore which method is the intended target
+   * method to call.
+   * </p>
+   * 
    * @param state used by the underlying Serializer objects to hold state while
    *          unmarshalling for detecting circular references and duplicates.
    * @param clazz optional java class to unmarshall to- if set to null then it
@@ -572,6 +629,26 @@ public class JSONSerializer implements Serializable
     }
 
     throw new UnmarshallException("no match");
+  }
+
+  /**
+   * Unmarshall json into an equivalent java object. <p/> This involves finding
+   * the correct Serializer to use and then delegating to that Serializer to
+   * unmarshall for us. This method will be invoked recursively as Serializers
+   * unmarshall complex object graphs.
+   * 
+   * @param clazz optional java class to unmarshall to- if set to null then it
+   *          will be looked for via the javaClass hinting mechanism.
+   * @param json JSONObject or JSONArray or primitive Object wrapper that
+   *          contains the json to unmarshall.
+   * @return the java object representing the json that was unmarshalled.
+   * @throws UnmarshallException if there is a problem unmarshalling json to
+   *           java.
+   */
+  public Object unmarshall(final Class<?> clazz, final Object json)
+      throws UnmarshallException
+  {
+    return this.unmarshall(createSerializerState(), clazz, json);
   }
 
   /**

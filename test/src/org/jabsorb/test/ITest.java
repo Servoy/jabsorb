@@ -205,6 +205,8 @@ public interface ITest
   Set<?> aSet();
 
   BeanA aBean();
+  
+  Map<?,?> complexKeyedMap();
 
   Enum<?> anEnum();
   
