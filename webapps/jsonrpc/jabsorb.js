@@ -29,6 +29,14 @@
  */
 var jabsorb = function()
 {
+  // The way to properly extend jabsorb is as follows:
+  //   var extendingJabsorbClass = function(){
+  //     var pub = jabsorb.apply(this, arguments);
+  //     var pro = this.pro;
+  //     //All pub and pro variables of jabsorb can be used here.
+  //     return pub;
+  //   }   
+
   /** Assign public variables to this */
   var pub = {};
 
@@ -62,16 +70,18 @@ var jabsorb = function()
    */
   pub.allowSyncCalls = false;
 
-  /* ************************** PRIVATE VARIABLES *************************** */
-
-  /** Private static final variables */
-  prv.CALLABLE_REFERENCE_METHOD_PREFIX = ".ref";
+  /* ************************* PROTECTED VARIABLES ************************** */
 
   /**
    * This is a static variable that maps className to a map of functions names
    * to calls, ie Map knownClasses<ClassName,Map<FunctionName,Function>>
    */
-  prv.knownClasses = {};
+  pro.knownClasses = {};
+  
+  /* ************************** PRIVATE VARIABLES *************************** */
+
+  /** Private static final variables */
+  prv.CALLABLE_REFERENCE_METHOD_PREFIX = ".ref";
 
   /**
    * The method creators that are iterated through in order in the addMethods()
@@ -79,83 +89,8 @@ var jabsorb = function()
    */
   prv.methodCreators = [];
 
-  /**
-   * A method creator which creates normal methods. It will always accept
-   * everything, so should be at the end of methodCreators.
-   */
-  prv.normalMethodCreator = function()
-  {
-    var pub = {};
-    pub.accept = function()
-    {
-      return true;
-    }
-    pub.createMethod = function(methodName, toAddTo, dontAdd)
-    {
-      // Create intervening objects in the path to the method name.
-      // For example with the method name "system.listMethods", we first
-      // create a new object called "system" and then add the "listMethod"
-      // function to that object.
-      var tmp = toAddTo;
-      var names = methodName.split(".");
-      var name;
-
-      for (n = 0; n < names.length - 1; n++)
-      {
-        name = names[n];
-        if (tmp[name])
-        {
-          tmp = tmp[name];
-        }
-        else
-        {
-          tmp[name] = {};
-          tmp = tmp[name];
-        }
-      }
-      name = names[names.length - 1];
-      var method = prv.createMethod(methodName);
-      // If it doesn't yet exist and it is to be added to this
-      if ((!toAddTo[name]) && (!dontAdd))
-      {
-        tmp[name] = method;
-      }
-    }
-    return pub;
-  }
-  
-  /**
-   * A method creator for callable references.
-   */
-  prv.callableMethodCreator = function()
-  {
-    var pub = {};
-    pub.accept = function(methodName)
-    {
-      var startIndex = methodName.indexOf("[");
-      var endIndex = methodName.indexOf("]");
-      return ((methodName.substring(0,
-          prv.CALLABLE_REFERENCE_METHOD_PREFIX.length) == prv.CALLABLE_REFERENCE_METHOD_PREFIX)
-          && (startIndex != -1) && (endIndex != -1) && (startIndex < endIndex));
-
-    }
-    pub.createMethod = function(methodName, toAddTo, dontAdd)
-    {
-      var startIndex = methodName.indexOf("[");
-      var endIndex = methodName.indexOf("]");
-      var javaClass = methodName.substring(startIndex + 1, endIndex);
-      var name = methodName.substring(endIndex + 2);
-      var method = prv.createMethod(name);
-      if (!prv.knownClasses[javaClass])
-      {
-        prv.knownClasses[javaClass] = {};
-      }
-      prv.knownClasses[javaClass][name] = method;
-      return method;
-    }
-    return pub;
-  }
   /* **************************** INNER CLASSES ***************************** */
+  
   /**
    * Callable Proxy constructor
    * 
@@ -165,7 +100,7 @@ var jabsorb = function()
    * @param javaclass
    *          The full package and classname of the object
    */
-  prv.JSONRPCCallableProxy = function(objectID, javaclass)
+  pro.JSONRPCCallableProxy = function(objectID, javaclass)
   {
     this.objectID = objectID;
     this.javaClass = javaclass;
@@ -229,7 +164,88 @@ var jabsorb = function()
     return str;
   };
 
+  /* ************************** METHOD CREATORS ***************************** */
+
+  /**
+   * A method creator for callable references.
+   */
+  pro.callableMethodCreator = function()
+  {
+    var pub = {};
+    pub.accept = function(methodName)
+    {
+      var startIndex = methodName.indexOf("[");
+      var endIndex = methodName.indexOf("]");
+      return ((methodName.substring(0,
+          prv.CALLABLE_REFERENCE_METHOD_PREFIX.length) == prv.CALLABLE_REFERENCE_METHOD_PREFIX)
+          && (startIndex != -1) && (endIndex != -1) && (startIndex < endIndex));
+
+    }
+    pub.createMethod = function(methodName, toAddTo, dontAdd)
+    {
+      var startIndex = methodName.indexOf("[");
+      var endIndex = methodName.indexOf("]");
+      var javaClass = methodName.substring(startIndex + 1, endIndex);
+      var name = methodName.substring(endIndex + 2);
+      var method = prv.createMethod(name);
+      if (!pro.knownClasses[javaClass])
+      {
+        pro.knownClasses[javaClass] = {};
+      }
+      pro.knownClasses[javaClass][name] = method;
+      return [method];
+    }
+    return pub;
+  }
+  
+  /**
+   * A method creator which creates normal methods. It will always accept
+   * everything, so should be at the end of methodCreators.
+   */
+  pro.normalMethodCreator = function()
+  {
+    var pub = {};
+    pub.accept = function()
+    {
+      return true;
+    }
+    pub.createMethod = function(methodName, toAddTo, dontAdd)
+    {
+      // Create intervening objects in the path to the method name.
+      // For example with the method name "system.listMethods", we first
+      // create a new object called "system" and then add the "listMethod"
+      // function to that object.
+      var tmp = toAddTo;
+      var names = methodName.split(".");
+      var name;
+
+      for (n = 0; n < names.length - 1; n++)
+      {
+        name = names[n];
+        if (tmp[name])
+        {
+          tmp = tmp[name];
+        }
+        else
+        {
+          tmp[name] = {};
+          tmp = tmp[name];
+        }
+      }
+      name = names[names.length - 1];
+      var method = prv.createMethod(methodName);
+      // If it doesn't yet exist and it is to be added to this
+      if ((!toAddTo[name]) && (!dontAdd))
+      {
+        tmp[name] = method;
+      }
+      return [method];
+    }
+    return pub;
+  }  
+  
   /* **************************** CONSTRUCTORS ****************************** */
+  
   /**
    * Jabsorb constructor
    * 
@@ -277,8 +293,8 @@ var jabsorb = function()
     prv.pass = args[argShift + 2];
     this.objectID = 0;
 
-    pro.addMethodCreator(prv.normalMethodCreator());
-    pro.addMethodCreator(prv.callableMethodCreator());
+    pro.addMethodCreator(pro.normalMethodCreator());
+    pro.addMethodCreator(pro.callableMethodCreator());
 
     if (doListMethods)
     {
@@ -400,7 +416,7 @@ var jabsorb = function()
     {
       if (r.objectID && r.JSONRPCType == "CallableReference")
       {
-        return prv.createCallableProxy(r.objectID, r.javaClass);
+        return pro.createCallableProxy(r.objectID, r.javaClass);
       }
       else
       {
@@ -425,9 +441,11 @@ var jabsorb = function()
   pub.toJSON = function(o, resultKey)
   {
     // temp variable to hold json while processing
-    var json = pro.simpleToJSON(o, null, "root"), result = {};
+    var json = pro.simpleToJSON(o, null, "root");
+    var result={};
     result[resultKey] = json
     return result;
+    //return "{\""+resultKey+"\":"+json+"}
   }
 
   /**
@@ -480,6 +498,47 @@ var jabsorb = function()
   }
 
   /**
+   * Combines objects passed as arguments to a json string
+   */
+  pro.combineObjectsToJSON=function()
+  {
+    var v = [], argIndex, key;
+
+    for (argIndex = 0; argIndex < arguments.length; argIndex++)
+    {
+      for (key in arguments[argIndex])
+      {
+        v.push("\"" + key + "\": " + arguments[argIndex][key]);
+      }
+    }
+    return "{" + v.join(", ") + "}";
+  }
+
+  /**
+   * Creates a new callable proxy (reference).
+   * 
+   * @param objectID
+   *          The id of the object as determined by the server
+   * @param javaClass
+   *          The package+classname of the object
+   * @return a new callable proxy object
+   */
+  pro.createCallableProxy = function(objectID, javaClass)
+  {
+    var cp, req, name, i;
+
+    cp = new pro.JSONRPCCallableProxy(objectID, javaClass);
+    // Then add all the cached methods to it.
+    for (name in pro.knownClasses[javaClass])
+    {
+      // TODO: DO these get added to this's cp.pub alone or everyones??
+      // I Think it may be the latter
+      cp[name] = pro.knownClasses[javaClass][name];
+    }
+    return cp;
+  };
+  
+  /**
    * Encodes a string into JSON format
    * 
    * @param s
@@ -502,7 +561,7 @@ var jabsorb = function()
     }
     return "\"" + parts.join("") + "\"";
   }
-
+  
   /**
    * Creates a callable reference on an object if it fits the form:
    * 
@@ -517,7 +576,7 @@ var jabsorb = function()
     if (value && value.objectID && value.javaClass
         && value.JSONRPCType == "CallableReference")
     {
-      return prv.createCallableProxy(value.objectID, value.javaClass);
+      return pro.createCallableProxy(value.objectID, value.javaClass);
     }
     return null;
   };
@@ -582,6 +641,8 @@ var jabsorb = function()
         // We are done dealing with object, pop it off the state and remove the
         // marker
         state.pop();
+        
+        //TODO: test to make sure no markers are ever left
         delete o[pro.simpleToJSON.marker];
         return "{" + v.join(", ") + "}";
       }
@@ -715,37 +776,15 @@ var jabsorb = function()
       {
         if (prv.methodCreators[j].accept(methodNames[i]))
         {
-          methods.push(prv.methodCreators[j].createMethod(methodNames[i],
+          //create method returns an array, so we use apply so push 
+          //(which can take many arguments) adds all of them.
+          methods=Array.concat(methods,prv.methodCreators[j].createMethod(methodNames[i],
               toAddTo, dontAdd));
         }
       }
     }
 
     return methods;
-  };
-
-  /**
-   * Creates a new callable proxy (reference).
-   * 
-   * @param objectID
-   *          The id of the object as determined by the server
-   * @param javaClass
-   *          The package+classname of the object
-   * @return a new callable proxy object
-   */
-  prv.createCallableProxy = function(objectID, javaClass)
-  {
-    var cp, req, name, i;
-
-    cp = new prv.JSONRPCCallableProxy(objectID, javaClass);
-    // Then add all the cached methods to it.
-    for (name in prv.knownClasses[javaClass])
-    {
-      // TODO: DO these get added to this's cp.pub alone or everyones??
-      // I Think it may be the latter
-      cp[name] = prv.knownClasses[javaClass][name];
-    }
-    return cp;
   };
 
   /**
@@ -1119,23 +1158,6 @@ var jabsorb = function()
      */
     comms_pub.makeRequest = function(methodName, args, objectID, cb)
     {
-      /**
-       * Combines objects passed as arguments to a json string
-       */
-      function combineObjectsToJSON()
-      {
-        var v = [], argIndex, key;
-
-        for (argIndex = 0; argIndex < arguments.length; argIndex++)
-        {
-          for (key in arguments[argIndex])
-          {
-            v.push("\"" + key + "\": " + arguments[argIndex][key]);
-          }
-        }
-        return "{" + v.join(", ") + "}";
-      }
-
       var req = {}, obj = {};
       req.requestId = pub.requestId++;
       obj.id = req.requestId;
@@ -1149,7 +1171,7 @@ var jabsorb = function()
         obj.method = pro.escapeJSONString(methodName);
       }
 
-      req.data = combineObjectsToJSON(pub.toJSON(args, "params"), obj);
+      req.data = pro.combineObjectsToJSON(pub.toJSON(args, "params"), obj);
       if (cb)
       {
         req.cb = cb;
@@ -1515,7 +1537,10 @@ var jabsorb = function()
 
   // Call the constructor
   prv.init.apply(this, arguments);
+  
+  // Give inheriting classes a way to access protected variables (see top)
   this.pro = pro;
+  
   // Give access to public variables
   return pub;
 };
