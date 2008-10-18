@@ -87,21 +87,31 @@ public abstract class AbstractSerializer implements Serializer
     this.ser = ser;
   }
 
-  protected JSONObject marshallHints(JSONObject obj, Object o)
-      throws MarshallException
+  /**
+   * Marshalls class hints onto an object, if appropriate (ie check
+   * <code>getMarshallClassHints()</code>).
+   * 
+   * @param toAddTo The object to add the hints to.
+   * @param objectWithClass The object from which the class should be taken
+   * @return the object to which the hints were added, for use with chaining.
+   * @throws MarshallException If an exception occurs while the hints are added.
+   */
+  protected JSONObject marshallHints(JSONObject toAddTo,
+      final Object objectWithClass) throws MarshallException
   {
     if (ser.getMarshallClassHints())
     {
       try
       {
-        obj.put(JSONSerializer.JAVA_CLASS_FIELD, o.getClass().getName());
+        toAddTo.put(JSONSerializer.JAVA_CLASS_FIELD, objectWithClass.getClass()
+            .getName());
       }
       catch (JSONException e)
       {
         throw new MarshallException("javaClass not found!", e);
       }
     }
-    return obj;
+    return toAddTo;
   }
 
 }
