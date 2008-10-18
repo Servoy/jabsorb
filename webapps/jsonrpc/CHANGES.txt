@@ -23,6 +23,11 @@ Done:
   This is set to false by default to prevent accidental calling of sync 
   calls in code. 
 
+* Added MessageConverter into the util package. This allows json which is 
+  parsable by one bridge to be converted to json which is parsable by another 
+  bridge. This is useful if you have a server which has two bridges that need to 
+  send json from one to another, ie a network bridge. 
+
 * Added Flat Serialization of data.
 
 * Added EnumSerializer and accompanying unit tests
