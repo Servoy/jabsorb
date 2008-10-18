@@ -7,7 +7,6 @@ import java.util.List;
 import org.jabsorb.serializer.MarshallException;
 import org.jabsorb.serializer.response.FixUp;
 import org.jabsorb.serializer.response.NoCircRefsOrDupes;
-import org.jabsorb.serializer.response.results.FixupsResult;
 import org.jabsorb.serializer.response.results.SuccessfulResult;
 import org.json.JSONArray;
 import org.json.JSONException;
