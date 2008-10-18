@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jabsorb.JSONSerializer;
-import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.response.fixups.FixupCircRefAndNonPrimitiveDupes;
 import org.jabsorb.serializer.response.results.FailedResult;
 import org.json.JSONArray;
@@ -44,7 +43,7 @@ public class Client implements InvocationHandler
   /**
    * Maps proxy keys to proxies
    */
-  private final Map<Object,String> proxyMap;
+  private final Map<Object, String> proxyMap;
 
   /**
    * The serializer instance to use.
@@ -68,7 +67,8 @@ public class Client implements InvocationHandler
       this.session = session;
       this.proxyMap = new HashMap<Object, String>();
       //TODO: this might need a better way of initialising it
-      this.serializer = new JSONSerializer(FixupCircRefAndNonPrimitiveDupes.class);
+      this.serializer = new JSONSerializer(
+          FixupCircRefAndNonPrimitiveDupes.class);
       this.serializer.registerDefaultSerializers();
     }
     catch (Exception e)
@@ -85,6 +85,16 @@ public class Client implements InvocationHandler
   public void closeProxy(Object proxy)
   {
     proxyMap.remove(proxy);
+  }
+
+  /**
+   * Allow access to the serializer
+   * 
+   * @return The serializer for this class
+   */
+  public JSONSerializer getSerializer()
+  {
+    return serializer;
   }
 
   //This method is public because of the inheritance from the InvokationHandler.
@@ -106,8 +116,8 @@ public class Client implements InvocationHandler
       return proxyObj.getClass().getName() + '@'
           + Integer.toHexString(proxyObj.hashCode());
     }
-    return invoke(proxyMap.get(proxyObj), method.getName(), args,
-        method.getReturnType());
+    return invoke(proxyMap.get(proxyObj), method.getName(), args, method
+        .getReturnType());
   }
 
   /**
@@ -172,8 +182,7 @@ public class Client implements InvocationHandler
       for (int argNo = 0; argNo < args.length; argNo++)
       {
         Object arg = args[argNo];
-        SerializerState state = serializer.createSerializerState();
-        params.put(serializer.marshall(state, /* parent */null, arg,
+        params.put(serializer.marshall(/* parent */null, arg,
             new Integer(argNo)));
       }
     }
@@ -191,7 +200,6 @@ public class Client implements InvocationHandler
     }
     if (returnType.equals(Void.TYPE))
       return null;
-    SerializerState state = serializer.createSerializerState();
-    return serializer.unmarshall(state, returnType, rawResult);
+    return serializer.unmarshall(returnType, rawResult);
   }
 }
