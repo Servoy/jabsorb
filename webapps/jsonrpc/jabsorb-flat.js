@@ -40,7 +40,7 @@ var jabsorb_flat = function()
 
   /* ************************** PRIVATE VARIABLES *************************** */
 
-  prv.INDEX_PREFIX = "_";
+  prv.INDEX_PREFIX = "_$Inx$_";
 
   /* **************************** PUBLIC METHODS **************************** */
 

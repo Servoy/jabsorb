@@ -23,7 +23,7 @@ public class FlatSerializerState implements SerializerState
   /**
    * The start indentifier of an index
    */
-  public static final String INDEX_PREFIX = "_!Inx!_";
+  public static final String INDEX_PREFIX = "_$Inx$_";
 
   /**
    * Adds the values contained in map, to the object o.
