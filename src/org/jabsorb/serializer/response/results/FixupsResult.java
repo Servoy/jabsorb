@@ -29,7 +29,7 @@ package org.jabsorb.serializer.response.results;
 import java.util.Collection;
 
 import org.jabsorb.serializer.response.FixUp;
-import org.json.JSONArray;
+import org.jabsorb.serializer.response.fixups.UsingFixups;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -66,15 +66,7 @@ public class FixupsResult extends SuccessfulResult
   public JSONObject createOutput() throws JSONException
   {
     JSONObject o = super.createOutput();
-    if (fixUps != null && fixUps.size() > 0)
-    {
-      JSONArray fixups = new JSONArray();
-      for (FixUp fixup :fixUps)
-      {
-        fixups.put(fixup.toJSONArray());
-      }
-      o.put(FixUp.FIXUPS_FIELD, fixups);
-    }
+    UsingFixups.addFixups(o,this.fixUps);
     return o;
   }
 }

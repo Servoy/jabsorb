@@ -37,6 +37,8 @@ import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
 import org.jabsorb.serializer.response.fixups.FixupProcessedObject;
 import org.jabsorb.serializer.response.results.SuccessfulResult;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Serializer State which can handle neither circular references or duplicates.
@@ -114,6 +116,13 @@ public class NoCircRefsOrDupes implements SerializerState,
       Object ref, Object java) throws MarshallException
   {
     throw new MarshallException("Circular Reference");
+  }
+
+  public JSONObject createObject(String key, Object json) throws JSONException
+  {
+    final JSONObject toReturn = new JSONObject();
+    toReturn.put(key, json);
+    return toReturn;
   }
 
   public SuccessfulResult createResult(Object requestId, Object json)

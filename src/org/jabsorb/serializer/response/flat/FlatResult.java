@@ -40,11 +40,8 @@ class FlatResult extends SuccessfulResult
     Object result = getResult();
     if (result != null)
     {
-      o.put(JSONSerializer.RESULT_FIELD, result);
-      for (FlatProcessedObject p : this.map.values())
-      {
-        o.put(p.getIndex().getIndex(), p.getActualSerialized());
-      }
+      FlatSerializerState.addValuesToObject(o, result, JSONSerializer.RESULT_FIELD, 
+          this.map);
     }
     return o;
   }

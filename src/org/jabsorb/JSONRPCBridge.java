@@ -345,17 +345,19 @@ public class JSONRPCBridge implements Serializable
       try
       {
         final Class<?> clazz = Class.forName(className);
-        Class<?> interfaces[] = clazz.getInterfaces();
-        for (Class<?> c : interfaces)
+        Class<?> superClass = clazz.getSuperclass();
+        while(superClass!=null)
         {
-          if (c.equals(RequestParser.class))
+          if (superClass.equals(RequestParser.class))
           {
             return (RequestParser) clazz.newInstance();
           }
+          superClass=superClass.getSuperclass();
         }
       }
       catch (Exception e)
       {
+        e.printStackTrace();
         //let it fall through to the return
       }
     }
@@ -635,7 +637,7 @@ public class JSONRPCBridge implements Serializable
     {
       encodedMethod = jsonReq.getString(JSONSerializer.METHOD_FIELD);
       requestId = jsonReq.opt(JSONSerializer.ID_FIELD);
-      arguments = requestParser.unmarshallArguments(jsonReq);
+      arguments = requestParser.unmarshallArray(jsonReq, JSONSerializer.PARAMETER_FIELD);
     }
     catch (JSONException e)
     {

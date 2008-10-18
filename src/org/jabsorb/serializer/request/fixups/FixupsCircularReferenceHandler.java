@@ -26,24 +26,27 @@
 
 package org.jabsorb.serializer.request.fixups;
 
-import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.request.RequestParser;
 import org.jabsorb.serializer.response.FixUp;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 /**
  * Circular references are handled by generating an extra parameter, fixups,
- * which contains an array of the paths to get to the duplicate value, matched 
- * with the path to get to the value that this duplicates. 
+ * which contains an array of the paths to get to the duplicate value, matched
+ * with the path to get to the value that this duplicates.
  */
-public class FixupsCircularReferenceHandler implements RequestParser
+public class FixupsCircularReferenceHandler extends RequestParser
 {
-  public JSONArray unmarshallArguments(final JSONObject jsonReq)
+  @Override
+  public JSONArray unmarshallArray(final JSONObject jsonReq, final String key)
       throws JSONException
   {
-    final JSONArray arguments = jsonReq.getJSONArray(JSONSerializer.PARAMETER_FIELD);
+    //TODO: handle error field here
+    final JSONArray arguments = jsonReq.getJSONArray(key);
     final JSONArray fixups = jsonReq.optJSONArray(FixUp.FIXUPS_FIELD);
 
     // apply the fixups (if any) to the parameters. This will result
@@ -65,14 +68,21 @@ public class FixupsCircularReferenceHandler implements RequestParser
     return arguments;
   }
 
+  @Override
+  public JSONObject unmarshallObject(JSONObject jsonReq, String key)
+      throws JSONException
+  {
+    // TODO: Implement this!!
+    throw new NotImplementedException();
+  }
+
   /**
-   * Apply one fixup assigment to the incoming json arguments.
-   * 
-   * WARNING: the resultant "fixed up" arguments may contain circular references
-   * after this operation. That is the whole point of course-- but the JSONArray
-   * and JSONObject's themselves aren't aware of circular references when
-   * certain methods are called (e.g. toString) so be careful when handling
-   * these circular referenced json objects.
+   * Apply one fixup assigment to the incoming json arguments. WARNING: the
+   * resultant "fixed up" arguments may contain circular references after this
+   * operation. That is the whole point of course-- but the JSONArray and
+   * JSONObject's themselves aren't aware of circular references when certain
+   * methods are called (e.g. toString) so be careful when handling these
+   * circular referenced json objects.
    * 
    * @param arguments the json arguments for the incoming json call.
    * @param fixup the fixup entry.
@@ -116,6 +126,50 @@ public class FixupsCircularReferenceHandler implements RequestParser
       ((JSONArray) fixupParent).put(arrRef, originalObject);
     }
   }
+
+  /**
+   * Given a previous json object, find the next object under the given index.
+   * 
+   * @param prev object to find subobject of.
+   * @param idx index of sub object to find.
+   * @return the next object in a fixup reference chain (prev[idx])
+   * @throws JSONException if something goes wrong.
+   */
+  private Object next(Object prev, int idx) throws JSONException
+  {
+    if (prev == null)
+    {
+      throw new JSONException("cannot traverse- missing object encountered");
+    }
+
+    if (prev instanceof JSONArray)
+    {
+      return ((JSONArray) prev).get(idx);
+    }
+    throw new JSONException("not an array");
+  }
+
+  /**
+   * Given a previous json object, find the next object under the given ref.
+   * 
+   * @param prev object to find subobject of.
+   * @param ref reference of sub object to find.
+   * @return the next object in a fixup reference chain (prev[ref])
+   * @throws JSONException if something goes wrong.
+   */
+  private Object next(Object prev, String ref) throws JSONException
+  {
+    if (prev == null)
+    {
+      throw new JSONException("cannot traverse- missing object encountered");
+    }
+    if (prev instanceof JSONObject)
+    {
+      return ((JSONObject) prev).get(ref);
+    }
+    throw new JSONException("not an object");
+  }
+
   /**
    * Traverse a list of references to find the target reference in an original
    * or fixup list.
@@ -182,50 +236,6 @@ public class FixupsCircularReferenceHandler implements RequestParser
     {
       throw new JSONException("unexpected exception");
     }
-  }
-  /**
-   * Given a previous json object, find the next object under the given index.
-   * 
-   * @param prev object to find subobject of.
-   * @param idx index of sub object to find.
-   * @return the next object in a fixup reference chain (prev[idx])
-   * 
-   * @throws JSONException if something goes wrong.
-   */
-  private Object next(Object prev, int idx) throws JSONException
-  {
-    if (prev == null)
-    {
-      throw new JSONException("cannot traverse- missing object encountered");
-    }
-
-    if (prev instanceof JSONArray)
-    {
-      return ((JSONArray) prev).get(idx);
-    }
-    throw new JSONException("not an array");
-  }
-
-  /**
-   * Given a previous json object, find the next object under the given ref.
-   * 
-   * @param prev object to find subobject of.
-   * @param ref reference of sub object to find.
-   * @return the next object in a fixup reference chain (prev[ref])
-   * 
-   * @throws JSONException if something goes wrong.
-   */
-  private Object next(Object prev, String ref) throws JSONException
-  {
-    if (prev == null)
-    {
-      throw new JSONException("cannot traverse- missing object encountered");
-    }
-    if (prev instanceof JSONObject)
-    {
-      return ((JSONObject) prev).get(ref);
-    }
-    throw new JSONException("not an object");
   }
 
 }

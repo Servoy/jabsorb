@@ -27,6 +27,8 @@
 package org.jabsorb.serializer;
 
 import org.jabsorb.serializer.response.results.SuccessfulResult;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Used by Serializers to hold state during marshalling and unmarshalling. It
@@ -35,15 +37,6 @@ import org.jabsorb.serializer.response.results.SuccessfulResult;
  */
 public interface SerializerState
 {
-  /**
-   * Creates a result to be returned to the jabsorb client.
-   * 
-   * @param requestId The id of the request for which this result is to be mad e
-   * @param json The serialized object
-   * @return Some kind of SuccessfulResult
-   */
-  public SuccessfulResult createResult(Object requestId, Object json);
-
   /**
    * Checks whether the current object being parsed needs action taken upon it
    * or is ok to marshal. If any value is returned except null, it means that it
@@ -61,6 +54,37 @@ public interface SerializerState
    */
   public Object checkObject(Object parent, Object currentObject, Object ref)
       throws MarshallException;
+
+  /**
+   * Creates a json object with the data in <code>json</code> stored at
+   * <code>key</code>
+   * 
+   * @param key The key in which the data should be stored
+   * @param json The data to store
+   * @return A new JSONObject with the data stored within it.
+   * @throws JSONException If an exception occurs storing the data.
+   */
+  public JSONObject createObject(String key, Object json) throws JSONException;
+
+  /**
+   * Creates a result to be returned to the jabsorb client.
+   * 
+   * @param requestId The id of the request for which this result is to be mad e
+   * @param json The serialized object
+   * @return Some kind of SuccessfulResult
+   */
+  public SuccessfulResult createResult(Object requestId, Object json);
+
+  /**
+   * If the given object has already been processed, return the ProcessedObject
+   * wrapper for that object which will indicate the original location from
+   * where that Object was processed from.
+   * 
+   * @param object Object to check.
+   * @return ProcessedObject wrapper for the given object or null if the object
+   *         hasn't been processed yet in this SerializerState.
+   */
+  public ProcessedObject getProcessedObject(Object object);
 
   /**
    * Pop off one level from the scope stack of the current location during
@@ -88,6 +112,15 @@ public interface SerializerState
   public Object push(Object parent, Object obj, Object ref);
 
   /**
+   * Tells the serializer state that marshalling for the given object has been
+   * completed
+   * 
+   * @param marshalledObject What the object was marshalled into
+   * @param java The object that was marshalled
+   */
+  public void setMarshalled(Object marshalledObject, Object java);
+
+  /**
    * Associate the incoming source object being serialized to it's serialized
    * representation. Currently only used within tryUnmarshall and unmarshall.
    * This MUST be called before a given unmarshall or tryUnmarshall recurses
@@ -105,17 +138,6 @@ public interface SerializerState
       throws UnmarshallException;
 
   /**
-   * If the given object has already been processed, return the ProcessedObject
-   * wrapper for that object which will indicate the original location from
-   * where that Object was processed from.
-   * 
-   * @param object Object to check.
-   * @return ProcessedObject wrapper for the given object or null if the object
-   *         hasn't been processed yet in this SerializerState.
-   */
-  public ProcessedObject getProcessedObject(Object object);
-
-  /**
    * Much simpler version of push to just account for the fact that an object
    * has been processed (used for unmarshalling where we just need to re-hook up
    * circ refs and duplicates and not generate fixups.)
@@ -123,13 +145,4 @@ public interface SerializerState
    * @param obj Object to account for as being processed.
    */
   public void store(Object obj);
-
-  /**
-   * Tells the serializer state that marshalling for the given object has been
-   * completed
-   * 
-   * @param marshalledObject What the object was marshalled into
-   * @param java The object that was marshalled
-   */
-  public void setMarshalled(Object marshalledObject, Object java);
 }

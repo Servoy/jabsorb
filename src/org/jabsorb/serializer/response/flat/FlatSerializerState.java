@@ -8,6 +8,7 @@ import org.jabsorb.serializer.ProcessedObject;
 import org.jabsorb.serializer.SerializerState;
 import org.jabsorb.serializer.UnmarshallException;
 import org.jabsorb.serializer.response.results.SuccessfulResult;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -22,7 +23,30 @@ public class FlatSerializerState implements SerializerState
   /**
    * The start indentifier of an index
    */
-  public static final String INDEX_PREFIX = "_";
+  public static final String INDEX_PREFIX = "_!Inx!_";
+
+  /**
+   * Adds the values contained in map, to the object o.
+   * 
+   * @param o The object to which the values are added
+   * @param result The primary value
+   * @param key The key under which the primary value is to be stored
+   * @param map The values to store in the object
+   * @return The object o, which was passed in.
+   * @throws JSONException If an error happens when the values in map are added
+   *           to the object
+   */
+  public static JSONObject addValuesToObject(JSONObject o, final Object result,
+      final String key, final Map<Integer, FlatProcessedObject> map)
+      throws JSONException
+  {
+    o.put(key, result);
+    for (FlatProcessedObject p : map.values())
+    {
+      o.put(p.getIndex().getIndex(), p.getActualSerialized());
+    }
+    return o;
+  }
 
   /**
    * The current index value
@@ -60,6 +84,17 @@ public class FlatSerializerState implements SerializerState
     }
     push(null, currentObject, null);
     return null;
+  }
+
+  public JSONObject createObject(String key, Object json) throws JSONException
+  {
+    final JSONObject toReturn = new JSONObject();
+    if (json != null)
+    {
+      FlatSerializerState.addValuesToObject(toReturn, json, key,
+          this.marshalledObjects);
+    }
+    return toReturn;
   }
 
   public SuccessfulResult createResult(Object requestId, Object json)
