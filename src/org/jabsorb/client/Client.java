@@ -44,11 +44,11 @@ import org.slf4j.LoggerFactory;
  */
 public class Client implements InvocationHandler
 {
-  static Logger log = LoggerFactory.getLogger(Client.class);
+  private static Logger log = LoggerFactory.getLogger(Client.class);
 
-  Session session;
+  private Session session;
 
-  JSONSerializer serializer;
+  private JSONSerializer serializer;
   
   /**
    * Maintain a unique id for each message
