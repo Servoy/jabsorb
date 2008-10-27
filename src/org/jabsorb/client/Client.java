@@ -56,6 +56,15 @@ public class Client implements InvocationHandler
   private int id = 0;
   
   /**
+   * Allow access to the serializer
+   * 
+   * @return The serializer for this class
+   */
+  public JSONSerializer getSerializer()
+  {
+    return serializer;
+  }
+  /**
    * Create a client given a session
    * 
    * @param session --
