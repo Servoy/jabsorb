@@ -1066,13 +1066,13 @@ public class JSONRPCBridge implements Serializable
    * certain methods are called (e.g. toString) so be careful when handling
    * these circular referenced json objects.
    * 
-   * @param arguments the json arguments for the incoming json call.
+   * @param object the object to apply fixups to.
    * @param fixup the fixup entry.
    * @param original the original value to assign to the fixup.
    * @throws org.json.JSONException if invalid or unexpected fixup data is
    *           encountered.
    */
-  private void applyFixup(JSONArray arguments, JSONArray fixup,
+  public static void applyFixup(Object object, JSONArray fixup,
       JSONArray original) throws JSONException
   {
     int last = fixup.length() - 1;
@@ -1082,8 +1082,8 @@ public class JSONRPCBridge implements Serializable
       throw new JSONException("fixup path must contain at least 1 reference");
     }
 
-    Object originalObject = traverse(arguments, original, false);
-    Object fixupParent = traverse(arguments, fixup, true);
+    Object originalObject = traverse(object, original, false);
+    Object fixupParent = traverse(object, fixup, true);
 
     // the last ref in the fixup needs to be created
     // it will be either a string or number depending on if the fixupParent is a
@@ -1117,7 +1117,7 @@ public class JSONRPCBridge implements Serializable
    *          objectID==0
    * @param methodName The name of method in the request
    * @return A map of AccessibleObjectKeys to a Collection of AccessibleObjects
-   * @throws NoSuchMethodException
+   * @throws NoSuchMethodException If the method cannot be found in the class 
    */
   private Map getAccessibleObjectMap(final int objectID,
       final String className, final String methodName)
@@ -1220,7 +1220,7 @@ public class JSONRPCBridge implements Serializable
    * 
    * @throws JSONException if something goes wrong.
    */
-  private Object next(Object prev, int idx) throws JSONException
+  private static Object next(Object prev, int idx) throws JSONException
   {
     if (prev == null)
     {
@@ -1243,7 +1243,7 @@ public class JSONRPCBridge implements Serializable
    * 
    * @throws JSONException if something goes wrong.
    */
-  private Object next(Object prev, String ref) throws JSONException
+  private static Object next(Object prev, String ref) throws JSONException
   {
     if (prev == null)
     {
@@ -1366,13 +1366,21 @@ public class JSONRPCBridge implements Serializable
    *         the traversal.
    * @throws JSONException if something unexpected is found in the data
    */
-  private Object traverse(JSONArray origin, JSONArray refs, boolean fixup)
+  private static Object traverse(Object origin, JSONArray refs, boolean fixup)
       throws JSONException
   {
     try
     {
-      JSONArray arr = origin;
-      JSONObject obj = null;
+      JSONArray arr=null;
+      JSONObject obj=null;
+      if(origin instanceof JSONArray)
+      {
+        arr = (JSONArray)origin;
+      }
+      else
+      {
+        obj = (JSONObject)origin;
+      }
 
       // where to stop when traversing
       int stop = refs.length();
