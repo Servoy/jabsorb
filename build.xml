@@ -398,7 +398,7 @@
 		</artifact:install>
 	</target>
 	
-	<target name="run" depends="copy-dependencies,compile.test" description="Runs the jabsorb webapp using jetty">
+	<target name="run" depends="copy-dependencies,compile.test,test.junit" description="Runs the jabsorb webapp using jetty">
 	   <java classname="org.jabsorb.test.JabsorbTestServer"
 	   	     fork="true"
 	         failonerror="true"
