@@ -26,10 +26,12 @@ package org.jabsorb.client;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Iterator;
 
+import org.jabsorb.JSONRPCBridge;
 import org.jabsorb.JSONRPCResult;
 import org.jabsorb.JSONSerializer;
+import org.jabsorb.serializer.FixUp;
 import org.jabsorb.serializer.SerializerState;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,12 +44,17 @@ import org.slf4j.LoggerFactory;
  */
 public class Client implements InvocationHandler
 {
-  static Logger  log = LoggerFactory.getLogger(Client.class);
+  static Logger log = LoggerFactory.getLogger(Client.class);
 
-  Session        session;
+  Session session;
 
   JSONSerializer serializer;
-
+  
+  /**
+   * Maintain a unique id for each message
+   */
+  private int id = 0;
+  
   /**
    * Create a client given a session
    * 
@@ -66,6 +73,11 @@ public class Client implements InvocationHandler
     {
       throw new ClientError(e);
     }
+  }
+
+  public synchronized int getId()
+  {
+    return id++;
   }
 
   /** Manual instantiation of HashMap<String, Object> */
@@ -134,41 +146,80 @@ public class Client implements InvocationHandler
     }
     return invoke(proxyMap.getString(proxyObj), method.getName(), args, method.getReturnType());
   }
-  
-  private Object invoke(String objectTag, String methodName, Object[] args, Class returnType) throws Exception {
-		JSONObject message= new JSONObject();
-		String methodTag= objectTag == null ? "" : objectTag + ".";
-		methodTag+= methodName;
-		message.put("method", methodTag);
 
-		JSONArray params= new JSONArray();
-		if (args != null) {
-			for (int argNo= 0; argNo < args.length; argNo++) {
-				Object arg= args[argNo];
-				SerializerState state= new SerializerState();
-				params.put(serializer.marshall(state, /* parent */null, arg, new Integer(argNo)));
-			}
-		}
-		message.put("params", params);
-		message.put("id", 1);
-		
-		JSONObject responseMessage= session.sendAndReceive(message);
+  private Object invoke(String objectTag, String methodName, Object[] args,
+      Class returnType) throws Exception
+  {
+    final int id = getId();
+    JSONObject message = new JSONObject();
+    String methodTag = objectTag == null ? "" : objectTag + ".";
+    methodTag += methodName;
+    message.put("method", methodTag);
 
-		if (!responseMessage.has("result"))
-			processException(responseMessage);
-		Object rawResult= responseMessage.get("result");
-		if (rawResult == null) {
-			processException(responseMessage);
-		}
-		if (returnType.equals(Void.TYPE))
-			return null;
-		SerializerState state= new SerializerState();
-		return serializer.unmarshall(state, returnType, rawResult);
-	}
+    {
+      SerializerState state = new SerializerState();
+
+      if (args != null)
+      {
+
+        JSONArray params = (JSONArray) serializer.marshall(state, /* parent */
+        null, args, "params");
+
+        if ((state.getFixUps() != null) && (state.getFixUps().size() > 0))
+        {
+          JSONArray fixups = new JSONArray();
+          for (Iterator i = state.getFixUps().iterator(); i.hasNext();)
+          {
+            FixUp fixup = (FixUp) i.next();
+            fixups.put(fixup.toJSONArray());
+          }
+          message.put("fixups", fixups);
+        }
+        message.put("params", params);
+      }
+      else
+      {
+        message.put("params", new JSONArray());
+      }
+    }
+    message.put("id", id);
+
+    JSONObject responseMessage = session.sendAndReceive(message);
+
+    if (!responseMessage.has("result"))
+    {
+      processException(responseMessage);
+    }
+    Object rawResult = responseMessage.get("result");
+    if (rawResult == null)
+    {
+      processException(responseMessage);
+    }
+    if (returnType.equals(Void.TYPE))
+    {
+      return null;
+    }
+
+    {
+      JSONArray fixups = responseMessage.optJSONArray("fixups");
+
+      if (fixups != null)
+      {
+        for (int i = 0; i < fixups.length(); i++)
+        {
+          JSONArray assignment = fixups.getJSONArray(i);
+          JSONArray fixup = assignment.getJSONArray(0);
+          JSONArray original = assignment.getJSONArray(1);
+          JSONRPCBridge.applyFixup(rawResult, fixup, original);
+        }
+      }
+    }
+    return serializer.unmarshall(new SerializerState(), returnType, rawResult);
+  }
 
   /**
-	 * Generate and throw exception based on the data in the 'responseMessage'
-	 */
+   * Generate and throw exception based on the data in the 'responseMessage'
+   */
   protected void processException(JSONObject responseMessage)
       throws JSONException
   {
