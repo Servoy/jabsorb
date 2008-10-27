@@ -1,27 +1,16 @@
 /*
  * jabsorb - a Java to JavaScript Advanced Object Request Broker
- * http://www.jabsorb.org
- *
- * Copyright 2007-2008 The jabsorb team
- *
- * based on original code from
- * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
- *
- * Copyright Metaparadigm Pte. Ltd. 2004.
- * Michael Clark <michael@metaparadigm.com>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
+ * http://www.jabsorb.org Copyright 2007-2008 The jabsorb team based on original
+ * code from JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
+ * Copyright Metaparadigm Pte. Ltd. 2004. Michael Clark
+ * <michael@metaparadigm.com> Licensed under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law
+ * or agreed to in writing, software distributed under the License is
+ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
  */
 
 package org.jabsorb.test;
@@ -34,6 +23,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import org.json.JSONObject;
+
 public interface ITest
 {
   static public class Waggle implements Serializable
@@ -41,11 +32,11 @@ public interface ITest
 
     private final static long serialVersionUID = 2;
 
-    private int               baz;
+    private int baz;
 
-    private String            bang;
+    private String bang;
 
-    Integer                   bork;
+    Integer bork;
 
     public Waggle()
     {
@@ -98,9 +89,9 @@ public interface ITest
 
     private final static long serialVersionUID = 2;
 
-    private String            foo;
+    private String foo;
 
-    private int               bar;
+    private int bar;
 
     public Wiggle()
     {
@@ -150,11 +141,12 @@ public interface ITest
 
   /**
    * Made to test issue 47
+   * 
    * @param object the array to echo
    * @return the same array given.
    */
   Object[] echoArray(Object[] object);
-  
+
   List echoList(List l);
 
   byte[] echoByteArray(byte ba[]);
@@ -172,9 +164,9 @@ public interface ITest
   Integer echoIntegerObject(Integer i);
 
   String echoOverloadedObject(Number i);
-  
+
   String echoOverloadedObject(Boolean s);
-  
+
   Long echoLongObject(Long l);
 
   Float echoFloatObject(Float f);
@@ -182,12 +174,14 @@ public interface ITest
   Double echoDoubleObject(Double d);
 
   Date echoDateObject(Date d);
-  
+
   java.sql.Date echoSQLDateObject(java.sql.Date d);
 
   Object echoObject(Object o);
 
   Object echoObjectArray(Object[] o);
+
+  JSONObject echoRawJSON(JSONObject rawObject);
 
   int[] anArray();
 
