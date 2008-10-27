@@ -75,7 +75,7 @@ public class Client implements InvocationHandler
     }
   }
 
-  public synchronized int getId()
+  private synchronized int getId()
   {
     return id++;
   }
