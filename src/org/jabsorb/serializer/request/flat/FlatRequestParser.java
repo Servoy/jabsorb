@@ -56,28 +56,12 @@ public class FlatRequestParser extends RequestParser
       {
         return this.parsedObjects.get(index);
       }
-      JSONObject o = jsonReq.getJSONObject(index);
-      this.parsedObjects.put(index, o);
-      Map<String, Object> newObjects = new TreeMap<String, Object>();
-      for (Iterator<?> i = o.keys(); i.hasNext();)
+      Object o = jsonReq.get(index);
+      if (isObjectIndex(o))
       {
-        String k = (String) i.next();
-        Object v = o.get(k);
-        if (isObjectIndex(v))
-        {
-          Object ob = getObject((String) v, jsonReq);
-          newObjects.put(k, ob);
-        }
-        else if (v instanceof JSONArray)
-        {
-          newObjects.put(k, parseArray((JSONArray) v, jsonReq));
-        }
+        return _getObject((String) o, jsonReq);
       }
-      for (Entry<String, Object> e : newObjects.entrySet())
-      {
-        o.put(e.getKey(), e.getValue());
-      }
-      return o;
+      return _getObject(index, jsonReq);
     }
 
     /**
@@ -107,7 +91,45 @@ public class FlatRequestParser extends RequestParser
       return array;
     }
 
-    
+    /**
+     * Gets an object by its index
+     * 
+     * @param index The index of the object
+     * @param jsonReq The object which maps indexes to objects
+     * @return The object requested
+     * @throws JSONException If the json cannot be read
+     */
+    private JSONObject _getObject(String index, JSONObject jsonReq)
+        throws JSONException
+    {
+      if (this.parsedObjects.containsKey(index))
+      {
+        return this.parsedObjects.get(index);
+      }
+      JSONObject o = jsonReq.getJSONObject(index);
+      this.parsedObjects.put(index, o);
+      Map<String, Object> newObjects = new TreeMap<String, Object>();
+      for (Iterator<?> i = o.keys(); i.hasNext();)
+      {
+        String k = (String) i.next();
+        Object v = o.get(k);
+        if (isObjectIndex(v))
+        {
+          Object ob = getObject((String) v, jsonReq);
+          newObjects.put(k, ob);
+        }
+        else if (v instanceof JSONArray)
+        {
+          newObjects.put(k, parseArray((JSONArray) v, jsonReq));
+        }
+      }
+      for (Entry<String, Object> e : newObjects.entrySet())
+      {
+        o.put(e.getKey(), e.getValue());
+      }
+      return o;
+    }
+
   }
 
   /**
@@ -128,17 +150,17 @@ public class FlatRequestParser extends RequestParser
     }
     return false;
   }
-  
+
   @Override
   public Object unmarshall(final JSONObject object, final String key)
       throws JSONException
   {
     Object value = object.get(key);
-    if(isObjectIndex(value))
+    if (isObjectIndex(value))
     {
-      return this.unmarshallObject(object, (String)value);
+      return this.unmarshallObject(object, (String) value);
     }
-    return super.unmarshall(object,key);
+    return super.unmarshall(object, key);
   }
 
   @Override
