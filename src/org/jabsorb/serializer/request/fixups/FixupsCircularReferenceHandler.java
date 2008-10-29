@@ -32,8 +32,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 /**
  * Circular references are handled by generating an extra parameter, fixups,
  * which contains an array of the paths to get to the duplicate value, matched
@@ -45,9 +43,29 @@ public class FixupsCircularReferenceHandler extends RequestParser
   public JSONArray unmarshallArray(final JSONObject jsonReq, final String key)
       throws JSONException
   {
-    //TODO: handle error field here
-    final JSONArray arguments = jsonReq.getJSONArray(key);
-    final JSONArray fixups = jsonReq.optJSONArray(FixUp.FIXUPS_FIELD);
+    return (JSONArray) _unmarshall(jsonReq, key);
+  }
+
+  @Override
+  public JSONObject unmarshallObject(JSONObject jsonReq, String key)
+      throws JSONException
+  {
+    return (JSONObject) _unmarshall(jsonReq, key);
+  }
+
+  /**
+   * Applies fixups to an JSONObject or JSONArray
+   * 
+   * @param data The object which holds the Object/array and the fixup info
+   * @param key The Key in data for the object/array
+   * @return The Object/Array
+   * @throws JSONException If the json cannot be read
+   */
+  private Object _unmarshall(JSONObject data, String key) throws JSONException
+  {
+    // TODO: handle error field here
+    final Object arguments = data.get(key);
+    final JSONArray fixups = data.optJSONArray(FixUp.FIXUPS_FIELD);
 
     // apply the fixups (if any) to the parameters. This will result
     // in a JSONArray that might have circular references-- so
@@ -68,14 +86,6 @@ public class FixupsCircularReferenceHandler extends RequestParser
     return arguments;
   }
 
-  @Override
-  public JSONObject unmarshallObject(JSONObject jsonReq, String key)
-      throws JSONException
-  {
-    // TODO: Implement this!!
-    throw new NotImplementedException();
-  }
-
   /**
    * Apply one fixup assigment to the incoming json arguments. WARNING: the
    * resultant "fixed up" arguments may contain circular references after this
@@ -84,14 +94,14 @@ public class FixupsCircularReferenceHandler extends RequestParser
    * methods are called (e.g. toString) so be careful when handling these
    * circular referenced json objects.
    * 
-   * @param arguments the json arguments for the incoming json call.
+   * @param toFix the element to apply the fixup to.
    * @param fixup the fixup entry.
    * @param original the original value to assign to the fixup.
    * @throws org.json.JSONException if invalid or unexpected fixup data is
    *           encountered.
    */
-  private void applyFixup(JSONArray arguments, JSONArray fixup,
-      JSONArray original) throws JSONException
+  private void applyFixup(Object toFix, JSONArray fixup, JSONArray original)
+      throws JSONException
   {
     int last = fixup.length() - 1;
 
@@ -100,8 +110,8 @@ public class FixupsCircularReferenceHandler extends RequestParser
       throw new JSONException("fixup path must contain at least 1 reference");
     }
 
-    Object originalObject = traverse(arguments, original, false);
-    Object fixupParent = traverse(arguments, fixup, true);
+    Object originalObject = traverse(toFix, original, false);
+    Object fixupParent = traverse(toFix, fixup, true);
 
     // the last ref in the fixup needs to be created
     // it will be either a string or number depending on if the fixupParent is a
@@ -184,13 +194,21 @@ public class FixupsCircularReferenceHandler extends RequestParser
    *         the traversal.
    * @throws JSONException if something unexpected is found in the data
    */
-  private Object traverse(JSONArray origin, JSONArray refs, boolean fixup)
+  private Object traverse(Object origin, JSONArray refs, boolean fixup)
       throws JSONException
   {
     try
     {
-      JSONArray arr = origin;
+      JSONArray arr = null;
       JSONObject obj = null;
+      if (origin instanceof JSONArray)
+      {
+        arr = (JSONArray) origin;
+      }
+      else
+      {
+        obj = (JSONObject) origin;
+      }
 
       // where to stop when traversing
       int stop = refs.length();
