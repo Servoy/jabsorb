@@ -101,8 +101,8 @@ public class MessageConverter
     {
       if (message != null)
       {
-        final Object toUnmarshall = from.getRequestParser().unmarshall(message,
-            dataKey);
+        final Object toUnmarshall = from.getSerializer().getRequestParser()
+            .unmarshall(message, dataKey);
         o = from.getSerializer().unmarshall(null, toUnmarshall);
       }
       else

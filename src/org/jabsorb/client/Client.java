@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jabsorb.JSONSerializer;
+import org.jabsorb.serializer.SerializerState;
+import org.jabsorb.serializer.request.fixups.FixupsCircularReferenceHandler;
 import org.jabsorb.serializer.response.fixups.FixupCircRefAndNonPrimitiveDupes;
 import org.jabsorb.serializer.response.results.FailedResult;
 import org.json.JSONArray;
@@ -40,6 +42,21 @@ import org.json.JSONObject;
  */
 public class Client implements InvocationHandler
 {
+  /**
+   * Maintain a unique id for each message
+   */
+  private int id = 0;
+
+  /**
+   * Gets the id of the next message
+   * 
+   * @return The id for the next message.
+   */
+  private synchronized int getId()
+  {
+    return id++;
+  }
+
   /**
    * Maps proxy keys to proxies
    */
@@ -68,7 +85,8 @@ public class Client implements InvocationHandler
       this.proxyMap = new HashMap<Object, String>();
       //TODO: this might need a better way of initialising it
       this.serializer = new JSONSerializer(
-          FixupCircRefAndNonPrimitiveDupes.class);
+          FixupCircRefAndNonPrimitiveDupes.class,
+          new FixupsCircularReferenceHandler());
       this.serializer.registerDefaultSerializers();
     }
     catch (Exception e)
@@ -171,35 +189,46 @@ public class Client implements InvocationHandler
   private Object invoke(String objectTag, String methodName, Object[] args,
       Class<?> returnType) throws Exception
   {
-    JSONObject message = new JSONObject();
+    JSONObject message;
     String methodTag = objectTag == null ? "" : objectTag + ".";
     methodTag += methodName;
-    message.put(JSONSerializer.METHOD_FIELD, methodTag);
 
-    JSONArray params = new JSONArray();
-    if (args != null)
     {
-      for (int argNo = 0; argNo < args.length; argNo++)
+      if (args != null)
       {
-        Object arg = args[argNo];
-        params.put(serializer.marshall(/* parent */null, arg,
-            new Integer(argNo)));
+        SerializerState state = this.serializer.createSerializerState();
+        Object params = serializer.marshall(state, /* parent */
+        null, args, JSONSerializer.PARAMETER_FIELD);
+        message = state.createObject(JSONSerializer.PARAMETER_FIELD, params);
+      }
+      else
+      {
+        message = new JSONObject();
+        message.put(JSONSerializer.PARAMETER_FIELD, new JSONArray());
       }
     }
-    message.put(JSONSerializer.PARAMETER_FIELD, params);
-    message.put(JSONSerializer.ID_FIELD, 1);
+    message.put(JSONSerializer.METHOD_FIELD, methodTag);
+    message.put(JSONSerializer.ID_FIELD, getId());
 
     JSONObject responseMessage = session.sendAndReceive(message);
 
     if (!responseMessage.has(JSONSerializer.RESULT_FIELD))
       processException(responseMessage);
-    Object rawResult = responseMessage.get(JSONSerializer.RESULT_FIELD);
-    if (rawResult == null)
+    Object rawResult = this.serializer.getRequestParser().unmarshall(
+        responseMessage, JSONSerializer.RESULT_FIELD);
+    if (returnType.equals(Void.TYPE))
+    {
+      return null;
+    }
+    else if (rawResult == null)
     {
       processException(responseMessage);
     }
-    if (returnType.equals(Void.TYPE))
-      return null;
-    return serializer.unmarshall(returnType, rawResult);
+    {
+      SerializerState state = this.serializer.createSerializerState();
+      Object toReturn = serializer.unmarshall(state, returnType, rawResult);
+
+      return toReturn;
+    }
   }
 }

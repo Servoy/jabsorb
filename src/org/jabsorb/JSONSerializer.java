@@ -57,6 +57,7 @@ import org.jabsorb.serializer.impl.RawJSONObjectSerializer;
 import org.jabsorb.serializer.impl.ReferenceSerializer;
 import org.jabsorb.serializer.impl.SetSerializer;
 import org.jabsorb.serializer.impl.StringSerializer;
+import org.jabsorb.serializer.request.RequestParser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -148,6 +149,11 @@ public class JSONSerializer implements Serializable
   private boolean marshallNullAttributes = true;
 
   /**
+   * The request parser to use
+   */
+  private final RequestParser requestParser;
+
+  /**
    * key: Class, value: Serializer
    */
   private transient final Map<Class<?>, Serializer> serializableMap;
@@ -173,13 +179,16 @@ public class JSONSerializer implements Serializable
    * 
    * @param serializerStateClass The serializer state's class which will be
    *          created by createSerializerState().
+   * @param requestParser The request parser to use
    */
-  public JSONSerializer(Class<? extends SerializerState> serializerStateClass)
+  public JSONSerializer(Class<? extends SerializerState> serializerStateClass,
+      final RequestParser requestParser)
   {
     this.serializerSet = new HashSet<Serializer>();
     this.serializerList = new ArrayList<Serializer>();
     this.serializableMap = new HashMap<Class<?>, Serializer>();
     this.serializerStateClass = serializerStateClass;
+    this.requestParser = requestParser;
   }
 
   /**
@@ -250,6 +259,16 @@ public class JSONSerializer implements Serializable
   public boolean getMarshallNullAttributes()
   {
     return marshallNullAttributes;
+  }
+
+  /**
+   * Gets the request parser
+   * 
+   * @return The request parser
+   */
+  public RequestParser getRequestParser()
+  {
+    return this.requestParser;
   }
 
   /**

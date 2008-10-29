@@ -503,12 +503,6 @@ public class JSONRPCBridge implements Serializable
   private final Set<Class<?>> referenceSet;
 
   /**
-   * Responsible for marshalling/unmarshalling any circular references in
-   * messages received.
-   */
-  private RequestParser requestParser;
-
-  /**
    * Local JSONSerializer instance
    */
   private JSONSerializer ser;
@@ -552,7 +546,7 @@ public class JSONRPCBridge implements Serializable
             + requestParser.getClass().getCanonicalName());
       }
     }
-    ser = new JSONSerializer(serializerStateClass);
+    ser = new JSONSerializer(serializerStateClass,requestParser);
     try
     {
       for (Serializer s : serializers)
@@ -579,7 +573,6 @@ public class JSONRPCBridge implements Serializable
     referenceSet = new HashSet<Class<?>>();
     callableReferenceSet = new HashSet<Class<?>>();
     referencesEnabled = false;
-    this.requestParser = requestParser;
   }
 
   /**
@@ -637,7 +630,7 @@ public class JSONRPCBridge implements Serializable
     {
       encodedMethod = jsonReq.getString(JSONSerializer.METHOD_FIELD);
       requestId = jsonReq.opt(JSONSerializer.ID_FIELD);
-      arguments = requestParser.unmarshallArray(jsonReq, JSONSerializer.PARAMETER_FIELD);
+      arguments = this.ser.getRequestParser().unmarshallArray(jsonReq, JSONSerializer.PARAMETER_FIELD);
     }
     catch (JSONException e)
     {
@@ -779,16 +772,6 @@ public class JSONRPCBridge implements Serializable
     {
       return referenceMap.get(new Integer(objectId));
     }
-  }
-
-  /**
-   * Gets the request parser in use.
-   * 
-   * @return The request parser in use.
-   */
-  public RequestParser getRequestParser()
-  {
-    return requestParser;
   }
 
   /**
@@ -1131,17 +1114,6 @@ public class JSONRPCBridge implements Serializable
   public void setExceptionTransformer(ExceptionTransformer exceptionTransformer)
   {
     this.exceptionTransformer = exceptionTransformer;
-  }
-
-  /**
-   * Allow the request parser to be set after construction. This is necessary
-   * for beans.
-   * 
-   * @param requestParser The request parser to use.
-   */
-  public void setRequestParser(RequestParser requestParser)
-  {
-    this.requestParser = requestParser;
   }
 
   /**
