@@ -50,7 +50,7 @@ import org.jabsorb.serializer.impl.EnumSerializer;
 import org.jabsorb.serializer.impl.ListSerializer;
 import org.jabsorb.serializer.impl.MapSerializer;
 import org.jabsorb.serializer.impl.NumberSerializer;
-import org.jabsorb.serializer.impl.ObjectKeyedMapSerializer;
+import org.jabsorb.serializer.impl.MapSerializer;
 import org.jabsorb.serializer.impl.PrimitiveSerializer;
 import org.jabsorb.serializer.impl.RawJSONArraySerializer;
 import org.jabsorb.serializer.impl.RawJSONObjectSerializer;
@@ -122,7 +122,7 @@ public class JSONSerializer implements Serializable
     defaultSerializers.add(new BeanSerializer());
     defaultSerializers.add(new ArraySerializer());
     defaultSerializers.add(new DictionarySerializer());
-    defaultSerializers.add(new ObjectKeyedMapSerializer());
+    defaultSerializers.add(new MapSerializer());
     defaultSerializers.add(new SetSerializer());
     defaultSerializers.add(new ListSerializer());
     defaultSerializers.add(new DateSerializer());
