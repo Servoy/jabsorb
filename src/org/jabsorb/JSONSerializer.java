@@ -151,7 +151,7 @@ public class JSONSerializer implements Serializable
   /**
    * The request parser to use
    */
-  private final RequestParser requestParser;
+  private RequestParser requestParser;
 
   /**
    * key: Class, value: Serializer
@@ -270,6 +270,16 @@ public class JSONSerializer implements Serializable
   {
     return this.requestParser;
   }
+  
+  /**
+   * Sets the request parser
+   * @param requestParser The new request parser
+   */
+  public void setRequestParser(final RequestParser requestParser)
+  {
+    this.requestParser=requestParser;
+  }
+
 
   /**
    * Marshall java into an equivalent json representation (JSONObject or

@@ -34,7 +34,7 @@
    for(JSONRPCBridge bridge: bridges)
    {
      bridge.setSerializerStateClass((Class<? extends org.jabsorb.serializer.SerializerState>)states[i]);
-     bridge.setRequestParser(requestParsers[i]);
+     bridge.getSerializer().setRequestParser(requestParsers[i]);
      bridge.registerObject("test", testObject);
 	   bridge.registerReference(org.jabsorb.test.Test.RefTest.class);
 	   bridge.registerCallableReference(org.jabsorb.test.Test.CallableRefTest.class);
