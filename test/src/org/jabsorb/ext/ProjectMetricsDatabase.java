@@ -35,6 +35,7 @@ import java.util.List;
 
 import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.UnmarshallException;
+import org.jabsorb.serializer.request.DefaultRequestParser;
 import org.jabsorb.serializer.response.NoCircRefsOrDupes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,7 +156,7 @@ public class ProjectMetricsDatabase
    */
   static
   {
-    serializer = new JSONSerializer(NoCircRefsOrDupes.class);
+    serializer = new JSONSerializer(NoCircRefsOrDupes.class, new DefaultRequestParser());
     try
     {
       serializer.registerDefaultSerializers();

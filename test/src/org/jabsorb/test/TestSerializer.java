@@ -33,6 +33,7 @@ import junit.framework.TestCase;
 
 import org.jabsorb.JSONSerializer;
 import org.jabsorb.serializer.SerializerState;
+import org.jabsorb.serializer.request.fixups.FixupsCircularReferenceHandler;
 import org.jabsorb.serializer.response.fixups.FixupCircRefAndNonPrimitiveDupes;
 import org.json.JSONObject;
 
@@ -52,7 +53,7 @@ public class TestSerializer extends TestCase
   @Override
   protected void setUp() throws Exception
   {
-    ser = new JSONSerializer(FixupCircRefAndNonPrimitiveDupes.class);
+    ser = new JSONSerializer(FixupCircRefAndNonPrimitiveDupes.class, new FixupsCircularReferenceHandler());
     ser.registerDefaultSerializers();
     ser.setMarshallClassHints(true);
   }
