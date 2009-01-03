@@ -51,6 +51,9 @@ Done:
 * Bug 30: The version number is now only stored in one place. Ant now copies 
   _header.jspinc to header.jspinc for inclusion into jsps.
 
+2008-12-01 jabsorb 1.3.1 release
+
+* Fix client side string encoding bug (Issue 52)
 
 2008-08-27 jabsorb 1.3 release
 
