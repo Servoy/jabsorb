@@ -99,9 +99,40 @@ circRefList.list[3].beanA.beanB = circRefList.list[3];
 circRefList.list[4].map.buckle_my_shoe = circRefList;
 circRefList.list[4].map.aBean = circRefList.list[3].beanA;
 
+// create some data for the client side JSON string tests
+var newlineTestStr = 'new\nline';
+var newlineTestResultStr = '"new\\nline"';
+var embeddedQuoteTestStr = '"Humpty" Dumpty Sat on a Wall';
+var embeddedQuoteTestResultStr = '"\\"Humpty\\" Dumpty Sat on a Wall"';
+var controlCharTestStr = 'hmm.... \u0000';
+var controlCharTestResultStr = '"hmm.... \\u0000"';
+
 // the unit tests
 
 var unitTests={
+  "Client Side JSON String Encoding":
+  {
+    tests:
+    [ 
+      // simple string escape
+      { code: 'escapeJSONString("hello world")',
+        test: 'result === "\\\"hello world\\\""'
+      },
+      // embedded newline
+      { code: 'escapeJSONString(newlineTestStr)',
+        test: 'result === newlineTestResultStr'
+      },
+      // embedded quote
+      { code: 'escapeJSONString(embeddedQuoteTestStr)',
+        test: 'result === embeddedQuoteTestResultStr'
+      },
+      // control char
+      { code: 'escapeJSONString(controlCharTestStr)',
+        test: 'result === controlCharTestResultStr'
+      }
+
+    ]
+  },
   "Circular References":
   {
     tests: 

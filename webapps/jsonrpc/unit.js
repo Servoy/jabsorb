@@ -523,22 +523,30 @@ function testAsyncCB(name,i)
 //Run a test in async mode
 function runTestAsync(name,i)
 {
-  var cb,code,str;
+  var cb,code,str,thisTest=unitTests[name].tests[i];
   try
   {
     // insert post results callback into first argument and submit test
     cb = testAsyncCB(name,i);
     //If it contains specific code to do the async calls then use this
-    if(unitTests[name].tests[i].asyncCode)
+    if(thisTest.asyncCode)
     {
-      code=unitTests[name].tests[i].asyncCode;
+      code=thisTest.asyncCode;
     }
     //Otherwise find every method call, ie: "()" and put cb in it.
     else
     {
-      code = unitTests[name].tests[i].code;
-      code = code.replace(/\(([^\)])/, "(cb, $1");
-      code = code.replace(/\(\)/, "(cb)");
+      // detect if this test calls the server
+      if ('jsonrpc'===thisTest.code.slice(0,7))
+      {
+        code = thisTest.code;
+        code = code.replace(/\(([^\)])/, "(cb, $1");
+        code = code.replace(/\(\)/, "(cb)");
+      }
+      else  // client side only test -- not really async...
+      {
+        code = 'cb((' + thisTest.code + '),undefined)';
+      }
     }
     // run the test
     eval(code);

@@ -2,7 +2,7 @@
  * jabsorb - a Java to JavaScript Advanced Object Request Broker
  * http://www.jabsorb.org
  *
- * Copyright 2007 The jabsorb team
+ * Copyright 2007,2008 The jabsorb team
  * Copyright (c) 2005 Michael Clark, Metaparadigm Pte Ltd
  * Copyright (c) 2003-2004 Jan-Klaas Kollhof
  *
@@ -24,54 +24,41 @@
  *
  */
 
-/* escape a character */
-
-var escapeJSONChar=function ()
+/* encode a string into JSON format 
+   (created inside a closure to hide "private" vars)
+*/
+var escapeJSONString = (function()
 {
-  var escapeChars = ["\b","\t","\n","\f","\r"];
+  // based on Douglas Crockford's Public Domain JavaScript JSON implementation at
+  // http://www.json.org/json2.js as of 2008-11-28
+  var escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+    meta = {    // table of character substitutions
+      '\b': '\\b',
+      '\t': '\\t',
+      '\n': '\\n',
+      '\f': '\\f',
+      '\r': '\\r',
+      '"' : '\\"',
+      '\\': '\\\\'
+    };
 
-  return function(c){
-    // Need to do these first as their ascii values are > 32 (34 & 92)
-    if(c == "\"" || c == "\\")
-    {
-      return "\\"+c;
-    }
-    //Otherwise it doesn't need escaping
-    if(c.charCodeAt(0)>=32)
-    {
-      return c;
-    }
-    // Otherwise it is has a code < 32 and may need escaping.
-    for(var i=0;i<escapeChars.length;i++)
-    {
-      if(c==escapeChars[i])
-      {
-        return "\\" + c;
-      }
-    }
-    // it was a character from 0-31 that wasn't one of the escape chars
-    return c;
+  return function (string) {
+
+    // If the string contains no control characters, no quote characters, and no
+    // backslash characters, then we can safely slap some quotes around it.
+    // Otherwise we must also replace the offending characters with safe escape
+    // sequences.
+
+    escapable.lastIndex = 0;
+    return escapable.test(string) ?
+      '"' + string.replace(escapable, function (a) {
+        var c = meta[a];
+        return typeof c === 'string' ? c :
+          '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+        }) + '"' :
+        '"' + string + '"';
   };
-}();
-
-/* encode a string into JSON format */
-
-function escapeJSONString(s)
-{
-  /* The following should suffice but Safari's regex is b0rken
-      (doesn't support callback substitutions)
-      return "\"" + s.replace(/([^\u0020-\u007f]|[\\\"])/g,
-      escapeJSONChar) + "\"";
-   */
-
-  /* Rather inefficient way to do it */
-  var parts = s.split("");
-  for (var i = 0; i < parts.length; i++)
-  {
-    parts[i] = escapeJSONChar(parts[i]);
-  }
-  return "\"" + parts.join("") + "\"";
-}
+})();
 
 /**
  * Marshall an object to JSON format.
@@ -515,7 +502,8 @@ JSONRpcClient.Exception.prototype.toString = function (code, msg)
 
 JSONRpcClient.default_ex_handler = function (e)
 {
-  var str="";
+  // unhandled exception thrown in jsonrpc handler
+  var a,str="";
   for(a in e)
   {
     str+=a +"\t"+e[a]+"\n";
