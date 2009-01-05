@@ -3,7 +3,7 @@
   jabsorb - a Java to JavaScript Advanced Object Request Broker
   http://jabsorb.org
 
-  Copyright 2007-2008 The jabsorb team
+  Copyright 2007-2009 The jabsorb team
 
   based on original code from
   JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
@@ -308,7 +308,7 @@
          see http://www.julienlecomte.net/yuicompressor/ -->
 
     <echo>Creating jsonrpc-min.js from jsonrpc.js using the YUI compressor.</echo>
-    <java jar="lib-ant/yuicompressor-2.2.5.jar" fork="true" failonerror="true">
+    <java jar="lib-ant/yuicompressor-2.4.2.jar" fork="true" failonerror="true">
       <arg value="-o"/>
       <arg value="${webapp}/jsonrpc-min.js"/>
       <arg value="${webapp}/jsonrpc.js"/>

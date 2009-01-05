@@ -2,7 +2,7 @@
  * jabsorb - a Java to JavaScript Advanced Object Request Broker
  * http://www.jabsorb.org
  *
- * Copyright 2007-2008 The jabsorb team
+ * Copyright 2007-2009 The jabsorb team
  *
  * based on original code from
  * JSON-RPC-Java - a JSON-RPC to Java Bridge with dynamic invocation
@@ -27,6 +27,7 @@
 package org.jabsorb.serializer.impl;
 
 import java.sql.Timestamp;
+import java.sql.Time;
 import java.util.Date;
 
 import org.jabsorb.JSONSerializer;
@@ -52,7 +53,7 @@ public class DateSerializer extends AbstractSerializer
    * Classes that this can serialise.
    */
   private static Class<?>[] _serializableClasses = new Class[] { Date.class,
-      Timestamp.class, java.sql.Date.class };
+      Timestamp.class, java.sql.Date.class, Time.class };
 
   /**
    * Classes that this can serialise to.
@@ -113,7 +114,8 @@ public class DateSerializer extends AbstractSerializer
       throw new UnmarshallException("no type hint");
     }
     if (!(java_class.equals("java.util.Date")) && 
-        !(java_class.equals("java.sql.Timestamp")) && 
+        !(java_class.equals("java.sql.Timestamp")) &&
+        !(java_class.equals("java.sql.Time")) &&
         !(java_class.equals("java.sql.Date")) )
     {
       throw new UnmarshallException("not a Date");
@@ -164,6 +166,11 @@ public class DateSerializer extends AbstractSerializer
     {
       returnValue = new java.sql.Date(time);
     }
+    else if (Time.class.equals(realClazz))
+    {
+      returnValue = new Time(time);
+    }
+
     if (returnValue == null)
     {
       throw new UnmarshallException("invalid class " + realClazz);
