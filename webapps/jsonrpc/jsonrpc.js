@@ -2,7 +2,7 @@
  * jabsorb - a Java to JavaScript Advanced Object Request Broker
  * http://www.jabsorb.org
  *
- * Copyright 2007,2008 The jabsorb team
+ * Copyright 2007-2009 The jabsorb team
  * Copyright (c) 2005 Michael Clark, Metaparadigm Pte Ltd
  * Copyright (c) 2003-2004 Jan-Klaas Kollhof
  *
@@ -266,7 +266,14 @@ function toJSON(o)
 
       if (o.constructor === Date)
       {
-        return '{javaClass: "java.util.Date", time: ' + o.valueOf() + '}';
+        if (o.javaClass) // if Date already has a javaClass defined, use that
+        {
+          return '{javaClass: "' + o.javaClass + '", time: ' + o.valueOf() + '}';
+        }
+        else  // otherwise use java.util.Date
+        {
+          return '{javaClass: "java.util.Date", time: ' + o.valueOf() + '}';
+        }
       }
       else if (o.constructor === Array)
       {
@@ -528,10 +535,25 @@ JSONRpcClient.fixupCircRefs = true;
 JSONRpcClient.fixupDuplicates = true;
 
 /**
- * if true, java.util.Date object are unmarshalled to javascript dates
- * if false, no customized unmarshalling for dates is done
+ * If true, java Date objects are automatically unmarshalled to JS Date objects.
  */
 JSONRpcClient.transformDates = false;
+
+/**
+ * If true, and JSONRpcClient.transformDates is also true, then objects that
+ * have the single property "time" (even if no javaClass hint is defined) 
+ * will also be transformed into JS date objects.
+ */
+JSONRpcClient.transformDateWithoutHint = false;
+
+/**
+ * The types of java Date classes to transform into JS Dates if JSONRpcClient.transformDates is true
+ */
+JSONRpcClient.javaDateClasses = {
+    'java.util.Date'    :true,
+    'java.sql.Date'     :true,
+    'java.sql.Time'     :true,
+    'java.sql.Timestamp':true};
 
 /**
  * Used to bind the this of the serverMethodCaller() (see below) which is to be
@@ -1055,53 +1077,84 @@ JSONRpcClient.prototype.unmarshallResponse=function(data)
       applyFixup(obj,fixups[i][0],findOriginal(obj,fixups[i][1]));
     }
   }
+
   /**
-   * Traverse the resulting object graph and replace serialized date objects with javascript dates. An object is 
-   * replaced with a JS date when any of the following conditions is true:
-   *   The object has a class hint, and the value of the hint is 'java.util.Date'
-   *   The object does not have a class hint, and the ONE AND ONLY property is 'time'
-   * Note that the traversal creates an infinite loop if the object graph is not a DAG, so do not call this function 
-   * after fixing up circular refs.
+   * Traverse the resulting object graph and replace serialized date objects with javascript dates.
+   * An object is replaced with a JS date when any of the following conditions is true:
+   *   The object has a class hint, and the value of the hint is one of the classes in 
+   *   JSONRpcClient.javaDateClasses
+   *   
+   *   The object does not have a class hint, and JSONRpcClient.transformDateWithoutHint is set
+   *   to true and the ONE AND ONLY property is 'time'
+   * 
+   * Note that the traversal creates an infinite loop if the object graph has any cycles, so do not
+   * call this function after fixing up circular refs.
+   *
    * @param obj root of the object graph where dates should be replaces.
-   * @return object graph where serialized date objects are replaced by javascript dates.
+   * @return object graph where serialized date objects are replaced by JS dates.
    */
-  function transform_date(obj) 
+  function transformDate(obj) 
   {
-    var hint,foo,num,i,jsDate
-    if (obj && typeof obj === 'object')
+    /**
+     * Utility function to determine if an object has one and only non-function prop.
+     *  
+     * @param obj object to check
+     * @param prop property to check for.
+     * @return true if prop is the ONE and only non-function property in obj.  
+     */
+    function hasOnlyProperty(obj,prop)
     {
-      hint = obj.hasOwnProperty('javaClass');
-      foo = hint ? obj.javaClass === 'java.util.Date' : obj.hasOwnProperty('time');
-      num = 0;
-      // if there is no class hint but the object has 'time' property, count its properties
-      if (!hint && foo)
+      var i,count=0;
+      if (obj.hasOwnProperty(prop))
       {
-        for (i in obj) 
+        for (i in obj)
         {
-          if (obj.hasOwnProperty(i)) 
+          if (obj.hasOwnProperty(i))
           {
-            num++;
+            count++;
+            if (count>1)
+            {
+              return;
+            }
           }
         }
+        return true;
       }
-      // if class hint is java.util.Date or no class hint set, but the only property is named 'time', we create jsdate
-      if (hint && foo || foo && num === 1) 
+    }
+
+    var i,d;
+
+    if (obj && typeof obj === 'object')
+    {
+      if ((obj.javaClass && JSONRpcClient.javaDateClasses[obj.javaClass]))
       {
-        jsDate = new Date(obj.time);
-        return jsDate;
-      } 
+        d = new Date(obj.time);
+        
+        // if not a Date base class,
+        // save the type of java Date transformed directly in the JS date object
+        if (obj.javaClass !== 'java.util.Date')
+        {
+          // so it can be reassembled if the Date is marshalled back to Java.
+          d.javaClass = obj.javaClass;
+        }
+        return d;
+      }
+      else if (JSONRpcClient.transformDateWithoutHint && hasOnlyProperty(obj,'time')) 
+      {
+        return new Date(obj.time);
+      }
       else
       {
         for (i in obj) 
         { 
           if (obj.hasOwnProperty(i))
           {
-            obj[i] = transform_date(obj[i]);
+            obj[i] = transformDate(obj[i]);
           }
         }
         return obj;
       }
-    } 
+    }
     else 
     {
       return obj;
@@ -1137,7 +1190,7 @@ JSONRpcClient.prototype.unmarshallResponse=function(data)
     }
     else
     {
-      r=JSONRpcClient.extractCallableReferences(this, JSONRpcClient.transformDates ? transform_date(r) : r);
+      r=JSONRpcClient.extractCallableReferences(this, JSONRpcClient.transformDates ? transformDate(r) : r);
       if (obj.fixups)
       {
         applyFixups(r,obj.fixups);

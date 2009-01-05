@@ -80,12 +80,18 @@ function clearChildren(node,name)
 }
 
 // some variables to hold stuff
-var tbody,asyncNode,profileNode,maxRequestNode,showSuccessesNode,hideUnrunNode;
+var tbody,asyncNode,transformDateNode,profileNode,maxRequestNode,showSuccessesNode,hideUnrunNode;
 
 //loads page
 function onLoad()
 {
   asyncNode = document.getElementById("async");
+  transformDateNode = document.getElementById("transformDates");
+  JSONRpcClient.transformDates=transformDateNode.checked;
+  transformDateNode.onclick=function()
+  {
+    JSONRpcClient.transformDates=this.checked;
+  };
   profileNode = document.getElementById("profile");
   maxRequestNode = document.getElementById("max_requests");
   showSuccessesNode = document.getElementById("showSuccesses");
@@ -462,6 +468,7 @@ function runTestSet(name)
     return;
   }
   JSONRpcClient.max_req_active = maxRequestNode.value;
+  //JSONRpcClient.transformDates = transformDateNode.checked;
 
   clearResultSet(name);
   if (profileNode.checked)
@@ -523,29 +530,30 @@ function testAsyncCB(name,i)
 //Run a test in async mode
 function runTestAsync(name,i)
 {
-  var cb,code,str,thisTest=unitTests[name].tests[i];
+  var cb,code,str,test=unitTests[name].tests[i];
+
   try
   {
     // insert post results callback into first argument and submit test
     cb = testAsyncCB(name,i);
     //If it contains specific code to do the async calls then use this
-    if(thisTest.asyncCode)
+    if(test.asyncCode)
     {
-      code=thisTest.asyncCode;
+      code=test.asyncCode;
     }
     //Otherwise find every method call, ie: "()" and put cb in it.
     else
     {
       // detect if this test calls the server
-      if ('jsonrpc'===thisTest.code.slice(0,7))
+      if ('jsonrpc'===test.code.slice(0,7))
       {
-        code = thisTest.code;
+        code = test.code;
         code = code.replace(/\(([^\)])/, "(cb, $1");
         code = code.replace(/\(\)/, "(cb)");
       }
       else  // client side only test -- not really async...
       {
-        code = 'cb((' + thisTest.code + '),undefined)';
+        code = 'cb((' + test.code + '),undefined)';
       }
     }
     // run the test
@@ -560,9 +568,9 @@ function runTestAsync(name,i)
 //Runs a test in sync mode
 function runTestSync(name,i)
 {
-  var result;
-  var exception;
-  var profile;
+  var result,exception,profile,
+    test=unitTests[name].tests[i];
+  
   if (profileNode.checked)
   {
     profile = {};
@@ -570,7 +578,7 @@ function runTestSync(name,i)
   }
   try
   {
-    eval("result = " + unitTests[name].tests[i].code);
+    eval("result = " + test.code);
   }
   catch (e)
   {
@@ -580,7 +588,7 @@ function runTestSync(name,i)
   {
     profile.end = profile.dispatch = new Date();
   }
-  postResults(name,i, result, exception, profile);
+  postResults(name, i, result, exception, profile);
 }
 
 /**

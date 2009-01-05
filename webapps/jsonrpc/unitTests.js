@@ -375,20 +375,32 @@ var unitTests={
       }
     ]
   },
-  
   "Dates":
   {  
     tests:
     [
       { code: 'jsonrpc.test.echoDateObject(new Date(1121689294000))',
-        test: 'JSONRpcClient.transformDates?!((result<new Date(1121689294000))||(result>new Date(1121689294000))):result.javaClass == "java.util.Date" && result.time == 1121689294000'
+        test: 'JSONRpcClient.transformDates?result.getTime()===1121689294000:result.javaClass === "java.util.Date" && result.time == 1121689294000'
       },
       { code: 'jsonrpc.test.echoSQLDateObject({javaClass:"java.sql.Date",time:1121689294001})',
-        test: 'result.javaClass == "java.sql.Date" && result.time == 1121689294001'
+        test: 'JSONRpcClient.transformDates?result.getTime()===1121689294001:result.javaClass === "java.sql.Date" && result.time == 1121689294001'
+      },
+      { code: 'jsonrpc.test.echoObject({javaClass:"java.util.Date",time:1121689294678})',
+        test: 'JSONRpcClient.transformDates?result.getTime()===1121689294678:result.javaClass === "java.util.Date" && result.time == 1121689294678'
+      },
+      { code: 'jsonrpc.test.echoObjectArray([new Date(1121689294000),new Date(1121689294100),new Date(1121689294200)])',
+        test: 'result.length === 3 && ' +
+              '(JSONRpcClient.transformDates?' +
+              '(result[0].getTime()===1121689294000 && ' +
+              'result[1].getTime()===1121689294100 && ' +
+              'result[2].getTime()===1121689294200):' +
+              '(result[0].javaClass==="java.util.Date" && result[0].time===1121689294000 && ' +
+              'result[1].javaClass==="java.util.Date" && result[1].time===1121689294100 && ' +
+              'result[2].javaClass==="java.util.Date" && result[2].time===1121689294200))'
       }
     ]
   },
-  
+
   "Lists":
   {  
     tests:

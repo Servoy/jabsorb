@@ -10,7 +10,7 @@
     </td>
     <td align="right">
       <div>(
-      <input type="checkbox" id="showSuccesses" checked="1" />
+      <input type="checkbox" id="showSuccesses" checked />
       Show successes  |
       <input type="checkbox" id="hideUnrun"  />
       Hide unrun  |
@@ -18,6 +18,8 @@
       Profile  |
       <input type="checkbox" id="async" checked />
       Asynchronous
+      <input type="checkbox" id="transformDates" />
+      Transform Dates
       )
       </div>
     </td>
