@@ -57,8 +57,8 @@
   </target>
 
   <target name="compile" depends="init,init-build,copy-dependencies" description="Compiles the source into the build directory">
-  	<mkdir dir="${build.classes}"/>
-  	<javac debug="true" source="1.4" srcdir="${src}" destdir="${build.classes}">
+    <mkdir dir="${build.classes}"/>
+    <javac debug="true" source="1.4" srcdir="${src}" destdir="${build.classes}">
       <classpath refid="default-classpath" />
     </javac>
   </target>
@@ -71,11 +71,11 @@
     <tstamp />
     <mkdir dir="${test.lib}" />
     <mkdir dir="${test.classes}" />
-  	<path id="test-classpath">
-	    <fileset dir="${lib-test}">
-	      <include name="*.jar"/>
-	    </fileset>
-  	</path>
+    <path id="test-classpath">
+      <fileset dir="${lib-test}">
+        <include name="*.jar"/>
+      </fileset>
+    </path>
   </target>
 
   <target name="setup-dependencies">
@@ -104,7 +104,7 @@
     <pathconvert refid="dependencies.path"  property="dependencies.string"/>
     <echo file="${lib-ext}/dependencies"> ${dependencies.string} </echo>
   </target>
-	
+  
   <!-- this target does not currently work on JDK 1.4 right now due to maven dependancy/repository issues -->
   <target name="compile.test" depends="test.init, dist, init" description="Compiles the testing classes">
     <javac debug="true" source="1.4" srcdir="${test.src}" destdir="${test.classes}">
@@ -114,25 +114,25 @@
       </classpath>
     </javac>
   </target>
-	
+  
   <target name="test.junit" depends="compile, compile.test">
-  	<property name="test.reports" value="${build}/testreports"/>
-  	<mkdir dir="${test.reports}"/>
-  	<junit printsummary="withOutAndErr" showoutput="true" haltonfailure="yes">
-  		<classpath >
-  			<path refid="default-classpath"/>
-  			<pathelement location="${build.classes}"/>
-  			<pathelement location="${test.classes}"/>
-		  	<path refid="test-classpath" />
- 			</classpath>
-  		<formatter type="plain"/>
-  		<batchtest fork="yes" todir="${test.reports}">
-			<fileset dir="${test.classes}">
-				<include name="**/*TestCase.class"/>
-				<exclude name="**/*Suite.class"/>
-			</fileset>
-  		</batchtest>
-  	</junit>
+    <property name="test.reports" value="${build}/testreports"/>
+    <mkdir dir="${test.reports}"/>
+    <junit printsummary="withOutAndErr" showoutput="true" haltonfailure="yes">
+      <classpath >
+        <path refid="default-classpath"/>
+        <pathelement location="${build.classes}"/>
+        <pathelement location="${test.classes}"/>
+        <path refid="test-classpath" />
+      </classpath>
+      <formatter type="plain"/>
+      <batchtest fork="yes" todir="${test.reports}">
+      <fileset dir="${test.classes}">
+        <include name="**/*TestCase.class"/>
+        <exclude name="**/*Suite.class"/>
+      </fileset>
+      </batchtest>
+    </junit>
   </target>
 
   <target name="test.dist" depends="compile.test,dist,init" description="Creates a war with the test files">
@@ -150,28 +150,6 @@
         <include name="**/*.jar" />
       </fileset>
     </copy>
-
-    <!-- include Apache Derby .jar file used by the ext/project metrics demo -->
-    <copy todir="${test.lib}">
-      <fileset dir="./${lib-ext}">
-        <include name="**/derby*.jar" />
-      </fileset>
-    </copy>
-
-    <!-- build the embedded apache derby database for the ext/projectmetrics demo -->
-    <java classname="org.jabsorb.ext.ProjectMetricsDatabase"
-        fork="true" failonerror="true">
-
-      <!-- path to files to load into DB -->
-      <arg value="${test.rsrc}/projectmetrics"/> 
-
-      <classpath >
-        <path refid="default-classpath"/>
-        <pathelement location="${build.classes}"/>
-        <pathelement location="${test.classes}"/>
-        <path refid="test-classpath" />
-      </classpath>
-    </java>
 
     <jar destfile="${test.lib}/rsrc.jar" basedir="${test.rsrc}" excludes="*~" />
     <war destfile="${app-war}" basedir="${webapp}" excludes="**/*~,WEB-INF/web.xml*" webxml="${webapp}/WEB-INF/web.xml" />
@@ -350,7 +328,7 @@
       </zipfileset>
       <zipfileset dir="${webapp}" prefix="${app-prefix}">
         <include name="jsonrpc*.js*"/>
-      	<exclude name="jsonrpc.js.txt" />
+        <exclude name="jsonrpc.js.txt" />
       </zipfileset>
     </zip>
     <tar destfile="${release}/${app-prefix}-minimal.tar">
@@ -389,31 +367,31 @@
     <gzip destfile="${release}/${app-prefix}-src.tar.gz" src="${release}/${app-prefix}-src.tar"/>
     <delete file="${release}/${app-prefix}-src.tar"/>
   </target>
-	
-	<target name="install-locally" depends="dist" description="Install artifacts into local repository">
-	    <jar destfile="${build}/${app-prefix}-sources.jar" basedir="${src}" excludes="*~" />
-		<artifact:install file="${app-jar}">
-			<pom file="pom.xml"/>
-			<attach file="${build}/${app-prefix}-sources.jar" classifier="sources"/>
-		</artifact:install>
-	</target>
-	
-	<target name="run" depends="copy-dependencies,compile.test,test.junit" description="Runs the jabsorb webapp using jetty">
-	   <java classname="org.jabsorb.test.JabsorbTestServer"
-	   	     fork="true"
-	         failonerror="true"
-	    >
-	   	<arg value="${port-number}"/>
+  
+  <target name="install-locally" depends="dist" description="Install artifacts into local repository">
+      <jar destfile="${build}/${app-prefix}-sources.jar" basedir="${src}" excludes="*~" />
+    <artifact:install file="${app-jar}">
+      <pom file="pom.xml"/>
+      <attach file="${build}/${app-prefix}-sources.jar" classifier="sources"/>
+    </artifact:install>
+  </target>
+  
+  <target name="run" depends="copy-dependencies,compile.test,test.junit" description="Runs the jabsorb webapp using jetty">
+     <java classname="org.jabsorb.test.JabsorbTestServer"
+           fork="true"
+           failonerror="true"
+      >
+      <arg value="${port-number}"/>
 
       <jvmarg value="-Djava.util.logging.config.file=testlogging.properties"/>
 
-	    <classpath >
+      <classpath >
         <path refid="jarClasspath" />
         <path refid="test-classpath" />
-    		<path refid="test-classpath" />
-	    	<pathelement location="${test.classes}"/>
-	    </classpath>
+        <path refid="test-classpath" />
+        <pathelement location="${test.classes}"/>
+      </classpath>
       </java>
-	</target>
+  </target>
 
 </project>

@@ -21,87 +21,80 @@
 
 
 <!-- 
-	This POM file is only used for deployment in the Maven repository. 
+  This POM file is only used for deployment in the Maven repository. 
     It may not be used to build the project.
 -->
 <project>
 
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.jabsorb</groupId>
-	<artifactId>jabsorb</artifactId>
-	<version>1.3-SNAPSHOT</version>
-	<packaging>jar</packaging>
-	<name>jabsorb</name>
-	<url>http://jabsorb.org</url>
-	<description>
-		jabsorb -- A JSON-RPC ORB in Java and JavaScript
-	</description>
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-	<scm>
-		<url>http://svn.jabsorb.org/svn/jabsorb</url>
-	</scm>
-	<dependencies>
-		<!-- Runtime dependencies -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.5.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-jdk14</artifactId>
-			<version>1.5.0</version>
-		</dependency>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.jabsorb</groupId>
+  <artifactId>jabsorb</artifactId>
+  <version>1.3-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>jabsorb</name>
+  <url>http://jabsorb.org</url>
+  <description>
+    jabsorb -- A JSON-RPC ORB in Java and JavaScript
+  </description>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <url>http://svn.jabsorb.org/svn/jabsorb</url>
+  </scm>
+  <dependencies>
+    <!-- Runtime dependencies -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.5.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-jdk14</artifactId>
+      <version>1.5.0</version>
+    </dependency>
 
-		<!-- Optional runtime dependencies -->
-		<dependency>
-			<!-- Replacement for commons-logging required by httpclient -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>jcl104-over-slf4j</artifactId>
-			<version>1.5.0</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
-			<version>3.1</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+    <!-- Optional runtime dependencies -->
+    <dependency>
+      <!-- Replacement for commons-logging required by httpclient -->
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl104-over-slf4j</artifactId>
+      <version>1.5.0</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+      <version>3.1</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>commons-logging</artifactId>
+          <groupId>commons-logging</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
-		<!-- Apache derby embedded database used by the project metrics demo in jabsorb war-->
-		<dependency>
-			<groupId>org.apache.derby</groupId>
-			<artifactId>derby</artifactId>
-			<version>10.3.2.1</version>
-		</dependency>
-
-		<!-- Test dependencies -->
-		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty</artifactId>
-			<version>6.1.6</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>3.8.2</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <version>6.1.6</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jsp-2.1</artifactId>
       <version>6.1.6</version>
     </dependency>
-	</dependencies>
+  </dependencies>
 </project>
