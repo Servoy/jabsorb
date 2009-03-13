@@ -1,6 +1,6 @@
 /*
  * jabsorb - a Java to JavaScript Advanced Object Request Broker
- * http://www.jabsorb.org Copyright 2007-2008 The jabsorb team based on original
+ * http://www.jabsorb.org Copyright 2007-2009 The jabsorb team based on original
  * code from JSON-RPC-Client, a Java client extension to JSON-RPC-Java (C)
  * Copyright CodeBistro 2007, Sasha Ovsankin <sasha at codebistro dot com>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not

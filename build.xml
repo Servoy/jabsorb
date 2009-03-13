@@ -181,7 +181,7 @@
       <!-- link href="http://java.sun.com/j2se/1.4.2/docs/api/" / -->
       <!-- link href="http://java.sun.com/products/servlet/2.2/javadoc/" / -->
       <doctitle><![CDATA[<h1>${app} ${version} API Documentation</h1>]]></doctitle>
-      <bottom><![CDATA[<i>Copyright &#169; 2007 The jabsorb team.</i>]]></bottom>
+      <bottom><![CDATA[<i>Copyright &#169; 2007-2009 The jabsorb team.</i>]]></bottom>
     </javadoc>
   </target>
 
