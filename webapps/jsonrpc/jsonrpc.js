@@ -2,7 +2,7 @@
  * jabsorb - a Java to JavaScript Advanced Object Request Broker
  * http://www.jabsorb.org
  *
- * Copyright 2007,2008 The jabsorb team
+ * Copyright 2007-2009 The jabsorb team
  * Copyright (c) 2005 Michael Clark, Metaparadigm Pte Ltd
  * Copyright (c) 2003-2004 Jan-Klaas Kollhof
  *
@@ -24,7 +24,7 @@
  *
  */
 
-/* encode a string into JSON format 
+/* encode a string into JSON format
    (created inside a closure to hide "private" vars)
 */
 var escapeJSONString = (function()
@@ -133,22 +133,22 @@ function toJSON(o)
 
   /**
    * Do the work of converting an individual "sub" object to JSON.
-   * Each object that is processed has a special marker object attached to it, 
-   * to quickly detect if it has already been processed and thus handle 
+   * Each object that is processed has a special marker object attached to it,
+   * to quickly detect if it has already been processed and thus handle
    * circular references and duplicates.
    *
    * @param o   object being converted into JSON.
-   * 
+   *
    * @param p   the parent of the object being processed, it should be null or
    *            undefined if it's the root object.
-   * 
-   * @param ref the "reference" of the object in the parent that is being 
+   *
+   * @param ref the "reference" of the object in the parent that is being
    *            converted such that p[ref] === o.
-   * 
-   * @return A string containing the JSON representation of the object o, but 
-   *         with duplicates and circular references removed (according to the 
-   *         option settings JSONRpcClient.fixupCircRefs and 
-   *         JSONRpcClient.fixupDuplicates. 
+   *
+   * @return A string containing the JSON representation of the object o, but
+   *         with duplicates and circular references removed (according to the
+   *         option settings JSONRpcClient.fixupCircRefs and
+   *         JSONRpcClient.fixupDuplicates.
    */
   function subObjToJSON(o,p,ref)
   {
@@ -160,7 +160,7 @@ function toJSON(o)
         parent,
         circRef,
         i;
-        
+
     if (o === null || o === undefined)
     {
       return "null";  // it's null or undefined, so serialize it as null
@@ -325,16 +325,16 @@ function toJSON(o)
   }
 }
 
-/** 
+/**
  * JSONRpcClient constructor
- * 
+ *
  * @param callback|methods - the function to call once the rpc list methods has completed.
  *                   if this argument is omitted completely, then the JSONRpcClient
  *                   is constructed synchronously.
  *                   if this arguement is an array then it is the list of methods
  *                   that can be invoked on the server (and the server will not
  *                   be queried for that information)
- * 
+ *
  * @param serverURL - path to JSONRpcServlet on server.
  * @param user
  * @param pass
@@ -381,12 +381,12 @@ function JSONRpcClient()
     //Make the call to list the methods
     req = JSONRpcClient._makeRequest(this,"system.listMethods", []);
     //If a callback was added to the constructor, call it
-    if(this.readyCB) 
+    if(this.readyCB)
     {
       self = this;
-      req.cb = function(result, e) 
+      req.cb = function(result, e)
       {
-         if(!e) 
+         if(!e)
          {
            self._addMethods(result);
          }
@@ -408,7 +408,7 @@ function JSONRpcClient()
 }
 
 /**
- * Creates a new callable proxy (reference). 
+ * Creates a new callable proxy (reference).
  *
  * @param objectID The id of the object as determined by the server
  * @param javaClass The package+classname of the object
@@ -417,7 +417,7 @@ function JSONRpcClient()
 JSONRpcClient.prototype.createCallableProxy=function(objectID,javaClass)
 {
   var cp,req,methodNames,name,i;
-  
+
   cp = new JSONRPCCallableProxy(objectID,javaClass);
   //Then add all the cached methods to it.
   for (name in JSONRpcClient.knownClasses[javaClass])
@@ -448,9 +448,9 @@ JSONRpcClient.knownClasses = {};
 JSONRpcClient.Exception = function (errorObject)
 {
   var m;
-  for( var prop in errorObject) 
+  for( var prop in errorObject)
   {
-    if (errorObject.hasOwnProperty(prop)) 
+    if (errorObject.hasOwnProperty(prop))
     {
       this[prop] = errorObject[prop];
     }
@@ -575,7 +575,7 @@ JSONRpcClient._createMethod = function (client,methodName)
     }
     else
     {
-      //when there is a callback, add the req to the list 
+      //when there is a callback, add the req to the list
       JSONRpcClient.async_requests.push(req);
       JSONRpcClient.kick_async();
       return req.requestId;
@@ -590,7 +590,7 @@ JSONRpcClient._createMethod = function (client,methodName)
  * the first argument to make this an async call.
  *
  * @param callback (optional)
- * @param constructorName The name of the class to create, which should be 
+ * @param constructorName The name of the class to create, which should be
  *   registered with JSONRPCBridge.registerClass()
  * @param _args The arguments the constructor takes
  * @return the new object if sync, the request id if async.
@@ -611,14 +611,14 @@ JSONRpcClient.prototype.createObject = function ()
     callback = args.shift();
   }
   constructorName=args[0]+".$constructor";
-  _args=args[1];      
-        
+  _args=args[1];
+
   req = JSONRpcClient._makeRequest(this, constructorName, _args, 0,callback);
-  if(callback === null) 
+  if(callback === null)
   {
     return JSONRpcClient._sendRequest(this, req);
   }
-  else 
+  else
   {
     JSONRpcClient.async_requests.push(req);
     JSONRpcClient.kick_async();
@@ -652,11 +652,11 @@ JSONRpcClient.prototype._addMethods = function (methodNames,dontAdd)
   //if(javaClass){
   //  JSONRpcClient.knownClasses[javaClass]={};
   //}
-  
+
   for (var i = 0; i < methodNames.length; i++)
   {
     obj = this;
-    
+
     names = methodNames[i].split(".");
     startIndex=methodNames[i].indexOf("[");
     endIndex=methodNames[i].indexOf("]");
@@ -664,7 +664,7 @@ JSONRpcClient.prototype._addMethods = function (methodNames,dontAdd)
         (methodNames[i].substring(0,
           JSONRpcClient.CALLABLE_REFERENCE_METHOD_PREFIX.length)==
           JSONRpcClient.CALLABLE_REFERENCE_METHOD_PREFIX)
-      &&(startIndex!=-1)&&(endIndex!=-1)&&(startIndex<endIndex))        
+      &&(startIndex!=-1)&&(endIndex!=-1)&&(startIndex<endIndex))
     {
       javaClass=methodNames[i].substring(startIndex+1,endIndex);
     }
@@ -692,7 +692,7 @@ JSONRpcClient.prototype._addMethods = function (methodNames,dontAdd)
     name = names[names.length - 1];
 
     //Create the method
-    
+
     if(javaClass)
     {
       method = JSONRpcClient._createMethod(this,name);
@@ -869,10 +869,10 @@ JSONRpcClient._makeRequest = function (client,methodName, args,objectID,cb)
   // this is to provide graceful backwards compatibility to the json-rpc spec.
   if (j.fixups)
   {
-    // todo: the call to toJSON here to turn the fixups into json is a bit 
+    // todo: the call to toJSON here to turn the fixups into json is a bit
     // inefficient, since there will never be fixups in the fixups... but
     // it saves us from writing some additional code at this point...
-    obj += ",fixups:" + toJSON(j.fixups).json;  
+    obj += ",fixups:" + toJSON(j.fixups).json;
   }
 
   req.data = obj + "}";
@@ -960,15 +960,15 @@ JSONRpcClient._sendRequest = function (client,req)
     JSONRpcClient.poolReturnHTTPRequest(http);
     JSONRpcClient.num_req_active--;
     throw new JSONRpcClient.Exception(
-      { 
-        code: JSONRpcClient.Exception.CODE_ERR_CLIENT, 
-        message: "Connection failed" 
+      {
+        code: JSONRpcClient.Exception.CODE_ERR_CLIENT,
+        message: "Connection failed"
       } );
   }
 
   if (!req.cb)
   {
-    delete JSONRpcClient.async_inflight[req.requestId]; 
+    delete JSONRpcClient.async_inflight[req.requestId];
     return client._handleResponse(http);
   }
   return null;
@@ -1004,9 +1004,9 @@ JSONRpcClient.prototype._handleResponse = function (http)
     JSONRpcClient.num_req_active--;
     JSONRpcClient.kick_async();
     throw new JSONRpcClient.Exception(
-      { 
-        code: JSONRpcClient.Exception.CODE_ERR_CLIENT, 
-        message: "Connection failed" 
+      {
+        code: JSONRpcClient.Exception.CODE_ERR_CLIENT,
+        message: "Connection failed"
       });
   }
 
@@ -1056,16 +1056,16 @@ JSONRpcClient.prototype.unmarshallResponse=function(data)
     }
   }
   /**
-   * Traverse the resulting object graph and replace serialized date objects with javascript dates. An object is 
+   * Traverse the resulting object graph and replace serialized date objects with javascript dates. An object is
    * replaced with a JS date when any of the following conditions is true:
    *   The object has a class hint, and the value of the hint is 'java.util.Date'
    *   The object does not have a class hint, and the ONE AND ONLY property is 'time'
-   * Note that the traversal creates an infinite loop if the object graph is not a DAG, so do not call this function 
+   * Note that the traversal creates an infinite loop if the object graph is not a DAG, so do not call this function
    * after fixing up circular refs.
    * @param obj root of the object graph where dates should be replaces.
    * @return object graph where serialized date objects are replaced by javascript dates.
    */
-  function transform_date(obj) 
+  function transform_date(obj)
   {
     var hint,foo,num,i,jsDate
     if (obj && typeof obj === 'object')
@@ -1076,24 +1076,24 @@ JSONRpcClient.prototype.unmarshallResponse=function(data)
       // if there is no class hint but the object has 'time' property, count its properties
       if (!hint && foo)
       {
-        for (i in obj) 
+        for (i in obj)
         {
-          if (obj.hasOwnProperty(i)) 
+          if (obj.hasOwnProperty(i))
           {
             num++;
           }
         }
       }
       // if class hint is java.util.Date or no class hint set, but the only property is named 'time', we create jsdate
-      if (hint && foo || foo && num === 1) 
+      if (hint && foo || foo && num === 1)
       {
         jsDate = new Date(obj.time);
         return jsDate;
-      } 
+      }
       else
       {
-        for (i in obj) 
-        { 
+        for (i in obj)
+        {
           if (obj.hasOwnProperty(i))
           {
             obj[i] = transform_date(obj[i]);
@@ -1101,12 +1101,12 @@ JSONRpcClient.prototype.unmarshallResponse=function(data)
         }
         return obj;
       }
-    } 
-    else 
+    }
+    else
     {
       return obj;
     }
-  } 
+  }
 
   var obj;
   try
@@ -1116,23 +1116,23 @@ JSONRpcClient.prototype.unmarshallResponse=function(data)
   catch(e)
   {
     throw new JSONRpcClient.Exception({ code: 550, message: "error parsing result" });
-  } 
+  }
   if (obj.error)
   {
     throw new JSONRpcClient.Exception (obj.error);
   }
   var r = obj.result;
 
-  // look for circular reference/duplicates fixups and execute them 
+  // look for circular reference/duplicates fixups and execute them
   // if they are there
-  
+
   var i,tmp;
-    
+
   /* Handle CallableProxy */
-  if (r) 
+  if (r)
   {
     if(r.objectID && r.JSONRPCType == "CallableReference")
-    {  
+    {
       return this.createCallableProxy(r.objectID,r.javaClass);
     }
     else
@@ -1263,8 +1263,8 @@ JSONRpcClient.getHTTPRequest = function ()
   /* None found */
   JSONRpcClient.httpObjectName = null;
   throw new JSONRpcClient.Exception(
-    { 
-      code: 0, 
-      message: "Can't create XMLHttpRequest object" 
+    {
+      code: 0,
+      message: "Can't create XMLHttpRequest object"
     });
 };

@@ -2,7 +2,7 @@
  * jabsorb - a Java to JavaScript Advanced Object Request Broker
  * http://www.jabsorb.org
  *
- * Copyright 2007 The jabsorb team
+ * Copyright 2007-2009 The jabsorb team
  * Copyright (c) 2005 Michael Clark, Metaparadigm Pte Ltd
  * Copyright (c) 2003-2004 Jan-Klaas Kollhof
  *
@@ -46,12 +46,12 @@ var jabsorb_flat = function()
 
   /**
    * Marshall an object to JSON format.
-   * 
+   *
    * @param o
    *          The object being converted to json
    * @param resultKey
    *          The field in which the json is to be stored
-   * 
+   *
    * @return an object, { '<resultKey>': jsonString }
    */
   pub.toJSON = function(o, resultKey)
@@ -106,7 +106,7 @@ var jabsorb_flat = function()
 
   /**
    * Parses json into an object tree
-   * 
+   *
    * @param data
    *          the object which contains the data
    * @param index
@@ -116,7 +116,7 @@ var jabsorb_flat = function()
   {
     /**
      * Makes a callable reference
-     * 
+     *
      * @param value
      *          The value to make a callable reference out of
      * @return The callable reference if it was made, otherwise value.
@@ -133,7 +133,7 @@ var jabsorb_flat = function()
 
     /**
      * Whether the given value is an index
-     * 
+     *
      * @return Whether it is an index
      */
     function isIndex(value)
@@ -150,7 +150,7 @@ var jabsorb_flat = function()
 
     /**
      * Parses an unmarshalled value into an object
-     * 
+     *
      * @param data
      *          The object which contains all the index->object mappings
      * @param obj

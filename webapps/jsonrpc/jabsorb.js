@@ -2,7 +2,7 @@
  * jabsorb - a Java to JavaScript Advanced Object Request Broker
  * http://www.jabsorb.org
  *
- * Copyright 2007 The jabsorb team
+ * Copyright 2007-2009 The jabsorb team
  * Copyright (c) 2005 Michael Clark, Metaparadigm Pte Ltd
  * Copyright (c) 2003-2004 Jan-Klaas Kollhof
  *
@@ -35,7 +35,7 @@ var jabsorb = function()
   //     var pro = this.pro;
   //     //All pub and pro variables of jabsorb can be used here.
   //     return pub;
-  //   }   
+  //   }
 
   /** Assign public variables to this */
   var pub = {};
@@ -77,7 +77,7 @@ var jabsorb = function()
    * to calls, ie Map knownClasses<ClassName,Map<FunctionName,Function>>
    */
   pro.knownClasses = {};
-  
+
   /* ************************** PRIVATE VARIABLES *************************** */
 
   /** Private static final variables */
@@ -90,10 +90,10 @@ var jabsorb = function()
   prv.methodCreators = [];
 
   /* **************************** INNER CLASSES ***************************** */
-  
+
   /**
    * Callable Proxy constructor
-   * 
+   *
    * @param objectID
    *          A unique identifier which the identity hashcode of the object on
    *          the server, if this is a reference type
@@ -109,7 +109,7 @@ var jabsorb = function()
 
   /**
    * Exception Constructor
-   * 
+   *
    * @param errorObject
    *          An object which describes the error.
    */
@@ -197,7 +197,7 @@ var jabsorb = function()
     }
     return pub;
   }
-  
+
   /**
    * A method creator which creates normal methods. It will always accept
    * everything, so should be at the end of methodCreators.
@@ -242,13 +242,13 @@ var jabsorb = function()
       return [method];
     }
     return pub;
-  }  
-  
+  }
+
   /* **************************** CONSTRUCTORS ****************************** */
-  
+
   /**
    * Jabsorb constructor
-   * 
+   *
    * @param callback|methods
    *          The function to call once the rpc list methods has completed. If
    *          this argument is omitted completely, then jabsorb is constructed
@@ -325,7 +325,7 @@ var jabsorb = function()
 
   /**
    * Cancels a request that is currentlyin progress
-   * 
+   *
    * @param requestId
    *          The id of the request to cancel
    */
@@ -337,7 +337,7 @@ var jabsorb = function()
   /**
    * Creates a new object from the bridge. A callback may optionally be given as
    * the first argument to make this an async call.
-   * 
+   *
    * @param callback
    *          (optional)
    * @param constructorName
@@ -400,12 +400,12 @@ var jabsorb = function()
 
   /**
    * Converts data from json to objects used by jabsorb.
-   * 
+   *
    * @param data
    *          The object which contains the json
    * @param key
    *          The key in which the json is stored.
-   * 
+   *
    * @return An object used by jabsorb.
    */
   pub.fromJSON = function(data, key)
@@ -430,12 +430,12 @@ var jabsorb = function()
 
   /**
    * Marshall an object to JSON format.
-   * 
+   *
    * An exception will be thrown if a circular reference is detected.
-   * 
+   *
    * @param o
    *          The object being converted to json
-   * 
+   *
    * @return an object, { "<resultKey>": jsonString }
    */
   pub.toJSON = function(o, resultKey)
@@ -450,7 +450,7 @@ var jabsorb = function()
 
   /**
    * Converts a json string into jabsorb data types.
-   * 
+   *
    * @param data
    *          The json string to parse. It should contain a value in the result
    *          field.
@@ -484,7 +484,7 @@ var jabsorb = function()
   /**
    * Adds a method creator to the list of known method creators. The new creator
    * will have the highest priority.
-   * 
+   *
    * @param methodCreator
    *          The method Creator to add. It should be an object which has two
    *          keys. The first should be "accept", take a method name and return
@@ -516,7 +516,7 @@ var jabsorb = function()
 
   /**
    * Creates a new callable proxy (reference).
-   * 
+   *
    * @param objectID
    *          The id of the object as determined by the server
    * @param javaClass
@@ -537,10 +537,10 @@ var jabsorb = function()
     }
     return cp;
   };
-  
+
   /**
    * Encodes a string into JSON format
-   * 
+   *
    * @param s
    *          the string to escape
    * @return The escaped json string
@@ -561,12 +561,12 @@ var jabsorb = function()
     }
     return "\"" + parts.join("") + "\"";
   }
-  
+
   /**
    * Creates a callable reference on an object if it fits the form:
-   * 
+   *
    * {"objectID":x "javaClass":y "JSONRPCType":"CallableReference"}
-   * 
+   *
    * @param Value
    *          The object to make the callable reference from
    * @return The callable reference or null, if it couldn't be created.
@@ -584,7 +584,7 @@ var jabsorb = function()
   /**
    * Method called by fromJSON() to do any final adjustments to a json object.
    * This can be overridden to do extend this to handle circular references.
-   * 
+   *
    * @param value
    *          The json value
    * @param data
@@ -599,10 +599,10 @@ var jabsorb = function()
   /**
    * Converts a simple object to JSON. Throws an exception if a circular
    * reference is found.
-   * 
+   *
    * @param o
    *          The object being converted into JSON.
-   * 
+   *
    * @return A string containing the JSON representation of the object o
    */
   pro.simpleToJSON = function(o, helper)
@@ -641,7 +641,7 @@ var jabsorb = function()
         // We are done dealing with object, pop it off the state and remove the
         // marker
         state.pop();
-        
+
         //TODO: test to make sure no markers are ever left
         delete o[pro.simpleToJSON.marker];
         return "{" + v.join(", ") + "}";
@@ -649,7 +649,7 @@ var jabsorb = function()
     }
     /**
      * Does the work of converting an object to json
-     * 
+     *
      * @param o
      *          The object to convet
      * @param helper
@@ -757,7 +757,7 @@ var jabsorb = function()
 
   /**
    * This is used to add a list of methods to this.
-   * 
+   *
    * @param the
    *          object that methods should be added to
    * @param methodNames
@@ -776,7 +776,7 @@ var jabsorb = function()
       {
         if (prv.methodCreators[j].accept(methodNames[i]))
         {
-          //create method returns an array, so we use apply so push 
+          //create method returns an array, so we use apply so push
           //(which can take many arguments) adds all of them.
           methods=Array.concat(methods,prv.methodCreators[j].createMethod(methodNames[i],
               toAddTo, dontAdd));
@@ -790,7 +790,7 @@ var jabsorb = function()
   /**
    * This creates a method that points to the serverMethodCaller and binds it
    * with the correct methodName.
-   * 
+   *
    * @param methodName
    *          The name of the method to create.
    */
@@ -825,7 +825,7 @@ var jabsorb = function()
 
   /**
    * Escapes a character, ensuring any character with a code < 32 is escaped
-   * 
+   *
    * @param c
    *          The character to escape
    * @return The escaped character
@@ -861,11 +861,11 @@ var jabsorb = function()
 
   /**
    * Recursivly extracts objects in the form:
-   * 
+   *
    * {"objectID":x "javaClass":y "JSONRPCType":"CallableReference"}
-   * 
+   *
    * and replaces it with a real callabe proxy.
-   * 
+   *
    * @param root
    *          the top level element to start processing from. The values in this
    *          will change.
@@ -914,11 +914,11 @@ var jabsorb = function()
    * Extracts the callback method from a list of arguments to a method. The
    * callback must be in either the first or last position, but not both. If
    * pub.doSync() is passed, then this will return null.
-   * 
+   *
    * @param args
    *          the list of arguments to a method which may contain a callback in
    *          the first or last position
-   * 
+   *
    * @return The callback if it exists, or null if no callback is found or the
    *         callback is pub.doSync().
    * @throws a
@@ -979,7 +979,7 @@ var jabsorb = function()
    * ONE AND ONLY property is 'time' Note that the traversal creates an infinite
    * loop if the object graph is not a DAG, so do not call this function after
    * fixing up circular refs.
-   * 
+   *
    * @param obj
    *          root of the object graph where dates should be replaces.
    * @return object graph where serialized date objects are replaced by
@@ -1066,7 +1066,7 @@ var jabsorb = function()
 
     /**
      * The names with which an MS ActiveXObject should be created.
-     * 
+     *
      * The search order here may seem strange, but it's actually what Microsoft
      * recommends
      */
@@ -1081,7 +1081,7 @@ var jabsorb = function()
 
     /**
      * Add a request to be sent to the server.
-     * 
+     *
      * @param req
      *          The request (which should have been created by makeRequest()) to
      *          send.
@@ -1096,7 +1096,7 @@ var jabsorb = function()
      * Ensures that the response for the given request will be no longer
      * handled. This must be called before the response is acted upon, but can
      * be called after it is received.
-     * 
+     *
      * @param requestId
      *          The id of the request to cancel.
      */
@@ -1145,7 +1145,7 @@ var jabsorb = function()
 
     /**
      * Makes a request to send to the server.
-     * 
+     *
      * @param methodName
      *          The method to call on the server
      * @param args
@@ -1187,7 +1187,7 @@ var jabsorb = function()
 
     /**
      * Sends a request to the server.
-     * 
+     *
      * @param req
      *          A request created with makeRequest().
      */
@@ -1344,7 +1344,7 @@ var jabsorb = function()
 
     /**
      * Tries to determine the correct character set for a server connection.
-     * 
+     *
      * @param http
      *          The connection to the server.
      */
@@ -1371,7 +1371,7 @@ var jabsorb = function()
 
     /**
      * Deals with a response from the server.
-     * 
+     *
      * @param http
      *          The connection to the server
      */
@@ -1465,7 +1465,7 @@ var jabsorb = function()
 
       /**
        * Returns a server connection to the cache.
-       * 
+       *
        * @param http
        *          The connection to return
        */
@@ -1485,7 +1485,7 @@ var jabsorb = function()
 
       /**
        * Gets a fresh http connection
-       * 
+       *
        * @return A new http connection
        */
       xhr_prv.getHTTPRequest = function()
@@ -1537,10 +1537,10 @@ var jabsorb = function()
 
   // Call the constructor
   prv.init.apply(this, arguments);
-  
+
   // Give inheriting classes a way to access protected variables (see top)
   this.pro = pro;
-  
+
   // Give access to public variables
   return pub;
 };

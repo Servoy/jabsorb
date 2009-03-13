@@ -2,7 +2,7 @@
  * jabsorb - a Java to JavaScript Advanced Object Request Broker
  * http://www.jabsorb.org
  *
- * Copyright 2007 The jabsorb team
+ * Copyright 2007-2009 The jabsorb team
  * Copyright (c) 2005 Michael Clark, Metaparadigm Pte Ltd
  * Copyright (c) 2003-2004 Jan-Klaas Kollhof
  *
@@ -58,16 +58,16 @@ var jabsorb_circrefs = function()
    * Marshall an object to JSON format. Circular references can be handled if
    * the parameter jabsorb.fixupCircRefs is true. If the parameter is false, an
    * exception will be thrown if a circular reference is detected.
-   * 
+   *
    * if the parameter, jabsorb.fixupDuplicates is true then duplicate objects in
    * the object graph are also combined except for Strings
-   * 
+   *
    * (TODO: it wouldn't be too hard to optimize strings as well, but probably a
    * threshold should be provided, so that only strings over a certain length
    * would be optimized) This would be worth doing on the upload (on the
    * download it's not so important, because gzip handles this) if it's false,
    * then duplicate objects are "re-serialized"
-   * 
+   *
    * @param o
    *          The object being converted to json
    * @param resultKey
@@ -257,7 +257,7 @@ var jabsorb_circrefs = function()
 
   /**
    * Applies circular references to the json value
-   * 
+   *
    * @param value
    *          The value to apply the circular references
    * @param data
@@ -277,7 +277,7 @@ var jabsorb_circrefs = function()
 
   /**
    * Apply fixups.
-   * 
+   *
    * @param obj
    *          root object to apply fixups against.
    * @param fixups
