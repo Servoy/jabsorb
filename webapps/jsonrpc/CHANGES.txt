@@ -1,5 +1,11 @@
 CHANGES log
 
+TBD        jabsorb 1.3.2 release
+
+* relax registerSerializer method on JSONSerializer to allow replacing already
+  existing serializers for registered classes, when registering new custom
+  serializers (Issues 20 and 58.)
+
 2009-03-04 jabsorb 1.3.1 release
 
 * Fix client side string encoding bug (Issue 52)
@@ -24,12 +30,12 @@ CHANGES log
 
 * Constructors added.
 
-* Extracted unmarshallString() out of handleResponse() in jsonrpc.js. This 
-  can be used to evaluate any JSON string with the client. 
+* Extracted unmarshallString() out of handleResponse() in jsonrpc.js. This
+  can be used to evaluate any JSON string with the client.
 
 * Modified message format to: .extensiontype[qualifier].methodname
 
-* Updated JSON library 
+* Updated JSON library
 
 * Tidied up exception interface
 
@@ -41,23 +47,23 @@ CHANGES log
 
 2008-01-16 jabsorb 1.2.2 release
 
-* The json-rpc-client is now part of jabsorb, under the new package 
-  org.jabsorb.client.  Thanks to Sasha Ovanskin for this extremely useful 
+* The json-rpc-client is now part of jabsorb, under the new package
+  org.jabsorb.client.  Thanks to Sasha Ovanskin for this extremely useful
   addition to jabsorb.
 
-* Changed internal circular and duplicate reference detection to use an 
+* Changed internal circular and duplicate reference detection to use an
   IdentityHashmap.
- 
-* Improved the message for an exception that can be thrown when a javaClass 
-  hint cannot be found or instantiated.  Thanks to Stanley Knutson for the 
-  suggestion.  
+
+* Improved the message for an exception that can be thrown when a javaClass
+  hint cannot be found or instantiated.  Thanks to Stanley Knutson for the
+  suggestion.
 
 2007-12-26 jabsorb 1.2.1 release
 
 * More improvements to exception handling; exception cause is included whenever
   possible.
 
-* new flag fixupDuplicatePrimitives to control primitive duplicate fixups 
+* new flag fixupDuplicatePrimitives to control primitive duplicate fixups
   serialization.
 
 2007-11-20 jabsorb 1.2 release
@@ -75,7 +81,7 @@ CHANGES log
 
 * Changed build script to automatically create minified version of jsonrpc.js.
 
-* memory leak bug fix with synchronous calls (thanks to Eric Pascarello for 
+* memory leak bug fix with synchronous calls (thanks to Eric Pascarello for
   finding this bug and providing the fix.)
 
 2007-10-25 jabsorb 1.2rc2 release candidate
@@ -98,31 +104,31 @@ new features:
 
 new features:
 
-* SLF4J logging - makes it easy to integrate into other java frameworks or 
+* SLF4J logging - makes it easy to integrate into other java frameworks or
   web applications that may use a different server side logging system.
 
-* GZIP compression to transparently compress the JsonRpcServlet response-- 
-  we are seeing compression results that are easily 1/10th the size for 
-  typical json responses.  This is useful for small applications that may 
-  not be already utilizing a filter or some other means of compressing 
-  dynamic responses.  It can easily be turned off if it's not needed for 
+* GZIP compression to transparently compress the JsonRpcServlet response--
+  we are seeing compression results that are easily 1/10th the size for
+  typical json responses.  This is useful for small applications that may
+  not be already utilizing a filter or some other means of compressing
+  dynamic responses.  It can easily be turned off if it's not needed for
   some reason.
-    
-* The JavaScript client code, jsonrpc.js is also now distributed in an extra 
-  alternative, "minified" version that was created with the YUI Compressor.  
-  Gzipped versions of jsonrpc.js are also included for web servers that can 
+
+* The JavaScript client code, jsonrpc.js is also now distributed in an extra
+  alternative, "minified" version that was created with the YUI Compressor.
+  Gzipped versions of jsonrpc.js are also included for web servers that can
   take advantage of this.
-  
-* More extensive javadoc and more manual sections (Custom Serializers are now 
+
+* More extensive javadoc and more manual sections (Custom Serializers are now
   documented.)
-  
-* Upgraded to json.org library version 2.0 which has bug fixes and many 
+
+* Upgraded to json.org library version 2.0 which has bug fixes and many
   additional general purpose JSON utilities.
-  
-* Pretty printing of the send and receive JSON in the server log when debug 
+
+* Pretty printing of the send and receive JSON in the server log when debug
   is on (this makes debugging much easier.)
-  
-* Optimized JSON escaping, and added method caching for callable references 
+
+* Optimized JSON escaping, and added method caching for callable references
   to improve performance.
 
 2007-08-31
@@ -255,7 +261,7 @@ json-rpc-java-1.0rc2
       addition of trailing ; to function assignments to allow usage
       or certain script compressors.
     * Fix to keepalive handling.
-    * Implement Serializable on all JSONRPCBridge related objects to 
+    * Implement Serializable on all JSONRPCBridge related objects to
       enable sessions to be persistent against tomcat restarts and
       clustering should now work.
     * Add ErrorInvocationCallback interface to allow callbacks to
@@ -398,17 +404,17 @@ json-rpc-java-0.9 (About time for a release release)
 * Modified DateSerializer to accept and convert java.sql.Timestamp and
   java.sql.Date.
 * Introduced attribute 'marshallClassHints' in the JSONSerializer class.
-  If set to false, the 'javaClass' JSON hints are not included by 
-  serializers.  Defaults to true.  Modified all serializers to use this 
+  If set to false, the 'javaClass' JSON hints are not included by
+  serializers.  Defaults to true.  Modified all serializers to use this
   setting in JSONSerializer.
 * Introduced attribute 'marshallNullAttributes' in the JSONSerializer class.
   If set to false, then any bean field that is null in Java will not serialize
   the attribute name to the client.  Defaults to true.
-* Exposed getter and setter attributes for the JSONSerializer object in the 
+* Exposed getter and setter attributes for the JSONSerializer object in the
   JSONRPCBridge.
 * Added constructor to JSONRPCBridge indicating to not register the default
   serializers in the JSONSerializer.
-* Allowed NumberSerializer and PrimitiveSerializer to accept JSONObjects of 
+* Allowed NumberSerializer and PrimitiveSerializer to accept JSONObjects of
   type String, if they can be converted to the appropriate primitive or number.
 * Allowed StringSerializers to accept JSONObjects of type integer.
   -- Ryan Gates <ryan dot gates at gmail dot com>
@@ -649,7 +655,7 @@ json-rpc-java-0.6
 * Add more detailed browser support section to documentation
 * Workaround missing setRequestHeader method of the XMLHttpRequest
   object in Opera 8 Beta
-* Add patch and documentation notes on how to resolve POST bug in 
+* Add patch and documentation notes on how to resolve POST bug in
   Konqueror (requires patching kdelibs)
 * Replace jsolait with lightweight json-rpc JavaScript implementation
 * Better web navigation for tutorial and demo
