@@ -110,7 +110,7 @@ public class JSONSerializer implements Serializable
 
   /**
    * A list of good serializers that are used when no others are given.
-   * 
+   *
    * @return A newly created list. This enables multiple bridges to call this
    *         method and not have the serializers duplicated.
    */
@@ -176,7 +176,7 @@ public class JSONSerializer implements Serializable
 
   /**
    * Creates a new JSONSerializer
-   * 
+   *
    * @param serializerStateClass The serializer state's class which will be
    *          created by createSerializerState().
    * @param requestParser The request parser to use
@@ -193,7 +193,7 @@ public class JSONSerializer implements Serializable
 
   /**
    * Creates a new serializer state for the given serializer.
-   * 
+   *
    * @return A new serializer state, as given to the constructor, or null if it
    *         cannot be instantiated.
    */
@@ -212,7 +212,7 @@ public class JSONSerializer implements Serializable
 
   /**
    * Convert a string in JSON format into Java objects.
-   * 
+   *
    * @param jsonString The JSON format string.
    * @return An object (or tree of objects) representing the data in the JSON
    *         format string.
@@ -238,7 +238,7 @@ public class JSONSerializer implements Serializable
    * name of objects being serialized? This can be helpful when unmarshalling,
    * though if not needed can be left out in favor of increased performance and
    * smaller size of marshalled String. Default is true.
-   * 
+   *
    * @return whether Java Class hints are included in the serialised JSON
    *         objects
    */
@@ -252,7 +252,7 @@ public class JSONSerializer implements Serializable
    * serialized JSON object. Defaults to true. Set to false for performance
    * gains and small JSON serialized size. Useful because null and undefined for
    * JSON object attributes is virtually the same thing.
-   * 
+   *
    * @return boolean value as to whether null attributes will be in the
    *         serialized JSON objects
    */
@@ -263,14 +263,14 @@ public class JSONSerializer implements Serializable
 
   /**
    * Gets the request parser
-   * 
+   *
    * @return The request parser
    */
   public RequestParser getRequestParser()
   {
     return this.requestParser;
   }
-  
+
   /**
    * Sets the request parser
    * @param requestParser The new request parser
@@ -287,7 +287,7 @@ public class JSONSerializer implements Serializable
    * of the given java object and then invoking it to marshall the java object
    * into json. <p/> The Serializer will invoke this method recursively while
    * marshalling complex object graphs.
-   * 
+   *
    * @param parent parent object of the object being converted. this can be null
    *          if it's the root object being converted.
    * @param java java object to convert into json.
@@ -313,7 +313,7 @@ public class JSONSerializer implements Serializable
    * of the given java object and then invoking it to marshall the java object
    * into json. <p/> The Serializer will invoke this method recursively while
    * marshalling complex object graphs.
-   * 
+   *
    * @param state can be used by the underlying Serializer objects to hold state
    *          while marshalling.
    * @param parent parent object of the object being converted. this can be null
@@ -356,7 +356,7 @@ public class JSONSerializer implements Serializable
       {
         Object marshalledObject = s.marshall(state, parent, java);
         state.setMarshalled(marshalledObject, java);
-        //Give the state the option of returning something different from the 
+        //Give the state the option of returning something different from the
         //actual serialized value.
         ProcessedObject po = state.getProcessedObject(java);
         if (po != null)
@@ -376,7 +376,7 @@ public class JSONSerializer implements Serializable
 
   /**
    * Ensures the reference serializer is registered for the given class
-   * 
+   *
    * @param clazz The java class that should be serialized with the reference
    *          serializer
    */
@@ -401,7 +401,7 @@ public class JSONSerializer implements Serializable
 
   /**
    * Register all of the provided standard serializers.
-   * 
+   *
    * @throws Exception If a serialiser has already been registered for a class.
    *           TODO: Should this be thrown: This can only happen if there is an
    *           internal problem with the code
@@ -438,26 +438,15 @@ public class JSONSerializer implements Serializable
    * serializers. This is because when the JSONSerializer is trying to find a
    * serializer, if it can't find the serializer by a direct match, it will
    * search for a serializer in the reverse order that they were registered.
-   * 
+   *
    * @param s A class implementing the Serializer interface (usually derived
    *          from AbstractSerializer).
-   * @throws Exception If a serialiser has already been registered for a class.
    */
-  public void registerSerializer(Serializer s) throws Exception
+  public void registerSerializer(Serializer s)
   {
     Class<?> classes[] = s.getSerializableClasses();
-    Serializer exists;
     synchronized (serializerSet)
     {
-      for (int i = 0; i < classes.length; i++)
-      {
-        exists = serializableMap.get(classes[i]);
-        if (exists != null && exists.getClass() != s.getClass())
-        {
-          throw new Exception("different serializer already registered for "
-              + classes[i].getName());
-        }
-      }
       if (!serializerSet.contains(s))
       {
         if (log.isDebugEnabled())
@@ -480,7 +469,7 @@ public class JSONSerializer implements Serializable
    * name of objects being serialized? This can be helpful when unmarshalling,
    * though if not needed can be left out in favor of increased performance and
    * smaller size of marshalled String. Default is true.
-   * 
+   *
    * @param marshallClassHints flag to enable/disable inclusion of Java class
    *          hints in the serialized JSON objects
    */
@@ -494,7 +483,7 @@ public class JSONSerializer implements Serializable
    * serialized JSON object. Defaults to true. Set to false for performance
    * gains and small JSON serialized size. Useful because null and undefined for
    * JSON object attributes is virtually the same thing.
-   * 
+   *
    * @param marshallNullAttributes flag to enable/disable marshalling of null
    *          attributes in the serialized JSON objects
    */
@@ -506,7 +495,7 @@ public class JSONSerializer implements Serializable
   /**
    * Allow serializer state class to be set after construction. This is
    * necessary for beans to construct JSONRPCBridge.
-   * 
+   *
    * @param serializerStateClass The serializer state class to use.
    */
   public void setSerializerStateClass(
@@ -521,7 +510,7 @@ public class JSONSerializer implements Serializable
    * format. Note that this method will remove any circular references /
    * duplicates and not handle the potential fixups that could be generated.
    * (unless duplicates/circular references are turned off.
-   * 
+   *
    * @param obj the object to be converted to JSON.
    * @param state holds any information that isn't returned in the json, eg
    *          circular references
@@ -551,7 +540,7 @@ public class JSONSerializer implements Serializable
    * matches most closely and therefore which method is the intended target
    * method to call.
    * </p>
-   * 
+   *
    * @param clazz optional java class to unmarshall to- if set to null then it
    *          will be looked for via the javaClass hinting mechanism.
    * @param json JSONObject or JSONArray or primitive Object wrapper that
@@ -581,7 +570,7 @@ public class JSONSerializer implements Serializable
    * matches most closely and therefore which method is the intended target
    * method to call.
    * </p>
-   * 
+   *
    * @param state used by the underlying Serializer objects to hold state while
    *          unmarshalling for detecting circular references and duplicates.
    * @param clazz optional java class to unmarshall to- if set to null then it
@@ -665,7 +654,7 @@ public class JSONSerializer implements Serializable
    * the correct Serializer to use and then delegating to that Serializer to
    * unmarshall for us. This method will be invoked recursively as Serializers
    * unmarshall complex object graphs.
-   * 
+   *
    * @param clazz optional java class to unmarshall to- if set to null then it
    *          will be looked for via the javaClass hinting mechanism.
    * @param json JSONObject or JSONArray or primitive Object wrapper that
@@ -685,7 +674,7 @@ public class JSONSerializer implements Serializable
    * the correct Serializer to use and then delegating to that Serializer to
    * unmarshall for us. This method will be invoked recursively as Serializers
    * unmarshall complex object graphs.
-   * 
+   *
    * @param state used by the underlying Serializer objects to hold state while
    *          unmarshalling for detecting circular references and duplicates.
    * @param clazz optional java class to unmarshall to- if set to null then it
@@ -776,7 +765,7 @@ public class JSONSerializer implements Serializable
    * object is neither a JSONObject or JSONArray, return the Class of the object
    * directly. (this implies a primitive type, such as String, Integer or
    * Boolean)
-   * 
+   *
    * @param o a JSONObject or JSONArray object to get the Class type from the
    *          javaClass hint.
    * @return the Class of javaClass hint found, or null if the passed in Object
@@ -845,7 +834,7 @@ public class JSONSerializer implements Serializable
 
   /**
    * Find the serializer for the given Java type and/or JSON type.
-   * 
+   *
    * @param clazz The Java class to lookup.
    * @param jsoClazz The JSON class type to lookup (may be null in the
    *          marshalling case in which case only the class is used to lookup
