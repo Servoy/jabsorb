@@ -53,8 +53,8 @@ import org.json.JSONObject;
  */
 public class Test implements Serializable, ITest
 {
-  
-  
+
+
   private final static long serialVersionUID = 2;
 
   // Void test
@@ -93,7 +93,7 @@ public class Test implements Serializable, ITest
   }
 
   // Type tests
-  
+
   public Object[] echoArray(Object[] object)
   {
     return object;
@@ -158,7 +158,7 @@ public class Test implements Serializable, ITest
   {
     return d;
   }
-  
+
   public java.sql.Date echoSQLDateObject(java.sql.Date d)
   {
     return d;
@@ -173,12 +173,12 @@ public class Test implements Serializable, ITest
   {
     return o;
   }
-  
+
   public String echoOverloadedObject(Number i)
   {
     return "number method";
   }
-  
+
   public String echoOverloadedObject(Boolean s)
   {
     return "boolean method";
@@ -187,6 +187,11 @@ public class Test implements Serializable, ITest
   public JSONObject echoRawJSON(JSONObject rawObject)
   {
     return rawObject;
+  }
+
+  public Map echoMap(Map map)
+  {
+    return map;
   }
 
   // Container tests
@@ -275,7 +280,7 @@ public class Test implements Serializable, ITest
     m.put("me",m);
     return m;
   }
-  
+
   public List aCircRefList()
   {
     ArrayList list = new ArrayList();
@@ -306,7 +311,7 @@ public class Test implements Serializable, ITest
 
   /**
    * Test more than one duplicate, to make sure the fixups they generate
-   * all refer to the same object 
+   * all refer to the same object
    * @return a List with some duplicates.
    */
   public List aDupDup()
@@ -378,7 +383,7 @@ public class Test implements Serializable, ITest
 
   /**
    * Test an array of 3 duplicate Strings.
-   * 
+   *
    * @return an array of 3 duplicate Strings.
    */
   public String[] aStringArrayDup()
@@ -390,10 +395,10 @@ public class Test implements Serializable, ITest
     arr[2] = dup;
     return arr;
   }
-  
+
   /**
    * Test an array of 3 duplicate Beans.
-   * 
+   *
    * @return an array of 3 duplicate Beans.
    */
   public BeanA[] aBeanArrayDup()
@@ -551,7 +556,7 @@ private static CallableRefTest callableRef = new CallableRefTest();
   {
     return callableRef;
   }
-  
+
   public Vector getCallableRefVector()
   {
     Vector v = new Vector();
@@ -565,7 +570,7 @@ private static CallableRefTest callableRef = new CallableRefTest();
     Vector v = new Vector();
     v.add(callableRef);
     v.add(callableRef);
-    v1.add(v);    
+    v1.add(v);
     return v1;
   }
   public Map getCallableRefMap()
@@ -621,10 +626,10 @@ private static CallableRefTest callableRef = new CallableRefTest();
     {
     }
   };
-  
+
   /**
    * Count the number of true booleans in the Map.
-   * 
+   *
    * @param input map.
    * @return number of booleans in the map that were set to true.
    */

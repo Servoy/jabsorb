@@ -113,7 +113,7 @@ var unitTests={
   "Client Side JSON String Encoding":
   {
     tests:
-    [ 
+    [
       // simple string escape
       { code: 'escapeJSONString("hello world")',
         test: 'result === "\\\"hello world\\\""'
@@ -135,7 +135,7 @@ var unitTests={
   },
   "Circular References":
   {
-    tests: 
+    tests:
     [
       // circular reference from server
       { code: 'jsonrpc.test.aBean()',
@@ -192,7 +192,7 @@ var unitTests={
       //duplicates from the server
       { code: 'jsonrpc.test.aDupDup()',
         test: 'true'},
-  
+
       //more duplicates from the server
       { code: 'jsonrpc.test.aDupDupDup()',
         test: 'true'},
@@ -229,9 +229,9 @@ var unitTests={
       }
     ]
   },
-  
+
   "Primitives":
-  {  
+  {
     tests:
     [
       { code: 'jsonrpc.test.voidFunction()',
@@ -275,9 +275,9 @@ var unitTests={
       }
     ]
   },
-  
+
   "Objects":
-  {  
+  {
     tests:
     [
       { code: 'jsonrpc.test.concat("a","b")',
@@ -304,6 +304,9 @@ var unitTests={
       { code: 'jsonrpc.test.echoObjectArray([{ "javaClass": "org.jabsorb.test.ITest$Waggle", "bang": "foo", "baz": 9, "bork": 5 }])',
         test: 'result[0].javaClass == "org.jabsorb.test.ITest$Waggle" && result[0].bang =="foo" && result[0].baz == 9 && result[0].bork == 5'
       },
+      { code: 'jsonrpc.test.echoObjectArray([])',
+        test: 'result.length === 0'
+      },
       { code: 'jsonrpc.test.echoObject([{ "javaClass": "org.jabsorb.test.ITest$Waggle", "bang": "foo", "baz": 9, "bork": 5 }])',
         test: 'result[0].javaClass == "org.jabsorb.test.ITest$Waggle" && result[0].bang =="foo" && result[0].baz == 9 && result[0].bork == 5'
       },
@@ -312,9 +315,9 @@ var unitTests={
       }
     ]
   },
-  
+
   "Constructors":
-  {  
+  {
     tests:
     [
       { code: 'jsonrpc.createObject("ConstructorTest",[])',
@@ -340,27 +343,27 @@ var unitTests={
       { code: 'jsonrpc.createObject("ConstructorTest",[3.4E37])',
         asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[3.4E37])',
         test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "float"'
-      },      
+      },
       { code: 'jsonrpc.createObject("ConstructorTest",[-3.4E37])',
         asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[-3.4E37])',
         test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "float"'
-      },      
+      },
       { code: 'jsonrpc.createObject("ConstructorTest",[3.4E39])',
         asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[3.4E39])',
         test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "double"'
-      },      
+      },
       { code: 'jsonrpc.createObject("ConstructorTest",[-3.4E39])',
         asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[-3.4E39])',
         test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "double"'
-      },      
+      },
       { code: 'jsonrpc.createObject("ConstructorTest",[true])',
         asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[true])',
         test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "boolean"'
-      },      
+      },
       { code: 'jsonrpc.createObject("ConstructorTest",[false])',
         asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",[false])',
         test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "boolean"'
-      },      
+      },
       { code: 'jsonrpc.createObject("ConstructorTest",["hello world"])',
         asyncCode: 'jsonrpc.createObject(cb,"ConstructorTest",["hello world"])',
         test: 'result.javaClass == "org.jabsorb.test.ConstructorTest" && result.getMessage() == "String"'
@@ -376,7 +379,7 @@ var unitTests={
     ]
   },
   "Dates":
-  {  
+  {
     tests:
     [
       { code: 'jsonrpc.test.echoDateObject(new Date(1121689294000))',
@@ -402,7 +405,7 @@ var unitTests={
   },
 
   "Lists":
-  {  
+  {
     tests:
     [
       { code: 'jsonrpc.test.echo([1,2,3])',
@@ -444,20 +447,20 @@ var unitTests={
       { code: 'jsonrpc.test.aList()',
         test: 'result.list.constructor == Array'
       },
-              
+
       { code: 'jsonrpc.test.echoObject([1,2])',
-        test: 'result.constructor == Array && result[0]==1 && result[1]==2' 
+        test: 'result.constructor == Array && result[0]==1 && result[1]==2'
       },
       { code: 'jsonrpc.test.echoObject(["a","b"])',
-        test: 'result.constructor == Array && result[0]=="a" && result[1]=="b"' 
+        test: 'result.constructor == Array && result[0]=="a" && result[1]=="b"'
       }
-        
-      
+
+
     ]
   },
-  
+
   "Sets":
-  {  
+  {
     tests:
     [
       { code: 'jsonrpc.test.aSet()',
@@ -465,9 +468,9 @@ var unitTests={
       }
     ]
   },
-  
+
   "Maps":
-  {  
+  {
     tests:
     [
       { code: 'jsonrpc.test.aHashtable()',
@@ -487,11 +490,19 @@ var unitTests={
       },
       { code: 'jsonrpc.test.trueBooleansInMap({ javaClass:"java.util.HashMap", map: {"yo": false, "ho": true, "bottle": false, "rum":true}})',
         test: 'result === 2'
-      } 
+      },
+      {
+        code: 'jsonrpc.test.echoMap({ javaClass:"java.util.HashMap", map: {"zero": [], "one": [1], "two": [1,2]}})',
+        test: 'result.javaClass==="java.util.HashMap"'
+      },
+      {
+        code: 'jsonrpc.test.echoMap({ javaClass:"java.util.HashMap", map: {"one": [1], "two": [1,2],"three":[1,2,3]}})',
+        test: 'result.javaClass==="java.util.HashMap"'
+      }
     ]
   },
   "Exceptions":
-  {  
+  {
     tests:
     [
       { code: 'jsonrpc.test.throwException()',
@@ -501,7 +512,7 @@ var unitTests={
     ]
   },
   "Special Characters":
-  {  
+  {
     tests:
     [
       { code: 'jsonrpc.test.echo("hello")',
