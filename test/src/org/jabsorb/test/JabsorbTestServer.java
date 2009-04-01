@@ -28,7 +28,6 @@ package org.jabsorb.test;
 
 import org.apache.jasper.servlet.JspServlet;
 import org.jabsorb.JSONRPCServlet;
-import org.jabsorb.ext.InitializationServlet;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.DefaultServlet;
@@ -46,7 +45,7 @@ public class JabsorbTestServer
 
   /**
    * Runs the webserver on port 8084
-   * 
+   *
    * @param args Not used
    */
   public static void main(String args[])
@@ -70,7 +69,7 @@ public class JabsorbTestServer
 
   /**
    * Creates a new webserver and starts it
-   * 
+   *
    * @param port The port the server runs on
    */
   public JabsorbTestServer(int port)
@@ -110,7 +109,7 @@ public class JabsorbTestServer
           "JSONRPCBridge_Default"));
       jsonRpcServlet.setInitParameter("auto-session-bridge", "0");
       context.addServlet(jsonRpcServlet, "/JSON-RPC-Default/*");
-      
+
     }
     {
       ServletHolder jsonRpcServlet = new ServletHolder(new JSONRPCServlet(
@@ -124,14 +123,11 @@ public class JabsorbTestServer
       jsonRpcServlet.setInitParameter("auto-session-bridge", "0");
       context.addServlet(jsonRpcServlet, "/JSON-RPC-Flat/*");
     }
-    // do other initialization that normally happens in web.xml
-    ServletHolder initServlet = new ServletHolder(new InitializationServlet());
-    context.addServlet(initServlet, null);
   }
 
   /**
    * Stops the server
-   * 
+   *
    * @throws Exception if jetty has issues stopping
    */
   public void stop() throws Exception
