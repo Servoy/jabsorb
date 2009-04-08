@@ -803,7 +803,8 @@ public class JSONSerializer implements Serializable
       JSONArray arr = (JSONArray) o;
       if (arr.length() == 0)
       {
-        throw new UnmarshallException("no type for empty array");
+        // assume Object array (best guess)
+        return Object[].class;
       }
       // return type of first element
       Class<?> compClazz;
