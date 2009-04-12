@@ -626,114 +626,111 @@ public class JSONRPCBridge implements Serializable
     final String encodedMethod;
     final Object requestId;
     final JSONArray arguments;
+    JSONRPCResult r;
     try
     {
       encodedMethod = jsonReq.getString(JSONSerializer.METHOD_FIELD);
       requestId = jsonReq.opt(JSONSerializer.ID_FIELD);
-      arguments = this.ser.getRequestParser().unmarshallArray(jsonReq, JSONSerializer.PARAMETER_FIELD);
+      arguments = this.ser.getRequestParser().unmarshallArray(jsonReq,
+          JSONSerializer.PARAMETER_FIELD);
+      if (log.isDebugEnabled())
+      {
+        log.debug("call " + encodedMethod + "(" + arguments + ")"
+            + ", requestId=" + requestId);
+      }
+      // #2: Get the name of the class and method from the encodedMethod
+      final String className;
+      final String methodName;
+      {
+        StringTokenizer t = new StringTokenizer(encodedMethod, ".");
+        if (t.hasMoreElements())
+        {
+          className = t.nextToken();
+        }
+        else
+        {
+          className = null;
+        }
+        if (t.hasMoreElements())
+        {
+          methodName = t.nextToken();
+        }
+        else
+        {
+          methodName = null;
+        }
+      }
+      // #3: Get the id of the object (if it exists) from the className
+      // (in the format: ".obj#<objectID>")
+      final int objectID;
+      {
+        final int objectStartIndex = encodedMethod.indexOf('[');
+        final int objectEndIndex = encodedMethod.indexOf(']');
+        if (encodedMethod.startsWith(OBJECT_METHOD_PREFIX)
+            && (objectStartIndex != -1) && (objectEndIndex != -1)
+            && (objectStartIndex < objectEndIndex))
+        {
+          objectID = Integer.parseInt(encodedMethod.substring(
+              objectStartIndex + 1, objectEndIndex));
+        }
+        else
+        {
+          objectID = 0;
+        }
+      }
+      // #4: Handle list method calls
+      if ((objectID == 0) && (encodedMethod.equals("system.listMethods")))
+      {
+        r = new SuccessfulResult(requestId, systemListMethods());
+      }
+      else
+      {
+        // #5: Get the object to act upon and the possible method that could be 
+        // called on it
+        final Map<AccessibleObjectKey, Set<AccessibleObject>> methodMap;
+        final Object javascriptObject;
+        final AccessibleObject ao;
+        try
+        {
+          javascriptObject = getObjectContext(objectID, className);
+          methodMap = getAccessibleObjectMap(objectID, className, methodName);
+          // #6: Resolve the method      
+          ao = AccessibleObjectResolver.resolveMethod(methodMap, methodName,
+              arguments, ser);
+          if (ao == null)
+          {
+            throw new NoSuchMethodException(FailedResult.MSG_ERR_NOMETHOD);
+          }
+          // #7: Call the method
+          r = AccessibleObjectResolver.invokeAccessibleObject(ao, context,
+              arguments, javascriptObject, requestId, ser, cbc,
+              exceptionTransformer);
+        }
+        catch (NoSuchMethodException e)
+        {
+          if (e.getMessage().equals(FailedResult.MSG_ERR_NOCONSTRUCTOR))
+          {
+            r = new FailedResult(FailedResult.CODE_ERR_NOCONSTRUCTOR,
+                requestId, FailedResult.MSG_ERR_NOCONSTRUCTOR);
+          }
+          else
+          {
+            r = new FailedResult(FailedResult.CODE_ERR_NOMETHOD, requestId,
+                FailedResult.MSG_ERR_NOMETHOD);
+          }
+        }
+      }
     }
     catch (JSONException e)
     {
       log.error("no method or parameters in request");
-      return new FailedResult(FailedResult.CODE_ERR_NOMETHOD, null,
-          FailedResult.MSG_ERR_NOMETHOD);
-    }
-    if (log.isDebugEnabled())
-    {
-      //      if (fixups == null)
-      //      {
-      log.debug("call " + encodedMethod + "(" + arguments + ")"
-          + ", requestId=" + requestId);
-      //      }
-      //      else
-      //      {
-      //        log.debug("call " + encodedMethod + "(" + arguments + ")" + ", fixups="
-      //            + fixups + ", requestId=" + requestId);
-      //      }
-    }
-
-    // #2: Get the name of the class and method from the encodedMethod
-    final String className;
-    final String methodName;
-    {
-      StringTokenizer t = new StringTokenizer(encodedMethod, ".");
-      if (t.hasMoreElements())
-      {
-        className = t.nextToken();
-      }
-      else
-      {
-        className = null;
-      }
-      if (t.hasMoreElements())
-      {
-        methodName = t.nextToken();
-      }
-      else
-      {
-        methodName = null;
-      }
-    }
-
-    // #3: Get the id of the object (if it exists) from the className
-    // (in the format: ".obj#<objectID>")
-    final int objectID;
-    {
-      final int objectStartIndex = encodedMethod.indexOf('[');
-      final int objectEndIndex = encodedMethod.indexOf(']');
-      if (encodedMethod.startsWith(OBJECT_METHOD_PREFIX)
-          && (objectStartIndex != -1) && (objectEndIndex != -1)
-          && (objectStartIndex < objectEndIndex))
-      {
-        objectID = Integer.parseInt(encodedMethod.substring(
-            objectStartIndex + 1, objectEndIndex));
-      }
-      else
-      {
-        objectID = 0;
-      }
-    }
-    // #4: Handle list method calls
-    if ((objectID == 0) && (encodedMethod.equals("system.listMethods")))
-    {
-      return new SuccessfulResult(requestId, systemListMethods());
-    }
-
-    // #5: Get the object to act upon and the possible method that could be 
-    // called on it
-    final Map<AccessibleObjectKey, Set<AccessibleObject>> methodMap;
-    final Object javascriptObject;
-    final AccessibleObject ao;
-    try
-    {
-      javascriptObject = getObjectContext(objectID, className);
-      methodMap = getAccessibleObjectMap(objectID, className, methodName);
-      // #6: Resolve the method      
-      ao = AccessibleObjectResolver.resolveMethod(methodMap, methodName,
-          arguments, ser);
-      if (ao == null)
-      {
-        throw new NoSuchMethodException(FailedResult.MSG_ERR_NOMETHOD);
-      }
-    }
-    catch (NoSuchMethodException e)
-    {
-      if (e.getMessage().equals(FailedResult.MSG_ERR_NOCONSTRUCTOR))
-      {
-        return new FailedResult(FailedResult.CODE_ERR_NOCONSTRUCTOR, requestId,
-            FailedResult.MSG_ERR_NOCONSTRUCTOR);
-      }
-      return new FailedResult(FailedResult.CODE_ERR_NOMETHOD, requestId,
+      r = new FailedResult(FailedResult.CODE_ERR_NOMETHOD, null,
           FailedResult.MSG_ERR_NOMETHOD);
     }
 
-    // #7: Call the method
-    JSONRPCResult r = AccessibleObjectResolver.invokeAccessibleObject(ao,
-        context, arguments, javascriptObject, requestId, ser, cbc,
-        exceptionTransformer);
     return r;
   }
-
+  
   /**
    * Allows references to be used on the bridge
    * 
