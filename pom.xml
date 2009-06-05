@@ -46,6 +46,10 @@
   <scm>
     <url>http://svn.jabsorb.org/svn/jabsorb</url>
   </scm>
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <testSourceDirectory>test/src</testSourceDirectory>
+  </build>
   <dependencies>
     <!-- Runtime dependencies -->
     <dependency>
