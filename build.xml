@@ -58,7 +58,7 @@
 
   <target name="compile" depends="init,init-build,copy-dependencies" description="Compiles the source into the build directory">
     <mkdir dir="${build.classes}"/>
-    <javac debug="true" source="5" srcdir="${src}" destdir="${build.classes}">
+    <javac debug="true" source="6" srcdir="${src}" destdir="${build.classes}">
       <classpath refid="default-classpath" />
     </javac>
   </target>
