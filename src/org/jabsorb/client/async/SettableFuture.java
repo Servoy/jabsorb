@@ -46,25 +46,18 @@ public class SettableFuture<T> implements Future<T> {
 	/**
 	 * Always returns false, since cancellation is not supported by this implementation
 	 */
-	@Override
 	public boolean cancel(final boolean mayInterruptIfRunning) {
 		return false;
 	}
 
-	@Override
-	/**
-	 * Always returns false, since cancellation is not supported by this implementation
-	 */
 	public boolean isCancelled() {
 		return false;
 	}
 
-	@Override
 	public boolean isDone() {
 		return done;
 	}
 
-	@Override
 	public synchronized T get() throws InterruptedException, ExecutionException {
 		while (!isDone()) {
 			// release monitor (synchronisation lock) and wait for notification
@@ -74,7 +67,6 @@ public class SettableFuture<T> implements Future<T> {
 		return result;
 	}
 
-	@Override
 	public synchronized T get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		long nanos = unit.toNanos(timeout);
 

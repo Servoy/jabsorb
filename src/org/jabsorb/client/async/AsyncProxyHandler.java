@@ -49,7 +49,6 @@ public class AsyncProxyHandler implements InvocationHandler {
 		private AsyncResultCallback<Object, Object, Method> resultCallback;
 
 		@SuppressWarnings("unchecked")
-		@Override
 		public Object invoke(final Object proxyObj, final Method method, final Object[] args) throws Exception {
 			assert (proxyObj instanceof AsyncProxy) : "Proxy object is not created by AsyncClient?";
 
@@ -102,7 +101,6 @@ public class AsyncProxyHandler implements InvocationHandler {
 			final JSONObject message = createInvokeMessage(proxyKey, method.getName(), args);
 
 			final AsyncResultCallback<AsyncSession, JSONObject, JSONObject> jsonResultCallback = new AsyncResultCallback<AsyncSession, JSONObject, JSONObject>() {
-				@Override
 				public void onAsyncResult(final AsyncSession source, final Future<JSONObject> response, final JSONObject request) {
 					// get the response
 					try {
