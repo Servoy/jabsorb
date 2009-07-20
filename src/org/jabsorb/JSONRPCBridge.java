@@ -681,7 +681,7 @@ public class JSONRPCBridge implements Serializable
       // #4: Handle list method calls
       if ((objectID == 0) && (encodedMethod.equals("system.listMethods")))
       {
-        r = new SuccessfulResult(requestId, systemListMethods());
+        r = new SuccessfulResult(requestId, getSystemMethods());
       }
       else
       {
@@ -1190,12 +1190,15 @@ public class JSONRPCBridge implements Serializable
   }
 
   /**
-   * Handle "system.listMethods" this is called by the browser side javascript
-   * when a new JSONRpcClient object is initialized.
-   * 
-   * @return A JSONArray containing the names of the system methods.
+   * Get list of system methods that can be invoked on this JSONRPCBridge.
+   *
+   * These are the methods that are retrieved via a system.listMethods call
+   * from the client (like when a new JSONRpcClient object is initialized
+   * by the browser side javascript.)
+   *
+   * @return A JSONArray of method names (in the format of Class.Method)
    */
-  protected JSONArray systemListMethods()
+  public JSONArray getSystemMethods()
   {
     Set<String> m = new TreeSet<String>();
     globalBridge.allInstanceMethods(m);
