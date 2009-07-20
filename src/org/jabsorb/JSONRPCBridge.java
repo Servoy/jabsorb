@@ -128,7 +128,7 @@ public class JSONRPCBridge implements Serializable
 
     /**
      * Creates a new ObjectInstance
-     * 
+     *
      * @param object The object for the instance
      */
     public ObjectInstance(Object object)
@@ -139,7 +139,7 @@ public class JSONRPCBridge implements Serializable
 
     /**
      * Creates a new ObjectInstance
-     * 
+     *
      * @param object The object for the instance
      * @param clazz The class the object is of
      */
@@ -156,7 +156,7 @@ public class JSONRPCBridge implements Serializable
 
     /**
      * Gets the class the object is of
-     * 
+     *
      * @return The class the object is of
      */
     public Class getClazz()
@@ -166,7 +166,7 @@ public class JSONRPCBridge implements Serializable
 
     /**
      * Gets the object for the instance
-     * 
+     *
      * @return the object for the instance
      */
     public Object getObject()
@@ -176,20 +176,20 @@ public class JSONRPCBridge implements Serializable
   }
 
   /**
-   * The prefix for callable references, as sent in messages 
+   * The prefix for callable references, as sent in messages
    */
   public static final String CALLABLE_REFERENCE_METHOD_PREFIX=".ref";
-  
+
   /**
    * The string identifying constuctor calls
    */
   public static final String CONSTRUCTOR_FLAG = "$constructor";
-  
+
   /**
    * The prefix for objects, as sent in messages
    */
   public static final String OBJECT_METHOD_PREFIX=".obj";
-  
+
   /**
    * Unique serialisation id.
    */
@@ -243,7 +243,7 @@ public class JSONRPCBridge implements Serializable
    * This method retrieves the global bridge singleton. <p/> It should be used
    * with care as objects should generally be registered within session specific
    * bridges for security reasons.
-   * 
+   *
    * @return returns the global bridge object.
    */
   public static JSONRPCBridge getGlobalBridge()
@@ -253,7 +253,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Get the global JSONSerializer object.
-   * 
+   *
    * @return the global JSONSerializer object.
    */
   public static JSONSerializer getSerializer()
@@ -264,7 +264,7 @@ public class JSONRPCBridge implements Serializable
   /**
    * Registers a Class to be removed from the exported method signatures and
    * instead be resolved locally using context information from the transport.
-   * 
+   *
    * @param argClazz The class to be resolved locally
    * @param argResolver The user defined class that resolves the and returns the
    *          method argument using transport context information
@@ -283,7 +283,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Set the global JSONSerializer object.
-   * 
+   *
    * @param ser the global JSONSerializer object.
    */
   public static void setSerializer(JSONSerializer ser)
@@ -293,7 +293,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Unregisters a LocalArgResolver</b>.
-   * 
+   *
    * @param argClazz The previously registered local class
    * @param argResolver The previously registered LocalArgResolver object
    * @param contextInterface The previously registered transport Context
@@ -311,7 +311,7 @@ public class JSONRPCBridge implements Serializable
   /**
    * Create unique method names by appending the given prefix to the keys from
    * the given HashMap and adding them all to the given HashSet.
-   * 
+   *
    * @param m HashSet to add unique methods to.
    * @param prefix prefix to append to each method name found in the methodMap.
    * @param methodMap a HashMap containing MethodKey keys specifying methods.
@@ -388,7 +388,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Adds a reference to the map of known references
-   * 
+   *
    * @param o The object to be added
    */
   public void addReference(Object o)
@@ -401,12 +401,12 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Call a method using a JSON-RPC request object.
-   * 
-   * @param  context The transport context (the HttpServletRequest and 
+   *
+   * @param  context The transport context (the HttpServletRequest and
    *         HttpServletResponse objects in the case of the HTTP transport).
-   *         
+   *
    * @param  jsonReq The JSON-RPC request structured as a JSON object tree.
-   * 
+   *
    * @return a JSONRPCResult object with the result of the invocation or an
    *         error.
    */
@@ -513,10 +513,10 @@ public class JSONRPCBridge implements Serializable
     if ((objectID == 0) && (encodedMethod.equals("system.listMethods")))
     {
       return new JSONRPCResult(JSONRPCResult.CODE_SUCCESS, requestId,
-          systemListMethods());
+        getSystemMethods());
     }
-   
-    // #5: Get the object to act upon and the possible method that could be 
+
+    // #5: Get the object to act upon and the possible method that could be
     // called on it
     final Map methodMap;
     final Object javascriptObject;
@@ -525,7 +525,7 @@ public class JSONRPCBridge implements Serializable
     {
       javascriptObject = getObjectContext(objectID, className);
       methodMap = getAccessibleObjectMap(objectID, className, methodName);
-      // #6: Resolve the method      
+      // #6: Resolve the method
       ao = AccessibleObjectResolver.resolveMethod(
           methodMap, methodName, arguments, ser);
       if (ao == null)
@@ -553,7 +553,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Allows references to be used on the bridge
-   * 
+   *
    * @throws Exception If a serialiser has already been registered for
    *           CallableReferences
    */
@@ -569,7 +569,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Get the CallbackController object associated with this bridge.
-   * 
+   *
    * @return the CallbackController object associated with this bridge.
    */
   public CallbackController getCallbackController()
@@ -579,7 +579,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Gets a known reference
-   * 
+   *
    * @param objectId The id of the object to get
    * @return The requested reference
    */
@@ -593,7 +593,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Check whether a class is registered as a callable reference type.
-   * 
+   *
    * @param clazz The class object to check is a callable reference.
    * @return true if it is, false otherwise
    */
@@ -611,7 +611,7 @@ public class JSONRPCBridge implements Serializable
     {
       return true;
     }
-    
+
     // check if the class implements any interface that is
     // registered as a callable reference...
     Class[] interfaces = clazz.getInterfaces();
@@ -633,16 +633,16 @@ public class JSONRPCBridge implements Serializable
       }
       superClass = superClass.getSuperclass();
     }
-    
+
     // should interfaces of each superclass be checked too???
     // not sure...
-    
+
     return globalBridge.isCallableReference(clazz);
   }
 
   /**
    * Check whether a class is registered as a reference type.
-   * 
+   *
    * @param clazz The class object to check is a reference.
    * @return true if it is, false otherwise.
    */
@@ -665,7 +665,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Lookup a class that is registered with this bridge.
-   * 
+   *
    * @param name The registered name of the class to lookup.
    * @return the class for the name
    */
@@ -679,7 +679,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Lookup an object that is registered with this bridge.
-   * 
+   *
    * @param key The registered name of the object to lookup.
    * @return The object desired if it exists, else null.
    */
@@ -709,10 +709,10 @@ public class JSONRPCBridge implements Serializable
    * </p>
    * <p>
    * <p>
-   * Note that the global bridge does not support registering of callable 
-   * references and attempting to do so will throw an Exception. 
-   * These operations are inherently session based and are disabled on the 
-   * global bridge because there is currently no safe simple way to garbage 
+   * Note that the global bridge does not support registering of callable
+   * references and attempting to do so will throw an Exception.
+   * These operations are inherently session based and are disabled on the
+   * global bridge because there is currently no safe simple way to garbage
    * collect such references across the JavaScript/Java barrier.
    * </p>
    * <p>
@@ -720,7 +720,7 @@ public class JSONRPCBridge implements Serializable
    * </p>
    * <code>{ "javaClass":"org.jabsorb.test.Bar",<br />
    * "objectID":4827452,<br /> "JSONRPCType":"CallableReference" }</code>
-   * 
+   *
    * @param clazz The class object that should be marshalled as a callable
    *          reference.
    * @throws Exception if this method is called on the global bridge.
@@ -747,7 +747,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Registers a callback to be called before and after method invocation
-   * 
+   *
    * @param callback The object implementing the InvocationCallback Interface
    * @param contextInterface The type of transport Context interface the
    *          callback is interested in eg. HttpServletRequest.class for the
@@ -769,7 +769,7 @@ public class JSONRPCBridge implements Serializable
    * classes that may then return CallableReferences to the JSON-RPC client.
    * <p/> Calling registerClass for a clazz again under the same name will have
    * no effect. <p/> To export instance methods you need to use registerObject.
-   * 
+   *
    * @param name The name to register the class with.
    * @param clazz The class to export static methods from.
    * @throws Exception If a class is already registed with this name
@@ -802,7 +802,7 @@ public class JSONRPCBridge implements Serializable
    * <code>&lt;key&gt;.&lt;methodnames&gt;</code> to JSON-RPC clients. <p/>
    * Calling registerObject for a name that already exists will replace the
    * existing entry.
-   * 
+   *
    * @param key The named prefix to export the object as
    * @param o The object instance to be called upon
    */
@@ -826,7 +826,7 @@ public class JSONRPCBridge implements Serializable
    * defined by interfaceClass of the particular object under the name passed in
    * as a key. <p/> This will make available these methods of the object as
    * <code>&lt;key&gt;.&lt;methodnames&gt;</code> to JSON-RPC clients.
-   * 
+   *
    * @param key The named prefix to export the object as
    * @param o The object instance to be called upon
    * @param interfaceClass The type that this object should be registered as.
@@ -859,15 +859,15 @@ public class JSONRPCBridge implements Serializable
    * <code>{ "javaClass":"org.jabsorb.test.Foo",<br />
    * "objectID":5535614,<br /> "JSONRPCType":"Reference" }</code>
    * <p>
-   * Note that the global bridge does not support registering of  
-   * references and attempting to do so will throw an Exception. 
-   * These operations are inherently session based and are disabled on the 
-   * global bridge because there is currently no safe simple way to garbage 
+   * Note that the global bridge does not support registering of
+   * references and attempting to do so will throw an Exception.
+   * These operations are inherently session based and are disabled on the
+   * global bridge because there is currently no safe simple way to garbage
    * collect such references across the JavaScript/Java barrier.
    * </p>
-   * 
+   *
    * @param clazz The class object that should be marshalled as a reference.
-   * @throws Exception if this method is called on the global bridge.   
+   * @throws Exception if this method is called on the global bridge.
    */
   public void registerReference(Class clazz) throws Exception
   {
@@ -891,7 +891,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Register a new serializer on this bridge.
-   * 
+   *
    * @param serializer A class implementing the Serializer interface (usually
    *          derived from AbstractSerializer).
    * @throws Exception If a serialiser has already been registered that
@@ -904,7 +904,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Set the CallbackController object for this bridge.
-   * 
+   *
    * @param cbc the CallbackController object to be set for this bridge.
    */
   public void setCallbackController(CallbackController cbc)
@@ -914,7 +914,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Sets the exception transformer for the bridge.
-   * 
+   *
    * @param exceptionTransformer The new exception transformer to use.
    */
   public void setExceptionTransformer(ExceptionTransformer exceptionTransformer)
@@ -924,7 +924,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Unregisters a callback
-   * 
+   *
    * @param callback The previously registered InvocationCallback object
    * @param contextInterface The previously registered transport Context
    *          interface.
@@ -942,7 +942,7 @@ public class JSONRPCBridge implements Serializable
   /**
    * Unregisters a class exported with registerClass. <p/> The JSONBridge will
    * unexport all static methods of the class.
-   * 
+   *
    * @param name The registered name of the class to unexport static methods
    *          from.
    */
@@ -966,7 +966,7 @@ public class JSONRPCBridge implements Serializable
    * Unregisters an object exported with registerObject. <p/> The JSONBridge
    * will unexport all instance methods and static methods of the particular
    * object under the name passed in as a key.
-   * 
+   *
    * @param key The named prefix of the object to unexport
    */
   public void unregisterObject(Object key)
@@ -988,7 +988,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Add all instance methods that can be invoked on this bridge to a HashSet.
-   * 
+   *
    * @param m HashSet to add all static methods to.
    */
   private void allInstanceMethods(Set m)
@@ -1015,7 +1015,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Add all methods on registered callable references to a HashSet.
-   * 
+   *
    * @param m Set to add all methods to.
    */
   private void allCallableReferences(Set m)
@@ -1026,7 +1026,7 @@ public class JSONRPCBridge implements Serializable
       while (i.hasNext())
       {
         Class clazz = (Class) i.next();
- 
+
         ClassData cd = ClassAnalyzer.getClassData(clazz);
 
         uniqueMethods(m, CALLABLE_REFERENCE_METHOD_PREFIX+"["+clazz.getName()+"].", cd.getStaticMethodMap());
@@ -1034,11 +1034,11 @@ public class JSONRPCBridge implements Serializable
       }
     }
   }
-  
+
   /**
    * Add all static methods that can be invoked on this bridge to the given
    * HashSet.
-   * 
+   *
    * @param m HashSet to add all static methods to.
    */
   private void allStaticMethods(Set m)
@@ -1059,13 +1059,13 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Apply one fixup assigment to the incoming json arguments.
-   * 
+   *
    * WARNING: the resultant "fixed up" arguments may contain circular references
    * after this operation. That is the whole point of course-- but the JSONArray
    * and JSONObject's themselves aren't aware of circular references when
    * certain methods are called (e.g. toString) so be careful when handling
    * these circular referenced json objects.
-   * 
+   *
    * @param object the object to apply fixups to.
    * @param fixup the fixup entry.
    * @param original the original value to assign to the fixup.
@@ -1111,13 +1111,13 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Gets the methods that can be called on the given object
-   * 
+   *
    * @param objectID The id of the object or 0 if it is a class
    * @param className The name of the class of the object - only required if
    *          objectID==0
    * @param methodName The name of method in the request
    * @return A map of AccessibleObjectKeys to a Collection of AccessibleObjects
-   * @throws NoSuchMethodException If the method cannot be found in the class 
+   * @throws NoSuchMethodException If the method cannot be found in the class
    */
   private Map getAccessibleObjectMap(final int objectID,
       final String className, final String methodName)
@@ -1176,7 +1176,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Resolves an objectId to an actual object
-   * 
+   *
    * @param objectID The id of the object to resolve
    * @param className The name of the class of the object
    * @return The object requested
@@ -1213,11 +1213,11 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Given a previous json object, find the next object under the given index.
-   * 
+   *
    * @param prev object to find subobject of.
    * @param idx index of sub object to find.
    * @return the next object in a fixup reference chain (prev[idx])
-   * 
+   *
    * @throws JSONException if something goes wrong.
    */
   private static Object next(Object prev, int idx) throws JSONException
@@ -1236,11 +1236,11 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Given a previous json object, find the next object under the given ref.
-   * 
+   *
    * @param prev object to find subobject of.
    * @param ref reference of sub object to find.
    * @return the next object in a fixup reference chain (prev[ref])
-   * 
+   *
    * @throws JSONException if something goes wrong.
    */
   private static Object next(Object prev, String ref) throws JSONException
@@ -1258,7 +1258,7 @@ public class JSONRPCBridge implements Serializable
 
   /**
    * Resolves a string to a class
-   * 
+   *
    * @param className The name of the class to resolve
    * @return The data associated with the className
    */
@@ -1301,7 +1301,7 @@ public class JSONRPCBridge implements Serializable
    * look in the global bridge too. <p/> If the key is not found in this bridge
    * or the global bridge, the requested key may be a class method (static
    * method) or may not exist (not registered under the requested key.)
-   * 
+   *
    * @param key registered object key being requested by caller.
    * @return ObjectInstance that has been registered under this key, in this
    *         bridge or the global bridge.
@@ -1326,12 +1326,15 @@ public class JSONRPCBridge implements Serializable
   }
 
   /**
-   * Handle "system.listMethods" this is called by the browser side javascript
-   * when a new JSONRpcClient object is initialized.
-   * 
-   * @return A JSONArray containing the names of the system methods.
+   * Get list of system methods that can be invoked on this JSONRPCBridge.
+   *
+   * These are the methods that are retrieved via a system.listMethods call
+   * from the client (like when a new JSONRpcClient object is initialized
+   * by the browser side javascript.)
+   *
+   * @return A JSONArray of method names (in the format of Class.Method)
    */
-  private JSONArray systemListMethods()
+  public JSONArray getSystemMethods()
   {
     Set m = new TreeSet();
     globalBridge.allInstanceMethods(m);
@@ -1355,7 +1358,7 @@ public class JSONRPCBridge implements Serializable
   /**
    * Traverse a list of references to find the target reference in an original
    * or fixup list.
-   * 
+   *
    * @param origin origin JSONArray (arguments) to begin traversing at.
    * @param refs JSONArray containing array integer references and or String
    *          object references.
