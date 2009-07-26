@@ -23,7 +23,7 @@ public class AsyncSessionUtilTest extends TestCase {
 	public void testToSyncSession() throws Exception {
 		final AsyncSession asyncSession = new DummyAsyncSession(1000, "testToSyncSession");
 
-		final Session session = AsyncSessionUtil.ToSyncSession(asyncSession);
+		final Session session = AsyncSessionUtil.toSyncSession(asyncSession);
 
 		long time = System.currentTimeMillis();
 		final JSONObject response = session.sendAndReceive(null);
@@ -41,7 +41,7 @@ public class AsyncSessionUtilTest extends TestCase {
 	public void testToAsyncSession() throws Exception {
 		final Session session = new DummySession(1000, "testToAsyncSession");
 
-		final AsyncSession asyncSession = AsyncSessionUtil.ToAsyncSession(session);
+		final AsyncSession asyncSession = AsyncSessionUtil.toAsyncSession(session);
 
 		long time = System.currentTimeMillis();
 		final Future<JSONObject> future = asyncSession.send(null);
@@ -61,14 +61,13 @@ public class AsyncSessionUtilTest extends TestCase {
 	public void testToAsyncSessionCallback() throws Exception {
 		final Session session = new DummySession(1000, "testToAsyncSessionCallback");
 
-		final AsyncSession asyncSession = AsyncSessionUtil.ToAsyncSession(session);
+		final AsyncSession asyncSession = AsyncSessionUtil.toAsyncSession(session);
 
 		final long time = System.currentTimeMillis();
 
 		final boolean[] callbackCalled = new boolean[] { false };
 
 		final Future<JSONObject> future = asyncSession.send(null, new AsyncResultCallback<AsyncSession, JSONObject, JSONObject>() {
-			@Override
 			public void onAsyncResult(final AsyncSession source, final Future<JSONObject> result, final JSONObject context) {
 				try {
 					assertEquals("testToAsyncSessionCallback", result.get().get(JSONSerializer.RESULT_FIELD));
@@ -92,11 +91,11 @@ public class AsyncSessionUtilTest extends TestCase {
 
 	public void testUnwrapSession() throws Exception {
 		final Session session = new DummySession(1000, "testUnwrapSession");
-		assertSame(session, AsyncSessionUtil.ToSyncSession(AsyncSessionUtil.ToAsyncSession(session)));
+		assertSame(session, AsyncSessionUtil.toSyncSession(AsyncSessionUtil.toAsyncSession(session)));
 	}
 
 	public void testUnwrapAsyncSession() throws Exception {
 		final AsyncSession session = new DummyAsyncSession(1000, "testUnwrapSession");
-		assertSame(session, AsyncSessionUtil.ToAsyncSession(AsyncSessionUtil.ToSyncSession(session)));
+		assertSame(session, AsyncSessionUtil.toAsyncSession(AsyncSessionUtil.toSyncSession(session)));
 	}
 }

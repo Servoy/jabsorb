@@ -18,12 +18,10 @@ class DummyAsyncSession implements AsyncSession {
 		this.response = response;
 	}
 
-	@Override
 	public void close() {
 		// nothing
 	}
 
-	@Override
 	public Future<JSONObject> send(final JSONObject request, final AsyncResultCallback<AsyncSession, JSONObject, JSONObject> callback) {
 		final SettableFuture<JSONObject> future = new SettableFuture<JSONObject>();
 
@@ -52,7 +50,6 @@ class DummyAsyncSession implements AsyncSession {
 		return future;
 	}
 
-	@Override
 	public Future<JSONObject> send(final JSONObject request) {
 		return send(request, null);
 	}

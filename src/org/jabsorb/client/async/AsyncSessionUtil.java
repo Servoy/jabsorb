@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class AsyncSessionUtil {
 	private static final Logger log = LoggerFactory.getLogger(AsyncSessionUtil.class);
 
-	public static Session ToSyncSession(final AsyncSession asyncSession) {
+	public static Session toSyncSession(final AsyncSession asyncSession) {
 		// unwrap if possible
 		if (asyncSession instanceof AsyncedSyncSession) {
 			return ((AsyncedSyncSession)asyncSession).getSession();
@@ -27,7 +27,7 @@ public class AsyncSessionUtil {
 		return new SyncedAsyncSession(asyncSession);
 	}
 
-	public static AsyncSession ToAsyncSession(final Session session) {
+	public static AsyncSession toAsyncSession(final Session session) {
 		// unwrap if possible
 		if (session instanceof SyncedAsyncSession) {
 			return ((SyncedAsyncSession)session).getAsyncSession();

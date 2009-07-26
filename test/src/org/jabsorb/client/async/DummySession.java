@@ -19,12 +19,10 @@ class DummySession implements Session {
 		this.response = response;
 	}
 
-	@Override
 	public void close() {
 		// nothing
 	}
 
-	@Override
 	public JSONObject sendAndReceive(final JSONObject message) {
 		try {
 			Thread.sleep(duration);
