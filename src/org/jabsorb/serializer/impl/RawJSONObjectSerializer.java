@@ -81,7 +81,7 @@ public class RawJSONObjectSerializer extends AbstractSerializer
       {
         key = (String) i.next();
 
-        Object j = ser.marshall(state, o, jsonIn.get(key), key);
+        Object j = ser.marshall(state, o, jsonIn.opt(key), key);
 
         // omit the object entirely if it's a circular reference or duplicate
         // it will be regenerated in the fixups phase
