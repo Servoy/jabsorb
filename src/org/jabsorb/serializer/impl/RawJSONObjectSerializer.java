@@ -80,7 +80,7 @@ public class RawJSONObjectSerializer extends AbstractSerializer
       {
         key = i.next();
 
-        Object j = ser.marshall(state, o, jsonIn.get(key), key);
+        Object j = ser.marshall(state, o, jsonIn.opt(key), key);
         jsonOut.put(key, j);
       }
     }

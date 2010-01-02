@@ -78,7 +78,7 @@ public class RawJSONArraySerializer extends AbstractSerializer
 
       for (i=0; i<j; i++)
       {
-        Object json = ser.marshall(state, o, jsonIn.get(i), new Integer(i));
+        Object json = ser.marshall(state, o, jsonIn.opt(i), new Integer(i));
         jsonOut.put(i, json);
       }
     }
