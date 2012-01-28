@@ -1,6 +1,15 @@
 CHANGES log
 
-TBD        jabsorb 1.3.2 release
+2012-01-28 jabsorb 1.3.2 release
+
+* minor fix; allow raw json serializers to serialize optional (null) values
+  properly
+
+* rename systemListMethods method and expose it on the JSONRPCBride to make
+   it easier to write custom method lookup resolvers
+
+* assume object array when unmarshalling zero element arrays instead ofi
+   immediately throwing an exception (Issue 60.)
 
 * relax registerSerializer method on JSONSerializer to allow replacing already
   existing serializers for registered classes, when registering new custom
