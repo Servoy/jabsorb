@@ -717,7 +717,7 @@ public class JSONSerializer implements Serializable
    *           the javaClass hint if the type of Object passed in is not
    *           JSONObject|JSONArray.
    */
-  private Class getClassFromHint(Object o) throws UnmarshallException
+  protected Class getClassFromHint(Object o) throws UnmarshallException
   {
     if (o == null)
     {
