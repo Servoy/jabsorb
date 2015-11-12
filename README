@@ -1,0 +1,3 @@
+jabsorb -- A JSON-RPC ORB in Java and JavaScript
+
+This jabsorb is using a newer version (with bugfixes) of org.json classes (via a dependency) instead of keeping an old version of those directly in the .jar file.

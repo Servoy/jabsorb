@@ -33,6 +33,11 @@
   <packaging>jar</packaging>
   <name>jabsorb</name>
   <url>http://jabsorb.org</url>
+  <properties>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   <description>
     jabsorb -- A JSON-RPC ORB in Java and JavaScript
   </description>
@@ -44,7 +49,7 @@
     </license>
   </licenses>
   <scm>
-    <url>http://svn.jabsorb.org/svn/jabsorb</url>
+    <url>https://github.com/Servoy/jabsorb</url>
   </scm>
   <build>
     <sourceDirectory>src</sourceDirectory>
@@ -99,6 +104,11 @@
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jsp-2.1</artifactId>
       <version>6.1.6</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.json</groupId>
+    	<artifactId>json</artifactId>
+    	<version>20140107</version>
     </dependency>
   </dependencies>
 </project>
