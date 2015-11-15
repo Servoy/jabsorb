@@ -287,7 +287,9 @@ public class JSONTokener {
                     sb.append(c);
                     break;
                 default:
-                    throw this.syntaxError("Illegal escape.");
+                    sb.append(c);
+                    // normally this would throw an exception here (strictly taken from standard) but for compatibility with legacy JSON that splits strings over multiple lines using \ we allow any char here
+                    // throw this.syntaxError("Illegal escape.");
                 }
                 break;
             default:
