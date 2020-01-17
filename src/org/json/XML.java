@@ -313,23 +313,24 @@ public class XML {
 // If it might be a number, try converting it, first as a Long, and then as a
 // Double. If that doesn't work, return the string.
 
-        try {
-            char initial = string.charAt(0);
-            if (initial == '-' || (initial >= '0' && initial <= '9')) {
-                Long value = new Long(string);
-                if (value.toString().equals(string)) {
-                    return value;
-                }
-            }
-        }  catch (Exception ignore) {
-            try {
-                Double value = new Double(string);
-                if (value.toString().equals(string)) {
-                    return value;
-                }
-            }  catch (Exception ignoreAlso) {
-            }
-        }
+        // Do not convert to numbers
+//        try {
+//            char initial = string.charAt(0);
+//            if (initial == '-' || (initial >= '0' && initial <= '9')) {
+//                Long value = new Long(string);
+//                if (value.toString().equals(string)) {
+//                    return value;
+//                }
+//            }
+//        }  catch (Exception ignore) {
+//            try {
+//                Double value = new Double(string);
+//                if (value.toString().equals(string)) {
+//                    return value;
+//                }
+//            }  catch (Exception ignoreAlso) {
+//            }
+//        }
         return string;
     }
 
