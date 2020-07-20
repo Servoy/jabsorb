@@ -25,6 +25,7 @@ SOFTWARE.
 */
 
 import java.util.Iterator;
+import java.util.Locale;
 
 /**
  * This provides static methods to convert an XML text into a JSONObject,
@@ -354,7 +355,7 @@ public class XML {
 
                     int dot = string.lastIndexOf('.');
                     String format = dot < 0 ? "%f" : ("%." + (string.length() - 1 - dot) + "f");
-                    if (value.toString().equals(string) || String.format(format, value).equals(string)) {
+                    if (value.toString().equals(string) || String.format(Locale.US, format, value).equals(string)) {
                         return value;
                     }
                 } catch (Exception ignoreAlso) {

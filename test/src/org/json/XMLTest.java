@@ -51,6 +51,14 @@ public class XMLTest extends TestCase {
         assertEquals(Double.class, value.getClass());
         assertEquals(new Double("12162019091.2"), value);
     }
+    
+    public void testMediumFractionNumberWithCommanAsDecimalStaysString() {
+        JSONObject json = XML.toJSONObject("<value>12162019091,2</value>", true);
+
+        Object value = json.get("value");
+        assertEquals(String.class, value.getClass());
+        assertEquals("12162019091,2", value);
+    }
 
     public void testMediumFractionNegativeNumberBecomesDouble() {
         JSONObject json = XML.toJSONObject("<value>-12162019091.2</value>", true);
