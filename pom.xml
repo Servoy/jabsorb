@@ -1,182 +1,193 @@
-<!--
-  jabsorb - a Java to JavaScript Advanced Object Request Broker
-  http://www.jabsorb.org
-
-  Copyright 2007-2009 The jabsorb team
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  Ant build script for Apache Ant version 1.6.5 or 1.7
--->
+<!-- jabsorb - a Java to JavaScript Advanced Object Request Broker http://www.jabsorb.org 
+	Copyright 2007-2009 The jabsorb team Licensed under the Apache License, Version 
+	2.0 (the "License"); you may not use this file except in compliance with 
+	the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 
+	Unless required by applicable law or agreed to in writing, software distributed 
+	under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES 
+	OR CONDITIONS OF ANY KIND, either express or implied. See the License for 
+	the specific language governing permissions and limitations under the License. 
+	Ant build script for Apache Ant version 1.6.5 or 1.7 -->
 
 
-<!-- 
-  This POM file is only used for deployment in the Maven repository. 
-    It may not be used to build the project.
--->
+<!-- This POM file is only used for deployment in the Maven repository. It 
+	may not be used to build the project. -->
 <project>
 
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.jabsorb.s</groupId>
-  <artifactId>jabsorb</artifactId>
-  <version>1.3.2.s4</version>
-  <packaging>jar</packaging>
-  <name>Jabsorb (+ modified org.json) for Osgi</name>
-  <url>http://jabsorb.org</url>
-  <properties>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.jabsorb.s</groupId>
+	<artifactId>jabsorb</artifactId>
+	<version>1.3.2.s4</version>
+	<packaging>jar</packaging>
+	<name>Jabsorb (+ modified org.json) for Osgi</name>
+	<url>http://jabsorb.org</url>
+	<properties>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-  <description>
+	</properties>
+	<description>
     jabsorb -- A JSON-RPC ORB in Java and JavaScript.
     Includes slightly modified org.json code.
     Can be built as an osgi bundle/eclipse plugin using 'mvn clean install p2:site'; results can be found in 'target\repository\plugins\'
   </description>
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-  <scm>
-    <url>https://github.com/Servoy/jabsorb</url>
-  </scm>
-  
-  <build>
-    <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>test/src</testSourceDirectory>
-    <plugins>
-      <!-- plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.4</version>
-        <configuration>
-          <archive>
-            <manifestFile>META-INF/MANIFEST.MF</manifestFile>
-            <manifestEntries>
-              <Bundle-Version>${project.version}</Bundle-Version>
-            </manifestEntries>
-          </archive>
-        </configuration>
-      </plugin-->
-      <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-source-plugin</artifactId>
-        <version>2.1.2</version>
-		<executions>
-			<execution>
-				<id>attach-sources</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>jar-no-fork</goal>
-                </goals>
-		    </execution>
-		</executions>
-	  </plugin>
-      <plugin>
-        <groupId>org.reficio</groupId>
-        <artifactId>p2-maven-plugin</artifactId>
-        <version>1.2.0-SNAPSHOT</version>
-        <executions>
-          <execution>
-            <id>default-cli</id>
-            <configuration>
-              <artifacts>
-                <!-- specify your dependencies here -->
-                <!-- groupId:artifactId:version -->
-                <artifact>
-                  <id>org.jabsorb.s:jabsorb:${project.version}</id>
-                  <transitive>false</transitive>
-                  <source>true</source>
-                  <instructions>
-                    <Bundle-SymbolicName>jabsorb</Bundle-SymbolicName>
-                    <Bundle-Name>${project.name}</Bundle-Name>
-                    <Import-Package></Import-Package>
-                    <Export-Package>*</Export-Package>
-                    <Require-Bundle>org.slf4j.api,javax.servlet</Require-Bundle>
-                    <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
-                    <Bundle-RequiredExecutionEnvironment>JavaSE-1.7</Bundle-RequiredExecutionEnvironment>
-                  </instructions>
-                  <singleton>true</singleton>
-                  <excludes/>
-                </artifact>
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-  
-  <dependencies>
-    <!-- Runtime dependencies -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.5.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-jdk14</artifactId>
-      <version>1.5.0</version>
-    </dependency>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<scm>
+		<url>https://github.com/Servoy/jabsorb</url>
+	</scm>
 
-    <!-- Optional runtime dependencies -->
-    <dependency>
-      <!-- Replacement for commons-logging required by httpclient -->
-      <groupId>org.slf4j</groupId>
-      <artifactId>jcl104-over-slf4j</artifactId>
-      <version>1.5.0</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <version>3.1</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>commons-logging</artifactId>
-          <groupId>commons-logging</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+		<testSourceDirectory>test/src</testSourceDirectory>
+		<plugins>
+			<!-- plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-jar-plugin</artifactId> 
+				<version>2.4</version> <configuration> <archive> <manifestFile>META-INF/MANIFEST.MF</manifestFile> 
+				<manifestEntries> <Bundle-Version>${project.version}</Bundle-Version> </manifestEntries> 
+				</archive> </configuration> </plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<archive>
+						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>4.2.1</version>
+				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>jabsorb;singleton:=true</Bundle-SymbolicName>
+						<Export-Package>org.json,org.jabsorb.callback,org.jabsorb.localarg.imp
+ l;uses:="org.jabsorb.localarg",org.jabsorb.reflect;uses:="org.jabsorb
+ .localarg,org.jabsorb",org.jabsorb.reflect.copy;uses:="org.jabsorb.lo
+ calarg,org.jabsorb",org.jabsorb.serializer.impl;uses:="org.json,org.j
+ absorb.serializer,org.jabsorb",org.jabsorb.serializer;uses:="org.jabs
+ orb,org.json,org.jabsorb.callback,org.jabsorb.reflect,org.jabsorb.loc
+ alarg",org.jabsorb.client;uses:="org.json,org.jabsorb.serializer,org.
+ jabsorb",org.jabsorb;uses:="org.json,org.jabsorb.callback,org.jabsorb
+ .reflect,org.jabsorb.serializer.impl,org.jabsorb.serializer,org.jabso
+ rb.localarg",org.jabsorb.localarg;uses:="org.jabsorb.localarg.impl,or
+ g.jabsorb.reflect,org.jabsorb.serializer,org.jabsorb"</Export-Package>
+						<Import-Package></Import-Package>
+						<Require-Bundle>org.slf4j.api,javax.servlet</Require-Bundle>
+						<Application-Name>jabsorb-${project.version}</Application-Name>
+						<Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
+						<Permissions>all-permissions</Permissions> 
+						<Codebase>*</Codebase>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jarsigner-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>sign</id>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>verify</id>
+						<goals>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
-    <!-- Test dependencies -->
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
-      <version>6.1.6</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jsp-2.1</artifactId>
-      <version>6.1.6</version>
-    </dependency>
-  </dependencies>
-  
-  <pluginRepositories>
-    <pluginRepository>
-      <id>reficio</id>
-      <url>http://repo.reficio.org/maven/</url>
-    </pluginRepository>
-  </pluginRepositories>
-  
+	<dependencies>
+		<!-- Runtime dependencies -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>1.5.0</version>
+		</dependency>
+
+		<!-- Optional runtime dependencies -->
+		<dependency>
+			<!-- Replacement for commons-logging required by httpclient -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl104-over-slf4j</artifactId>
+			<version>1.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>org.mortbay.jetty</groupId>
+			<artifactId>jetty</artifactId>
+			<version>6.1.6</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mortbay.jetty</groupId>
+			<artifactId>jsp-2.1</artifactId>
+			<version>6.1.6</version>
+		</dependency>
+	</dependencies>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>reficio</id>
+			<url>http://repo.reficio.org/maven/</url>
+		</pluginRepository>
+	</pluginRepositories>
+
 </project>
