@@ -33,8 +33,8 @@ import java.lang.reflect.Modifier;
 import java.math.*;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -153,7 +153,7 @@ public class JSONObject {
      * Construct an empty JSONObject.
      */
     public JSONObject() {
-        this.map = new HashMap<String, Object>();
+        this.map = new LinkedHashMap<String, Object>();
     }
 
     /**
@@ -244,7 +244,7 @@ public class JSONObject {
      * @throws JSONException
      */
     public JSONObject(Map<?, ?> map) {
-        this.map = new HashMap<String, Object>();
+        this.map = new LinkedHashMap<String, Object>();
         if (map != null) {
         	for (final Entry<?, ?> e : map.entrySet()) {
                 final Object value = e.getValue();

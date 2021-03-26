@@ -14,9 +14,9 @@
 <project>
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.jabsorb.s</groupId>
+	<groupId>com.servoy</groupId>
 	<artifactId>jabsorb</artifactId>
-	<version>1.3.2.s4</version>
+	<version>1.3.2.s5</version>
 	<packaging>jar</packaging>
 	<name>Jabsorb (+ modified org.json) for Osgi</name>
 	<url>http://jabsorb.org</url>
