@@ -16,7 +16,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.servoy</groupId>
 	<artifactId>jabsorb</artifactId>
-	<version>1.3.2.s5</version>
+	<version>1.3.2.s6</version>
 	<packaging>jar</packaging>
 	<name>Jabsorb (+ modified org.json) for Osgi</name>
 	<url>http://jabsorb.org</url>
@@ -100,8 +100,10 @@
  .reflect,org.jabsorb.serializer.impl,org.jabsorb.serializer,org.jabso
  rb.localarg",org.jabsorb.localarg;uses:="org.jabsorb.localarg.impl,or
  g.jabsorb.reflect,org.jabsorb.serializer,org.jabsorb"</Export-Package>
-						<Import-Package></Import-Package>
-						<Require-Bundle>org.slf4j.api,javax.servlet</Require-Bundle>
+						<Import-Package>javax.servlet;version="[2.5,5)",
+javax.servlet.http;version="[2.5,5)",
+org.slf4j</Import-Package>
+						<Require-Bundle></Require-Bundle>
 						<Application-Name>jabsorb-${project.version}</Application-Name>
 						<Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
 						<Permissions>all-permissions</Permissions> 
