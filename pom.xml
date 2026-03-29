@@ -185,7 +185,7 @@ org.slf4j</Import-Package>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>12.0.22</version>
+            <version>12.0.32</version>
             <scope>test</scope>
         </dependency>	
         
